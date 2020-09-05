@@ -43,6 +43,7 @@ class SVD:
             self.collect()
 
         if retrieve.status_code == 200:
+            self.start = time.time()
             logger.success(SITE,self.taskID,'Got product page')
             try:
                 soup = BeautifulSoup(retrieve.text, "html.parser")
@@ -547,7 +548,7 @@ class SVD:
             self.braintreePaypal()
 
         url = storeCookies(checkoutUrl,self.session)
-
+        self.end = time.time() - self.start
         discord.success(
             webhook=loadSettings()["webhook"],
             site=SITE,
@@ -558,7 +559,9 @@ class SVD:
             price=self.productPrice,
             paymentMethod='PayPal',
             profile=self.task["PROFILE"],
-            product=self.task["PRODUCT"]
+            product=self.task["PRODUCT"],
+            proxy=self.session.proxies,
+            speed=self.end
         )
         sendNotification(SITE,self.productTitle)
 
@@ -994,10 +997,12 @@ class SVD:
                 price=self.productPrice,
                 paymentMethod='Card',
                 profile=self.task["PROFILE"],
+                proxy=self.session.proxies
             )
             time.sleep(int(self.task["DELAY"]))
             self.braintreeCard()
         if r.status_code == 200:
+            self.end = time.time() - self.start
             logger.secondary(SITE,self.taskID,'Checkout Complete!')
             sendNotification(SITE,self.productTitle)
             discord.success(
@@ -1010,6 +1015,8 @@ class SVD:
                 price=self.productPrice,
                 paymentMethod='Card',
                 profile=self.task["PROFILE"],
+                proxy=self.session.proxies,
+                speed=self.end
             )
             while True:
                 pass
@@ -1225,6 +1232,7 @@ class SVD:
                 price=self.productPrice,
                 paymentMethod='Card',
                 profile=self.task["PROFILE"],
+                proxy=self.session.proxies
             )
             time.sleep(int(self.task["DELAY"]))
             self.braintreeCard()
@@ -1241,7 +1249,8 @@ class SVD:
                 price=self.productPrice,
                 paymentMethod='Card',
                 profile=self.task["PROFILE"],
-                product=self.task["PRODUCT"]
+                product=self.task["PRODUCT"],
+                proxy=self.session.proxies
             )
             while True:
                 pass

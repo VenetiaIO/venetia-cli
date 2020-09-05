@@ -48,6 +48,7 @@ class HOLYPOP:
             self.collect()
         if retrieve:
             if retrieve.status_code == 200:
+                self.start = time.time()
                 regex = r"preloadedStock =(.+)"
                 matches = re.search(regex, retrieve.text, re.MULTILINE)
                 if matches:
@@ -201,6 +202,7 @@ class HOLYPOP:
             self.productPrice = '{} {}'.format(cart.json()["payload"][0]["price"],cart.json()["payload"][0]["currencyCode"])
             self.productLink = cart.json()["payload"][0]["permalink"]
             if self.task["PAYMENT"].lower() == "cart hold":
+                self.end = time.time() - self.start
                 discord.success(
                     webhook=loadSettings()["webhook"],
                     site=SITE,
@@ -212,7 +214,9 @@ class HOLYPOP:
                     paymentMethod='Cart Hold',
                     profile=self.task["PROFILE"],
                     account=self.task["ACCOUNT EMAIL"],
-                    product=self.task["PRODUCT"]
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
                 )
             elif self.task["PAYMENT"].lower() == "paypal":
                 self.checkout()
@@ -257,7 +261,7 @@ class HOLYPOP:
                     self.checkout()
                 
 
-            captchaResponse = loadToken()
+            captchaResponse = loadToken(SITE)
             if captchaResponse == "empty":
                 captchaResponse = captcha.v2('6Lc8GBUUAAAAAKMfe1S46jE08TvVKNSnMYnuj6HN',self.task["PRODUCT"],self.proxies,SITE,self.taskID)
 
@@ -335,6 +339,7 @@ class HOLYPOP:
             self.startPP()
 
         if checkout.status_code == 200 and "paypal" in checkout.url:
+            self.end = time.time() - self.start
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
 
             url = storeCookies(checkout.url,self.session)
@@ -349,7 +354,9 @@ class HOLYPOP:
                 price=self.productPrice,
                 paymentMethod='PayPal',
                 profile=self.task["PROFILE"],
-                product=self.task["PRODUCT"]
+                product=self.task["PRODUCT"],
+                proxy=self.session.proxies,
+                speed=self.end
             )
             sendNotification(SITE,self.productTitle)
             while True:
@@ -365,7 +372,8 @@ class HOLYPOP:
                 size=self.size,
                 price=self.productPrice,
                 paymentMethod='PayPal',
-                profile=self.task["PROFILE"]
+                profile=self.task["PROFILE"],
+                proxy=self.session.proxies
             )
             time.sleep(int(self.task["DELAY"]))
             self.startPP()

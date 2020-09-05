@@ -44,6 +44,7 @@ class FOOTASYLUM:
 
 
         if retrieve.status_code == 200:
+            self.start = time.time()
             logger.success(SITE,self.taskID,'Got product page')
             try:
                 soup = BeautifulSoup(retrieve.text,"html.parser")
@@ -602,6 +603,7 @@ class FOOTASYLUM:
             self.payPal()
 
         if ec.status_code == 200 and ec.json()["ack"] == "success":
+            self.end = time.time() - self.start
             logger.success(SITE,self.taskID,'Successfully retrieved PayPal checkout token')
             self.ecToken = ec.json()["data"]["token"]
             paypalURL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token={}&useraction=commit'.format(self.ecToken)
@@ -621,7 +623,9 @@ class FOOTASYLUM:
                 price=self.productPrice,
                 paymentMethod='PayPal',
                 profile=self.task["PROFILE"],
-                product=self.task["PRODUCT"]
+                product=self.task["PRODUCT"],
+                proxy=self.session.proxies,
+                speed=self.end
             )
             sendNotification(SITE,self.productTitle)
             while True:
@@ -639,6 +643,7 @@ class FOOTASYLUM:
                 price=self.productPrice,
                 paymentMethod='PayPal',
                 profile=self.task["PROFILE"],
+                proxy=self.session.proxies
             )
 
             time.sleep(int(self.task["DELAY"]))

@@ -43,6 +43,8 @@ class AIRNESS:
 
 
         if retrieve.status_code == 200:
+            self.start = time.time()
+
             logger.success(SITE,self.taskID,'Got product page')
             try:
                 getToken = self.session.post('https://airness-2.commercelayer.io/oauth/token',data={'scope':'market:2392','grant_type':'client_credentials'},headers={
@@ -649,6 +651,7 @@ class AIRNESS:
                 self.payment()
 
             if postPaypal.status_code == 201:
+                self.end = time.time() - self.start
                 logger.success(SITE,self.taskID,'Successfully set payment method')
                 self.paypalUrl = postPaypal.json()["data"]["attributes"]["approval_url"]
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
@@ -666,9 +669,11 @@ class AIRNESS:
                     price=self.productPrice,
                     paymentMethod='PayPal',
                     profile=self.task["PROFILE"],
-                    product=self.task["PRODUCT"]
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
                 )
-                sendNotification(SITE,self.productTitle)
+                sendNotification(SITE,self.name)
                 while True:
                     pass
             else:
@@ -683,6 +688,7 @@ class AIRNESS:
                     price=self.productPrice,
                     paymentMethod='PayPal',
                     profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
                 )
                 logger.error(SITE,self.taskID,'Failed to set payment method. Retrying...')
                 time.sleep(int(self.task["DELAY"]))

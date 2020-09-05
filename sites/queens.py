@@ -77,6 +77,7 @@ class QUEENS:
             
 
         if retrieve.status_code == 200 and retrieve.url != f'https://www.queens.{self.region}/':
+            self.start = time.time()
             if mode == 'kws':
                 logger.info(SITE,self.taskID, 'Searching for product')
                 kwProduct = findProduct(retrieve.text, kws, SITE, self.taskID, self.region)
@@ -362,6 +363,7 @@ class QUEENS:
                 self.delivery()
 
             if paypalOrder.status_code == 201 and paypalOrder.json()["status"] == "CREATED":
+                self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
 
                 url = storeCookies(paypalOrder.json()["links"][1]["href"],self.session)
@@ -377,7 +379,9 @@ class QUEENS:
                     profile=self.task["PROFILE"],
                     tracking=tracking,
                     order=orderNumber,
-                    product=self.task["PRODUCT"]
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
                 )
                 sendNotification(SITE,self.productTitle)
                 while True:
@@ -394,7 +398,8 @@ class QUEENS:
                     size=self.size,
                     price=self.productPrice,
                     paymentMethod='PayPal',
-                    profile=self.task["PROFILE"]
+                    profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
                 )
                 time.sleep(int(self.task["DELAY"]))
                 self.delivery()

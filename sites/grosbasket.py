@@ -72,6 +72,7 @@ class GROSBASKET:
         split = self.task["PRODUCT"].split("grosbasket.com/")[1]
         self.region = split.split('/')[0]
         if retrieve.status_code == 200:
+            self.start = time.time()
             logger.success(SITE,self.taskID,'Got product page')
             try:
                 soup = BeautifulSoup(retrieve.text, "html.parser")
@@ -370,6 +371,7 @@ class GROSBASKET:
             self.startPaypal()
 
         if "paypal" in startExpress.url:
+            self.end = time.time() - self.start
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
 
             url = storeCookies(startExpress.url,self.session)
@@ -397,7 +399,9 @@ class GROSBASKET:
                 price=self.productPrice,
                 paymentMethod='PayPal',
                 profile=self.task["PROFILE"],
-                product=self.task["PRODUCT"]
+                product=self.task["PRODUCT"],
+                proxy=self.session.proxies,
+                speed=self.end
             )
             sendNotification(SITE,self.productTitle)
         else:
@@ -411,6 +415,7 @@ class GROSBASKET:
                 price=self.productPrice,
                 paymentMethod='PayPal',
                 profile=self.task["PROFILE"],
+                proxy=self.session.proxies
             )
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout link. Retrying...')
             self.startPaypal()

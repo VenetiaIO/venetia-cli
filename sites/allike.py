@@ -64,6 +64,7 @@ class ALLIKE:
             self.collect()
 
         if retrieve.status_code == 200:
+            self.start = time.time()
             logger.success(SITE,self.taskID,'Got product page')
             try:
                 soup = BeautifulSoup(retrieve.text, "html.parser")
@@ -348,6 +349,7 @@ class ALLIKE:
             self.paypal()
 
         if postVerifyPayment.status_code == 200:
+            self.end = time.time() - self.start
             try:
                 startExpress = self.session.get('https://www.allikestore.com/default/paypal/express/start/', headers={
                     'authority': 'www.allikestore.com',
@@ -381,11 +383,14 @@ class ALLIKE:
                     price=self.productPrice,
                     paymentMethod='PayPal',
                     profile=self.task["PROFILE"],
-                    product=self.task["PRODUCT"]
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
                 )
                 while True:
                     pass
             else:
+
                 discord.failed(
                     webhook=loadSettings()["webhook"],
                     site=SITE,
@@ -395,7 +400,8 @@ class ALLIKE:
                     size=self.size,
                     price=self.productPrice,
                     paymentMethod='PayPal',
-                    profile=self.task["PROFILE"]
+                    profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
                 )
                 logger.error(SITE,self.taskID,'Failed to get PayPal checkout link. Retrying...')
                 self.paypal()
@@ -528,7 +534,8 @@ class ALLIKE:
                             size=self.size,
                             price=self.productPrice,
                             paymentMethod='Card',
-                            profile=self.task["PROFILE"]
+                            profile=self.task["PROFILE"],
+                            proxy=self.session.proxies
                         )
 
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -536,6 +543,7 @@ class ALLIKE:
                         self.creditCard()
 
                     elif response["success"] == True:
+                        self.end = time.time() - self.start
                         logger.alert(SITE,self.taskID,'Sending Card checkout to Discord!')
                         
                         url = storeCookies(response["redirect"],self.session)
@@ -550,7 +558,9 @@ class ALLIKE:
                             price=self.productPrice,
                             paymentMethod='Card',
                             profile=self.task["PROFILE"],
-                            product=self.task["PRODUCT"]
+                            product=self.task["PRODUCT"],
+                            proxy=self.session.proxies,
+                            speed=self.end
                         )
                         sendNotification(SITE,self.productTitle)
                         while True:

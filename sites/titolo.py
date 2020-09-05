@@ -67,6 +67,7 @@ class TITOLO:
             self.collect()
 
         if retrieve.status_code == 200:
+            self.start = time.time()
             logger.success(SITE,self.taskID,'Got product page')
             try:
                 split = self.task["PRODUCT"].split("titoloshop.")[1]
@@ -202,7 +203,15 @@ class TITOLO:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.method()
 
-        if setMethod.status_code == 200 and setMethod.json() == []:
+        try:
+            data = setMethod.json()
+        except:
+            logger.error(SITE,self.taskID,'Failed to save method. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.method()
+
+
+        if setMethod.status_code == 200 and data == []:
             logger.success(SITE,self.taskID,'Saved Method')
             self.billing()
         else:
@@ -328,6 +337,7 @@ class TITOLO:
 
     
             if "paypal" in getPaypal.url:
+                self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
                 url = storeCookies(getPaypal.url,self.session)
                 
@@ -342,7 +352,9 @@ class TITOLO:
                     price=self.productPrice,
                     paymentMethod='PayPal',
                     profile=self.task["PROFILE"],
-                    product=self.task["PRODUCT"]
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
                 )
                 while True:
                     pass
@@ -357,6 +369,7 @@ class TITOLO:
                     price=self.productPrice,
                     paymentMethod='PayPal',
                     profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
                 )
                 logger.error(SITE,self.taskID,'Failed to get PayPal checkout link. Retrying...')
                 self.paypal()
@@ -461,6 +474,7 @@ class TITOLO:
 
             
             if submitCard.status_code == 200:
+                self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending Card checkout to Discord!')
                 url = storeCookies(submitCard.url,self.session)
     
@@ -475,7 +489,9 @@ class TITOLO:
                     price=self.productPrice,
                     paymentMethod=self.paymentMethod,
                     profile=self.task["PROFILE"],
-                    product=self.task["PRODUCT"]
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
                 )
                 while True:
                     pass
@@ -491,6 +507,7 @@ class TITOLO:
                     price=self.productPrice,
                     paymentMethod=self.paymentMethod,
                     profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
                 )
                 time.sleep(int(self.task["DELAY"]))
                 self.placeOrder()

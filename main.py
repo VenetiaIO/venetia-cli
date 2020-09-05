@@ -24,7 +24,7 @@ click.echo = echo
 click.secho = secho
 
 
-VERSION  = '0.3.5'
+VERSION  = '0.3.6'
 os.system("title VenetiaIO CLI [Version {}]".format(VERSION))
 
 #sites

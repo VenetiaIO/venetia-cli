@@ -65,6 +65,7 @@ class AWLAB:
             self.collect()
 
         if retrieve.status_code == 200:
+            self.start = time.time()
             logger.success(SITE,self.taskID,'Got product page')
             try:
                 soup = BeautifulSoup(retrieve.text, "html.parser")
@@ -335,6 +336,7 @@ class AWLAB:
             self.method()
 
         if payment.status_code == 200:
+            self.end = time.time() - self.start
             try:
                 data = payment.json()
             except:
@@ -358,7 +360,9 @@ class AWLAB:
                 price=self.productPrice,
                 paymentMethod='PayPal',
                 profile=self.task["PROFILE"],
-                product=self.task["PRODUCT"]
+                product=self.task["PRODUCT"],
+                proxy=self.session.proxies,
+                speed=self.end
             )
             while True:
                 pass
@@ -373,7 +377,8 @@ class AWLAB:
                 size=self.size,
                 price=self.productPrice,
                 paymentMethod='PayPal',
-                profile=self.task["PROFILE"]
+                profile=self.task["PROFILE"],
+                proxy=self.session.proxies
             )
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout link. Retrying...')
             self.paypal()
