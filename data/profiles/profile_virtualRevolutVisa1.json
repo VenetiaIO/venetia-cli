@@ -1,1 +1,21 @@
-{"firstName": "Claire", "lastName": "Bottomley", "email": "charliebottomleyt@protonmail.com","phonePrefix":"+44" ,"phone": "077890562842", "house": "12", "addressOne": "Pilmore Mews", "addressTwo": "Unit  NAS73", "city": "Darlington", "region": "Durham", "country": "United Kingdom", "countryCode": "GB", "zip": "DL2 2BQ", "card": {"cardNumber": "4596548040807232", "cardMonth": "9", "cardYear": "2024", "cardCVV": "734"}}
+{
+  "firstName": "Claire",
+  "lastName": "Bottomley",
+  "email": "charliebottomleyt@protonmail.com",
+  "phonePrefix": "+44",
+  "phone": "077890562842",
+  "house": "12",
+  "addressOne": "Pilmore Mews",
+  "addressTwo": "Unit  NAS73",
+  "city": "Darlington",
+  "region": "Durham",
+  "country": "United Kingdom",
+  "countryCode": "GB",
+  "zip": "DL2 2BQ",
+  "card": {
+    "cardNumber": "4596548040807232",
+    "cardMonth": "9",
+    "cardYear": "2024",
+    "cardCVV": "734"
+  }
+}

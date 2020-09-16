@@ -45,6 +45,9 @@ from sites.bstn import BSTN
 from sites.overkill import OVERKILL
 from sites.awlab import AWLAB
 from sites.einhalb import EINHALB
+from sites.chmielna import CHMIELNA
+from sites.workingClassHeroes import WCH
+from sites.naked import NAKED
 
 #utils
 from utils.quicktask import QT
@@ -67,7 +70,11 @@ sites = {
     "SCHUH":SCHUH,
     "SLAMJAM":SLAMJAM,
     "AWLAB":AWLAB,
-    "EINHALB":EINHALB
+    "EINHALB":EINHALB,
+    "STARCOW":STARCOW,
+    "CHIMELNA20":CHMIELNA,
+    "WCH":WCH,
+    "NAKED":NAKED
 }
 
 

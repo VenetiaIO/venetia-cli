@@ -865,8 +865,12 @@ class SVD:
                 'TermUrl': 'https://0eaf.cardinalcommerce.com/EAFService/jsp/v1/term', 'MD': self.md}
         r = self.session.post('https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
                               headers=headers, data=data)
-        soup = BeautifulSoup(r.text, 'lxml')
-        self.transToken = str(soup.find_all("script")[0]).split('"')[1]
+        try:
+            soup = BeautifulSoup(r.text, 'lxml')
+            self.transToken = str(soup.find_all("script")[0]).split('"')[1]
+        except:
+            logger.error(SITE,self.taskID,'Failed to get trans token...')
+            self.braintreeCard()
 
         if len(self.transToken) > 70:
             self.nonThreeDS()

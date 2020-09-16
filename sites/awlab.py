@@ -72,7 +72,23 @@ class AWLAB:
                 self.productTitle = soup.find('h1',{'class':['b-pdp__product-title','h-hidden-small']}).text.replace('\n','')
                 self.productPrice = soup.find('span',{'class':'b-price__sale'}).text
                 self.productImage = soup.find('link',{'rel':'image_src'})["href"]
-                foundSizes = soup.find_all('li',{'class':['b-size-selector__item', 'b-product_variations-swatch_item', 'js-pdp-selector-item', 'b-size-selector__item-default']})
+                self.productId = soup.find('div',{'id':'pdpMain'})["data-product-id"]
+
+                try:
+                    retrieveSizes = self.session.get(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Product-Variation?pid={self.productId}&format=ajax', headers={
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
+                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+        
+                    })
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    time.sleep(int(self.task["DELAY"]))
+                    self.collect()
+
+                soup = BeautifulSoup(retrieveSizes.text, "html.parser")
+                foundSizes = soup.find('ul',{'class':'swatches b-size-selector__list b-size-selector_large'})
                 allSizes = []
                 sizes = []
                 

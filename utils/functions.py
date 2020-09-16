@@ -400,7 +400,7 @@ def slamjam_datadome(proxy,taskID, pid, region):
                 
 def starcow_datadome(proxy,taskID):
     siteKey = '6LccSjEUAAAAANCPhaM2c-WiRxCZ5CzsjR_vd8uX'
-    site = 'https://www.starcow.com'
+    site = 'https://www.starcowparis.com'
     session = requests.session()
     session.headers = {
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",

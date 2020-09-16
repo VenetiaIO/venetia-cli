@@ -52,6 +52,18 @@ class STARCOW:
 
     def collect(self):
         logger.prepare(SITE,self.taskID,'Getting product page...')
+
+        self.cookie = loadCookie('STARCOW')["cookie"]
+        if self.cookie == 'empty':
+            # del self.session.cookies["datadome"]
+            self.cookie = starcow_datadome(self.session.proxies,self.taskID)
+            self.session.cookies["datadome"]  = self.cookie
+        else:
+            # del self.session.cookies["datadome"]
+            self.session.cookies["datadome"]  = self.cookie
+            self.session.proxies = self.cookie["proxy"]
+
+
         try:
             retrieve = self.session.get(self.task["PRODUCT"])
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
@@ -62,7 +74,7 @@ class STARCOW:
             self.collect()
 
         if retrieve:
-            print(retrieve,retrieve.url)
+            print(retrieve.url)
             if 'DDUser' in retrieve.url:
                 self.cookie = loadCookie('STARCOW')
                 if self.cookie == 'empty':
