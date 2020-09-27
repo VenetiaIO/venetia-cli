@@ -366,35 +366,41 @@ class AWLAB:
             url = storeCookies(ppURL,self.session)
             
             sendNotification(SITE,self.productTitle)
-            discord.success(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=url,
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='PayPal',
-                profile=self.task["PROFILE"],
-                product=self.task["PRODUCT"],
-                proxy=self.session.proxies,
-                speed=self.end
-            )
-            while True:
-                pass
+            try:
+                discord.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=url,
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
+                )
+                while True:
+                    pass
+            except:
+                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
         
         else:
-            discord.failed(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=self.task["PRODUCT"],
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='PayPal',
-                profile=self.task["PROFILE"],
-                proxy=self.session.proxies
-            )
+            try:
+                discord.failed(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.task["PRODUCT"],
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
+                )
+            except:
+                pass
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout link. Retrying...')
             self.paypal()

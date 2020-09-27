@@ -48,6 +48,7 @@ from sites.einhalb import EINHALB
 from sites.chmielna import CHMIELNA
 from sites.workingClassHeroes import WCH
 from sites.naked import NAKED
+from sites.footdistrict import FOOTDISTRICT
 
 #utils
 from utils.quicktask import QT
@@ -72,9 +73,10 @@ sites = {
     "AWLAB":AWLAB,
     "EINHALB":EINHALB,
     "STARCOW":STARCOW,
-    "CHIMELNA20":CHMIELNA,
+    "CHMIELNA20":CHMIELNA,
     "WCH":WCH,
-    "NAKED":NAKED
+    "NAKED":NAKED,
+    "FOOTDISTRICT":FOOTDISTRICT
 }
 
 
@@ -99,6 +101,19 @@ def clearTokens():
         json.dump(data,tokenFile)
     return 'complete'
 
+def checkTasks(site):
+    tasks = []
+    with open('./data/tasks.csv','r') as csvFile:
+        csv_reader = csv.DictReader(csvFile)
+        for r in csv_reader:
+            if site.lower() in r["SITE"].lower():
+                tasks.append(1)
+
+    if len(tasks) > 0:
+        return True
+    elif len(tasks) == 0:
+        return False
+
 class Menu:
     def __init__(self):
         threading.Thread(target=QT,daemon=True).start()
@@ -118,8 +133,8 @@ class Menu:
         self.menu()
 
 
-    def siteSelectFunc(self, siteSelection):
-        key_chosen, value_chosen = sorted(sites.items())[int(siteSelection) -1 ]
+    def siteSelectFunc(self, availableSites, siteSelection):
+        key_chosen, value_chosen = sorted(availableSites.items())[int(siteSelection) -1 ]
         with open('./data/tasks.csv','r') as csvFile:
             csv_reader = csv.DictReader(csvFile)
             i = 1
@@ -190,9 +205,15 @@ class Menu:
  
         if option == 2:
             number = 1
+            availableSites = {}
             for row in sorted(sites):
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored(number,'red', attrs=["bold"]), colored(row,'red', attrs=["bold"])))
+                if(checkTasks(row)):
+                    availableSites[row] = sites[row]
+
+            for s in availableSites:
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored(number,'red', attrs=["bold"]), colored(s,'red', attrs=["bold"])))
                 number = number + 1
+            
 
             
 
@@ -203,7 +224,7 @@ class Menu:
             if int(siteSelection) == menuNum:
                 self.menu()
             os.system("title VenetiaIO CLI Version {}   Running Tasks...".format(VERSION))
-            self.siteSelectFunc(siteSelection)
+            self.siteSelectFunc(availableSites, siteSelection)
 
         if option == 3:
             try:

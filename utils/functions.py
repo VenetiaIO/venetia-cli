@@ -7,14 +7,15 @@ import urllib.parse
 import time
 import random
 import threading
-import cloudscraper
+# import cloudscraper
+from utils.cloudscraper import cloudscraper
 import base64
 from pynotifier import Notification
 from win10toast import ToastNotifier
 
 from utils.logger import logger
 from utils.captcha import captcha
-from utils.helheim import helheim
+from helheim import helheim
 
 def injection(session, response):
     if session.is_New_IUAM_Challenge(response):

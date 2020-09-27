@@ -9,7 +9,7 @@ import cloudscraper
 
 from utils.logger import logger
 from utils.captcha import captcha
-from utils.helheim import helheim
+from helheim import helheim
 
 def injection(session, response):
     if session.is_New_IUAM_Challenge(response):

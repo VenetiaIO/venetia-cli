@@ -546,23 +546,26 @@ class SLAMJAM:
                     
                     url = storeCookies(paypalURL,self.session)
             
-                    discord.success(
-                        webhook=loadSettings()["webhook"],
-                        site=SITE,
-                        url=url,
-                        image=self.productImage,
-                        title=self.productTitle,
-                        size=self.size,
-                        price=self.productPrice,
-                        paymentMethod='PayPal',
-                        profile=self.task["PROFILE"],
-                        product=self.task["PRODUCT"],
-                        proxy=self.session.proxies,
-                        speed=self.end
-                    )
-                    sendNotification(SITE,self.productTitle)
-                    while True:
-                        pass
+                    try:
+                        discord.success(
+                            webhook=loadSettings()["webhook"],
+                            site=SITE,
+                            url=url,
+                            image=self.productImage,
+                            title=self.productTitle,
+                            size=self.size,
+                            price=self.productPrice,
+                            paymentMethod='PayPal',
+                            profile=self.task["PROFILE"],
+                            product=self.task["PRODUCT"],
+                            proxy=self.session.proxies,
+                            speed=self.end
+                        )
+                        sendNotification(SITE,self.productTitle)
+                        while True:
+                            pass
+                    except:
+                        logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
                     
                 else:
                     logger.error(SITE,self.taskID,'Failed to submit payment. Retrying...')

@@ -195,6 +195,7 @@ class WCH:
             self.addToCart()
 
     def paypal(self):
+        print("paypal")
         try:
             cart = self.session.post('https://www.workingclassheroes.co.uk/wsCitrusStore.asmx/WightPaypalBtnCallback', headers={
                 'authority': 'www.workingclassheroes.co.uk',
@@ -208,7 +209,7 @@ class WCH:
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.login()
+            self.paypal()
 
         try:
             data = cart.json()
@@ -234,7 +235,7 @@ class WCH:
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                self.login()
+                self.paypal()
 
 
             try:
@@ -250,22 +251,30 @@ class WCH:
             sendNotification(SITE,productData["Name"])
 
 
-            discord.success(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=url,
-                image='https://www.workingclassheroes.co.uk/{}'.format(productData["ImageLargePath"]),
-                title=productData["Name"],
-                size=self.size,
-                price=productData["Price"],
-                paymentMethod='PayPal',
-                profile=self.task["PROFILE"],
-                product=self.task["PRODUCT"],
-                proxy=self.session.proxies,
-                speed=self.end
-            )
-            while True:
-                pass
+            try:
+                discord.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=url,
+                    image='https://www.workingclassheroes.co.uk/{}'.format(productData["ImageLargePath"]),
+                    title=productData["Name"],
+                    size=self.size,
+                    price=productData["Price"],
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
+                )
+                while True:
+                    pass
+            except:
+                logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+        
+        else:
+            logger.error(SITE,self.taskID,'Failed to get paypal token. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.paypal()
 
 
 
@@ -583,8 +592,6 @@ class WCH:
                         self.card()
 
                     if r.status_code == 200:
-                        print(r)
-                        print(r.url)
                         try:
                             r = self.session.post('https://www.workingclassheroes.co.uk/ssl/secure/default.aspx?3DPostBack=true',headers={
                                 'authority': 'www.workingclassheroes.co.uk',
@@ -623,27 +630,32 @@ class WCH:
                             try:
                                 productData = GetProductLW.json()["d"]
                             except Exception as e:
-                                logger.error(SITE,self.taskID,'Failed to get paypal token.Retrying...')
+                                logger.error(SITE,self.taskID,'Failed to get product token.Retrying...')
                                 log.info(e)
                                 time.sleep(int(self.task["DELAY"]))
-                                self.paypal()
+                                self.card()
+
+                            print(productData)
                             
         
-                            discord.success(
-                                webhook=loadSettings()["webhook"],
-                                site=SITE,
-                                image='https://www.workingclassheroes.co.uk/{}'.format(productData["ImageLargePath"]),
-                                title=productData["Name"],
-                                size=self.size,
-                                price=productData["Price"],
-                                paymentMethod='Card',
-                                profile=self.task["PROFILE"],
-                                product=self.task["PRODUCT"],
-                                proxy=self.session.proxies,
-                                speed=self.end
-                            )
-                            sendNotification(SITE,productData["Name"])
-                            while True:
+                            try:
+                                discord.success(
+                                    webhook=loadSettings()["webhook"],
+                                    site=SITE,
+                                    image='https://www.workingclassheroes.co.uk/{}'.format(productData["ImageLargePath"]),
+                                    title=productData["Name"],
+                                    size=self.size,
+                                    price=productData["Price"],
+                                    paymentMethod='Card',
+                                    profile=self.task["PROFILE"],
+                                    product=self.task["PRODUCT"],
+                                    proxy=self.session.proxies,
+                                    speed=self.end
+                                )
+                                sendNotification(SITE,productData["Name"])
+                                while True:
+                                    pass
+                            except:
                                 pass
                         
                         else:

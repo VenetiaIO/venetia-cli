@@ -203,21 +203,25 @@ class HOLYPOP:
             self.productLink = cart.json()["payload"][0]["permalink"]
             if self.task["PAYMENT"].lower() == "cart hold":
                 self.end = time.time() - self.start
-                discord.success(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=self.productLink,
-                    image=self.productImage,
-                    title=self.productTitle,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod='Cart Hold',
-                    profile=self.task["PROFILE"],
-                    account=self.task["ACCOUNT EMAIL"],
-                    product=self.task["PRODUCT"],
-                    proxy=self.session.proxies,
-                    speed=self.end
-                )
+                try:
+                    discord.success(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=self.productLink,
+                        image=self.productImage,
+                        title=self.productTitle,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod='Cart Hold',
+                        profile=self.task["PROFILE"],
+                        account=self.task["ACCOUNT EMAIL"],
+                        product=self.task["PRODUCT"],
+                        proxy=self.session.proxies,
+                        speed=self.end
+                    )
+                except:
+                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Cart Hold ==> {}'.format(self.task["ACCOUNT EMAIL"]))
+                    
             elif self.task["PAYMENT"].lower() == "paypal":
                 self.checkout()
         else:
@@ -344,37 +348,43 @@ class HOLYPOP:
 
             url = storeCookies(checkout.url,self.session)
             
-            discord.success(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=url,
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='PayPal',
-                profile=self.task["PROFILE"],
-                product=self.task["PRODUCT"],
-                proxy=self.session.proxies,
-                speed=self.end
-            )
-            sendNotification(SITE,self.productTitle)
-            while True:
-                pass
+            try:
+                discord.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=url,
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
+                )
+                sendNotification(SITE,self.productTitle)
+                while True:
+                    pass
+            except:
+                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
         else:
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout. Retrying...')
-            discord.failed(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=self.productLink,
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='PayPal',
-                profile=self.task["PROFILE"],
-                proxy=self.session.proxies
-            )
+            try:
+                discord.failed(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.productLink,
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
+                )
+            except:
+                pass
             time.sleep(int(self.task["DELAY"]))
             self.startPP()
 

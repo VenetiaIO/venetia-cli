@@ -9,7 +9,9 @@ import re
 import json
 import os
 import base64
-import cloudscraper
+# import cloudscraper
+from utils.cloudscraper import cloudscraper
+
 import string
 
 from utils.logger import logger
@@ -31,6 +33,7 @@ class NAKED:
             requestPostHook=injection,
             sess=self.sess,
             interpreter='nodejs',
+            delay=5,
             browser={
                 'browser': 'chrome',
                 'mobile': False,
@@ -146,6 +149,7 @@ class NAKED:
             postCart = self.session.post('https://www.nakedcph.com/en/cart/add', data=payload, headers={
                 'authority': 'www.nakedcph.com',
                 'accept-language': 'en-US,en;q=0.9',
+                'accept': '*/*',
                 'origin': 'https://www.nakedcph.com',
                 'referer': self.task["PRODUCT"],
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
@@ -159,6 +163,7 @@ class NAKED:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.addToCart()
     
+
 
         if postCart:
             if postCart.status_code == 200:
@@ -185,7 +190,7 @@ class NAKED:
 
         params = {
             'partial': 'shipping-quotes',
-            'zip': '',
+            'zip': profile["zip"],
             'countryCode': countryCode,
             'skip_layout': '1'
         }
@@ -193,6 +198,7 @@ class NAKED:
             shippingQuote = self.session.post('https://www.nakedcph.com/en/webshipr/render', params=params, headers={
                 'authority': 'www.nakedcph.com',
                 'accept-language': 'en-US,en;q=0.9',
+                'accept': '*/*',
                 'origin': 'https://www.nakedcph.com',
                 'referer': 'https://www.nakedcph.com/en/cart/view',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
@@ -218,11 +224,13 @@ class NAKED:
                 'partial': 'shipping-quotes',
                 'skip_layout': '1'
             }
+            print(params)
             try:
                 shippingQuote = self.session.post('https://www.nakedcph.com/en/webshipr/setshippingquote', params=params, headers={
                     'authority': 'www.nakedcph.com',
                     'accept-language': 'en-US,en;q=0.9',
                     'origin': 'https://www.nakedcph.com',
+                    'accept': '*/*',
                     'referer': 'https://www.nakedcph.com/en/cart/view',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest',
@@ -251,10 +259,12 @@ class NAKED:
 
     
     def payment(self):
+
         try:
-            paymentMethod = self.session.post('https://www.nakedcph.com/en/cart/setpaymentmethod', data={'id': 5, 'partial': 'ajax-cart'}, headers={
+            paymentMethod = self.session.post('https://www.nakedcph.com/en/cart/setpaymentmethod', data={'id': '5', 'partial': 'ajax-cart'}, headers={
                 'authority': 'www.nakedcph.com',
                 'accept-language': 'en-US,en;q=0.9',
+                'accept': '*/*',
                 'origin': 'https://www.nakedcph.com',
                 'referer': 'https://www.nakedcph.com/en/cart/view',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
@@ -281,8 +291,7 @@ class NAKED:
         payload = {
             '_AntiCsrfToken': self.antiCsrf,
             'country': profile["countryCode"],
-            'emailAddress': profile["email"],
-            'postalCodeQuery': '',
+            'postalCodeQuery': profile["zip"],
             'firstName': profile["firstName"],
             'lastName': profile["lastName"],
             'addressLine2': profile["house"] + " " + profile["addressOne"],
@@ -303,9 +312,13 @@ class NAKED:
                 'accept-language': 'en-US,en;q=0.9',
                 'origin': 'https://www.nakedcph.com',
                 'referer': 'https://www.nakedcph.com/en/cart/view',
+                'sec-fetch-dest': 'document',
+                'sec-fetch-mode': 'navigate',
+                'sec-fetch-site': 'same-origin',
+                'sec-fetch-user': '?1',
+                'upgrade-insecure-requests': '1',
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                'x-requested-with': 'XMLHttpRequest',
-                'x-anticsrftoken':self.antiCsrf
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)
@@ -313,6 +326,9 @@ class NAKED:
             time.sleep(int(self.task["DELAY"]))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.shipping()
+
+        print(processP.headers)
+        print(processP.url)
         
         processPaymentResponse = {
             "Response":{

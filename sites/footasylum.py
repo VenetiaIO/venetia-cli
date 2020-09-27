@@ -613,38 +613,44 @@ class FOOTASYLUM:
 
             url = storeCookies(paypalURL,self.session)
 
-            discord.success(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=url,
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='PayPal',
-                profile=self.task["PROFILE"],
-                product=self.task["PRODUCT"],
-                proxy=self.session.proxies,
-                speed=self.end
-            )
-            sendNotification(SITE,self.productTitle)
-            while True:
-                pass
+            try:
+                discord.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=url,
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
+                )
+                sendNotification(SITE,self.productTitle)
+                while True:
+                    pass
+            except:
+                logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
         
         else:
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout token. Retrying...')
-            discord.failed(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=self.task["PRODUCT"],
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='PayPal',
-                profile=self.task["PROFILE"],
-                proxy=self.session.proxies
-            )
+            try:
+                discord.failed(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.task["PRODUCT"],
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
+                )
+            except:
+                pass
 
             time.sleep(int(self.task["DELAY"]))
             self.payPal()

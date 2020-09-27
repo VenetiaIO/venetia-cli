@@ -342,35 +342,41 @@ class TITOLO:
                 url = storeCookies(getPaypal.url,self.session)
                 
                 sendNotification(SITE,self.productTitle)
-                discord.success(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=url,
-                    image=self.productImage,
-                    title=self.productTitle,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod='PayPal',
-                    profile=self.task["PROFILE"],
-                    product=self.task["PRODUCT"],
-                    proxy=self.session.proxies,
-                    speed=self.end
-                )
-                while True:
-                    pass
+                try:
+                    discord.success(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=url,
+                        image=self.productImage,
+                        title=self.productTitle,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod='PayPal',
+                        profile=self.task["PROFILE"],
+                        product=self.task["PRODUCT"],
+                        proxy=self.session.proxies,
+                        speed=self.end
+                    )
+                    while True:
+                        pass
+                except:
+                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             elif "paypal" not in getPaypal.url:
-                discord.failed(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=self.task["PRODUCT"],
-                    image=self.productImage,
-                    title=self.productTitle,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod='PayPal',
-                    profile=self.task["PROFILE"],
-                    proxy=self.session.proxies
-                )
+                try:
+                    discord.failed(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=self.task["PRODUCT"],
+                        image=self.productImage,
+                        title=self.productTitle,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod='PayPal',
+                        profile=self.task["PROFILE"],
+                        proxy=self.session.proxies
+                    )
+                except:
+                    pass
                 logger.error(SITE,self.taskID,'Failed to get PayPal checkout link. Retrying...')
                 self.paypal()
             
@@ -478,37 +484,42 @@ class TITOLO:
                 logger.alert(SITE,self.taskID,'Sending Card checkout to Discord!')
                 url = storeCookies(submitCard.url,self.session)
     
-
-                discord.success(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=url,
-                    image=self.productImage,
-                    title=self.productTitle,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod=self.paymentMethod,
-                    profile=self.task["PROFILE"],
-                    product=self.task["PRODUCT"],
-                    proxy=self.session.proxies,
-                    speed=self.end
-                )
-                while True:
-                    pass
+                try:
+                    discord.success(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=url,
+                        image=self.productImage,
+                        title=self.productTitle,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod=self.paymentMethod,
+                        profile=self.task["PROFILE"],
+                        product=self.task["PRODUCT"],
+                        proxy=self.session.proxies,
+                        speed=self.end
+                    )
+                    while True:
+                        pass
+                except:
+                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             elif submitCard.status_code != 200:
                 logger.error(SITE,self.taskID,'Error submitting card. Retrying...')
-                discord.failed(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=self.task["PRODUCT"],
-                    image=self.productImage,
-                    title=self.productTitle,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod=self.paymentMethod,
-                    profile=self.task["PROFILE"],
-                    proxy=self.session.proxies
-                )
+                try:
+                    discord.failed(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=self.task["PRODUCT"],
+                        image=self.productImage,
+                        title=self.productTitle,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod=self.paymentMethod,
+                        profile=self.task["PROFILE"],
+                        proxy=self.session.proxies
+                    )
+                except:
+                    pass
                 time.sleep(int(self.task["DELAY"]))
                 self.placeOrder()
 

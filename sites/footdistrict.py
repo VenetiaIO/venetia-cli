@@ -9,18 +9,18 @@ import re
 import json
 import os
 import base64
-from utils.cloudscraper import cloudscraper
+import cloudscraper
 import string
 
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies)
-SITE = 'CHMIELNA 20'
+SITE = 'FOOTDISTRICT'
 
 
 
-class CHMIELNA:
+class FOOTDISTRICT:
     def __init__(self, task,taskName):
         self.task = task
         self.sess = requests.session()
@@ -31,6 +31,7 @@ class CHMIELNA:
             requestPostHook=injection,
             sess=self.sess,
             interpreter='nodejs',
+            delay=5,
             browser={
                 'browser': 'chrome',
                 'mobile': False,
@@ -50,7 +51,11 @@ class CHMIELNA:
     def collect(self):
         logger.warning(SITE,self.taskID,'Solving Cloudflare...')
         try:
-            retrieve = self.session.get(self.task["PRODUCT"])
+            retrieve = self.session.get(self.task["PRODUCT"], headers={
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+
+            })
             logger.success(SITE,self.taskID,'Solved Cloudflare')
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)
@@ -62,53 +67,69 @@ class CHMIELNA:
         if retrieve.status_code == 200:
             self.start = time.time()
             logger.success(SITE,self.taskID,'Got product page')
-            # try:
-            soup = BeautifulSoup(retrieve.text, "html.parser")
-            self.cartURL = soup.find('form',{'name':'product__add'})["action"]
-            self.token = soup.find('form',{'name':'_token'})["value"]
+            try:
+                soup = BeautifulSoup(retrieve.text, "html.parser")
+                self.productTitle = soup.find("title").text
+                self.productImage = soup.find("img", {"id": "image-0"})["src"]
+                self.atcUrl = soup.find("form", {"id": "product_addtocart_form"})[
+                    "action"].replace("checkout/cart", "oxajax/cart")
+                self.formKey = soup.find("input", {"name": "form_key"})["value"]
+                self.productId = soup.find("input", {"name": "product"})["value"]
+                self.productPrice = soup.find("span",{"class":"price"}).text
+                self.attributeId = soup.find("select", {
+                                            "class": "required-entry super-attribute-select"})["id"].split("attribute")[1]
+    
+                regex = r"{\"attributes\":(.*?)}}\)"
+                matches = re.search(regex, retrieve.text, re.MULTILINE)
+                if matches:
+                    productData = json.loads(
+                        matches.group()[:-1])["attributes"][self.attributeId]
+    
+                    allSizes = []
+                    sizes = []
+                    for s in productData["options"]:
+                        allSizes.append('{}:{}:{}'.format(s["label"],s["products"][0],s["id"]))
+                        sizes.append(s["label"])
+    
+                    if len(sizes) == 0:
+                        logger.error(SITE,self.taskID,'Size Not Found')
+                        time.sleep(int(self.task["DELAY"]))
+                        self.collect()
 
-            foundSizes = soup.find_all('span',{'class':'product__available__pink'})
-            if foundSizes:
+                        
+                    if self.task["SIZE"].lower() != "random":
+                        if self.task["SIZE"] not in sizes:
+                            logger.error(SITE,self.taskID,'Size Not Found')
+                            time.sleep(int(self.task["DELAY"]))
+                            self.collect()
+                        else:
+                            for size in allSizes:
+                                if size.split(':')[0] == self.task["SIZE"]:
+                                    self.size = size.split(':')[0]
+                                    self.sizeID = size.split(':')[2]
+                                    self.option = size.split(":")[1]
+                                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+        
+                    
+                    elif self.task["SIZE"].lower() == "random":
+                        selected = random.choice(allSizes)
+                        self.size = selected.split(":")[0]
+                        self.sizeID = selected.split(":")[2]
+                        self.option = selected.split(":")[1]
+                        logger.success(SITE,self.taskID,f'Found Size => {self.size}')
 
-                sizes = []
-                for s in foundSizes:
-                    li = s["li"]
-                    sizes.append(li["data-sizeUS"])
-
-                if len(sizes) == 0:
+                
+                else:
                     logger.error(SITE,self.taskID,'Size Not Found')
                     time.sleep(int(self.task["DELAY"]))
                     self.collect()
 
-                    
-                if self.task["SIZE"].lower() != "random":
-                    if self.task["SIZE"] not in sizes:
-                        logger.error(SITE,self.taskID,'Size Not Found')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-                    else:
-                        for size in sizes:
-                            if size == self.task["SIZE"]:
-                                self.size = size
-                                logger.success(SITE,self.taskID,f'Found Size => {self.size}')
-    
-                
-                elif self.task["SIZE"].lower() == "random":
-                    self.size = random.choice(sizes)
-                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
-            
-            else:
-                logger.error(SITE,self.taskID,'Size Not Found')
-                time.sleep(int(self.task["DELAY"]))
-                self.collect()
-
-
                         
-            # except Exception as e:
-            #    log.info(e)
-            #    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-            #    time.sleep(int(self.task["DELAY"]))
-            #    self.collect()
+            except Exception as e:
+               log.info(e)
+               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+               time.sleep(int(self.task["DELAY"]))
+               self.collect()
 
             self.addToCart()
 
@@ -123,19 +144,17 @@ class CHMIELNA:
 
     def addToCart(self):
         payload = {
-            'isAjax': 1,
-            'form_key': self.formKey,
+            'recaptcha_response': '',
             'product': self.productId,
             'related_product': '',
             f'super_attribute[{self.attributeId}]': self.sizeID,
-            'return_url': ''
         }
 
         try:
             postCart = self.session.post(self.atcUrl, data=payload, headers={
-                'authority': 'www.allikestore.com',
+                'authority': 'footdistrict.com',
                 'accept-language': 'en-US,en;q=0.9',
-                'origin': 'https://www.allikestore.com',
+                'origin': 'https://footdistrict.com',
                 'referer': self.task["PRODUCT"],
                 'sec-fetch-dest': 'empty',
                 'sec-fetch-mode': 'cors',
@@ -150,16 +169,9 @@ class CHMIELNA:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.addToCart()
         
-        try:
-            splitText = postCart.text.split('({')[1].split('})')[0]
-            data = json.loads('{' + splitText + '}')
-            status = data["status"]
-        except:
-            logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.addToCart()
 
-        if postCart.status_code == 200 and data["status"] == "SUCCESS":
+
+        if postCart.status_code in [200,301,302] and 'cart' in postCart.url:
             logger.success(SITE,self.taskID,'Successfully carted')
             self.method()
         else:
@@ -167,3 +179,4 @@ class CHMIELNA:
             time.sleep(int(self.task["DELAY"]))
             self.addToCart()
 
+    
