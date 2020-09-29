@@ -9,9 +9,8 @@ import re
 import json
 import os
 import base64
-# import cloudscraper
-from utils.cloudscraper import cloudscraper
-
+import cloudscraper
+import urllib.parse
 import string
 
 from utils.logger import logger
@@ -68,6 +67,9 @@ class NAKED:
             try:
                 soup = BeautifulSoup(retrieve.text, "html.parser")
                 self.antiCsrf = self.session.cookies["AntiCsrfToken"]
+                self.productTitle = soup.find('title').text
+                self.productPrice = soup.find('meta',{'property':'og:price'})["content"]
+                self.productImage = 'https://www.nakedcph.com/' + soup.find_all('img',{'class':'lazyload'})[0]['src']
     
                 foundSizes = soup.find('select',{'id':'product-form-select'})
                 if foundSizes:
@@ -147,12 +149,8 @@ class NAKED:
 
         try:
             postCart = self.session.post('https://www.nakedcph.com/en/cart/add', data=payload, headers={
-                'authority': 'www.nakedcph.com',
-                'accept-language': 'en-US,en;q=0.9',
                 'accept': '*/*',
-                'origin': 'https://www.nakedcph.com',
                 'referer': self.task["PRODUCT"],
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest',
                 'x-anticsrftoken':self.antiCsrf
             })
@@ -196,12 +194,8 @@ class NAKED:
         }
         try:
             shippingQuote = self.session.post('https://www.nakedcph.com/en/webshipr/render', params=params, headers={
-                'authority': 'www.nakedcph.com',
-                'accept-language': 'en-US,en;q=0.9',
                 'accept': '*/*',
-                'origin': 'https://www.nakedcph.com',
                 'referer': 'https://www.nakedcph.com/en/cart/view',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest',
                 'x-anticsrftoken':self.antiCsrf
             })
@@ -224,15 +218,10 @@ class NAKED:
                 'partial': 'shipping-quotes',
                 'skip_layout': '1'
             }
-            print(params)
             try:
                 shippingQuote = self.session.post('https://www.nakedcph.com/en/webshipr/setshippingquote', params=params, headers={
-                    'authority': 'www.nakedcph.com',
-                    'accept-language': 'en-US,en;q=0.9',
-                    'origin': 'https://www.nakedcph.com',
                     'accept': '*/*',
                     'referer': 'https://www.nakedcph.com/en/cart/view',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest',
                     'x-anticsrftoken':self.antiCsrf
                 })
@@ -262,12 +251,8 @@ class NAKED:
 
         try:
             paymentMethod = self.session.post('https://www.nakedcph.com/en/cart/setpaymentmethod', data={'id': '5', 'partial': 'ajax-cart'}, headers={
-                'authority': 'www.nakedcph.com',
-                'accept-language': 'en-US,en;q=0.9',
                 'accept': '*/*',
-                'origin': 'https://www.nakedcph.com',
                 'referer': 'https://www.nakedcph.com/en/cart/view',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest',
                 'x-anticsrftoken':self.antiCsrf
             })
@@ -291,6 +276,7 @@ class NAKED:
         payload = {
             '_AntiCsrfToken': self.antiCsrf,
             'country': profile["countryCode"],
+            'emailAddress':profile["email"],
             'postalCodeQuery': profile["zip"],
             'firstName': profile["firstName"],
             'lastName': profile["lastName"],
@@ -303,22 +289,13 @@ class NAKED:
             'billingProvince': '-1',
             'webshiprQuoteMethod': self.method,
             'txvariant': 'card',
-            'termsAccepted': True
+            'termsAccepted': 'true'
         }
-        print(payload)
         try:
             processP = self.session.post('https://www.nakedcph.com/en/cart/process', data=payload, headers={
-                'authority': 'www.nakedcph.com',
-                'accept-language': 'en-US,en;q=0.9',
-                'origin': 'https://www.nakedcph.com',
                 'referer': 'https://www.nakedcph.com/en/cart/view',
-                'sec-fetch-dest': 'document',
-                'sec-fetch-mode': 'navigate',
-                'sec-fetch-site': 'same-origin',
-                'sec-fetch-user': '?1',
-                'upgrade-insecure-requests': '1',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+                'content-type': 'application/x-www-form-urlencoded'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)
@@ -327,101 +304,189 @@ class NAKED:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.shipping()
 
-        print(processP.headers)
-        print(processP.url)
-        
-        processPaymentResponse = {
-            "Response":{
-                "Items":[
-                    {
-                        "Id":2495,
-                        "Description":"315115 112 - Nike Sportswear - Air Force 1 '07 37,5",
-                        "IsDiscounted":False,
-                        "IsOnSale":False,
-                        "OriginalPrice":{
-                            "ExclVAT":87.5,
-                            "InclVAT":105.0,
-                            "VATTotal":17.5,
-                            "VATRate":20.0
-                        },
-                        "Price":"105 EUR",
-                        "UnitsAvailable":1,
-                        "Quantity":1,
-                        "SubTotal":{
-                            "ExclVAT":87.50000,
-                            "InclVAT":105.00000,
-                            "VATTotal":17.50000,
-                            "VATRate":20.0
-                        },
-                        "SubTotalVAT":17.50000,
-                        "VATRate":20.0
-                    }
-                ],
-                "TotalProductCost":"105 EUR",
-                "TotalPaymentFee":"0 EUR",
-                "TotalShippingCost":"10 EUR",
-                "TotalDesiredAmount":"115 EUR",
-                "TotalFormatted":{
-                    "InclVAT":"105 EUR",
-                    "ExclVAT":"88 EUR"
-                }
-            },
-            "StatusCode":0,
-            "Status":"OK"
-        }
+        if 'adyen' in processP.url:
+            try:
+                adyen = self.session.get(processP.url,headers={
+                    'Referer': 'https://www.nakedcph.com/en/cart/view',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                self.shipping()
+            
+            if adyen.status_code == 200:
+                soup = BeautifulSoup(adyen.text,"html.parser")
+                self.originalSession = soup.find('input',{'name':'originalSession'})['value']
+                self.merchantIntegrationSig = soup.find('input',{'name':'merchantIntegration.sig'})['value']
+                self.merchantIntegrationType = soup.find('input',{'name':'merchantIntegration.type'})['value']
+                self.sig = soup.find('input',{'name':'sig'})['value']
 
+                
+                def decodeURIComponent(str):
+                    decoded = urllib.parse.unquote(str)
+                    return decoded
+
+                url = processP.url
+                self.referer = url
+                self.paymentAmount = decodeURIComponent(url.split('?paymentAmount=')[1].split('&')[0])
+                self.currencyCode = decodeURIComponent(url.split('currencyCode=')[1].split('&')[0])
+                self.skinCode = decodeURIComponent(url.split('skinCode=')[1].split('&')[0])
+                self.merchantRef = decodeURIComponent(url.split('merchantReference=')[1].split('&')[0])
+                self.shopperIP = decodeURIComponent(url.split('shopperIP=')[1].split('&')[0])
+                self.shopperReference = decodeURIComponent(url.split('shopperReference=')[1].split('&')[0])
+                self.shopperEmail = decodeURIComponent(url.split('shopperEmail=')[1].split('&')[0])
+                self.merchantAccount = decodeURIComponent(url.split('merchantAccount=')[1].split('&')[0])
+                self.sessionValidity = decodeURIComponent(url.split('sessionValidity=')[1].split('&')[0])
+                self.shipBeforeDate = decodeURIComponent(url.split('shipBeforeDate=')[1].split('&')[0])
+                self.allowedMethods = decodeURIComponent(url.split('allowedMethods=')[1].split('&')[0])
+                self.resURL = decodeURIComponent(url.split('resURL=')[1].split('&')[0])
+                self.countryCode = decodeURIComponent(url.split('countryCode=')[1].split('&')[0])
+                self.merchantOrderReference = decodeURIComponent(url.split('merchantOrderReference=')[1].split('&')[0])
+                self.shopperFname = decodeURIComponent(url.split('shopper.firstName=')[1].split('&')[0])
+                self.shopperLname = decodeURIComponent(url.split('shopper.lastName=')[1].split('&')[0])
+                self.shopperGender = decodeURIComponent(url.split('shopper.gender=')[1].split('&')[0])
+                self.shopperPhone = decodeURIComponent(url.split('shopper.telephoneNumber=')[1].split('&')[0])
+                self.riskDataMethod = decodeURIComponent(url.split('riskdata.deliveryMethod=')[1].split('&')[0])
+                self.billingAddressType = decodeURIComponent(url.split('billingAddressType=')[1].split('&')[0])
+                self.shopperLocale = decodeURIComponent(url.split('shopperLocale=')[1].split('&')[0])
+                self.orderData = decodeURIComponent(url.split('orderData=')[1].split('&')[0])
+                self.billingStreet = decodeURIComponent(url.split('billingAddress.street=')[1].split('&')[0])
+                self.billingHouse = decodeURIComponent(url.split('billingAddress.houseNumberOrName=')[1].split('&')[0])
+                self.billingCity = decodeURIComponent(url.split('billingAddress.city=')[1].split('&')[0])
+                self.billingZIP = decodeURIComponent(url.split('billingAddress.postalCode=')[1].split('&')[0])
+                self.billingState = decodeURIComponent(url.split('billingAddress.stateOrProvince=')[1].split('&')[0])
+                self.billingCountry = decodeURIComponent(url.split('billingAddress.country=')[1].split('&')[0])
+                self.billingAddressSig = decodeURIComponent(url.split('billingAddressSig=')[1].split('&')[0])
+                self.deliveryStreet = decodeURIComponent(url.split('deliveryAddress.street=')[1].split('&')[0])
+                self.deliveryHouse = decodeURIComponent(url.split('deliveryAddress.houseNumberOrName=')[1].split('&')[0])
+                self.deliveryCity = decodeURIComponent(url.split('deliveryAddress.city=')[1].split('&')[0])
+                self.deliveryZIP = decodeURIComponent(url.split('deliveryAddress.postalCode=')[1].split('&')[0])
+                self.deliveryState = decodeURIComponent(url.split('deliveryAddress.stateOrProvince=')[1].split('&')[0])
+                self.deliveryCountry = decodeURIComponent(url.split('deliveryAddress.country=')[1].split('&')[0])
+                self.deliveryAddressSig = decodeURIComponent(url.split('deliveryAddressSig=')[1].split('&')[0])
+                self.merchantSig = decodeURIComponent(url.split('merchantSig=')[1].split('&')[0])
+                self.shopperSig = decodeURIComponent(url.split('shopperSig=')[1].split('&')[0])
+                self.riskDataSig = decodeURIComponent(url.split('riskdata.sig=')[1].split('&')[0])
+                logger.success(SITE,self.taskID,'Successfully got checkout data')
+                self.paypal()
+                
+            
 
     def paypal(self):
-        pass
-        # displayGroup: paypal
-        # pay: pay
-        # sig: PMEpaNX77xg/s7arIhx3skTdGnE=
-        # merchantReference: 1106685
-        # brandCode: paypal
-        # paymentAmount: 11500
-        # currencyCode: EUR
-        # shipBeforeDate: 2020-09-21T21:33:03Z
-        # skinCode: SfaF16TW
-        # merchantAccount: NakedCOM
-        # shopperLocale: en
-        # stage: pay
-        # sessionId: EEUbpMyKsz3HVa57tOvgWzhay/w=
-        # orderData: H4sIAAAAAAAEAK2QMQvCMBCFd8H/cGRxKjaW6lIDDjo6WPwBaXPoYW3iJSL996ZSwcEOgtt3994dj1cEXTUIdaO9XwvLBjmhgFcv1HQCUITKmu6F/cAD9WzeRwZ9zeQC2VaoTOZS5iDlAhLY0wWhdJaDf6DmuNkQw85yjSBhlq4gWxbzYL59vd11Gyh0Qskxi2OqMeppDtvj4cMVkX/IXJ7JOWpP/4gyliTC0GSkvnL1BKi47rZ6AQAA
-        # sessionValidity: 2020-09-14T21:43:03Z
-        # countryCode: GB
-        # shopperEmail: charliebottomley15@gmail.com
-        # shopperReference: 5590317
-        # merchantOrderReference: 736186
-        # resURL: https://www.nakedcph.com/adyen/return
-        # allowedMethods: paypal
-        # originalSession: H4sIAAAAAAAAAIVVXXOiShD9Kyle767yJYZUbdUVMWr8QEVDYvkywgCjA0OGUYK37n+/M0F3iW7u+th9+ni6+/Twj4RSxFwGIig9SBkopW8ShSGkFNLVYsxjMWNZ/rBpbppFUTRSsIeBn8UNnySbJkw3TR9QtmkeESx4aR6TLIN0THyABSFMP/jyP1OBoBRsFLIDFUU+OaSMll0SCJ6+xUNcXQJT1klESnpQlJYsc+CBa039C7K3WnzoQJkFQ0KhDZgIq7Iqf5fN76qyVJUHTXuQtTXHJZD6MUjZQrTMWQRUUWTDuG8Jlj1Kz7RuCB4VY+nVajq+XwmRpqKTrjPhSUIDSPl/Ah4e6PmwU/16nZE6n8yP3YnVfQzuB3xs/cX7aAc8Aw9te0cMb1ZY4GVGXj0NPblj0zTWbuH3nIgxzTT1YKf4vZflahgAx3wpjmNrl8TRo39UBvPuargcJQfjkbN2bNM7wUWxNk9w3lWfAVk6a7eFbNyJx69y4cXBE7BDw04O0/28uG+VO9eK8Zseee/b0+u4ZR4DRemXsTzP9+9Idd4mMMtsdtzp/uR5/7JpDl+e2k+Ol802TT0qMVp25b67P6ZjxRohvU3XRmfe6YjpwTxHJH0GGAWIlbUlKLpYgn5Zwtk0vQQgzFF8uBQjuCWMkQTDUmn9HYmU8MkvdH1jrZYpa0q7thtHrKEOaWuGcm98mFEYBqVRl3B/AZ/vLz1g/E0CGJMCBhPIYhLk1TFkAPOSLSb+vpap8Gcd/HQYFLa8xH9ZSji5skKVIWGYw5+4nHF3XpENUwaFJj62S2aLMOZqO0HAzyhflpnohosKIEZHSMtPiU9k9RAfXQbSsh76TNzIGYVCnKSodzOEEy7ubgKLXLpBxuSQw+kh2ULq0ClIzoJu+PhcHDqj5IiqFdxiMsJR+Hxh9li9U635LcqvzDM40IJQFv8GUD0Vl2fiajL/19k19IvWbhl/09s16IvmrmG33d0gPrd33m4jRDRnZ43d6mRqWZSG6P3KEA0MflZYl+uq1UQw5VfDk6vpaOp401oqEA2HFuIKbVA64YQfT3xNXwP9Kf8KAb1OM4hhFpP0vACuQ263TUPVNFNu1bTkxEcAu+KO+ewu4IqLonzP/wY0LkOsjpZzzUAKIkJBw+Wfhoy752N7vN+GB7fic0Frz4e4w4gCcYeNHEXi6XLelicU6WvNX+5naDEfPca63d80jb+iH19UsupYB7OZVFNW8Y1mk7BVvMYD6EaHJL1XrT6ea7IevZM6nfsB7vVW22xSjvKTNngGrTZzjpF3ikHJP6Q/pH//AxYTDVnEBwAA
-        # billingAddress.street: 12 Pilmore Mews
-        # billingAddress.houseNumberOrName: 
-        # billingAddress.city: Hurworth
-        # billingAddress.postalCode: DL2 2BQ
-        # billingAddress.stateOrProvince: 
-        # billingAddress.country: GB
-        # billingAddressType: 
-        # deliveryAddress.street: 12 Pilmore Mews
-        # deliveryAddress.houseNumberOrName: 
-        # deliveryAddress.city: Hurworth
-        # deliveryAddress.postalCode: DL2 2BQ
-        # deliveryAddress.stateOrProvince: 
-        # deliveryAddress.country: GB
-        # shopper.firstName: Charlie
-        # shopper.lastName: Bottomley
-        # shopper.gender: UNKNOWN
-        # shopper.telephoneNumber: 07796233905
-        # riskdata.deliveryMethod: Panagora.ShippingProvider.Webshipr
-        # merchantIntegration.sig: 2OqTzig4Z3cTkPiRQKFh4DG/6+g=
-        # merchantIntegration.type: HPP
-        # riskdata.sig: KPMf5wYhHeSgumn82BGlQ304gxo=
-        # referrerURL: https://www.nakedcph.com/en/cart/view
-        # dfValue: ryEGX8eZpJ0030000000000000BTWDfYZVR30089146776cVB94iKzBGQkPFutk01m5S16Goh5Mk0045zgp4q8JSa00000qZkTE00000PRbZ1HbvOQG2etdcqzfW:40
-        # usingFrame: false
-        # usingPopUp: false
-        # 
-        # 
+        adyenForm = {
+            'displayGroup': 'paypal',
+            'pay': 'pay',
+            'sig': self.sig,
+            'merchantReference': self.merchantRef,
+            'brandCode': 'paypal',
+            'paymentAmount': self.paymentAmount,
+            'currencyCode': self.currencyCode,
+            'shipBeforeDate': self.shipBeforeDate,
+            'skinCode': self.skinCode,
+            'merchantAccount': self.merchantAccount,
+            'shopperLocale': self.shopperLocale,
+            'stage': 'pay',
+            'sessionId': self.merchantSig,
+            'orderData': self.orderData,
+            'sessionValidity': self.sessionValidity,
+            'countryCode': self.countryCode,
+            'shopperEmail': self.shopperEmail,
+            'shopperReference': self.shopperReference,
+            'merchantOrderReference': self.merchantOrderReference,
+            'resURL': self.resURL,
+            'allowedMethods': self.allowedMethods,
+            'originalSession': self.originalSession,
+            'billingAddress.street': self.billingStreet,
+            'billingAddress.houseNumberOrName': self.billingHouse,
+            'billingAddress.city': self.billingCity,
+            'billingAddress.postalCode': self.billingZIP,
+            'billingAddress.stateOrProvince': self.billingState,
+            'billingAddress.country': self.billingCountry,
+            'billingAddressType': self.billingAddressType,
+            'deliveryAddress.street': self.deliveryStreet,
+            'deliveryAddress.houseNumberOrName': self.deliveryHouse,
+            'deliveryAddress.city': self.deliveryCity,
+            'deliveryAddress.postalCode': self.deliveryZIP,
+            'deliveryAddress.stateOrProvince': self.deliveryState,
+            'deliveryAddress.country': self.deliveryCountry,
+            'shopper.firstName': self.shopperFname,
+            'shopper.lastName': self.shopperLname,
+            'shopper.gender': self.shopperGender,
+            'shopper.telephoneNumber': self.shopperPhone,
+            'riskdata.deliveryMethod': self.riskDataMethod,
+            'merchantIntegration.sig': self.merchantIntegrationSig,
+            'merchantIntegration.type': self.merchantIntegrationType,
+            'riskdata.sig': self.riskDataSig,
+            'referrerURL': 'https://www.nakedcph.com/en/cart/view',
+            'dfValue': 'ryEGX8eZpJ0030000000000000BTWDfYZVR30089146776cVB94iKzBGzk6emGsPvH5S16Goh5Mk0045zgp4q8JSa00000qZkTE00000PRbZ1HbvOQG2etdcqzfW:40',
+            'usingFrame': False,
+            'usingPopUp': False,
+            'shopperBehaviorLog': ''
+        }
+        try:
+            getPaypal = self.session.post('https://live.adyen.com/hpp/redirectPayPal.shtml', data=adyenForm, headers={
+                'Referer': self.referer,
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'content-type': 'application/x-www-form-urlencoded'
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            self.shipping()
+
+
+        if getPaypal.status_code in [200,302] and 'paypal' in getPaypal.url:
+            self.end = time.time() - self.start
+            logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+
+            url = storeCookies(getPaypal.url,self.session)
+            
+            try:
+                discord.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=url,
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
+                )
+                sendNotification(SITE,self.productTitle)
+                while True:
+                    pass
+            except:
+                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+
+        else:
+            logger.error(SITE,self.taskID,'Failed to get PayPal checkout. Retrying...')
+            try:
+                discord.failed(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.productLink,
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
+                )
+            except:
+                pass
+            time.sleep(int(self.task["DELAY"]))
+            self.paypal()
+
 
         
 

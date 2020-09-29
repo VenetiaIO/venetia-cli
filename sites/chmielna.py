@@ -9,7 +9,7 @@ import re
 import json
 import os
 import base64
-from utils.cloudscraper import cloudscraper
+import cloudscraper
 import string
 
 from utils.logger import logger
@@ -30,7 +30,6 @@ class CHMIELNA:
         self.session = cloudscraper.create_scraper(
             requestPostHook=injection,
             sess=self.sess,
-            interpreter='nodejs',
             browser={
                 'browser': 'chrome',
                 'mobile': False,
@@ -42,7 +41,13 @@ class CHMIELNA:
                 'api_key': twoCap
             }
         )
+        self.session.headers={
+           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+           'referer': 'https://chmielna20.pl',
+           'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36'
+        }
         
+
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
 
         self.collect()
@@ -59,56 +64,63 @@ class CHMIELNA:
             time.sleep(int(self.task["DELAY"]))
             self.collect()
 
+
         if retrieve.status_code == 200:
             self.start = time.time()
-            logger.success(SITE,self.taskID,'Got product page')
-            # try:
-            soup = BeautifulSoup(retrieve.text, "html.parser")
-            self.cartURL = soup.find('form',{'name':'product__add'})["action"]
-            self.token = soup.find('form',{'name':'_token'})["value"]
-
-            foundSizes = soup.find_all('span',{'class':'product__available__pink'})
-            if foundSizes:
-
-                sizes = []
-                for s in foundSizes:
-                    li = s["li"]
-                    sizes.append(li["data-sizeUS"])
-
-                if len(sizes) == 0:
-                    logger.error(SITE,self.taskID,'Size Not Found')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-
-                    
-                if self.task["SIZE"].lower() != "random":
-                    if self.task["SIZE"] not in sizes:
-                        logger.error(SITE,self.taskID,'Size Not Found')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-                    else:
-                        for size in sizes:
-                            if size == self.task["SIZE"]:
-                                self.size = size
-                                logger.success(SITE,self.taskID,f'Found Size => {self.size}')
-    
-                
-                elif self.task["SIZE"].lower() == "random":
-                    self.size = random.choice(sizes)
-                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
-            
-            else:
-                logger.error(SITE,self.taskID,'Size Not Found')
+            if retrieve.text == "":
+                logger.error(SITE,self.taskID,f'Failed to get product page. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 self.collect()
 
 
+            logger.success(SITE,self.taskID,'Got product page')
+            try:
+                soup = BeautifulSoup(retrieve.text, "html.parser")
+                self.cartURL = soup.find('form',{'name':'product__add'})["action"]
+                self.token = soup.find('input',{'name':'_token'})["value"]
+    
+                foundSizes = soup.find_all('span',{'class':'product__available__pink'})
+                if foundSizes:
+    
+                    sizes = []
+                    for s in foundSizes:
+                        li = s["li"]
+                        sizes.append(li["data-sizeUS"])
+    
+                    if len(sizes) == 0:
+                        logger.error(SITE,self.taskID,'Size Not Found')
+                        time.sleep(int(self.task["DELAY"]))
+                        self.collect()
+    
                         
-            # except Exception as e:
-            #    log.info(e)
-            #    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-            #    time.sleep(int(self.task["DELAY"]))
-            #    self.collect()
+                    if self.task["SIZE"].lower() != "random":
+                        if self.task["SIZE"] not in sizes:
+                            logger.error(SITE,self.taskID,'Size Not Found')
+                            time.sleep(int(self.task["DELAY"]))
+                            self.collect()
+                        else:
+                            for size in sizes:
+                                if size == self.task["SIZE"]:
+                                    self.size = size
+                                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+        
+                    
+                    elif self.task["SIZE"].lower() == "random":
+                        self.size = random.choice(sizes)
+                        logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                
+                else:
+                    logger.error(SITE,self.taskID,'Size Not Found')
+                    time.sleep(int(self.task["DELAY"]))
+                    self.collect()
+    
+    
+                            
+            except Exception as e:
+               log.info(e)
+               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+               time.sleep(int(self.task["DELAY"]))
+               self.collect()
 
             self.addToCart()
 

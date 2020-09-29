@@ -1,49 +1,351 @@
-<div class="shipping-quotes has-selected-quote">
-    <div class="shipping-quote is-selected " data-quote-id="65">
-        <div class="shipping-quote__option">
-            <a href="/en/webshipr/setshippingquote"
-                class="shipping-quote__link custom-control custom-control custom-radio d-flex mr-0 is-active">
-                <span class="shipping-quote__radio custom-control-indicator"></span>
-                <div class="shipping-quote__info custom-control-description">
-                    <input type="hidden" name="webshiprQuoteMethod" value="GLS Europe, 10 EUR">
-                    <span class="shipping-quote__name">
-                        GLS Europe
-                    </span>
-                    <span class="shipping-quote__price">
-                        10 EUR
-                    </span>
-                    <div class="shipping-quote__description">
-                        2-4 business days
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
-    <div class="shipping-quote  " data-quote-id="68">
-        <div class="shipping-quote__option">
-            <a href="/en/webshipr/setshippingquote"
-                class="shipping-quote__link custom-control custom-control custom-radio d-flex mr-0 ">
-                <span class="shipping-quote__radio custom-control-indicator"></span>
-                <div class="shipping-quote__info custom-control-description">
-                    <span class="shipping-quote__name">
-                        DHL Express
-                    </span>
-                    <span class="shipping-quote__price">
-                        20 EUR
-                    </span>
-                    <div class="shipping-quote__description">
-                        1-2 business days
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+        data-page-type="select-pmm-page"    data-page-model="one-page"          data-shopperlocale="en"     >
+<head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+        <title>Step 1: Choose your Payment Method</title>
+
+        <link rel="shortcut icon" href="/sf/SfaF16TW/img/favicon.ico" />
+
+        <link rel="stylesheet" type="text/css" href="/hpp/css/reset.css?v=version" />
+        <link rel="stylesheet" media="screen" type="text/css" href="/sf/SfaF16TW/css/screen.css" />
+        <link rel="stylesheet" media="print"  type="text/css" href="/sf/SfaF16TW/css/print.css" />
+        <script type="text/javascript" src="/hpp/js/default.js?v=version"></script>
+        <!--[if lt IE 7]>
+                <link rel="stylesheet" type="text/css" href="/sf/SfaF16TW/css/screen_ie6.css" />
+        <![endif]-->
+</head>
+<body>
+ <script type="text/javascript">
+        //<![CDATA[
+        var clientIPAddress="5.255.122.190";
+
+        var config = [];
+        config["pmmanimation"] = 2;
+
+        //]]>
+  </script>
+
+
+        <div id="container">
+                        <script>
+                                 (function () {
+                                        try {
+                                                var m = document.createElement("meta");
+                                                m.name='viewport';
+                                                m.content = "width=device-width,initial-scale=1,minimum-scale=1";
+                                                document.head.appendChild(m);
+                                        } catch (e) {}
+                                        })();
+                        </script>
+      <form id="pageform" action="details.shtml" method="post"  autocomplete="off" onsubmit="return formValidate(this  ,'default' );">
+      <div id="content" >
+                                <div id="logoheader">
+        <div id="logo"></div>
 </div>
-<a href=".payment-section.active" data-toggle="scroll" class="continue-btn__wrap">
-    <div class="continue-btn__container btn-wrap">
-        <button type="button"
-            class="continue-btn continue-btn--shipping continue-btn--finalize-step btn btn-primary btn-lg">
-            Continue to payment
-        </button>
-    </div>
-</a>
+<div id="pmcontent">
+<script type = "text/javascript">
+        try {
+                config["pmmanimation"] = 1;
+        } catch (e) {}
+</script>                       <div class="paddiv1"></div>
+                        <script type="text/javascript">
+//<![CDATA[
+/* Form validation */
+var requiredFields = [];
+var openInPopup = [];
+
+
+var fieldLinks = [];
+var errorMessages = [];
+var errorAreas = [];
+var validationFunctions = [];
+var details = [];
+
+errorMessages["default"] = [];
+requiredFields["default"] = [];
+
+
+var maySubmitOnlyOnce=true;
+errorMessages["default"]["submitonce"] = "Your request is being processed, please wait...";
+requiredFields["default"].push("brandCode");
+errorMessages["default"]["brandCode"] = "Please enter your payment details";
+
+var locked = false;
+var _valFunc = new function() {};
+
+var displayAmountExtras = new Object();
+
+function show(detail, actionURL, group, brandCode) {
+
+        if(config["pmmanimation"] != 1) {
+                if(locked) { return false; }
+                locked = true;
+                setTimeout('locked=false',1000);
+        }
+
+        if(group == "card") {
+                brandCode="brandCodeUndef";
+        }
+
+        document.forms["pageform"].action=actionURL;
+        document.forms["pageform"].onsubmit=null;
+
+        if(document.forms["pageform"].addEventListener) {
+          document.forms["pageform"].removeEventListener('submit',_valFunc ,false);
+          document.forms["pageform"].addEventListener('submit',_valFunc = function(e) {
+                    result = formValidate(document.forms["pageform"] ,group);
+                        if(result == false) {
+                  e=e||event;
+                  e.preventDefault? e.preventDefault() : e.returnValue = false;
+                }
+          },false);
+        } else {
+          document.forms["pageform"].detachEvent('onsubmit',_valFunc);
+          document.forms["pageform"].attachEvent('onsubmit',_valFunc = function(e) {
+                result = formValidate(document.forms["pageform"] ,group);
+                if(result == false) {
+                  e=e||event;
+                  e.preventDefault? e.preventDefault() : e.returnValue = false;
+                }
+          });
+        }
+
+        document.forms["pageform"]["brandCode"].value=brandCode;
+        document.forms["pageform"]["displayGroup"].value=group;
+        document.getElementById('extraCostAmount').innerHTML = displayAmountExtras[group];
+
+        if(detail != "") {
+        detail.slideit();
+        for (i = 0; i < details.length; i++) {
+                if (details[i].divId != detail.divId) {
+                        details[i].slideup();
+                }
+        }
+        }
+
+        // possible selection handler hook
+        var selectHandler = "select"+group+"Handler";
+        if (eval("typeof " + selectHandler + " === 'function'")) {
+                window[selectHandler](detail, actionURL, group, brandCode);
+        }
+
+        return false;
+}
+
+
+        addOnLoad(preventEnterSubmit);
+
+
+
+//]]>
+</script>
+<script type="text/javascript" src="/hpp/js/animatedcollapse.js?v=version"></script>
+<script type="text/javascript" src="/hpp/js/cc.js?v=version"></script>
+  <input type="hidden" id="displayGroup" name="displayGroup" value="" />
+<h2 id="stageheader">Step 1: Please select your payment method</h2>
+
+<div id="orderDataWrapper">
+ <div id="orderDataHeader">Order Details</div>
+ <div id="orderData">
+        <table class="order-items">
+  <tbody>
+    <tr>
+      <td
+        class="description">VN0A4UUS1DT1 - Vans - Cap Mash Lo Lx 38</td>
+      <td
+        class="quantity">2</td>
+      <td class="price">130 EUR</td>
+    </tr>
+  </tbody>
+</table>
+ </div>
+</div>
+<div id="displayAmount">
+ Total payment amount EUR 260.00 <span id="extraCostAmount"></span>
+</div>
+
+
+<ul id="paymentMethods">
+
+
+
+
+    <li style="list-style-type: none;" data-variant="paypal">
+         <input             type="submit" name="brandName" value="PayPal" class="imgB pmB pmBpaypal"
+
+                        onclick="return show(collapsepaypal, 'redirectPayPal.shtml', 'paypal', 'paypal');"
+
+        />
+                        <span id="pmmextracosts-paypal" class="pmmextracosts">
+                            </span>
+
+            <span id="pmpaypaldescription" class="pmmdescription"></span>
+            <div id="pmmdetails-paypal" class="pmmdetails">
+
+                <script type="text/javascript">
+                    var collapsepaypal = new animatedcollapse("pmmdetails-paypal", 1000, false, false, config["pmmanimation"]==1?false:true);
+                    details.push(collapsepaypal);
+
+                                                                                    displayAmountExtras['paypal'] = "";
+                                                                                                                displayAmountExtras['paypal'] = "";
+
+
+                                                                        addOnLoad(function () {
+                            setTimeout("show(collapsepaypal, 'redirectPayPal.shtml', 'paypal', 'paypal')",100);
+                        });
+
+                    if (notNull(document.getElementById('pmmform-paypal'))) {
+                        document.getElementById('pmmform-paypal').setAttribute("autocomplete","off");
+                    }
+                </script>
+
+                                                            <table class="basetable">
+
+    <tr>
+        <td>
+            Pay using your PayPal account. You will be redirected to the PayPal system to complete the payment.
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2"><div class="r">
+            <input  class="paySubmit paySubmitpaypal" type="submit" name="pay" value="pay" />
+        </div></td>
+    </tr>
+</table>
+                                                         </div>
+    </li>
+
+
+</ul>
+
+
+        <div id="errorFrame" style="display: none;" class="popupMsg errorFrame">
+                <div id="errorFrameValidationErrors">
+                </div>
+        </div>
+        <div id="okFrame" style="display: none;" class="popupMsg okFrame">
+        <div id="okFrameMessages">
+        </div>
+</div>
+
+
+
+<input type="text" style="display: none" />
+ <input type="hidden" name="sig" value="cgVeryWe2AqC68uUP5N40S+zV2c=" />
+ <input type="hidden" name="merchantReference" value="1118310" />
+ <input type="hidden" name="brandCode" value="brandCodeUndef" />
+ <input type="hidden" name="paymentAmount" value="26000" />
+ <input type="hidden" name="currencyCode" value="EUR" />
+ <input type="hidden" name="shipBeforeDate" value="2020-10-06T22:02:55Z" />
+ <input type="hidden" name="skinCode" value="SfaF16TW" />
+ <input type="hidden" name="merchantAccount" value="NakedCOM" />
+ <input type="hidden" name="shopperLocale" value="en" />
+ <input type="hidden" name="stage" value="pay" />
+ <input type="hidden" name="sessionId" value="b3rmP/V0FaN6ZvTrFWSGSspjpmw=" />
+ <input type="hidden" name="orderData" value="H4sIAAAAAAAEALMpSUzKSVVIzkksLrZVyi9KSS3SzSxJzS1WsuPlUlCwKUnKT6kEM0GcIigLxE6BaUpJLU4uyiwoyczPU7IL8zNwNAkNDTZ0CTFU0FUIS8wrBlLOiQUKvonFGQo++Qo+FQrGFjb6JSnYzCosTcwrySypVLIzwqWkoCgzOVXJztDYQME1NAhJFZAJcR+QAXU1kAXynh0A4HaW0OYAAAA=" />
+
+ <input type="hidden" name="sessionValidity" value="2020-09-29T22:12:55Z" />
+
+
+
+ <input type="hidden" name="countryCode" value="GB" />
+
+ <input type="hidden" name="shopperEmail" value="charliebottomley15@gmail.com" />
+ <input type="hidden" name="shopperReference" value="5590317" />
+ <input type="hidden" name="merchantOrderReference" value="791512" />
+
+ <input type="hidden" name="resURL" value="https://www.nakedcph.com/adyen/return" />
+ <input type="hidden" name="allowedMethods" value="paypal" />
+
+
+
+
+
+
+ <input type="hidden" name="originalSession" value="H4sIAAAAAAAAAIVVXXOiShD9Kyles1HAqNGqrbr4laiIGkSN5csII8w6zLAzo4hb97/fmaC7RJO7VvnSffpw+nQ3/NIQQcIVIIRaU0tApn3TGNxCxiDzXm0Zi4RIeHNdXpfTNC0RsIOBn0Qln8brMiTrsg+YWJcPCKaylEc0SSCzqQ+wIoTknY//nQoEmWJjUOyZKvLpngiWtWmgeJ5bMiTVxZAIK1YprWnWdF2XwL3USvwLsuu9vutASQtuKYMdIFTY1E39wdAf9NrMNJu62axWVxIXQ+ZHgIhX1bJkUVDDMJ4qhq5Ydoicad0t6Bm12aJQY/l+LkRzVCft8UgmKQsgk88EMvzyyPtW/uta9ihxvdPQnc/7p92O22w1z1Bj6LoV9+QeByfXWPD9BHu4nQ49MpzVdt2R/uz3UWgfu7UW8JKB7T3uM5TSzD9NvHrffjo5qWPtnM5spbdnPU/veX33KWUtbI/R1BseKOk9T+n9vfz3puy592NTG7jk7dSmfOanLHOzZG73T+nPxY62w9N4vhycROdtOuoajhUNeitr4L/eT62lZ+ysZUYi3Xp8AQt9/KZ6+q4cgpwjSuYAowCJ7GK03ngwG8po42L0eTG6MUBYoqSBDCO4oULQGMPMqP4TqpTahT/o4lSq1YZeMeoF/8fK6iKk3jCqhvm+cGopEAnbVO4Q8OWMyB7jbxrAmKYwGEER0YDnC58ALEs2mPq7QibHn3XI8xBQrd4l/mdt1Lbm484zdLvl8DeOC7mBV2R9IqDSJG27ZDYIY6nWCgJ5KnyWJaobKSqAGB0gyz4kPpAVQ9K6BJCsGPpIXOKCQSVOM8y7CcKxFHc3ginXbpAR3XPo7OMNZGPmgPgs6IZP+jJmE0YPKB/BLSahEoXPV9SxzTuzNb1F+fnydNRWkFBQ8gkkfyFcXgZX3vxfb9fQL5q7Zfyku2vQF+1dwz7r7wbzscHzhEtbxLg4q2znZ1PIIrJFx6ulKGHwu6J1ubBCTQiJvByZ9JyhM144hVSgWt62EBNRB2Tj7UgeUHRNXwD9Lf8GAbtOC4hhElFyHoHUodfrjZpZqTT0akELpz4C2FW3LN27gHMuhvhOPgaULibmhyu5JoCAkDJQcuUnIJFmv89P9ltawI36LLDCK0TdYsiAusUSR6Esf8rs0eE4mGTDcOtHeuut+nOzENBebtLvXxSK/F5fJhOtICynCzYoG9UcMFhWjxkKYXgkdZwsfW81LdK57+BNhcWTdXmu94BTWx1mrLdwn12e/Ehi+fB//wM+247wqwcAAA==" />
+
+
+
+
+                    <input type="hidden" name="billingAddress.street"            value="12 Pilmore Mews" />      <input type="hidden" name="billingAddress.houseNumberOrName" value="" />                <input type="hidden" name="billingAddress.city"              value="Darlington" />           <input type="hidden" name="billingAddress.postalCode"        value="DL2 2BQ" />       <input type="hidden" name="billingAddress.stateOrProvince"   value="" />                <input type="hidden" name="billingAddress.country"           value="GB" />                     <input type="hidden" name="billingAddressType"               value="" />
+                    <input type="hidden" name="deliveryAddress.street"            value="12 Pilmore Mews" />     <input type="hidden" name="deliveryAddress.houseNumberOrName" value="" />                       <input type="hidden" name="deliveryAddress.city"              value="Darlington" />          <input type="hidden" name="deliveryAddress.postalCode"        value="DL2 2BQ" />      <input type="hidden" name="deliveryAddress.stateOrProvince"   value="" />               <input type="hidden" name="deliveryAddress.country"           value="GB" />
+                                        <input type="hidden" name="shopper.firstName"                                   value="Charlie" />                                         <input type="hidden" name="shopper.lastName"                      value="Bottomley" />                             <input type="hidden" name="shopper.gender"                                value="UNKNOWN" />                                       <input type="hidden" name="shopper.telephoneNumber"               value="07796233905" />
+
+
+
+                        <input type="hidden" name="riskdata.deliveryMethod" value="Panagora.ShippingProvider.Webshipr" />
+                        <input type="hidden" name="merchantIntegration.sig" value="8yLMvxJPyKgfch0BY5qbWteLXbw=" />
+                        <input type="hidden" name="merchantIntegration.type" value="HPP" />
+                        <input type="hidden" name="riskdata.sig" value="dbiyM6NaJX5xyigegxn7lpXcUZQ=" />
+
+
+        <input type="hidden" name="referrerURL" value="https://www.nakedcph.com/en/cart/view" />
+
+
+
+
+        <script type="text/javascript" src="/hpp/js/df.js?v=20200930"></script>
+
+        <div id="df_swf_c" style="display:none;"></div>
+        <input type="hidden" name="dfValue" id="dfValue" value="" />
+        <script type="text/javascript">
+                //<![CDATA[
+                dfDo("dfValue");
+                //]]>
+        </script>
+        <input type="hidden" name="usingFrame" id="usingFrame" value="false" />
+        <input type="hidden" name="usingPopUp" id="usingPopUp" value="false" />
+        <script type="text/javascript">
+                //<![CDATA[
+                try {
+                var uf = _.G("usingFrame");
+                if(uf && uf.value != "") {
+                        uf.value = ( top.location != self.location );
+                }
+                var up = _.G("usingPopUp");
+                if(up && up.value != "") {
+                        up.value = ( window.name == "myPopUp" );
+                }
+                } catch(e){ }
+                //]]>
+        </script>
+  <div class="paddiv2"></div>
+        </div>              </div>
+  <div id="foot">
+        <div id="footc">
+          <div id="nextstep">
+                <div id="nextstepc">Next Step: Enter your Payment Details</div>
+          </div>
+          <div id="footerb2div">
+                  </div>
+          <div id="footerb1div">
+                           <input                                                                 onclick="this.blur(); prepareForBack();" name="back" id="mainBack" value="previous" type="submit" class="hideforprint footerB backB"
+                                                  />
+                                  </div>
+        </div>
+  </div>
+
+          <input type="hidden" name="shopperBehaviorLog" id="hpp-sbLog" value="" />
+
+  </form>
+        </div>
+        <script type="text/javascript" src="/hpp/js/adyen.eventlog.js?v=version"></script>
+        <script type="text/javascript">
+                if (typeof JSON === 'object' && typeof JSON.stringify === 'function') {
+                        setInterval(function() {
+                                var ev = {};
+                                evLog('extend', ev);
+                                if (ev.hasOwnProperty("numberBind")) {                                  document.getElementById( 'hpp-sbLog' ).value = JSON.stringify( ev, null, '' );
+                                }
+                        }, 500);
+                }
+        </script>
+
+
+</body>
+</html>

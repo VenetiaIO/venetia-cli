@@ -51,9 +51,7 @@ class ALLIKE:
         logger.warning(SITE,self.taskID,'Solving Cloudflare...')
         try:
             retrieve = self.session.get(self.task["PRODUCT"], headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-
             })
             logger.success(SITE,self.taskID,'Solved Cloudflare')
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
@@ -160,7 +158,6 @@ class ALLIKE:
                 'sec-fetch-dest': 'empty',
                 'sec-fetch-mode': 'cors',
                 'sec-fetch-site': 'same-origin',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
@@ -181,25 +178,86 @@ class ALLIKE:
 
         if postCart.status_code == 200 and data["status"] == "SUCCESS":
             logger.success(SITE,self.taskID,'Successfully carted')
-            self.method()
+            if self.task["PAYMENT"].lower() == "paypal":
+                self.ppExpress()
+            else:
+                self.method()
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
             time.sleep(int(self.task["DELAY"]))
             self.addToCart()
+
+    def ppExpress(self):
+        
+        try:
+            startExpress = self.session.get('https://www.allikestore.com/default/paypal/express/start/button/1/',headers={
+                'authority': 'www.allikestore.com',
+                'referer': self.task["PRODUCT"],
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            self.addToCart()
+
+        self.end = time.time() - self.start
+        if "paypal" in startExpress.url:
+            logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+
+            url = storeCookies(startExpress.url,self.session)
+
+            
+            sendNotification(SITE,self.productTitle)
+            try:
+                discord.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=url,
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
+                )
+                while True:
+                    pass
+            except:
+                logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+        else:
+            try:
+                discord.failed(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.task["PRODUCT"],
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
+                )
+            except:
+                pass
+            logger.error(SITE,self.taskID,'Failed to get PayPal checkout link. Retrying...')
+            self.ppExpress()
 
     def method(self):
         try:
             postMethod = self.session.post('https://www.allikestore.com/default/checkout/onepage/saveMethod/', data={"method": "guest"}, headers={
                 'authority': 'www.allikestore.com',
                 'referer': 'https://www.allikestore.com/default/checkout/onepage/',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest',
                 'accept':'text/javascript, text/html, application/xml, text/xml, */*'
             })
             postMethod = self.session.post('https://www.allikestore.com/default/checkout/onepage/saveMethod/', data={"method": "guest"}, headers={
                 'authority': 'www.allikestore.com',
                 'referer': 'https://www.allikestore.com/default/checkout/onepage/',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest',
                 'accept':'text/javascript, text/html, application/xml, text/xml, */*'
             })
@@ -259,7 +317,6 @@ class ALLIKE:
                 'sec-fetch-dest': 'empty',
                 'sec-fetch-mode': 'cors',
                 'sec-fetch-site': 'same-origin',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest',
                 'accept': 'text/javascript, text/html, application/xml, text/xml, */*'
             })
@@ -299,7 +356,6 @@ class ALLIKE:
                 'sec-fetch-dest': 'empty',
                 'sec-fetch-mode': 'cors',
                 'sec-fetch-site': 'same-origin',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
@@ -338,7 +394,6 @@ class ALLIKE:
                 'sec-fetch-dest': 'empty',
                 'sec-fetch-mode': 'cors',
                 'sec-fetch-site': 'same-origin',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
@@ -358,7 +413,6 @@ class ALLIKE:
                     'sec-fetch-dest': 'document',
                     'sec-fetch-mode': 'navigate',
                     'sec-fetch-site': 'same-origin',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest'
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
@@ -444,7 +498,6 @@ class ALLIKE:
                 'Sec-Fetch-Dest': 'script',
                 'Sec-Fetch-Mode': 'no-cors',
                 'Sec-Fetch-Site': 'same-origin',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)
@@ -479,7 +532,6 @@ class ALLIKE:
                     'sec-fetch-dest': 'empty',
                     'sec-fetch-mode': 'cors',
                     'sec-fetch-site': 'same-origin',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest'
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
@@ -515,7 +567,6 @@ class ALLIKE:
                         'sec-fetch-dest': 'empty',
                         'sec-fetch-mode': 'cors',
                         'sec-fetch-site': 'same-origin',
-                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                         'x-requested-with': 'XMLHttpRequest'
                     })
                 except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
