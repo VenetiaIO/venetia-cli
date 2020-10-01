@@ -46,6 +46,7 @@ class SCHUH:
             self.collect()
 
         if retrieve.status_code == 200:
+            self.start = time.time()
             logger.success(SITE,self.taskID,'Got product page')
             try:
                 soup = BeautifulSoup(retrieve.text,"html.parser")
@@ -302,6 +303,7 @@ class SCHUH:
                 time.sleep(int(self.task['DELAY']))
                 self.paypal()
             if EC.status_code == 200:
+                self.end = time.time() - self.start
                 self.ppToken = EC.json()["data"]["token"]
 
                 self.ppURL = 'https://www.paypal.com/checkoutnow?locale.x=en_GB&fundingSource=paypal&env=production&fundingOffered=paypal&logLevel=warn&version=4&token={}&xcomponent=1'.format(self.ppToken)
@@ -310,34 +312,43 @@ class SCHUH:
 
                 url = storeCookies(self.ppURL,self.session)
     
-                discord.success(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=url,
-                    image=self.productImage,
-                    title=self.productTitle,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod='PayPal',
-                    profile=self.task["PROFILE"],
-                    product=self.task["PRODUCT"]
-                )
-                sendNotification(SITE,self.productTitle)
-                while True:
-                    pass
+                try:
+                    discord.success(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=url,
+                        image=self.productImage,
+                        title=self.productTitle,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod='PayPal',
+                        profile=self.task["PROFILE"],
+                        product=self.task["PRODUCT"],
+                        proxy=self.session.proxies,
+                        speed=self.end
+                    )
+                    sendNotification(SITE,self.productTitle)
+                    while True:
+                        pass
+                except:
+                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             else:
                 logger.error(SITE,self.taskID,'Could not complete PayPal Checkout. Retrying...')
-                discord.failed(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=self.task["PRODUCT"],
-                    image=self.productImage,
-                    title=self.productTitle,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod='PayPal',
-                    profile=self.task["PROFILE"]
-                )
+                try:
+                    discord.failed(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=self.task["PRODUCT"],
+                        image=self.productImage,
+                        title=self.productTitle,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod='PayPal',
+                        profile=self.task["PROFILE"],
+                        proxy=self.session.proxies
+                    )
+                except:
+                    pass
                 logger.error(SITE,self.taskID,'Failed to retrieve paypal checkout info. Retrying...')
                 time.sleep(int(self.task['DELAY']))
                 self.paypal()

@@ -7,14 +7,15 @@ import urllib.parse
 import time
 import random
 import threading
-import cloudscraper
+# import cloudscraper
+from utils.cloudscraper import cloudscraper
 import base64
 from pynotifier import Notification
 from win10toast import ToastNotifier
 
 from utils.logger import logger
 from utils.captcha import captcha
-from utils.helheim import helheim
+from helheim import helheim
 
 def injection(session, response):
     if session.is_New_IUAM_Challenge(response):
@@ -400,7 +401,7 @@ def slamjam_datadome(proxy,taskID, pid, region):
                 
 def starcow_datadome(proxy,taskID):
     siteKey = '6LccSjEUAAAAANCPhaM2c-WiRxCZ5CzsjR_vd8uX'
-    site = 'https://www.starcow.com'
+    site = 'https://www.starcowparis.com'
     session = requests.session()
     session.headers = {
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",

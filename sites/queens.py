@@ -77,6 +77,7 @@ class QUEENS:
             
 
         if retrieve.status_code == 200 and retrieve.url != f'https://www.queens.{self.region}/':
+            self.start = time.time()
             if mode == 'kws':
                 logger.info(SITE,self.taskID, 'Searching for product')
                 kwProduct = findProduct(retrieve.text, kws, SITE, self.taskID, self.region)
@@ -362,40 +363,50 @@ class QUEENS:
                 self.delivery()
 
             if paypalOrder.status_code == 201 and paypalOrder.json()["status"] == "CREATED":
+                self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
 
                 url = storeCookies(paypalOrder.json()["links"][1]["href"],self.session)
-                discord.success(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=url,
-                    image=self.productImage,
-                    title=self.productTitle,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod='PayPal',
-                    profile=self.task["PROFILE"],
-                    tracking=tracking,
-                    order=orderNumber,
-                    product=self.task["PRODUCT"]
-                )
-                sendNotification(SITE,self.productTitle)
-                while True:
-                    pass
+                try:
+                    discord.success(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=url,
+                        image=self.productImage,
+                        title=self.productTitle,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod='PayPal',
+                        profile=self.task["PROFILE"],
+                        tracking=tracking,
+                        order=orderNumber,
+                        product=self.task["PRODUCT"],
+                        proxy=self.session.proxies,
+                        speed=self.end
+                    )
+                    sendNotification(SITE,self.productTitle)
+                    while True:
+                        pass
+                except:
+                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             
             elif paypalOrder.status_code != 201:
                 logger.error(SITE,self.taskID,'Could not complete PayPal Checkout. Retrying...')
-                discord.failed(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=self.task["PRODUCT"],
-                    image=self.productImage,
-                    title=self.productTitle,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod='PayPal',
-                    profile=self.task["PROFILE"]
-                )
+                try:
+                    discord.failed(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=self.task["PRODUCT"],
+                        image=self.productImage,
+                        title=self.productTitle,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod='PayPal',
+                        profile=self.task["PROFILE"],
+                        proxy=self.session.proxies
+                    )
+                except:
+                    pass
                 time.sleep(int(self.task["DELAY"]))
                 self.delivery()
 

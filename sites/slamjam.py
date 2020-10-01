@@ -78,7 +78,7 @@ class SLAMJAM:
             time.sleep(int(self.task["DELAY"]))
             self.collect()
 
-
+        self.start = time.time()
         regex = r"[A-Z](\d+).html"
         matches = re.search(regex, retrieve.url)
         if matches:
@@ -100,6 +100,7 @@ class SLAMJAM:
 
 
         if retrieve.status_code == 200:
+            
             self.redirectUrl = retrieve.url
             logger.success(SITE,self.taskID,'Got product page')
             try:
@@ -530,6 +531,7 @@ class SLAMJAM:
                     self.PayPalpayment()
         
                 if payment.status_code == 200 and data:
+                    self.end = time.time() - self.start
                     logger.success(SITE,self.taskID,'Successfully submitted payment')
                     
                     try:
@@ -542,23 +544,28 @@ class SLAMJAM:
                     paypalURL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token={}&useraction=commit'.format(self.paypalToken)
                     logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
                     
-                    storeCookies(paypalURL,self.session)
-        
-                    discord.success(
-                        webhook=loadSettings()["webhook"],
-                        site=SITE,
-                        url=url,
-                        image=self.productImage,
-                        title=self.productTitle,
-                        size=self.size,
-                        price=self.productPrice,
-                        paymentMethod='PayPal',
-                        profile=self.task["PROFILE"],
-                        product=self.task["PRODUCT"]
-                    )
-                    sendNotification(SITE,self.productTitle)
-                    while True:
-                        pass
+                    url = storeCookies(paypalURL,self.session)
+            
+                    try:
+                        discord.success(
+                            webhook=loadSettings()["webhook"],
+                            site=SITE,
+                            url=url,
+                            image=self.productImage,
+                            title=self.productTitle,
+                            size=self.size,
+                            price=self.productPrice,
+                            paymentMethod='PayPal',
+                            profile=self.task["PROFILE"],
+                            product=self.task["PRODUCT"],
+                            proxy=self.session.proxies,
+                            speed=self.end
+                        )
+                        sendNotification(SITE,self.productTitle)
+                        while True:
+                            pass
+                    except:
+                        logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
                     
                 else:
                     logger.error(SITE,self.taskID,'Failed to submit payment. Retrying...')

@@ -72,6 +72,7 @@ class GROSBASKET:
         split = self.task["PRODUCT"].split("grosbasket.com/")[1]
         self.region = split.split('/')[0]
         if retrieve.status_code == 200:
+            self.start = time.time()
             logger.success(SITE,self.taskID,'Got product page')
             try:
                 soup = BeautifulSoup(retrieve.text, "html.parser")
@@ -370,6 +371,7 @@ class GROSBASKET:
             self.startPaypal()
 
         if "paypal" in startExpress.url:
+            self.end = time.time() - self.start
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
 
             url = storeCookies(startExpress.url,self.session)
@@ -387,31 +389,42 @@ class GROSBASKET:
                 pass
         
 
-            discord.success(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=url,
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='PayPal',
-                profile=self.task["PROFILE"],
-                product=self.task["PRODUCT"]
-            )
-            sendNotification(SITE,self.productTitle)
+            try:
+                discord.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=url,
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
+                )
+                sendNotification(SITE,self.productTitle)
+                while True:
+                    pass
+            except:
+                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
         else:
-            discord.failed(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=self.task["PRODUCT"],
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='PayPal',
-                profile=self.task["PROFILE"],
-            )
+            try:
+                discord.failed(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.task["PRODUCT"],
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
+                )
+            except:
+                pass
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout link. Retrying...')
             self.startPaypal()
 

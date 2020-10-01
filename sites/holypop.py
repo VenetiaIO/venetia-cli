@@ -48,6 +48,7 @@ class HOLYPOP:
             self.collect()
         if retrieve:
             if retrieve.status_code == 200:
+                self.start = time.time()
                 regex = r"preloadedStock =(.+)"
                 matches = re.search(regex, retrieve.text, re.MULTILINE)
                 if matches:
@@ -201,19 +202,26 @@ class HOLYPOP:
             self.productPrice = '{} {}'.format(cart.json()["payload"][0]["price"],cart.json()["payload"][0]["currencyCode"])
             self.productLink = cart.json()["payload"][0]["permalink"]
             if self.task["PAYMENT"].lower() == "cart hold":
-                discord.success(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=self.productLink,
-                    image=self.productImage,
-                    title=self.productTitle,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod='Cart Hold',
-                    profile=self.task["PROFILE"],
-                    account=self.task["ACCOUNT EMAIL"],
-                    product=self.task["PRODUCT"]
-                )
+                self.end = time.time() - self.start
+                try:
+                    discord.success(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=self.productLink,
+                        image=self.productImage,
+                        title=self.productTitle,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod='Cart Hold',
+                        profile=self.task["PROFILE"],
+                        account=self.task["ACCOUNT EMAIL"],
+                        product=self.task["PRODUCT"],
+                        proxy=self.session.proxies,
+                        speed=self.end
+                    )
+                except:
+                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Cart Hold ==> {}'.format(self.task["ACCOUNT EMAIL"]))
+                    
             elif self.task["PAYMENT"].lower() == "paypal":
                 self.checkout()
         else:
@@ -257,7 +265,7 @@ class HOLYPOP:
                     self.checkout()
                 
 
-            captchaResponse = loadToken()
+            captchaResponse = loadToken(SITE)
             if captchaResponse == "empty":
                 captchaResponse = captcha.v2('6Lc8GBUUAAAAAKMfe1S46jE08TvVKNSnMYnuj6HN',self.task["PRODUCT"],self.proxies,SITE,self.taskID)
 
@@ -335,38 +343,48 @@ class HOLYPOP:
             self.startPP()
 
         if checkout.status_code == 200 and "paypal" in checkout.url:
+            self.end = time.time() - self.start
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
 
             url = storeCookies(checkout.url,self.session)
             
-            discord.success(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=url,
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='PayPal',
-                profile=self.task["PROFILE"],
-                product=self.task["PRODUCT"]
-            )
-            sendNotification(SITE,self.productTitle)
-            while True:
-                pass
+            try:
+                discord.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=url,
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
+                )
+                sendNotification(SITE,self.productTitle)
+                while True:
+                    pass
+            except:
+                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
         else:
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout. Retrying...')
-            discord.failed(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=self.productLink,
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='PayPal',
-                profile=self.task["PROFILE"]
-            )
+            try:
+                discord.failed(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.productLink,
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='PayPal',
+                    profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
+                )
+            except:
+                pass
             time.sleep(int(self.task["DELAY"]))
             self.startPP()
 

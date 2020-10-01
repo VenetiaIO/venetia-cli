@@ -43,6 +43,8 @@ class AIRNESS:
 
 
         if retrieve.status_code == 200:
+            self.start = time.time()
+
             logger.success(SITE,self.taskID,'Got product page')
             try:
                 getToken = self.session.post('https://airness-2.commercelayer.io/oauth/token',data={'scope':'market:2392','grant_type':'client_credentials'},headers={
@@ -649,6 +651,7 @@ class AIRNESS:
                 self.payment()
 
             if postPaypal.status_code == 201:
+                self.end = time.time() - self.start
                 logger.success(SITE,self.taskID,'Successfully set payment method')
                 self.paypalUrl = postPaypal.json()["data"]["attributes"]["approval_url"]
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
@@ -656,34 +659,43 @@ class AIRNESS:
                 url = storeCookies(self.paypalUrl,self.session)
 
                 self.productImage = 'https:{}'.format(self.image)
-                discord.success(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=url,
-                    image=self.productImage,
-                    title=self.name,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod='PayPal',
-                    profile=self.task["PROFILE"],
-                    product=self.task["PRODUCT"]
-                )
-                sendNotification(SITE,self.productTitle)
-                while True:
-                    pass
+                try:
+                    discord.success(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=url,
+                        image=self.productImage,
+                        title=self.name,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod='PayPal',
+                        profile=self.task["PROFILE"],
+                        product=self.task["PRODUCT"],
+                        proxy=self.session.proxies,
+                        speed=self.end
+                    )
+                    sendNotification(SITE,self.name)
+                    while True:
+                        pass
+                except:
+                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             else:
                 self.productImage = 'https:{}'.format(self.image)
-                discord.failed(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=self.task["PRODUCT"],
-                    image=self.productImage,
-                    title=self.name,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod='PayPal',
-                    profile=self.task["PROFILE"],
-                )
+                try:
+                    discord.failed(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=self.task["PRODUCT"],
+                        image=self.productImage,
+                        title=self.name,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod='PayPal',
+                        profile=self.task["PROFILE"],
+                        proxy=self.session.proxies
+                    )
+                except:
+                    pass
                 logger.error(SITE,self.taskID,'Failed to set payment method. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 self.payment()

@@ -43,6 +43,7 @@ class SVD:
             self.collect()
 
         if retrieve.status_code == 200:
+            self.start = time.time()
             logger.success(SITE,self.taskID,'Got product page')
             try:
                 soup = BeautifulSoup(retrieve.text, "html.parser")
@@ -547,20 +548,25 @@ class SVD:
             self.braintreePaypal()
 
         url = storeCookies(checkoutUrl,self.session)
-
-        discord.success(
-            webhook=loadSettings()["webhook"],
-            site=SITE,
-            url=url,
-            image=self.productImage,
-            title=self.productTitle,
-            size=self.size,
-            price=self.productPrice,
-            paymentMethod='PayPal',
-            profile=self.task["PROFILE"],
-            product=self.task["PRODUCT"]
-        )
-        sendNotification(SITE,self.productTitle)
+        self.end = time.time() - self.start
+        try:
+            discord.success(
+                webhook=loadSettings()["webhook"],
+                site=SITE,
+                url=url,
+                image=self.productImage,
+                title=self.productTitle,
+                size=self.size,
+                price=self.productPrice,
+                paymentMethod='PayPal',
+                profile=self.task["PROFILE"],
+                product=self.task["PRODUCT"],
+                proxy=self.session.proxies,
+                speed=self.end
+            )
+            sendNotification(SITE,self.productTitle)
+        except:
+            logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
 
         headers = {
             "Host": "api.braintreegateway.com",
@@ -862,8 +868,12 @@ class SVD:
                 'TermUrl': 'https://0eaf.cardinalcommerce.com/EAFService/jsp/v1/term', 'MD': self.md}
         r = self.session.post('https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
                               headers=headers, data=data)
-        soup = BeautifulSoup(r.text, 'lxml')
-        self.transToken = str(soup.find_all("script")[0]).split('"')[1]
+        try:
+            soup = BeautifulSoup(r.text, 'lxml')
+            self.transToken = str(soup.find_all("script")[0]).split('"')[1]
+        except:
+            logger.error(SITE,self.taskID,'Failed to get trans token...')
+            self.braintreeCard()
 
         if len(self.transToken) > 70:
             self.nonThreeDS()
@@ -984,34 +994,44 @@ class SVD:
 
         if r.status_code == 400:
             logger.error(SITE,self.taskID,'Checkout Failed. Retrying...')
-            discord.failed(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=self.task["PRODUCT"],
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='Card',
-                profile=self.task["PROFILE"],
-            )
+            try:
+                discord.failed(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.task["PRODUCT"],
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='Card',
+                    profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
+                )
+            except:
+                pass
             time.sleep(int(self.task["DELAY"]))
             self.braintreeCard()
         if r.status_code == 200:
+            self.end = time.time() - self.start
             logger.secondary(SITE,self.taskID,'Checkout Complete!')
             sendNotification(SITE,self.productTitle)
-            discord.success(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=self.task["PRODUCT"],
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='Card',
-                profile=self.task["PROFILE"],
-            )
-            while True:
+            try:
+                discord.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.task["PRODUCT"],
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='Card',
+                    profile=self.task["PROFILE"],
+                    proxy=self.session.proxies,
+                    speed=self.end
+                )
+                while True:
+                    pass
+            except:
                 pass
 
     def ThreeDS(self):
@@ -1215,33 +1235,41 @@ class SVD:
 
         if r.status_code == 400:
             logger.error(SITE,self.taskID,'Checkout Failed. Retrying...')
-            discord.failed(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=self.task["PRODUCT"],
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='Card',
-                profile=self.task["PROFILE"],
-            )
+            try:
+                discord.failed(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.task["PRODUCT"],
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='Card',
+                    profile=self.task["PROFILE"],
+                    proxy=self.session.proxies
+                )
+            except:
+                pass
             time.sleep(int(self.task["DELAY"]))
             self.braintreeCard()
 
         if r.status_code == 200:
             logger.secondary(SITE,self.taskID,'Checkout Complete!')
-            discord.success(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                url=self.task["PRODUCT"],
-                image=self.productImage,
-                title=self.productTitle,
-                size=self.size,
-                price=self.productPrice,
-                paymentMethod='Card',
-                profile=self.task["PROFILE"],
-                product=self.task["PRODUCT"]
-            )
-            while True:
+            try:
+                discord.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.task["PRODUCT"],
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod='Card',
+                    profile=self.task["PROFILE"],
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies
+                )
+                while True:
+                    pass
+            except:
                 pass
