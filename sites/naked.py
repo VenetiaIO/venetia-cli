@@ -261,7 +261,7 @@ class NAKED:
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.shipping()
+            self.payment()
 
         if paymentMethod.status_code == 200:
             logger.success(SITE,self.taskID,'Successfully saved payment details')
@@ -302,7 +302,7 @@ class NAKED:
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.shipping()
+            self.process()
 
         if 'adyen' in processP.url:
             try:
@@ -315,7 +315,7 @@ class NAKED:
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                self.shipping()
+                self.process()
             
             if adyen.status_code == 200:
                 soup = BeautifulSoup(adyen.text,"html.parser")
@@ -372,6 +372,11 @@ class NAKED:
                 self.riskDataSig = decodeURIComponent(url.split('riskdata.sig=')[1].split('&')[0])
                 logger.success(SITE,self.taskID,'Successfully got checkout data')
                 self.paypal()
+        
+        else:
+            logger.error(SITE,self.taskID,'Failed to get checkout data. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.process()
                 
             
 
@@ -437,7 +442,7 @@ class NAKED:
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.shipping()
+            self.paypal()
 
 
         if getPaypal.status_code in [200,302] and 'paypal' in getPaypal.url:
@@ -465,7 +470,7 @@ class NAKED:
                 while True:
                     pass
             except:
-                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
 
         else:
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout. Retrying...')
@@ -473,7 +478,7 @@ class NAKED:
                 discord.failed(
                     webhook=loadSettings()["webhook"],
                     site=SITE,
-                    url=self.productLink,
+                    url=self.task["PRODUCT"],
                     image=self.productImage,
                     title=self.productTitle,
                     size=self.size,

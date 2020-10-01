@@ -45,7 +45,6 @@ class discord:
     
             webhook.execute()
         except Exception as e:
-            print(e)
             pass
 
 
