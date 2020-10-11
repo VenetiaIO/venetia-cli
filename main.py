@@ -24,7 +24,7 @@ click.echo = echo
 click.secho = secho
 
 
-VERSION  = '0.3.6'
+VERSION  = '0.3.7'
 os.system("title VenetiaIO CLI [Version {}]".format(VERSION))
 
 #sites
@@ -49,6 +49,7 @@ from sites.chmielna import CHMIELNA
 from sites.workingClassHeroes import WCH
 from sites.naked import NAKED
 from sites.footdistrict import FOOTDISTRICT
+from sites.prodirect import PRODIRECT
 
 #utils
 from utils.quicktask import QT
@@ -76,7 +77,8 @@ sites = {
     #"CHMIELNA20":CHMIELNA,
     "WCH":WCH,
     "NAKED":NAKED,
-    #"FOOTDISTRICT":FOOTDISTRICT
+    #"FOOTDISTRICT":FOOTDISTRICT,
+    "PRODIRECT":PRODIRECT
 }
 
 

@@ -16,6 +16,7 @@ import string
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
+from utils.captcha import captcha
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies)
 SITE = 'NAKED'
 
@@ -122,7 +123,10 @@ class NAKED:
                self.collect()
 
 
-            self.addToCart()
+            if self.task["ACCOUNT EMAIL"] == "":
+                self.addToCart()
+            else:
+                self.login()
         
         if retrieve.status_code == 403:
             logger.error(SITE,self.taskID,f'Failed to get product page => 403. Retrying...')
@@ -138,6 +142,39 @@ class NAKED:
             logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
             time.sleep(int(self.task["DELAY"]))
             self.collect()
+
+    def login(self):
+        logger.prepare(SITE,self.taskID,'Preparing login...')
+        captchaResponse = loadToken(SITE)
+        if captchaResponse == "empty":
+            captchaResponse = captcha.v3('6Ldpi-gUAAAAANpo2mKVvIR6u8nUGrInKKik8MME',self.task["PRODUCT"],self.session.proxies,SITE,self.taskID)
+        payload = {
+            '_AntiCsrfToken': self.antiCsrf,
+            'email': self.task["ACCOUNT EMAIL"],
+            'password': self.task["ACCOUNT PASSWORD"],
+            'g-recaptcha-response':captchaResponse,
+            'action':'login'
+        }
+
+        try:
+            login = self.session.post('https://www.nakedcph.com/en/cart/add', data=payload, headers={
+                'accept': 'application/json, text/javascript, */*; q=0.01',
+                'referer': 'https://www.nakedcph.com/en/auth/view',
+                'x-requested-with': 'XMLHttpRequest',
+                'x-anticsrftoken':self.antiCsrf
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            self.addToCart()
+
+        print(login)
+        print(login.url)
+        print(login.text)
+        
+
 
     def addToCart(self):
         logger.prepare(SITE,self.taskID,'Carting Product...')

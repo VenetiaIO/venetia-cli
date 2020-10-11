@@ -78,3 +78,199 @@
 17:54:54,673 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
 17:55:06,10 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
 17:55:49,712 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:09,45 root ERROR SaaS -> CloudflarePhaseTwo -> POST -> ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+06:58:20,87 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:20,403 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:20,615 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:20,633 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:20,645 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:20,709 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:20,881 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:21,311 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:21,341 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:21,481 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:25,446 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:25,629 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:28,889 root ERROR SaaS -> CloudflarePhaseTwo -> POST -> ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+06:58:30,237 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:31,30 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:40,222 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:40,316 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:40,628 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:40,680 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:44,362 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:44,920 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:44,976 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:47,612 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:49,599 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:50,483 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:58:56,932 root ERROR SaaS -> Response -> [CloudflarePhaseThree] Backend Failure / Failed to Solve.
+06:58:59,971 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:00,74 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:05,342 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:05,400 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:06,664 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:08,962 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:15,70 root ERROR SaaS -> Response -> [CloudflarePhaseThree] Backend Failure / Failed to Solve.
+06:59:15,262 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:24,220 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:28,335 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:29,467 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:33,810 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:34,57 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:48,341 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:48,462 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:52,928 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+06:59:53,516 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:00:12,200 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:00:12,813 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:00:12,850 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:00:17,190 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:00:31,93 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:00:31,863 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:00:40,63 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:00:45,347 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:00:48,69 root ERROR SaaS -> CloudflarePhaseThree -> POST -> ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+07:00:52,507 root ERROR CloudflarePhaseThree() -> POST -> ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+07:00:54,84 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:01:03,742 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:01:21,647 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:01:33,786 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:01:48,562 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:01:56,798 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:02:10,366 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:02:13,666 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:02:44,893 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+07:04:05,197 root ERROR CloudflarePhaseThree() -> POST -> ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+07:04:41,773 root ERROR CloudflarePhaseThree() -> POST -> ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+07:04:56,617 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+07:06:16,162 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+07:06:16,287 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+07:06:32,878 root ERROR list index out of range
+07:07:27,446 root ERROR list index out of range
+07:07:39,508 root ERROR list index out of range
+07:07:50,674 root ERROR list index out of range
+07:08:04,157 root ERROR list index out of range
+07:08:15,265 root ERROR list index out of range
+07:08:22,262 root ERROR list index out of range
+07:08:39,569 root ERROR list index out of range
+07:08:43,646 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+07:09:24,886 root ERROR list index out of range
+07:09:27,928 root ERROR list index out of range
+07:09:46,8 root ERROR list index out of range
+07:10:03,370 root ERROR list index out of range
+07:10:33,145 root ERROR list index out of range
+07:10:38,428 root ERROR list index out of range
+07:10:39,587 root ERROR list index out of range
+07:11:04,354 root ERROR list index out of range
+07:11:06,947 root ERROR list index out of range
+07:11:27,350 root ERROR list index out of range
+07:11:30,71 root ERROR list index out of range
+07:11:35,104 root ERROR list index out of range
+07:11:58,92 root ERROR list index out of range
+07:12:09,491 root ERROR list index out of range
+07:12:27,243 root ERROR list index out of range
+07:12:39,179 root ERROR list index out of range
+07:12:49,995 root ERROR list index out of range
+07:12:59,322 root ERROR list index out of range
+07:13:08,552 root ERROR list index out of range
+07:13:21,289 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+07:13:21,555 root ERROR list index out of range
+07:13:25,395 root ERROR list index out of range
+07:13:26,773 root ERROR list index out of range
+07:15:11,162 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+07:15:12,711 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+07:15:15,147 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+07:15:17,460 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+07:15:54,822 root ERROR list index out of range
+07:16:02,352 root ERROR list index out of range
+07:16:08,753 root ERROR list index out of range
+07:16:27,697 root ERROR list index out of range
+07:16:43,240 root ERROR list index out of range
+07:16:44,397 root ERROR list index out of range
+07:16:58,757 root ERROR list index out of range
+07:17:04,212 root ERROR list index out of range
+07:17:12,179 root ERROR list index out of range
+07:17:13,790 root ERROR list index out of range
+07:17:26,268 root ERROR list index out of range
+07:17:36,382 root ERROR list index out of range
+07:17:49,603 root ERROR list index out of range
+07:17:50,990 root ERROR list index out of range
+07:18:01,755 root ERROR list index out of range
+07:18:15,584 root ERROR list index out of range
+07:18:28,259 root ERROR list index out of range
+07:18:30,117 root ERROR list index out of range
+07:18:41,371 root ERROR list index out of range
+07:18:57,490 root ERROR list index out of range
+07:19:05,48 root ERROR list index out of range
+07:19:10,522 root ERROR list index out of range
+07:19:19,694 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+07:19:35,444 root ERROR list index out of range
+07:19:44,774 root ERROR list index out of range
+07:19:47,8 root ERROR list index out of range
+07:20:01,786 root ERROR list index out of range
+07:20:14,287 root ERROR list index out of range
+07:20:23,100 root ERROR list index out of range
+07:20:40,604 root ERROR list index out of range
+07:20:41,402 root ERROR list index out of range
+07:20:53,711 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+18:44:01,648 root ERROR SaaS -> Response -> [CloudflarePhaseTwo] Backend Failure.
+18:44:56,573 root ERROR SaaS -> Response -> [CloudflarePhaseTwo] Backend Failure.
+18:45:18,281 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+18:45:22,794 root ERROR CloudflarePhaseOne() -> Step 3 -> Encode -> Error.
+18:45:26,876 root ERROR CloudflarePhaseOne() -> Step 3 -> Encode -> Error.
+18:45:31,791 root ERROR CloudflarePhaseOne() -> Step 3 -> Encode -> Error.
+18:45:53,54 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+18:46:14,319 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+18:46:32,302 root ERROR SaaS -> Response -> [CloudflarePhaseTwo] Backend Failure.
+18:47:25,465 root ERROR SaaS -> Response -> [CloudflarePhaseTwo] Backend Failure.
+18:47:47,263 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+18:47:57,987 root ERROR SaaS -> Response -> [CloudflarePhaseThree] Backend Failure / Failed to Solve.
+18:48:08,828 root ERROR SaaS -> setupChallenge -> POST -> ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+18:48:30,626 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+18:49:00,913 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+18:49:22,141 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+18:49:42,803 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+18:50:03,444 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+18:50:24,829 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+19:17:51,441 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+19:18:46,331 root ERROR SaaS -> Response -> [CloudflarePhaseTwo] Backend Failure.
+19:19:02,142 root ERROR SaaS -> Response -> [CloudflarePhaseTwo] Backend Failure.
+19:19:24,101 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+19:19:45,671 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+19:20:05,987 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+19:37:53,634 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+19:38:15,858 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+19:39:11,911 root ERROR SaaS -> Response -> [CloudflarePhaseTwo] Backend Failure.
+19:46:16,738 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+19:46:37,250 root ERROR SaaS -> Response -> [CloudflarePhaseTwo] Backend Failure.
+19:47:00,700 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+19:47:21,787 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+19:47:44,775 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+19:48:39,845 root ERROR SaaS -> Response -> [CloudflarePhaseTwo] Backend Failure.
+19:49:35,563 root ERROR SaaS -> Response -> [CloudflarePhaseTwo] Backend Failure.
+19:50:30,578 root ERROR SaaS -> Response -> [CloudflarePhaseTwo] Backend Failure.
+19:50:40,37 root ERROR SaaS -> Response -> [CloudflarePhaseThree] Backend Failure / Failed to Solve.
+19:51:44,450 root ERROR SaaS -> Response -> [CloudflarePhaseTwo] Backend Failure.
+17:34:48,801 root ERROR ('Connection aborted.', TimeoutError(10060, 'A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond', None, 10060, None))
+17:35:09,146 root ERROR ('Connection aborted.', TimeoutError(10060, 'A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond', None, 10060, None))
+17:35:29,638 root ERROR ('Connection aborted.', TimeoutError(10060, 'A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond', None, 10060, None))
+17:35:49,976 root ERROR ('Connection aborted.', TimeoutError(10060, 'A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond', None, 10060, None))
+17:37:20,653 root ERROR "name='AntiCsrfToken', domain=None, path=None"
+17:37:21,873 root ERROR "name='AntiCsrfToken', domain=None, path=None"
+17:37:23,102 root ERROR "name='AntiCsrfToken', domain=None, path=None"
+17:37:24,316 root ERROR "name='AntiCsrfToken', domain=None, path=None"
+17:37:48,278 root ERROR list index out of range
+17:37:49,625 root ERROR list index out of range
+17:37:50,787 root ERROR list index out of range
+17:38:50,122 root ERROR list index out of range
+17:38:51,294 root ERROR list index out of range
+17:38:52,478 root ERROR list index out of range
+17:38:53,677 root ERROR list index out of range
+17:38:55,389 root ERROR list index out of range
+17:39:49,976 root ERROR list index out of range
+17:39:51,158 root ERROR list index out of range
+17:39:52,329 root ERROR list index out of range
+17:39:53,507 root ERROR list index out of range
+23:33:49,853 root ERROR SaaS -> CloudflarePhaseTwo -> POST -> ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+23:34:08,75 root ERROR SaaS -> Response -> [CloudflarePhaseTwo] Backend Failure.

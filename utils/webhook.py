@@ -25,7 +25,7 @@ class discord:
 
         try:
             webhook = DiscordWebhook(webhook)
-            embed = DiscordEmbed(title='Successful Checkout 🚀', description='', color=0x2feb61)
+            embed = DiscordEmbed(title='Successful Checkout :rocket:', description='', color=0x2feb61)
             embed.set_footer(text='VenetiaIO CLI')
             embed.set_timestamp()
     
@@ -50,7 +50,7 @@ class discord:
 
         try:
             webhookPublic = DiscordWebhook(publicWebhook)
-            embed2 = DiscordEmbed(title='User Checkout 🚀', description='', color=0x2feb61)
+            embed2 = DiscordEmbed(title='User Checkout :rocket:', description='', color=0x2feb61)
             embed2.set_footer(text='VenetiaIO CLI')
             embed2.set_timestamp()
     
