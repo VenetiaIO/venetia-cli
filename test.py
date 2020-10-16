@@ -1,16 +1,30 @@
-from utils.adyen import adyen
-import datetime
+from bs4 import BeautifulSoup
+text = ["""<li data-sizecm="23.0" data-sizeeu="35.5" data-sizeuk="3.5" data-sizeus="4.0" data-value="4.0">
+35.5
+<span class="product__available__pink">Pospiesz się, została tylko 1 sztuka</span>
+</li>""", """<li data-sizecm="23.5" data-sizeeu="36.5" data-sizeuk="4.0" data-sizeus="4.5" data-value="4.5">
+36.5
+<span class="product__available__pink">Pospiesz się, została tylko 1 sztuka</span>
+</li>""", """<li data-sizecm="23.5" data-sizeeu="37.5" data-sizeuk="4.5" data-sizeus="5.0" data-value="5.0">
+37.5
+<span class="product__available__pink">Pospiesz się, została tylko 1 sztuka</span>
+</li>""", """<li data-sizecm="24.0" data-sizeeu="38.5" data-sizeuk="5.5" data-sizeus="6.0" data-value="6.0">
+38.5
+<span class="product__available__pink">Pospiesz się, zostały tylko 2 sztuki</span>
+</li>""", """<li data-sizecm="24.5" data-sizeeu="39.0" data-sizeuk="6.0" data-sizeus="6.5" data-value="6.5">
+39.0
+<span class="product__available__pink">Pospiesz się, została tylko 1 sztuka</span>
+</li>""", """<li data-sizecm="26.5" data-sizeeu="42.0" data-sizeuk="7.5" data-sizeus="8.5" data-value="8.5">
+42.0
+<span class="product__available__pink">Pospiesz się, została tylko 1 sztuka</span>
+</li>""", """<li data-sizecm="27.0" data-sizeeu="42.5" data-sizeuk="8.0" data-sizeus="9.0" data-value="9.0">
+42.5
+<span class="product__available__pink">Pospiesz się, została tylko 1 sztuka</span>
+</li>""", """<li data-sizecm="27.5" data-sizeeu="43.0" data-sizeuk="8.5" data-sizeus="9.5" data-value="9.5">
+43.0
+<span class="product__available__pink">Pospiesz się, zostały tylko 2 sztuki</span>
+</li>"""]
 
-data = {
-    "number":"4659431562822885",
-    "cvc":"273",
-    "holderName":"Charlie Bottomley",
-    "expiryMonth":"08",
-    "expiryYear":"2021",
-    "generationtime":datetime.datetime.now().isoformat()
-}
-print(data)
-
-key = '10001|C968272F6E7CDEEF08BFC02691A7801D7138C08A7752382F439AB4DC06BD13C0EF9F0D25DF71C50A1A24FB8E4824D5DF18887DA7CD0D864CC521EC75AB8601C1C3476DC16FFEC7BF405543A2221676A3A7A4F8833CE31553C52F7F2344E37D63A535E279A0D9A4072BBE89E7154AD6751948B3D7762DDF3304ED57466DC8B880665EA8725FC29518ED97FBB3B5C085F4A59CEF25EA47E0AF3B54FE0C6B264E5D7AB2003486B8F38D7C9784E8065B4922EA86E3108C2805723B7EAC77F7FF6EF8F0C12529511251C6073C3AE3D0CAE4AC469CB333E6DFED82B7358510B05A4113BFF392761F9587E0D71BE94856E432135F8145A1EE07758F42A0ED37D9FCD123'
-
-encrypted = adyen.encrypt_0_1_16(data, key)
+for s in text:
+    soup = BeautifulSoup(s,"html.parser")
+    print(soup.find('li')["data-sizeeu"])

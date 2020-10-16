@@ -31,9 +31,11 @@ def loadSettings():
 
 
 def loadProfile(profile):
-    with open(f'./data/profiles/profile_{profile}.json') as profile:
-        profile = json.loads(profile.read())
-        return profile
+    with open(f'./data/profiles/profiles.json') as data:
+        profiles = json.loads(data.read())
+        for p in profiles["profiles"]:
+            if p["profileName"] == profile:
+                return p
 
 def loadProxy(proxies,taskID, SITE):
     if proxies == "":

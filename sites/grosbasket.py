@@ -76,7 +76,7 @@ class GROSBASKET:
             logger.success(SITE,self.taskID,'Got product page')
             try:
                 soup = BeautifulSoup(retrieve.text, "html.parser")
-                self.productTitle = soup.find("h1", {"itemprop": "name"}).text
+                self.productTitle = soup.find("h1", {"itemprop": "name"}).text.replace('\n','')
                 self.productImage = soup.find("img", {"class": "lazy"})["src"]
                 self.attributeId = soup.find("select", {
                     "class": "required-entry super-attribute-select"})["id"].split("attribute")[1]
@@ -275,7 +275,7 @@ class GROSBASKET:
                 self.shippingMethodValue = soup.find("input",{"name":"shipping_method"})["value"]
             except Exception as e:
                 log.info(e)
-                logger.shipping('', False, SITE,self.taskID)
+                logger.error(SITE,self.taskID,'Failed to scrape shipping details. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 self.billing()
 
@@ -465,8 +465,7 @@ class GROSBASKET:
             time.sleep(int(self.task["DELAY"]))
             self.braintreeCard()
 
-        with open('request1.txt','w') as output:
-            output.write(f'{config} - {config.text}')
+
 
         headers = {
             'authority': 'payments.braintree-api.com',
@@ -506,8 +505,6 @@ class GROSBASKET:
                               headers=headers, json=data, )
         ccToken = r.json()['data']['tokenizeCreditCard']['token']
 
-        with open('request2.txt','w') as output:
-            output.write(f'{r} - {r.text}')
 
         cardinalHeaders = {
             'authority': 'centinelapi.cardinalcommerce.com',
@@ -562,8 +559,8 @@ class GROSBASKET:
         self.consumerId = payload.split('ConsumerSessionId":"')[
             1].split('"')[0]
 
-        with open('request3.txt','w') as output:
-            output.write(f'{r} - {r.text}')
+
+
 
 
         headers = {
@@ -602,75 +599,7 @@ class GROSBASKET:
         self.md = r.json()['lookup']['md']
         self.transactionId = r.json()['lookup']['transactionId']
         self.termURL = r.json()['lookup']['termUrl']
-        self.termURL = self.termURL + f'&three_d_secure_version: 3.16.0&authentication_complete_base_urlhttps://assets.braintreegateway.com/web/3.16.0/html/three-d-secure-authentication-complete-frame.html?channel={self.nonce}'
-        self.termURL = self.termURL.replace(':433','')
 
-        with open('request4.txt','w') as output:
-            output.write(f'{r} - {r.text}')
-
-
-        payload = {
-            "analytics":[
-                {
-                    "kind":"web.threedsecure.initialized",
-                    "timestamp":time.time()
-                }
-            ],
-            "braintreeLibraryVersion":"braintree/web/3.16.0",
-            "_meta":{
-                "merchantAppId":"www.grosbasket.com",
-                "platform":"web",
-                "sdkVersion":"3.16.0",
-                "source":"client",
-                "integration":"custom",
-                "integrationType":"custom",
-                "sessionId":self.sessionId
-            },
-            "authorizationFingerprint":self.fingerprint
-        }
-
-        data = {
-            "BrowserPayload": {
-                "PaymentType": "CCA",
-                "Order": {
-                    "OrderDetails": {
-                        "TransactionId": self.transactionId
-                    },
-                    "Consumer": {
-                        "BillingAddress": {},
-                        "ShippingAddress": {},
-                        "Account": {}
-                    },
-                    "Cart": [],
-                    "Token": {},
-                    "Authorization": {},
-                    "Options": {},
-                    "CCAExtension": {}
-                }
-            },
-            "Client": {
-                "Agent": "SongbirdJS",
-                "Version": "1.30.2"
-            },
-            "ConsumerSessionId": self.consumerId,
-            "ServerJWT": self.jwt
-        }
-        headers = {
-            'authority': 'centinelapi.cardinalcommerce.com',
-            'sec-fetch-dest': 'empty',
-            'x-cardinal-tid': '',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
-            'content-type': 'application/json;charset=UTF-8',
-            'accept': '*/*',
-            'origin': 'https://www.grosbasket.com',
-            'sec-fetch-site': 'cross-site',
-            'sec-fetch-mode': 'cors',
-        }
-        r = self.session.post('https://centinelapi.cardinalcommerce.com/V1/Order/JWT/Continue',
-                          headers=headers, json=data, )
-
-        with open('request5.txt','w') as output:
-            output.write(f'{r} - {r.text}')
 
 
         r = self.session.post('https://0eaf.cardinalcommerce.com/EAFService/jsp/v1/redirect',data={'PaReq':self.pareq,'MD':self.md,'TermUrl':self.termURL},headers={
@@ -687,9 +616,6 @@ class GROSBASKET:
         self.pareq = str(soup.find("input", attrs={"name": "PaReq"})['value'])
         self.md = soup.find("input", attrs={"name": "MD"})['value']
 
-        with open('request6.txt','w') as output:
-            output.write(f'{r} - {r.text}')
-
 
         headers = {
             'authority': 'verifiedbyvisa.acs.touchtechpayments.com',
@@ -703,27 +629,96 @@ class GROSBASKET:
             'sec-fetch-site': 'cross-site',
             'sec-fetch-mode': 'navigate',
         }
-        data = {'PaReq': self.pareq,
-                'TermUrl': 'https://0eaf.cardinalcommerce.com/EAFService/jsp/v1/term', 'MD': self.md}
+        data = {'PaReq': self.pareq,'TermUrl': 'https://0eaf.cardinalcommerce.com/EAFService/jsp/v1/term', 'MD': self.md}
         r = self.session.post('https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
-                              headers=headers, data=data, )
+                              headers=headers, data=data)
+        
+        print(r.text)
         soup = BeautifulSoup(r.text, 'lxml')
         self.transToken = str(soup.find_all("script")[0]).split('"')[1]
+        print(self.transToken)
 
-        try:
-            with open('request7.txt','w') as output:
-                output.write(f'{r} - {r.text}')
-        except:
-            pass
-
-        if len(self.transToken) > 70:
-            self.nonThreeDS()
-        else:
-            self.ThreeDS()
+        self.ThreeDS()
+        # if len(self.transToken) > 70:
+            # self.nonThreeDS()
+        # else:
+            # self.ThreeDS()
 
     def nonThreeDS(self):
         logger.info(SITE,self.taskID,'Initiating non 3DS checkout')
-        pass
+        
+        headers = {
+            'Connection': 'keep-alive',
+            'Cache-Control': 'max-age=0',
+            'Origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
+            'Upgrade-Insecure-Requests': '1',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+            'Sec-Fetch-Dest': 'iframe',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'Sec-Fetch-Site': 'cross-site',
+            'Sec-Fetch-Mode': 'navigate',
+        }
+        data = {'MD': self.md, 'PaRes': self.transToken}
+        r = self.session.post('https://0eaf.cardinalcommerce.com/EAFService/jsp/v1/term',
+                              headers=headers, data=data)
+
+
+        payload = {
+            'billing[address_id]': self.addressId,
+            'billing[firstname]': self.profile["firstName"],
+            'billing[lastname]': self.profile["lastName"],
+            'billing[email]': self.profile["email"],
+            'billing[telephone]': self.profile["phone"],
+            'billing[street][]': '{} {}'.format(self.profile["house"], self.profile["addressOne"]),
+            'billing[postcode]': self.profile["zip"],
+            'billing[city]': self.profile["city"],
+            'billing[country_id]': self.countryCode,
+            'billing[region_id]': '',
+            'billing[region]': self.profile["region"],
+            'shipping[same_as_billing]': 1,
+            'billing[company]': '',
+            'billing[vat_id]': '',
+            'billing[customer_password]': '',
+            'billing[confirm_password]': '',
+            'billing[save_in_address_book]': 1,
+            'billing[use_for_shipping]': 1,
+            'shipping[address_id]': self.shippingId,
+            'shipping[firstname]': self.profile["firstName"],
+            'shipping[lastname]':  self.profile["lastName"],
+            'shipping[telephone]': self.profile["phone"],
+            'shipping[street][]': '{} {}'.format(self.profile["house"], self.profile["addressOne"]),
+            'shipping[postcode]': self.profile["zip"],
+            'shipping[city]': self.profile["city"],
+            'shipping[country_id]': self.countryCode,
+            'shipping[region_id]': '',
+            'shipping[region]': '',
+            'shipping[company]': '',
+            'shipping[vat_id]': '',
+            'shipping[save_in_address_book]': 1,
+            'shipping_method': self.shippingMethodValue,
+            'coupon[remove]': 0,
+            'coupon[code]': '',
+            'order-comment': '',
+            'payment[method]': 'gene_braintree_creditcard',
+            'payment[payment_method_nonce]':self.nonce,
+            self.cartSafe: 1,
+            self.cartQty: 1,
+            'payment[device_data]': {"device_session_id": ""},
+            'agreement[3]': 1
+        }
+    
+        try:
+            postSaveOrder = self.session.post(f'https://www.grosbasket.com/{self.region}/firecheckout/index/saveOrder/form_key/{self.formKey}',data=payload,headers={
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+                'accept': 'text/javascript, text/html, application/xml, text/xml, */*'
+            })
+        except:
+            logger.error(SITE,self.taskID,'Connection Error. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            self.nonThreeDS()
+
 
     def ThreeDS(self):
         logger.info(SITE,self.taskID,'Initiating 3DS checkout')
@@ -782,9 +777,6 @@ class GROSBASKET:
         r = self.session.post('https://poll.touchtechpayments.com/poll',
                               headers=headers, data=data, )
         
-        with open('request3DS-1.txt','w') as output:
-            output.write(f'{r} - {r.text}')
-
 
         if r.json()["status"] == "blocked":
             logger.cardError('', True, SITE, 'Card Blocked',self.taskID)
@@ -796,17 +788,13 @@ class GROSBASKET:
 
         authToken = r.json()['authToken']
         logger.alert(SITE,self.taskID,'3DS Authorised')
-        with open('request3DS-2.txt','w') as output:
-            output.write(f'{r} - {r.text}')
 
 
         data = '{"transToken":"%s","authToken":"%s"}' % (
             self.transToken, authToken)
         r = self.session.post("https://macs.touchtechpayments.com/v1/confirmTransaction",
                               headers=headers, data=data, )
-        
-        with open('request3DS-3.txt','w') as output:
-            output.write(f'{r} - {r.text}')
+
 
 
         pares = r.json()['Response']
@@ -828,8 +816,7 @@ class GROSBASKET:
         r = self.session.post('https://0eaf.cardinalcommerce.com/EAFService/jsp/v1/term',
                               headers=headers, data=data, )
         
-        with open('request3DS-4.txt','w') as output:
-            output.write(f'{r} - {r.text}')
+
 
         headers = {
             'authority': 'centinelapi.cardinalcommerce.com',
@@ -846,9 +833,6 @@ class GROSBASKET:
         data = {'PaRes': pares, 'MD': self.consumerId}
         r = self.session.post('https://centinelapi.cardinalcommerce.com/V1/TermURL/Overlay/CCA',
                               headers=headers, data=data, )
-
-        with open('request3DS-5.txt','w') as output:
-            output.write(f'{r} - {r.text}')
 
 
         soup = BeautifulSoup(r.text, 'lxml')
@@ -895,9 +879,6 @@ class GROSBASKET:
 
         print(self.termURL)
         r = self.session.post(self.termURL,headers=headers,data={'MD': self.md, 'PaRes': pares})
-
-        with open('request3DS-6.txt','w') as output:
-            output.write(f'{r} - {r.text}')
 
 
         #r = self.session.get('https://assets.braintreegateway.com/web/3.16.0/html/three-d-secure-authentication-complete-frame.html')
@@ -958,8 +939,7 @@ class GROSBASKET:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.saveOrder()
 
-        with open('request3DS-8.txt','w') as output:
-            output.write(f'{postSaveOrder} - {postSaveOrder.text}')
+
 
         
         print(postSaveOrder.json())
