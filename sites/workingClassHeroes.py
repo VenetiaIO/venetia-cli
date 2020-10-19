@@ -635,7 +635,6 @@ class WCH:
                                 time.sleep(int(self.task["DELAY"]))
                                 self.card()
 
-                            print(productData)
                             
         
                             try:

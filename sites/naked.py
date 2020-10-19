@@ -16,6 +16,7 @@ import string
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
+from utils.captcha import captcha
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies)
 SITE = 'NAKED'
 
@@ -46,7 +47,11 @@ class NAKED:
         )
         
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+        self.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/603.1.23 (KHTML, like Gecko) Version/10.0 Mobile/14E5239e Safari/602.1'
 
+        self.session.headers.update({
+            'User-Agent':self.userAgent
+        })
         self.collect()
 
     def collect(self):
@@ -69,7 +74,7 @@ class NAKED:
                 self.antiCsrf = self.session.cookies["AntiCsrfToken"]
                 self.productTitle = soup.find('title').text
                 self.productPrice = soup.find('meta',{'property':'og:price'})["content"]
-                self.productImage = 'https://www.nakedcph.com/' + soup.find_all('img',{'class':'lazyload'})[0]['src']
+                self.productImage = 'https://www.nakedcph.com/' + soup.find_all('img',{'class':'lazyload'})[0]['data-href']
     
                 foundSizes = soup.find('select',{'id':'product-form-select'})
                 if foundSizes:
@@ -122,22 +127,65 @@ class NAKED:
                self.collect()
 
 
-            self.addToCart()
+            if self.task["ACCOUNT EMAIL"] == "":
+                self.addToCart()
+            else:
+                self.login()
         
-        if retrieve.status_code == 403:
-            logger.error(SITE,self.taskID,f'Failed to get product page => 403. Retrying...')
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
 
-        else:
+
+        elif retrieve.status_code != 200:
             try:
                 status = retrieve.status_code
             except:
                 status = 'Unknown'
             logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
             time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.collect()
+
+    def login(self):
+        logger.prepare(SITE,self.taskID,'Preparing login...')
+        captchaResponse = loadToken(SITE)
+        if captchaResponse == "empty":
+            captchaResponse = captcha.v2('6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo',self.task["PRODUCT"],self.session.proxies,SITE,self.taskID)
+
+        payload = {
+            '_AntiCsrfToken': self.antiCsrf,
+            'email': self.task["ACCOUNT EMAIL"],
+            'password': self.task["ACCOUNT PASSWORD"],
+            'g-recaptcha-response':captchaResponse,
+            'action':'login'
+        }
+
+
+        try:
+            login = self.session.post('https://www.nakedcph.com/en/auth/submit', data=payload,headers={
+                'Accept': '*/*',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Accept-Language': 'en-US,en;q=0.9,it;q=0.8',
+                'Referer': 'https://www.nakedcph.com/en/auth/view',
+                'User-Agent': self.userAgent,
+                'X-Requested-With': 'XMLHttpRequest'
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            self.login()
+
+        # self.session.debugRequest(login)
+
+
+        if login.status_code == 200 and login.json()["Response"]["Success"] == True:
+            logger.success(SITE,self.taskID,'Successfully logged in')
+            self.addToCart()
+        else:
+            logger.error(SITE,self.taskID,'Failed to login. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.login()
+
 
     def addToCart(self):
         logger.prepare(SITE,self.taskID,'Carting Product...')
@@ -152,7 +200,8 @@ class NAKED:
                 'accept': '*/*',
                 'referer': self.task["PRODUCT"],
                 'x-requested-with': 'XMLHttpRequest',
-                'x-anticsrftoken':self.antiCsrf
+                'x-anticsrftoken':self.antiCsrf,
+                'User-Agent':self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)
@@ -197,7 +246,8 @@ class NAKED:
                 'accept': '*/*',
                 'referer': 'https://www.nakedcph.com/en/cart/view',
                 'x-requested-with': 'XMLHttpRequest',
-                'x-anticsrftoken':self.antiCsrf
+                'x-anticsrftoken':self.antiCsrf,
+                'User-Agent':self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)
@@ -223,7 +273,8 @@ class NAKED:
                     'accept': '*/*',
                     'referer': 'https://www.nakedcph.com/en/cart/view',
                     'x-requested-with': 'XMLHttpRequest',
-                    'x-anticsrftoken':self.antiCsrf
+                    'x-anticsrftoken':self.antiCsrf,
+                    'User-Agent':self.userAgent
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
                 log.info(e)
@@ -254,7 +305,8 @@ class NAKED:
                 'accept': '*/*',
                 'referer': 'https://www.nakedcph.com/en/cart/view',
                 'x-requested-with': 'XMLHttpRequest',
-                'x-anticsrftoken':self.antiCsrf
+                'x-anticsrftoken':self.antiCsrf,
+                'User-Agent':self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)
@@ -295,7 +347,8 @@ class NAKED:
             processP = self.session.post('https://www.nakedcph.com/en/cart/process', data=payload, headers={
                 'referer': 'https://www.nakedcph.com/en/cart/view',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'content-type': 'application/x-www-form-urlencoded'
+                'content-type': 'application/x-www-form-urlencoded',
+                'User-Agent':self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)
@@ -435,7 +488,8 @@ class NAKED:
             getPaypal = self.session.post('https://live.adyen.com/hpp/redirectPayPal.shtml', data=adyenForm, headers={
                 'Referer': self.referer,
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'content-type': 'application/x-www-form-urlencoded'
+                'content-type': 'application/x-www-form-urlencoded',
+                'User-Agent':self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)

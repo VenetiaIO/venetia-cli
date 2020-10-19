@@ -27,6 +27,14 @@ from sites.bstn import BSTN
 from sites.overkill import OVERKILL
 from sites.awlab import AWLAB
 from sites.einhalb import EINHALB
+from sites.chmielna import CHMIELNA
+from sites.workingClassHeroes import WCH
+from sites.naked import NAKED
+from sites.footdistrict import FOOTDISTRICT
+from sites.prodirect import PRODIRECT
+from sites.disney import DISNEY
+from sites.cornerstreet import CORNERSTREET
+
 
 sites = {
     "SVD":SVD,
@@ -40,7 +48,16 @@ sites = {
     "SCHUH":SCHUH,
     "SLAMJAM":SLAMJAM,
     "AWLAB":AWLAB,
-    "EINHALB":EINHALB
+    #"EINHALB":EINHALB,
+    #"STARCOW":STARCOW,
+    "CHMIELNA20":CHMIELNA,
+    "WCH":WCH,
+    "NAKED":NAKED,
+    #"FOOTDISTRICT":FOOTDISTRICT,
+    "PRODIRECT":PRODIRECT,
+    "DISNEY":DISNEY,
+    "CORNERSTREET":CORNERSTREET
+
 }
 
 class EndpointAction(object):

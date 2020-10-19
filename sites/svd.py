@@ -30,7 +30,7 @@ class SVD:
 
     def collect(self):
         try:
-            url = '{}{}'.format(self.task["PRODUCT"],f"%253F_={randomString(20)}")
+            url = '{}{}'.format(self.task["PRODUCT"],f"#%253F_={randomString(20)}")
             retrieve = self.session.get(url,headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',

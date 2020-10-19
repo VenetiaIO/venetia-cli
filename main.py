@@ -24,7 +24,7 @@ click.echo = echo
 click.secho = secho
 
 
-VERSION  = '0.3.6'
+VERSION  = '0.3.7'
 os.system("title VenetiaIO CLI [Version {}]".format(VERSION))
 
 #sites
@@ -49,6 +49,9 @@ from sites.chmielna import CHMIELNA
 from sites.workingClassHeroes import WCH
 from sites.naked import NAKED
 from sites.footdistrict import FOOTDISTRICT
+from sites.prodirect import PRODIRECT
+from sites.disney import DISNEY
+from sites.cornerstreet import CORNERSTREET
 
 #utils
 from utils.quicktask import QT
@@ -58,6 +61,7 @@ from utils.accounts import ACCOUNTS
 from utils.auth import auth
 from utils.datadome import datadome
 from utils.ascii import logo
+from utils.updates import Updater
 
 sites = {
     "SVD":SVD,
@@ -73,10 +77,14 @@ sites = {
     "AWLAB":AWLAB,
     #"EINHALB":EINHALB,
     #"STARCOW":STARCOW,
-    #"CHMIELNA20":CHMIELNA,
+    "CHMIELNA20":CHMIELNA,
     "WCH":WCH,
     "NAKED":NAKED,
-    #"FOOTDISTRICT":FOOTDISTRICT
+    #"FOOTDISTRICT":FOOTDISTRICT,
+    "PRODIRECT":PRODIRECT,
+    #"DISNEY":DISNEY,
+    #"CORNERSTREET":CORNERSTREET
+
 }
 
 
@@ -97,6 +105,7 @@ def clearTokens():
     data['TITOLO'] = []
     data['BSTN'] = []
     data['HOLYPOP'] = []
+    data['NAKED'] = []
     with open('./data/captcha/tokens.json','w') as tokenFile:
         json.dump(data,tokenFile)
     return 'complete'
@@ -114,8 +123,28 @@ def checkTasks(site):
     elif len(tasks) == 0:
         return False
 
+def checkUpdate():
+    status = Updater.checkForUpdate(VERSION)
+    if status["error"] == False:
+        if status["latest"] == True:
+            logger.menu('VENETIA','Menu','{}'.format(colored(f'You are on the latest version! {VERSION}','green', attrs=["bold"])))
+            return True
+        if status["latest"] == False:
+            logger.menu('VENETIA','Menu','{}'.format(colored(f'Updating...','magenta', attrs=["bold"])))
+            download = Updater.downloadLatest(status["version"])
+            if download == "complete":
+                logger.menu('VENETIA','Menu','{}'.format(colored(f'Update complete. Please delete the old file named "venetiaCLI_old.exe" and open the new one name "venetiaCLI.exe"','cyan', attrs=["bold"])))
+            else:
+                logger.menu('VENETIA','Menu','{}'.format(colored('Failed to download latest version. Please try again later.','red', attrs=["bold"])))
+    if status["error"] == True:
+        logger.menu('VENETIA','Menu','{}'.format(colored('Failed to check version. Retrying...','red', attrs=["bold"])))
+        time.sleep(10)
+        checkUpdate()
+
 class Menu:
     def __init__(self):
+        checkUpdate()
+
         threading.Thread(target=QT,daemon=True).start()
         
         try:
@@ -160,12 +189,7 @@ class Menu:
         except:
             pass
 
-        #logger.error('VENETIA','Menu','                 Welcome To...                   ')
-        #logger.alert('VENETIA','Menu',' _    __                __  _          ________    ____')
-        #logger.alert('VENETIA','Menu','| |  / /__  ____  ___  / /_(_)___ _   / ____/ /   /  _/')
-        #logger.alert('VENETIA','Menu','| | / / _ \/ __ \/ _ \/ __/ / __ `/  / /   / /    / /  ')
-        #logger.alert('VENETIA','Menu','| |/ /  __/ / / /  __/ /_/ / /_/ /  / /___/ /____/ /   ')
-        #logger.alert('VENETIA','Menu','|___/\___/_/ /_/\___/\__/_/\__,_/   \____/_____/___/  {}'.format(colored(VERSION,'magenta',attrs=["bold"])))
+     
         print('                 Welcome To...                  ')
         logger.logo(logo,VERSION)
         logger.menu('VENETIA','Menu','{}'.format(colored(f'Key Authorised','green', attrs=["bold"])))
@@ -174,10 +198,11 @@ class Menu:
         logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('View Config','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('Edit Config','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('5','red', attrs=["bold"]), colored('Create Profile','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('6','red', attrs=["bold"]), colored('Generate Captchas','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('7','red', attrs=["bold"]), colored('Account Gen','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('8','red', attrs=["bold"]), colored('Cookie Gen','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('9','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('6','red', attrs=["bold"]), colored('View|Edit Profiles','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('7','red', attrs=["bold"]), colored('Generate Captchas','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('8','red', attrs=["bold"]), colored('Account Gen','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('9','red', attrs=["bold"]), colored('Cookie Gen','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('10','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
         #sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
         sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
         try:
@@ -211,7 +236,7 @@ class Menu:
                     availableSites[row] = sites[row]
 
             for s in availableSites:
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored(number,'red', attrs=["bold"]), colored(s,'red', attrs=["bold"])))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored(number,'red', attrs=["bold"]), colored(s.title(),'red', attrs=["bold"])))
                 number = number + 1
             
 
@@ -351,49 +376,40 @@ class Menu:
                 self.RPC.update(large_image="image", state=f"Version {VERSION}", details='Creating Profiles...', start=self.rpctime,small_image="image",small_text="@venetiaIO")
             except:
                 pass
-            profile = {}
 
-            profileName = input(f"[{get_time()}] Profile Name ==> ")
+            with open(f'./data/profiles/profiles.json','r') as profileRead:
+                profiles = json.loads(profileRead.read())
             
 
-            profile["firstName"] = input(f"[{get_time()}] First Name ==> ")
+            profileName = input(f"[{get_time()}] Profile Name ==> ")
 
-            profile["lastName"] = input(f"[{get_time()}] Last Name ==> ")
+            
+            profiles["profiles"].append({
+                "profileName":profileName,
+                "firstName":input(f"[{get_time()}] First Name ==> "),
+                "lastName":input(f"[{get_time()}] Last Name ==> "),
+                "email":input(f"[{get_time()}] Email ==> "),
+                "phonePrefix":input(f"[{get_time()}] Phone Prefix (example: +44) ==> "),
+                "phone": input(f"[{get_time()}] Phone ==> "),
+                "house":input(f"[{get_time()}] House (Number / Name ) ==> "),
+                "addressOne":input(f"[{get_time()}] Address 1 ==> "),
+                "addressTwo":input(f"[{get_time()}] Address 2 ==> "),
+                "city":input(f"[{get_time()}] City ==> "),
+                "region":input(f"[{get_time()}] Region/Province/State ==> "),
+                "country":input(f"[{get_time()}] Country (example: United Kingdom) ==> "),
+                "countryCode":input(f"[{get_time()}] Country Code (example: GB) ==> "),
+                "zip":input(f"[{get_time()}] Zipcode/Postcode ==> "),
+                "card":{
+                    "cardNumber":input(f"[{get_time()}] Card Number ==> "),
+                    "cardMonth": input(f"[{get_time()}] Card Expiry Month (example: 8) ==> "),
+                    "cardYear":input(f"[{get_time()}] Card Expiry Year (example: 2024) ==> "),
+                    "cardCVV":input(f"[{get_time()}] Card CVV/CVC ==> ")
+                }
+            })
 
-            profile["email"] = input(f"[{get_time()}] Email ==> ")
 
-            profile["phonePrefix"] = input(f"[{get_time()}] Phone Prefix (example: +44) ==> ")
-
-            profile["phone"] = input(f"[{get_time()}] Phone ==> ")
-
-            profile["house"] = input(f"[{get_time()}] House (Number / Name ) ==> ")
-
-            profile["addressOne"] = input(f"[{get_time()}] Address 1 ==> ")
-
-            profile["addressTwo"] = input(f"[{get_time()}] Address 2 ==> ")
-
-            profile["city"] = input(f"[{get_time()}] City ==> ")
-
-            profile["region"] = input(f"[{get_time()}] Region/Province/State ==> ")
-
-            profile["country"] = input(f"[{get_time()}] Country ==> ")
-
-            profile["countryCode"] = input(f"[{get_time()}] Country Code (example: GB) ==> ")
-
-            profile["zip"] = input(f"[{get_time()}] Zipcode/Postcode ==> ")
-
-            profile['card'] = {}
-
-            profile['card']["cardNumber"] = input(f"[{get_time()}] Card Number ==> ")
-
-            profile['card']["cardMonth"] = input(f"[{get_time()}] Card Expiry Month (example: 8) ==> ")
-
-            profile['card']["cardYear"] = input(f"[{get_time()}] Card Expiry Year (example: 2024) ==> ")
-
-            profile['card']["cardCVV"] = input(f"[{get_time()}] Card CVV/CVC ==> ")
-
-            with open(f'./data/profiles/profile_{profileName}.json','w') as profileDump:
-                json.dump(profile, profileDump)
+            with open(f'./data/profiles/profiles.json','w') as profileDump:
+                json.dump(profiles, profileDump)
 
             logger.menu('VENETIA','Menu','PROFILE CREATED - {}'.format(colored(profileName,'green',attrs=["bold"])))
 
@@ -402,6 +418,237 @@ class Menu:
             self.menu()
 
         if option == 6:
+            with open(f'./data/profiles/profiles.json','r') as profileRead:
+                profiles = json.loads(profileRead.read())
+
+            num_profiles = len(profiles['profiles'])
+            index = 0
+            for p in profiles['profiles']:
+                index += 1
+                logger.menu('VENETIA','Profiles','[{}] => {}'.format(colored(index,'red', attrs=["bold"]), colored(p['profileName'],'cyan')))
+
+            logger.menu('VENETIA','Profiles','[{}] => {}'.format(colored(index + 1,'red', attrs=["bold"]), colored('RETURN TO MAIN Menu','cyan')))
+
+            sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
+            try:
+                option_profile = int(input(' Pick a profile => '))
+            except ValueError:
+                logger.error('VENETIA','Menu','Please enter a number')
+                self.menu()
+            
+            if option_profile == num_profiles + 1:
+                self.menu()
+            else:
+                selected_p = profiles['profiles'][option_profile -1]
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('PROFILE NAME','red', attrs=["bold"]), colored(selected_p['profileName'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('FIRST NAME','red', attrs=["bold"]), colored(selected_p['firstName'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('LAST NAME','red', attrs=["bold"]), colored(selected_p['lastName'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('EMAIL','red', attrs=["bold"]), colored(selected_p['email'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('PHONE PREFIX','red', attrs=["bold"]), colored(selected_p['phonePrefix'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('PHONE','red', attrs=["bold"]), colored(selected_p['phone'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('HOUSE NUMBER/NAME','red', attrs=["bold"]), colored(selected_p['house'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('ADDRESS 1','red', attrs=["bold"]), colored(selected_p['addressOne'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('ADDRESS 2','red', attrs=["bold"]), colored(selected_p['addressTwo'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CITY','red', attrs=["bold"]), colored(selected_p['city'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('REGION','red', attrs=["bold"]), colored(selected_p['region'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('COUNTRY','red', attrs=["bold"]), colored(selected_p['country'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('COUNTRY CODE','red', attrs=["bold"]), colored(selected_p['countryCode'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('ZIP/POSTCODE','red', attrs=["bold"]), colored(selected_p['zip'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CARD NUMBER','red', attrs=["bold"]), colored(selected_p['card']['cardNumber'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CARD MONTH','red', attrs=["bold"]), colored(selected_p['card']['cardMonth'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CARD YEAR','red', attrs=["bold"]), colored(selected_p['card']['cardYear'],'cyan')))
+                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CARD CVV','red', attrs=["bold"]), colored(selected_p['card']['cardCVV'],'cyan')))
+
+                sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
+                option_edit_prof = input(' Edit Profile? Y/N => ')
+
+                if option_edit_prof.lower() == "y":
+                    with open(f'./data/profiles/profiles.json','r') as profileRead:
+                        profiles = json.loads(profileRead.read())
+            
+
+                    print(colored(f"[{get_time()}] Configure Config Below (Leave blank to leave unchanged) ", "red",attrs=['bold']))
+                    for p in profiles['profiles']:
+                        if p['profileName'] == selected_p['profileName']:
+                            profileName =  input(f"[{get_time()}] Profile Name ==> ")
+                            if profileName == "":
+                                try:
+                                    profileName = p['profileName']
+                                except:
+                                    profileName = ""
+                            else:
+                                p['profileName'] = profileName
+
+                            firtn =  input(f"[{get_time()}] First Name ==> ")
+                            if firtn == "":
+                                try:
+                                    firtn = p['firstName']
+                                except:
+                                    firtn = ""
+                            else:
+                                p['firstName'] = firtn
+
+                            lastn =  input(f"[{get_time()}] Last Name ==> ")
+                            if lastn == "":
+                                try:
+                                    lastn = p['lastName']
+                                except:
+                                    lastn = ""
+                            else:
+                                p['lastName'] = lastn
+
+                            email =  input(f"[{get_time()}] Email ==> ")
+                            if email == "":
+                                try:
+                                    email = p['email']
+                                except:
+                                    email = ""
+                            else:
+                                p['email'] = email
+
+                            prefix =  input(f"[{get_time()}] Phone Prefix (example: +44) ==> ")
+                            if prefix == "":
+                                try:
+                                    prefix = p['phonePrefix']
+                                except:
+                                    prefix = ""
+                            else:
+                                p['phonePrefix'] = prefix
+
+                            phone =  input(f"[{get_time()}] Phone ==> ")
+                            if phone == "":
+                                try:
+                                    phone = p['phone']
+                                except:
+                                    phone = ""
+                            else:
+                                p['phone'] = phone
+
+                            house =  input(f"[{get_time()}] House (Number / Name ) ==> ")
+                            if house == "":
+                                try:
+                                    house = p['house']
+                                except:
+                                    house = ""
+                            else:
+                                p['house'] = house
+
+                            add1 =  input(f"[{get_time()}] Address 1 ==> ")
+                            if add1 == "":
+                                try:
+                                    add1 = p['addressOne']
+                                except:
+                                    add1 = ""
+                            else:
+                                p['addressOne'] = add1
+
+                            add2 =  input(f"[{get_time()}] Address 2 ==> ")
+                            if add2 == "":
+                                try:
+                                    add2 = p['addressTwo']
+                                except:
+                                    add2 = ""
+                            else:
+                                p['addressTwo'] = add2
+                                    
+                            city =  input(f"[{get_time()}] City ==> ")
+                            if city == "":
+                                try:
+                                    city = p['city']
+                                except:
+                                    city = ""
+                            else:
+                                p['city'] = city
+
+                            region =  input(f"[{get_time()}] Region/Province/State ==> ")
+                            if region == "":
+                                try:
+                                    region = p['region']
+                                except:
+                                    region = ""
+                            else:
+                                p['region'] = region
+
+                            country =  input(f"[{get_time()}] Country (example: United Kingdom) ==> ")
+                            if country == "":
+                                try:
+                                    country = p['country']
+                                except:
+                                    country = ""
+                            else:
+                                p['country'] = country
+                            
+                            countryC =  input(f"[{get_time()}] Country Code (example: GB) ==> ")
+                            if countryC == "":
+                                try:
+                                    countryC = p['countryCode']
+                                except:
+                                    countryC = ""
+                            else:
+                                p['countryCode'] = countryC
+
+                            zip =  input(f"[{get_time()}] Zipcode/Postcode ==> ")
+                            if zip == "":
+                                try:
+                                    zip = p['zip']
+                                except:
+                                    zip = ""
+                            else:
+                                p['zip'] = zip
+
+                            cn =  input(f"[{get_time()}] Card Number ==> ")
+                            if cn == "":
+                                try:
+                                    cn = p['card']['cardNumber']
+                                except:
+                                    cn = ""
+                            else:
+                                p['card']['cardNumber'] = cn
+
+                            expm =  input(f"[{get_time()}] Card Expiry Month (example: 8) ==> ")
+                            if expm == "":
+                                try:
+                                    expm = p['card']['cardMonth']
+                                except:
+                                    expm = ""
+                            else:
+                                p['card']['cardMonth'] = expm
+
+                            expy =  input(f"[{get_time()}] Card Expiry Year (example: 2024) ==> ")
+                            if expy == "":
+                                try:
+                                    expy = p['card']['cardYear']
+                                except:
+                                    expy = ""
+                            else:
+                                p['card']['cardYear'] = expy
+
+                            cvv =  input(f"[{get_time()}] Card CVV/CVC ==> ")
+                            if cvv == "":
+                                try:
+                                    cvv = p['card']['cardCVV']
+                                except:
+                                    cvv = ""
+                            else:
+                                p['card']['cardCVV'] = cvv
+                            
+                            
+
+        
+                    with open(f'./data/profiles/profiles.json','w') as profileDump2:
+                        json.dump(profiles, profileDump2)
+        
+                    logger.menu('VENETIA','Menu','PROFILE Updated - {}'.format(colored(profileName,'green',attrs=["bold"])))
+        
+                    sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
+                    option = input(' [ENTER] TO RETURN TO Menu ')
+                    self.menu()
+                else:
+                    self.menu()
+
+            
+
+        if option == 7:
             print('[{}] Would you like to clear current captcha tokens ?   Y | N'.format(colored(get_time(),'red',attrs=['bold'])))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             cleartokenQuestion = input(' Pick an option => ')
@@ -413,7 +660,7 @@ class Menu:
 
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('TITOLO','cyan')))
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
-            #logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('BSTN','cyan')))
+            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('NAKED','cyan')))
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             CaptchasiteSelect = input(' Select a site => ')
@@ -426,9 +673,9 @@ class Menu:
                 siteKey = '6Lc8GBUUAAAAAKMfe1S46jE08TvVKNSnMYnuj6HN'
                 siteName = 'HOLYPOP'
             if CaptchasiteSelect == "3":
-                siteUrl = 'https://www.bstn.com/'
-                siteKey = '6Le9G8cUAAAAANrlPVYknZGUZw8lopZAqe8_SfRQ'
-                siteName = 'BSTN'
+                siteUrl = 'https://www.nakedcph.com/'
+                siteKey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
+                siteName = 'NAKED'
             if CaptchasiteSelect == "4":
                 self.menu()
 
@@ -449,7 +696,7 @@ class Menu:
             if threading.active_count() == 2:
                 self.menu()
 
-        if option == 7:
+        if option == 8:
             logger.menu('VENETIA','ACCOUNTS','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
             logger.menu('VENETIA','ACCOUNTS','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
@@ -481,7 +728,7 @@ class Menu:
             if threading.active_count() == 2:
                 self.menu()
         
-        if option == 8:
+        if option == 9:
             # self.menu()
             
             #logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('COURIR','cyan')))
@@ -519,7 +766,7 @@ class Menu:
             if threading.active_count() == 2:
                 self.menu()
 
-        if option == 9:
+        if option == 10:
             logger.menu('VENETIA','Menu','{}'.format(colored('Goodbye...','yellow', attrs=["bold"])))
             time.sleep(3)
             os._exit(0)
