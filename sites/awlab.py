@@ -304,6 +304,8 @@ class AWLAB:
             logger.success(SITE,self.taskID,'Successfully submitted shipping')
             if self.task["PAYMENT"].lower() == "paypal":
                 self.paypal()
+            if self.task["PAYMENT"].lower() == "cad":
+                self.cad()
             elif self.task["PAYMENT"].lower() == "card":
                 self.card()
         else:
@@ -408,6 +410,81 @@ class AWLAB:
                 pass
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout link. Retrying...')
             self.paypal()
+
+
+    def cad(self):
+        logger.info(SITE,self.taskID,'Starting [CAD] checkout...')
+        profile = loadProfile(self.task["PROFILE"])
+
+    
+        payload = {
+            'dwfrm_billing_save': 'true',
+            'dwfrm_billing_billingAddress_addressId': 'guest-shipping',
+            'dwfrm_billing_billingAddress_addressFields_isValidated': 'true',
+            'dwfrm_billing_billingAddress_addressFields_firstName': profile["firstName"],
+            'dwfrm_billing_billingAddress_addressFields_lastName': profile["lastName"],
+            'dwfrm_billing_billingAddress_addressFields_address1': '{} {}, {}'.format(profile["house"], profile["addressOne"], profile["addressTwo"]),
+            'dwfrm_billing_billingAddress_addressFields_postal': profile["zip"],
+            'dwfrm_billing_billingAddress_addressFields_city': profile["city"],
+            'dwfrm_billing_billingAddress_addressFields_states_state': self.stateID,
+            'dwfrm_billing_billingAddress_addressFields_country': profile["countryCode"],
+            'dwfrm_billing_billingAddress_invoice_accountType': 'private',
+            'dwfrm_billing_couponCode': '',
+            'dwfrm_billing_paymentMethods_creditCard_encrypteddata': '',
+            'dwfrm_billing_paymentMethods_creditCard_type': '',
+            'dwfrm_adyPaydata_brandCode': '',
+            'noPaymentNeeded': 'true',
+            'dwfrm_billing_paymentMethods_creditCard_selectedCardID': '',
+            'dwfrm_billing_paymentMethods_selectedPaymentMethodID': 'CASH_ON_DELIVERY',
+            'dwfrm_billing_billingAddress_personalData': 'true',
+            'dwfrm_billing_billingAddress_tersmsOfSale': 'true',
+            'csrf_token': self.csrf
+        }
+
+        try:
+            payment = self.session.post(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/COBilling-Billing', data=payload, headers={
+                'accept-language': 'en-US,en;q=0.9',
+                'origin': f'https://{self.awlabRegion}',
+                'referer':f'https://{self.awlabRegion}/billing',
+                'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'x-requested-with': 'XMLHttpRequest',
+                'accept':'*/*',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            self.card()
+
+        if payment.status_code in [200,302]:
+            self.end = time.time() - self.start
+            logger.alert(SITE,self.taskID,'Checkout complete!')
+            
+            try:
+                discord.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod="Card",
+                    profile=self.task["PROFILE"],
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
+                )
+                while True:
+                    pass
+            except:
+                pass
+        else:
+            logger.error(SITE,self.taskID,'Checkout Failed. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.cad()
+
 
     
     def card(self):
@@ -611,7 +688,7 @@ class AWLAB:
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                         self.card()
 
-                    if confirm.status_code == 200 and "orderconfirmed" in confirm.url:
+                    if confirm.status_code == 200 and "orderconfirmed" in confirm.url or "riepilogoordine" in confirm.url:
                         self.end = time.time() - self.start
                         logger.alert(SITE,self.taskID,'Checkout complete!')
             

@@ -1,6 +1,7 @@
 import requests
 import shutil
 import os
+import sys
 
 class Updater:
     @staticmethod
@@ -17,7 +18,11 @@ class Updater:
     @staticmethod
     def downloadLatest(VERSION):
         #print(os.path.realpath(__file__))
-        os.rename('venetiCLI.exe', 'venetiaCLI_old.exe')
+        for file in os.listdir(os.getcwd()):
+            print(file)
+            if 'venetia' in file.lower():
+                name = file.split('.exe')[0]
+                os.rename(file, f'{name}_old.exe')
         response = requests.get('https://venetiacli.io/venetia-cli-latest/download',stream=True)
         with open(f'venetiaCLI.exe', 'wb') as f:
             shutil.copyfileobj(response.raw, f)
