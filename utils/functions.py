@@ -18,11 +18,11 @@ from utils.captcha import captcha
 from helheim import helheim
 
 def injection(session, response):
-    if session.is_New_IUAM_Challenge(response):
+    if session.is_New_IUAM_Challenge(response) \
+    or session.is_New_Captcha_Challenge(response):
         return helheim('2044b982-151b-4fca-974d-ebad6fd10bec', session, response)
     else:
         return response
-
 
 def loadSettings():
     with open(f'./data/config.json') as settings:

@@ -61,6 +61,7 @@ from utils.accounts import ACCOUNTS
 from utils.auth import auth
 from utils.datadome import datadome
 from utils.ascii import logo
+from utils.updates import Updater
 
 sites = {
     "SVD":SVD,
@@ -104,6 +105,7 @@ def clearTokens():
     data['TITOLO'] = []
     data['BSTN'] = []
     data['HOLYPOP'] = []
+    data['NAKED'] = []
     with open('./data/captcha/tokens.json','w') as tokenFile:
         json.dump(data,tokenFile)
     return 'complete'
@@ -121,8 +123,28 @@ def checkTasks(site):
     elif len(tasks) == 0:
         return False
 
+def checkUpdate():
+    status = Updater.checkForUpdate(VERSION)
+    if status["error"] == False:
+        if status["latest"] == True:
+            logger.menu('VENETIA','Menu','{}'.format(colored(f'You are on the latest version! {VERSION}','green', attrs=["bold"])))
+            return True
+        if status["latest"] == False:
+            logger.menu('VENETIA','Menu','{}'.format(colored(f'Updating...','magenta', attrs=["bold"])))
+            download = Updater.downloadLatest(status["version"])
+            if download == "complete":
+                logger.menu('VENETIA','Menu','{}'.format(colored(f'Update complete. Please delete the old file named "venetiaCLI_old.exe" and open the new one name "venetiaCLI.exe"','cyan', attrs=["bold"])))
+            else:
+                logger.menu('VENETIA','Menu','{}'.format(colored('Failed to download latest version. Please try again later.','red', attrs=["bold"])))
+    if status["error"] == True:
+        logger.menu('VENETIA','Menu','{}'.format(colored('Failed to check version. Retrying...','red', attrs=["bold"])))
+        time.sleep(10)
+        checkUpdate()
+
 class Menu:
     def __init__(self):
+        checkUpdate()
+
         threading.Thread(target=QT,daemon=True).start()
         
         try:
@@ -167,12 +189,7 @@ class Menu:
         except:
             pass
 
-        #logger.error('VENETIA','Menu','                 Welcome To...                   ')
-        #logger.alert('VENETIA','Menu',' _    __                __  _          ________    ____')
-        #logger.alert('VENETIA','Menu','| |  / /__  ____  ___  / /_(_)___ _   / ____/ /   /  _/')
-        #logger.alert('VENETIA','Menu','| | / / _ \/ __ \/ _ \/ __/ / __ `/  / /   / /    / /  ')
-        #logger.alert('VENETIA','Menu','| |/ /  __/ / / /  __/ /_/ / /_/ /  / /___/ /____/ /   ')
-        #logger.alert('VENETIA','Menu','|___/\___/_/ /_/\___/\__/_/\__,_/   \____/_____/___/  {}'.format(colored(VERSION,'magenta',attrs=["bold"])))
+     
         print('                 Welcome To...                  ')
         logger.logo(logo,VERSION)
         logger.menu('VENETIA','Menu','{}'.format(colored(f'Key Authorised','green', attrs=["bold"])))
@@ -643,7 +660,7 @@ class Menu:
 
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('TITOLO','cyan')))
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
-            #logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('BSTN','cyan')))
+            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('NAKED','cyan')))
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             CaptchasiteSelect = input(' Select a site => ')
@@ -656,9 +673,9 @@ class Menu:
                 siteKey = '6Lc8GBUUAAAAAKMfe1S46jE08TvVKNSnMYnuj6HN'
                 siteName = 'HOLYPOP'
             if CaptchasiteSelect == "3":
-                siteUrl = 'https://www.bstn.com/'
-                siteKey = '6Le9G8cUAAAAANrlPVYknZGUZw8lopZAqe8_SfRQ'
-                siteName = 'BSTN'
+                siteUrl = 'https://www.nakedcph.com/'
+                siteKey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
+                siteName = 'NAKED'
             if CaptchasiteSelect == "4":
                 self.menu()
 

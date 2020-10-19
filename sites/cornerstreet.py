@@ -208,7 +208,7 @@ class CORNERSTREET:
                 'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'accept-language': 'en-US,en;q=0.9',
                 'referer': 'https://www.cornerstreet.fr/checkout/cart/',
-                'Cookie':'frontend={}; frontend_cid={};'.format(self.frontend,self.frontend_cid)
+                'Cookie':'frontend={}; frontend_cid={}; _mcnc=1;'.format(self.frontend,self.frontend_cid)
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)
@@ -228,7 +228,7 @@ class CORNERSTREET:
                 'accept-language': 'en-US,en;q=0.9',
                 'referer': 'https://www.cornerstreet.fr/checkout/onepage/',
                 'content-type': 'application/x-www-form-urlencoded',
-                'cookie':'frontend={}; frontend_cid={};'.format(self.frontend,self.frontend_cid)
+                'cookie':'frontend={}; frontend_cid={}; _mcnc=1;'.format(self.frontend,self.frontend_cid)
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)
@@ -254,11 +254,11 @@ class CORNERSTREET:
         logger.prepare(SITE,self.taskID,'Submitting address...')
         profile = loadProfile(self.task["PROFILE"])
         try:
-            getOnepage = self.session.get('https://www.cornerstreet.fr/checkout/onepage/index',headers={
+            getOnepage = self.session.get('https://www.cornerstreet.fr/checkout/onepage',headers={
                 'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'accept-language': 'en-US,en;q=0.9',
                 'referer': 'https://www.cornerstreet.fr/checkout/onepage/',
-                'Cookie':'frontend={}; frontend_cid={};'.format(self.frontend,self.frontend_cid)
+                'Cookie':'frontend={}; frontend_cid={}; _mcnc=1;'.format(self.frontend,self.frontend_cid)
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)
@@ -267,10 +267,17 @@ class CORNERSTREET:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.billing()
 
+
+
+        print(self.session.cookies)
         self.frontend = getOnepage.headers['set-cookie'].split('frontend=')[1].split(';')[0]
         self.frontend_cid = getOnepage.headers['set-cookie'].split('frontend_cid=')[1].split(';')[0]
+        self.visitor_id = getOnepage.headers['set-cookie'].split('spm_visitor_id=')[1].split(';')[0]
+        self.tawk_uuid = getOnepage.headers['set-cookie'].split('__tawkuuid=')[1].split(';')[0]
 
-        if getOnepage.status_code == 200 and 'onepage/index' in getOnepage.url:
+        print(getOnepage,getOnepage.url)
+
+        if getOnepage.status_code == 200 and 'onepage' in getOnepage.url:
             try:
                 soup = BeautifulSoup(getOnepage.text,"html.parser")
                 self.addressId = soup.find('input',{'name':'billing[address_id]'})['value']
@@ -300,6 +307,9 @@ class CORNERSTREET:
                 'form_key': self.formKey
             }
             payloadEncoded = urlencode(payload, quote_via=quote_plus)
+            #e::cornerstreet.fr::SSIekepEYHjQB+GkHevkaeMt8qBHfun14pt2/+RnD91LyMqTpZ5C0ejGMCk0R+Y2::2	
+
+
 
             try:
                 postBilling = self.session.post('https://www.cornerstreet.fr/checkout/onepage/saveBilling/',data=payloadEncoded,headers={
@@ -308,9 +318,9 @@ class CORNERSTREET:
                     'accept-encoding': 'gzip, deflate, br',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                    'cookie': 'frontend={}; frontend_cid={};'.format(self.frontend,self.frontend_cid),
+                    'cookie': 'frontend={}; frontend_cid={}; _mcnc=1; __tawkuuid={}'.format(self.frontend,self.frontend_cid, self.visitor_id, self.tawk_uuid),
                     'origin': 'https://www.cornerstreet.fr',
-                    'referer': 'https://www.cornerstreet.fr/checkout/onepage/index/',
+                    'referer': 'https://www.cornerstreet.fr/checkout/onepage/',
                     'sec-fetch-dest': 'empty',
                     'sec-fetch-mode': 'cors',
                     'sec-fetch-site': 'same-origin',
@@ -325,10 +335,12 @@ class CORNERSTREET:
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 self.billing()
 
+
             print(postBilling.text)
 
             self.frontend = postBilling.headers['set-cookie'].split('frontend=')[1].split(';')[0]
             self.frontend_cid = postBilling.headers['set-cookie'].split('frontend_cid=')[1].split(';')[0]
+
 
 
 

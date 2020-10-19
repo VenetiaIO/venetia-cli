@@ -1,6 +1,28 @@
 {
     "profiles": [
         {
+            "profileName": "example",
+            "firstName": "charlie",
+            "lastName": "example",
+            "email": "charlie@gmail.com",
+            "phonePrefix": "+44",
+            "phone": "78874238743",
+            "house": "12",
+            "addressOne": "Street",
+            "addressTwo": "Unit HAY36",
+            "city": "London",
+            "region": "",
+            "country": "United Kingdom",
+            "countryCode": "GB",
+            "zip": "",
+            "card": {
+                "cardNumber": "",
+                "cardMonth": "",
+                "cardYear": "",
+                "cardCVV": ""
+            }
+        },
+        {
             "profileName": "black_rev",
             "firstName": "Claire",
             "lastName": "Bottomley",

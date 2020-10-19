@@ -84,3 +84,146 @@
 23:48:38,532 root ERROR SaaS -> Response -> Subscription has expired
 23:48:41,70 root ERROR SaaS -> Response -> Subscription has expired
 23:48:43,666 root ERROR SaaS -> Response -> Subscription has expired
+00:07:41,276 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+00:08:10,729 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+00:08:31,653 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+00:09:02,172 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:23:11,681 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:23:33,713 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:24:09,664 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:24:32,592 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:25:02,821 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:25:24,451 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:25:46,475 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:26:32,993 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:27:05,124 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:27:27,933 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:28:04,705 root ERROR SaaS -> Response -> [CloudflarePhaseThree] Backend Failure / Failed to Solve.
+09:28:52,110 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:29:14,211 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:32:54,213 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:33:17,397 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:33:28,633 root ERROR SaaS -> Response -> [CloudflarePhaseThree] Backend Failure / Failed to Solve.
+09:33:51,274 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:34:13,839 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:34:20,868 root ERROR SaaS -> CloudflarePhaseTwo -> Response -> Payload Format Error
+09:34:23,865 root ERROR SaaS -> setupChallenge -> Response -> Payload Format Error
+09:34:26,589 root ERROR SaaS -> setupChallenge -> Response -> Payload Format Error
+09:34:49,337 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:35:11,467 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:43:08,112 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:43:29,975 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:43:51,941 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:44:30,504 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+09:44:52,297 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+14:03:37,911 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+14:04:09,219 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:34:57,300 root ERROR name 'payloadEncoded' is not defined
+20:35:00,102 root ERROR name 'payloadEncoded' is not defined
+20:35:02,658 root ERROR name 'payloadEncoded' is not defined
+19:59:56,679 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:00:11,616 root ERROR SaaS -> Response -> [CloudflarePhaseThree] Backend Failure / Failed to Solve.
+20:00:35,196 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:00:54,589 root ERROR SaaS -> Response -> [CloudflarePhaseThree] Backend Failure / Failed to Solve.
+20:01:25,357 root ERROR SaaS -> Response -> [CloudflarePhaseThree] Backend Failure / Failed to Solve.
+20:03:10,875 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:03:35,507 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:04:08,737 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:04:31,963 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:06:21,204 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:06:52,232 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:07:15,645 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:14:31,741 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:14:54,920 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:15:17,261 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:15:48,387 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:16:11,248 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:16:35,46 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:17:09,479 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:17:32,352 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:18:05,340 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:18:45,755 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:25:46,849 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:26:21,132 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:27:20,869 root ERROR SaaS -> Response -> [hCaptchaPhaseTwo] Backend Failure.
+20:30:23,499 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+20:30:58,805 root ERROR CloudflarePhaseThree() -> POST -> ('Connection broken: IncompleteRead(9117 bytes read, 1123 more expected)', IncompleteRead(9117 bytes read, 1123 more expected))
+20:31:25,234 root ERROR CloudflarePhaseThree() -> POST -> ('Connection broken: IncompleteRead(9117 bytes read, 1123 more expected)', IncompleteRead(9117 bytes read, 1123 more expected))
+20:31:29,773 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+20:31:41,979 root ERROR CloudflarePhaseThree() -> POST -> ('Connection broken: IncompleteRead(9117 bytes read, 1123 more expected)', IncompleteRead(9117 bytes read, 1123 more expected))
+20:31:44,882 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+20:31:46,786 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+20:58:35,602 root ERROR SaaS -> Response -> [hCaptchaPhaseThree] Backend Failure.
+20:58:39,704 root ERROR ('Connection broken: IncompleteRead(9117 bytes read, 1123 more expected)', IncompleteRead(9117 bytes read, 1123 more expected))
+21:09:42,13 root ERROR ('Connection broken: IncompleteRead(8920 bytes read, 1292 more expected)', IncompleteRead(8920 bytes read, 1292 more expected))
+21:10:20,835 root ERROR SaaS -> Response -> [CloudflarePhaseThree] Backend Failure / Failed to Solve.
+21:10:25,83 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+21:10:48,423 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+21:10:54,348 root ERROR ('Connection broken: IncompleteRead(9117 bytes read, 1123 more expected)', IncompleteRead(9117 bytes read, 1123 more expected))
+21:12:01,305 root ERROR SaaS -> Response -> [hCaptchaPhaseTwo] Backend Failure.
+21:12:58,629 root ERROR SaaS -> Response -> [hCaptchaPhaseTwo] Backend Failure.
+21:13:23,97 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+21:14:26,193 root ERROR SaaS -> Response -> [hCaptchaPhaseThree] Backend Failure.
+21:14:28,377 root ERROR ('Connection broken: IncompleteRead(8920 bytes read, 1303 more expected)', IncompleteRead(8920 bytes read, 1303 more expected))
+21:14:30,853 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+21:15:07,60 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+21:15:48,236 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+21:23:45,365 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:23:52,933 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:23:55,102 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+21:24:00,278 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:24:02,193 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+21:24:12,495 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:24:19,820 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:24:25,166 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:24:26,959 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+21:24:33,818 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:24:40,303 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:25:14,732 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+21:25:16,778 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+21:25:29,582 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:25:35,78 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:25:40,948 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:25:49,861 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+21:25:52,38 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+21:26:00,555 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:26:34,282 root ERROR Orchestrate() -> GET -> HTTPSConnectionPool(host='www.nakedcph.com', port=443): Max retries exceeded with url: /cdn-cgi/challenge-platform/h/g/orchestrate/jsch/v1 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+21:26:39,939 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:26:45,588 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:26:47,405 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+21:26:57,698 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:27:04,673 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:28:00,258 root ERROR ('Connection broken: IncompleteRead(8920 bytes read, 1286 more expected)', IncompleteRead(8920 bytes read, 1286 more expected))
+21:28:04,797 root ERROR ('Connection broken: IncompleteRead(9117 bytes read, 1123 more expected)', IncompleteRead(9117 bytes read, 1123 more expected))
+21:29:09,788 root ERROR SaaS -> Response -> [hCaptchaPhaseThree] Backend Failure.
+21:30:07,585 root ERROR SaaS -> Response -> [hCaptchaPhaseTwo] Backend Failure.
+21:30:18,372 root ERROR CloudflarePhaseThree() -> POST -> ('Connection broken: IncompleteRead(9117 bytes read, 1123 more expected)', IncompleteRead(9117 bytes read, 1123 more expected))
+21:30:41,364 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+21:31:05,911 root ERROR CloudflarePhaseThree() -> POST -> ('Connection broken: IncompleteRead(9117 bytes read, 1123 more expected)', IncompleteRead(9117 bytes read, 1123 more expected))
+21:32:02,406 root ERROR SaaS -> Response -> [hCaptchaPhaseTwo] Backend Failure.
+21:32:32,11 root ERROR CloudflarePhaseTwo() -> Response -> Error -> Invalid Challenge Answer Detected
+21:34:04,491 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:34:33,983 root ERROR ('Connection broken: IncompleteRead(8920 bytes read, 1320 more expected)', IncompleteRead(8920 bytes read, 1320 more expected))
+21:35:35,396 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
+21:37:36,636 root ERROR 'src'
+21:37:38,995 root ERROR 'src'
+21:37:40,387 root ERROR 'src'
+21:37:41,710 root ERROR 'src'
+21:37:43,89 root ERROR 'src'
+21:37:44,451 root ERROR 'src'
+21:37:45,929 root ERROR 'src'
+21:37:47,734 root ERROR 'src'
+21:37:49,55 root ERROR 'src'
+21:37:50,706 root ERROR 'src'
+21:37:52,78 root ERROR 'src'
+21:37:53,419 root ERROR 'src'
+21:37:54,793 root ERROR 'src'
+21:37:56,160 root ERROR 'src'
+21:37:57,992 root ERROR 'src'
+21:55:36,501 root ERROR CloudflarePhaseThree() -> POST -> ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+21:55:43,644 root ERROR ('Connection broken: IncompleteRead(0 bytes read)', IncompleteRead(0 bytes read))
+21:56:19,998 root ERROR 'src'
+21:56:21,326 root ERROR 'src'
+21:56:22,674 root ERROR 'src'
+21:56:23,989 root ERROR 'src'
+21:56:25,943 root ERROR 'src'
