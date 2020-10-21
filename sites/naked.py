@@ -17,7 +17,7 @@ from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
 from utils.captcha import captcha
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle)
 SITE = 'NAKED'
 
 
@@ -214,6 +214,7 @@ class NAKED:
 
         if postCart:
             if postCart.status_code == 200:
+                updateConsoleTitle(True,False,SITE)
                 logger.success(SITE,self.taskID,'Successfully carted')
                 self.shipping()
             else:
@@ -233,6 +234,10 @@ class NAKED:
 
     def shipping(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         countryCode = profile["countryCode"]
 
         params = {
@@ -325,6 +330,10 @@ class NAKED:
 
     def process(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         payload = {
             '_AntiCsrfToken': self.antiCsrf,
             'country': profile["countryCode"],
@@ -501,6 +510,7 @@ class NAKED:
 
         if getPaypal.status_code in [200,302] and 'paypal' in getPaypal.url:
             self.end = time.time() - self.start
+            updateConsoleTitle(False,True,SITE)
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
 
             url = storeCookies(getPaypal.url,self.session)

@@ -7,8 +7,9 @@ import urllib.parse
 import time
 import random
 import threading
-# import cloudscraper
-from utils.cloudscraper import cloudscraper
+import win32console 
+from utils.config import VERSION
+import cloudscraper
 import base64
 from pynotifier import Notification
 from win10toast import ToastNotifier
@@ -31,21 +32,29 @@ def loadSettings():
 
 
 def loadProfile(profile):
+    profileFound = []
     with open(f'./data/profiles/profiles.json') as data:
         profiles = json.loads(data.read())
         for p in profiles["profiles"]:
             if p["profileName"] == profile:
+                profileFound.append('1')
                 return p
+    
+    if len(profileFound) == 0:
+        return None
 
 def loadProxy(proxies,taskID, SITE):
     if proxies == "":
         return None
     elif proxies != "":
-        with open(f'./data/{proxies}.txt', 'r') as proxyIn:
-            try:
-                proxyInput = proxyIn.read().splitlines()
-            except:
-                return None
+        try:
+            with open(f'./data/{proxies}.txt', 'r') as proxyIn:
+                try:
+                    proxyInput = proxyIn.read().splitlines()
+                except:
+                    return None
+        except:
+            return None
     
         if len(proxyInput) == 0:
             return None
@@ -72,6 +81,21 @@ def createId(length):
 def randomString(length):
     return ''.join(random.choice(string.ascii_lowercase) for i in range(length))
 
+def updateConsoleTitle(carted,checkedOut, SITE):
+    if carted == True:
+        title = win32console.GetConsoleTitle()
+        carted = title.split('Carted: ')[1].split(' |')[0]
+        newCarted = int(carted) + 1
+
+        checked = title.split('Checked Out: ')[1].split(' |')[0]
+        win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,SITE.title(),newCarted,checked))
+    if checkedOut == True:
+        title = win32console.GetConsoleTitle()
+        checked = title.split('Checked Out: ')[1].split(' |')[0]
+        newChecked = int(checked) + 1
+
+        carted = title.split('Carted: ')[1].split(' |')[0]
+        win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,SITE.title(),carted,newChecked))
 
 def loadCookie(SITE):
     with open('./data/cookies/datadome.json','r') as tokens:

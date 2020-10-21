@@ -18,7 +18,7 @@ from utils.webhook import discord
 from utils.log import log
 from utils.captcha import captcha
 from utils.adyen import ClientSideEncrypter
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle)
 SITE = 'PRO-DIRECT'
 
 class PRODIRECT:
@@ -204,6 +204,7 @@ class PRODIRECT:
 
         if postCart.status_code == 200 and 'successfully' in postCart.text:
             logger.success(SITE,self.taskID,'Successfully carted')
+            updateConsoleTitle(True,False,SITE)
             self.address()
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
@@ -217,6 +218,10 @@ class PRODIRECT:
 
     def address(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         logger.prepare(SITE,self.taskID,'Submitting Address...')
         try:
             addy = self.session.get('https://www.prodirectbasketball.com/accounts/Checkout.aspx?ACC=ADDR',headers={
@@ -405,6 +410,7 @@ class PRODIRECT:
         if pp.status_code in [200,302] and 'paypal' in pp.url:
             self.end = time.time() - self.start
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+            updateConsoleTitle(False,True,SITE)
 
             url = storeCookies(pp.url,self.session)
             try:

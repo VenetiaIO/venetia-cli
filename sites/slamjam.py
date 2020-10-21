@@ -15,7 +15,7 @@ import string
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, slamjam_datadome, sendNotification, injection,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, slamjam_datadome, sendNotification, injection,storeCookies, updateConsoleTitle)
 SITE = 'SLAMJAM'
 
 
@@ -56,7 +56,13 @@ class SLAMJAM:
             "upgrade-insecure-requests": "1",
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
         }
-        self.region = loadProfile(self.task["PROFILE"])["countryCode"].upper()
+        profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
+        self.region = profile["countryCode"].upper()
+
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
 
 
@@ -268,6 +274,7 @@ class SLAMJAM:
                     self.collect()
         
                 if cart.status_code == 200 and int(cart.json()["quantityTotal"]) > 0:
+                    updateConsoleTitle(True,False,SITE)
                     logger.success(SITE,self.taskID,'Successfully Carted Product!')
                     self.shipping()
                 else:
@@ -277,6 +284,10 @@ class SLAMJAM:
 
     def shipping(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         logger.prepare(SITE,self.taskID,'Getting checkout page...')
         self.session.headers = {}
         self.session.headers = {
@@ -475,6 +486,10 @@ class SLAMJAM:
     def PayPalpayment(self):
         logger.warning(SITE,self.taskID,'Submitting payment...')
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         payload = {
             'addressSelector': self.shipmentUUID,
             'dwfrm_billing_addressFields_firstName': profile["firstName"],
@@ -543,6 +558,7 @@ class SLAMJAM:
         
                     paypalURL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token={}&useraction=commit'.format(self.paypalToken)
                     logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+                    updateConsoleTitle(False,True,SITE)
                     
                     url = storeCookies(paypalURL,self.session)
             
@@ -575,6 +591,10 @@ class SLAMJAM:
     def ccPayment(self):
         logger.warning(SITE,self.taskID,'Submitting payment...')
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         firstNumber = profile["card"]["cardNumber"]
         if firstNumber == "3":
             CARD_TYPE = 'American Express'
@@ -619,13 +639,5 @@ class SLAMJAM:
 
 
         
-
-        
-# TODO:
-# Check DD on every request
-# Card checkout
-# Different modes (pre-load)
-# get datadome.py working
-
 
   

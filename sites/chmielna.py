@@ -15,7 +15,7 @@ import string
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle)
 SITE = 'CHMIELNA20'
 
 
@@ -159,6 +159,7 @@ class CHMIELNA:
             self.addToCart()
 
         if postCart.status_code in [200,302] and "basket" in postCart.url:
+            updateConsoleTitle(True,False,SITE)
             logger.success(SITE,self.taskID,'Successfully carted')
             self.method()
         else:
@@ -193,6 +194,10 @@ class CHMIELNA:
         logger.prepare(SITE,self.taskID,'Submitting address...')
 
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         payload = {
             '_token': self.token,
             'addressValue[firstname]': profile['firstName'],
@@ -356,8 +361,10 @@ class CHMIELNA:
             if payCreate.status_code in [200,302] and "paypal" in payCreate.url:
                 self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+                updateConsoleTitle(False,True,SITE)
                 url = storeCookies(payCreate.url,self.session)               
                 sendNotification(SITE,self.productTitle)
+                
 
                 try:
                     discord.success(

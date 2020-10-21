@@ -18,7 +18,7 @@ import string
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection, updateConsoleTitle)
 SITE = 'CONSORTIUM'
 
 
@@ -227,6 +227,10 @@ class CONSORTIUM:
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36'
         }
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         payload = {
             'register[email]': profile["email"],
             'register[password]': None,
@@ -247,6 +251,10 @@ class CONSORTIUM:
 
     def billing(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
 
         try:
             securePage = self.session.get('https://www.consortium.co.uk/checkout/secure/billing/')

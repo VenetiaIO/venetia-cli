@@ -16,7 +16,7 @@ import string
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle)
 
 SITE = 'GROSBASKET'
 
@@ -176,6 +176,7 @@ class GROSBASKET:
             self.addToCart()
 
         if postCart.status_code == 200 and postCart.json()["is_add_to_cart"] == "1":
+            updateConsoleTitle(True,False,SITE)
             logger.success(SITE,self.taskID,'Successfully carted')
             self.clientToken()
         else:
@@ -248,6 +249,10 @@ class GROSBASKET:
 
     def billing(self):
         self.profile = loadProfile(self.task["PROFILE"])
+        if self.profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         self.countryCode = self.profile["countryCode"]
 
         try:
@@ -373,6 +378,7 @@ class GROSBASKET:
         if "paypal" in startExpress.url:
             self.end = time.time() - self.start
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+            updateConsoleTitle(False,True,SITE)
 
             url = storeCookies(startExpress.url,self.session)
 
@@ -389,6 +395,7 @@ class GROSBASKET:
                 pass
         
 
+        
             try:
                 discord.success(
                     webhook=loadSettings()["webhook"],
@@ -448,6 +455,10 @@ class GROSBASKET:
         self.productPrice = '{} {}'.format(self.price, self.currency)
 
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         countryCode = profile["countryCode"]
 
         choice = "0123456789abcdefghijklmnopqrstuvwxyz"
@@ -945,6 +956,7 @@ class GROSBASKET:
         print(postSaveOrder.json())
         if postSaveOrder.json()["success"] == True:
             logger.secondary(SITE,self.taskID,'Checkout Complete!')
+            updateConsoleTitle(False,True,SITE)
             discord.success(
                 webhook=loadSettings()["webhook"],
                 site=SITE,

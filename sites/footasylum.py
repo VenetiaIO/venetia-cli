@@ -15,7 +15,7 @@ from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
 from utils.captcha import captcha
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle)
 
 class FOOTASYLUM:
     def __init__(self,task,taskName):
@@ -222,6 +222,7 @@ class FOOTASYLUM:
             self.addToCart()
 
         if initCart.status_code in [200,302]:
+            updateConsoleTitle(True,False,SITE)
             logger.success(SITE,self.taskID,'Successfully carted')
             self.initiateCheckout()
         else:
@@ -609,6 +610,7 @@ class FOOTASYLUM:
             paypalURL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token={}&useraction=commit'.format(self.ecToken)
 
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+            updateConsoleTitle(False,True,SITE)
  
 
             url = storeCookies(paypalURL,self.session)

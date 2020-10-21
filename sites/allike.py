@@ -15,7 +15,7 @@ import string
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle)
 SITE = 'ALLIKE'
 
 
@@ -177,6 +177,7 @@ class ALLIKE:
             self.addToCart()
 
         if postCart.status_code == 200 and data["status"] == "SUCCESS":
+            updateConsoleTitle(True,False,SITE)
             logger.success(SITE,self.taskID,'Successfully carted')
             if self.task["PAYMENT"].lower() == "paypal":
                 self.ppExpress()
@@ -203,6 +204,7 @@ class ALLIKE:
 
         self.end = time.time() - self.start
         if "paypal" in startExpress.url:
+            updateConsoleTitle(False,True,SITE)
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
 
             url = storeCookies(startExpress.url,self.session)
@@ -278,6 +280,10 @@ class ALLIKE:
 
     def billing(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         countryCode = profile["countryCode"]
 
         day = random.randint(1,29)
@@ -421,6 +427,7 @@ class ALLIKE:
                 time.sleep(int(self.task["DELAY"]))
                 self.paypal()
             if "paypal" in startExpress.url:
+                updateConsoleTitle(False,True,SITE)
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
  
                 url = storeCookies(startExpress.url,self.session)
@@ -472,6 +479,10 @@ class ALLIKE:
     def creditCard(self):
         logger.info(SITE,self.taskID,'Starting [CREDIT CARD] checkout...')
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         number = profile["card"]["cardNumber"]
         if str(number[0]) == "3":
             cType = 'A'
@@ -600,6 +611,7 @@ class ALLIKE:
 
                     elif response["success"] == True:
                         self.end = time.time() - self.start
+                        updateConsoleTitle(False,True,SITE)
                         logger.alert(SITE,self.taskID,'Sending Card checkout to Discord!')
                         
                         url = storeCookies(response["redirect"],self.session)

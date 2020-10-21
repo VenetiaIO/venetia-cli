@@ -12,6 +12,8 @@ from pypresence import Presence
 import uuid
 import os
 import click
+import win32console 
+from utils.config import VERSION
 init(autoreset=True)
 
 def secho(text, file=None, nl=None, err=None, color=None, **styles):
@@ -24,8 +26,8 @@ click.echo = echo
 click.secho = secho
 
 
-VERSION  = '0.3.7'
-os.system("title VenetiaIO CLI [Version {}]".format(VERSION))
+# os.system("title VenetiaIO CLI [Version {}]".format(VERSION))
+win32console.SetConsoleTitle("]Version {}] VenetiaIO CLI".format(VERSION))
 
 #sites
 from sites.svd import SVD
@@ -82,11 +84,11 @@ sites = {
     "NAKED":NAKED,
     #"FOOTDISTRICT":FOOTDISTRICT,
     "PRODIRECT":PRODIRECT,
-    #"DISNEY":DISNEY,
-    #"CORNERSTREET":CORNERSTREET
+    "DISNEY":DISNEY,
+    #"CORNERSTREET":CORNERSTREET,
+    "BSTN":BSTN
 
 }
-
 
 
 def get_time():
@@ -106,6 +108,7 @@ def clearTokens():
     data['BSTN'] = []
     data['HOLYPOP'] = []
     data['NAKED'] = []
+    data['PRODIRECT'] = []
     with open('./data/captcha/tokens.json','w') as tokenFile:
         json.dump(data,tokenFile)
     return 'complete'
@@ -144,7 +147,6 @@ def checkUpdate():
 class Menu:
     def __init__(self):
         checkUpdate()
-
         threading.Thread(target=QT,daemon=True).start()
         
         try:
@@ -171,6 +173,7 @@ class Menu:
                 if row["SITE"].lower() == key_chosen.lower():
                     if row["PRODUCT"] != "":
                         try:
+                            win32console.SetConsoleTitle("]Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,key_chosen.title(),"0","0"))
                             self.RPC.update(large_image="image", state=f"Version {VERSION}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
                         except:
                             pass
@@ -212,6 +215,7 @@ class Menu:
             self.menu()
         
         if option == 1:
+            win32console.SetConsoleTitle("] Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,"Running Tasks","0","0"))
 
             with open('./data/tasks.csv','r') as csvFile:
                 csv_reader = csv.DictReader(csvFile)
@@ -248,7 +252,6 @@ class Menu:
             siteSelection = input(' Select a site => ')
             if int(siteSelection) == menuNum:
                 self.menu()
-            os.system("title VenetiaIO CLI Version {}   Running Tasks...".format(VERSION))
             self.siteSelectFunc(availableSites, siteSelection)
 
         if option == 3:
@@ -256,6 +259,7 @@ class Menu:
                 with open('./data/config.json') as config:
                     config = json.loads(config.read())
                     k = config["key"]
+                    checkoutN = config["checkoutNoise"]
                     w = config["webhook"]
                     twoC = config["2Captcha"]
                     ac = config["AntiCaptcha"]
@@ -267,6 +271,7 @@ class Menu:
                     qtPayment = config["quickTaskPayment"]
                     qtSize = config["quickTaskSize"]
                     logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('KEY','red', attrs=["bold"]), colored(k,'cyan')))
+                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CHECKOUT NOISE','red', attrs=["bold"]), colored(checkoutN,'cyan')))
                     logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('WEBHOOK','red', attrs=["bold"]), colored(w,'cyan')))
                     logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('2 CAPTCHA','red', attrs=["bold"]), colored(twoC,'cyan')))
                     logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('ANTI CAPTCHA','red', attrs=["bold"]), colored(ac,'cyan')))
@@ -290,6 +295,13 @@ class Menu:
             with open('./data/config.json') as config:
                 config = json.loads(config.read())
                 print(colored(f"[{get_time()}] Configure Config Below (Leave blank to leave unchanged) ", "red",attrs=['bold']))
+
+                checkoutNoise = input(f"[{get_time()}] Checkout Noise (Y / N) ==> ")
+                if checkoutNoise == "":
+                    try:
+                        checkoutNoise = config["checkoutNoise"]
+                    except:
+                        checkoutNoise = "Y"
 
                 webhook = input(f"[{get_time()}] Enter Webhook ==> ")
                 if webhook == "":
@@ -362,7 +374,7 @@ class Menu:
                         qtPassword = ""
 
 
-                config_updated = {"key":config["key"],"webhook":webhook,"2Captcha":twoCaptcha,"AntiCaptcha":antiCaptcha,"quickTaskSize":qtSize,"quickTaskProfile":qtProfile,"quickTaskProxies":qtProxies,"quickTaskDelay":qtDelay,"quickTaskPayment":qtPayment,"quickTaskEmail":qtEmail,"quickTaskPassword":qtPassword}
+                config_updated = {"key":config["key"],"checkoutNoise":checkoutNoise.upper(),"webhook":webhook,"2Captcha":twoCaptcha,"AntiCaptcha":antiCaptcha,"quickTaskSize":qtSize,"quickTaskProfile":qtProfile,"quickTaskProxies":qtProxies,"quickTaskDelay":qtDelay,"quickTaskPayment":qtPayment,"quickTaskEmail":qtEmail,"quickTaskPassword":qtPassword}
 
                 with open("./data/config.json","w") as updated:
                     json.dump(config_updated, updated)
@@ -661,7 +673,8 @@ class Menu:
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('TITOLO','cyan')))
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('NAKED','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
+            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('PRO-DIRECT','cyan')))
+            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('5','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             CaptchasiteSelect = input(' Select a site => ')
             if CaptchasiteSelect == "1":
@@ -676,7 +689,11 @@ class Menu:
                 siteUrl = 'https://www.nakedcph.com/'
                 siteKey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
                 siteName = 'NAKED'
-            if CaptchasiteSelect == "4":
+            if CaptchasiteSelect == "3":
+                siteUrl = 'https://www.prodirectbasketball.com/'
+                siteKey = '6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g'
+                siteName = 'PRO-DIRECT'
+            if CaptchasiteSelect == "5":
                 self.menu()
 
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))

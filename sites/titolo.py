@@ -16,7 +16,7 @@ from utils.logger import logger
 from utils.captcha import captcha
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle)
 
 
 class TITOLO:
@@ -179,6 +179,7 @@ class TITOLO:
             self.addToCart()
 
         if postCart.status_code == 200 and "/checkout/cart/" in postCart.url:
+            updateConsoleTitle(True,False,SITE)
             logger.success(SITE,self.taskID,'Successfully carted')
             self.method()
         else:
@@ -223,6 +224,10 @@ class TITOLO:
 
     def billing(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         countryCode = profile["countryCode"]
 
         payload = {
@@ -340,6 +345,7 @@ class TITOLO:
                 self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
                 url = storeCookies(getPaypal.url,self.session)
+                updateConsoleTitle(False,True,SITE)
                 
                 sendNotification(SITE,self.productTitle)
                 try:
@@ -449,6 +455,10 @@ class TITOLO:
             self.ccRedirect = saveOrder.json()["redirect"]
 #            
             profile = loadProfile(self.task["PROFILE"])
+            if profile == None:
+                logger.error(SITE,self.taskID,'Profile Not Found.')
+                time.sleep(10)
+                sys.exit()
             getSaferPay = self.session.get(self.ccRedirect,headers={
                 'authority': 'en.titoloshop.com',
                 'method': 'GET',
@@ -482,6 +492,7 @@ class TITOLO:
             if submitCard.status_code == 200:
                 self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending Card checkout to Discord!')
+                updateConsoleTitle(False,True,SITE)
                 url = storeCookies(submitCard.url,self.session)
     
                 try:
