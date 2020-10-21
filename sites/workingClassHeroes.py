@@ -15,7 +15,7 @@ import string
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle)
 SITE = 'WorkingClassHeroes'
 
 
@@ -185,6 +185,7 @@ class WCH:
 
         if postCart.status_code == 200 and data:
             logger.success(SITE,self.taskID,'Successfully carted')
+            updateConsoleTitle(True,False,SITE)
             if self.task["PAYMENT"].lower() == "paypal":
                 self.paypal()
             elif self.task["PAYMENT"].lower() == "card":
@@ -247,6 +248,7 @@ class WCH:
                 self.paypal()
 
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+            updateConsoleTitle(False,True,SITE)
             url = storeCookies(data["d"]["errorMsg"],self.session)               
             sendNotification(SITE,productData["Name"])
 
@@ -316,6 +318,10 @@ class WCH:
     
     def delivery(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         payload = {
             "firstName":profile["firstName"],
             "lastName":profile["lastName"],
@@ -417,6 +423,10 @@ class WCH:
     def card(self):
         logger.info(SITE,self.taskID,'Starting [CREDIT CARD] checkout...')
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         if len(profile["card"]["cardMonth"]) != 2:
             cardMonth = '0{}'.format(profile["card"]["cardMonth"])
         else:
@@ -610,7 +620,8 @@ class WCH:
                         
                         if r.status_code in [200,201,302] and 'confirm' in r.url.lower():
                             self.end = time.time() - self.start
-                            logger.alert(SITE,self.taskID,'Sending Card checkout to Discord!')
+                            logger.alert(SITE,self.taskID,'Checkout Successful!')
+                            updateConsoleTitle(False,True,SITE)
 
                             try:
                                 GetProductLW = self.session.post('https://www.workingclassheroes.co.uk/wsCitrusStore.asmx/GetProductLW', headers={
@@ -659,12 +670,12 @@ class WCH:
                         
                         else:
                             log.info('{} [{}]'.format(r.status_code, r.url))
-                            logger.error(SITE,self.taskID,'Checkout Failed []. Retrying...'.format(r.status_code))
+                            logger.error(SITE,self.taskID,'Checkout Failed [{}]. Retrying...'.format(r.status_code))
                             time.sleep(int(self.task["DELAY"]))
                             self.card()
                     
                     else:
-                        logger.error(SITE,self.taskID,'Checkout Failed []. Retrying...'.format(r.status_code))
+                        logger.error(SITE,self.taskID,'Checkout Failed [{}]. Retrying...'.format(r.status_code))
                         time.sleep(int(self.task["DELAY"]))
                         self.card()
                     

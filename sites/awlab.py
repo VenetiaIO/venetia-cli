@@ -16,7 +16,7 @@ from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
 from utils.adyen import ClientSideEncrypter
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, birthday, injection,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, birthday, injection,storeCookies, updateConsoleTitle)
 SITE = 'AW-LAB'
 
 
@@ -43,7 +43,13 @@ class AWLAB:
             }
         )
         
-        self.dwRegion = loadProfile(self.task["PROFILE"])["countryCode"].upper()
+        profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
+        self.dwRegion = profile["countryCode"].upper()
+
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
         self.awlabRegion = self.task["PRODUCT"].split('https://')[1].split('/')[0]
 
@@ -184,6 +190,7 @@ class AWLAB:
 
         if postCart.status_code == 200 and submitCart.status_code == 200 and submitCart.json()["success"] == True:
             logger.success(SITE,self.taskID,'Successfully carted')
+            updateConsoleTitle(True,False,SITE)
             self.method()
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
@@ -223,6 +230,10 @@ class AWLAB:
 
     def shipping(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         bday = birthday()
 
         try:
@@ -317,6 +328,10 @@ class AWLAB:
     def paypal(self):
         logger.info(SITE,self.taskID,'Starting [PAYPAL] checkout...')
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         payload = {
             'dwfrm_billing_save': 'true',
             'dwfrm_billing_billingAddress_addressId': 'guest-shipping',
@@ -370,7 +385,7 @@ class AWLAB:
             ppURL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token={}&useraction=commit'.format(data["token"])
 
             url = storeCookies(ppURL,self.session)
-            
+            updateConsoleTitle(False,True,SITE)
             sendNotification(SITE,self.productTitle)
             try:
                 discord.success(
@@ -415,7 +430,10 @@ class AWLAB:
     def cad(self):
         logger.info(SITE,self.taskID,'Starting [CAD] checkout...')
         profile = loadProfile(self.task["PROFILE"])
-
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
     
         payload = {
             'dwfrm_billing_save': 'true',
@@ -461,6 +479,7 @@ class AWLAB:
         if payment.status_code in [200,302]:
             self.end = time.time() - self.start
             logger.alert(SITE,self.taskID,'Checkout complete!')
+            updateConsoleTitle(False,True,SITE)
             
             try:
                 discord.success(
@@ -490,6 +509,10 @@ class AWLAB:
     def card(self):
         logger.info(SITE,self.taskID,'Starting [CARD] checkout...')
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         number = profile["card"]["cardNumber"]
         if str(number[0]) == "3":
             cType = 'amex'
@@ -691,6 +714,7 @@ class AWLAB:
                     if confirm.status_code == 200 and "orderconfirmed" in confirm.url or "riepilogoordine" in confirm.url:
                         self.end = time.time() - self.start
                         logger.alert(SITE,self.taskID,'Checkout complete!')
+                        updateConsoleTitle(False,True,SITE)
             
                         try:
                             discord.success(

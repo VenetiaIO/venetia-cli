@@ -14,7 +14,7 @@ SITE = 'QUEENS'
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle)
 
 
 def findProduct(text, kws, SITE, taskID, region):
@@ -185,6 +185,7 @@ class QUEENS:
             self.addToCart()
 
         if postCart.status_code == 200 and checkCart.status_code == 200 and int(cart) > 0:
+            updateConsoleTitle(True,False,SITE)
             logger.success(SITE,self.taskID,'Successfully carted')
             self.country()
         else:
@@ -223,6 +224,10 @@ class QUEENS:
 
     def country(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         countryCode = profile["countryCode"]
 
         try:
@@ -307,6 +312,10 @@ class QUEENS:
 
     def delivery(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         payload = {
             '_csrf': self.csrf,
             'CheckoutForm[first_name]': profile["firstName"],
@@ -365,6 +374,7 @@ class QUEENS:
             if paypalOrder.status_code == 201 and paypalOrder.json()["status"] == "CREATED":
                 self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+                updateConsoleTitle(False,True,SITE)
 
                 url = storeCookies(paypalOrder.json()["links"][1]["href"],self.session)
                 try:

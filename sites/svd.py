@@ -14,7 +14,7 @@ import uuid
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, randomString, sendNotification,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, randomString, sendNotification,storeCookies, updateConsoleTitle)
 SITE = 'SVD'
 
 
@@ -165,6 +165,7 @@ class SVD:
             self.addToCart()
 
         if cart.status_code == 200 and cart.json() == []:
+            updateConsoleTitle(True,False,SITE)
             logger.success(SITE,self.taskID,'Successfully carted')
             self.jwt()
         else:
@@ -258,6 +259,10 @@ class SVD:
     def shipping(self):
 
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         countryCode = profile["countryCode"]
 
         try:
@@ -491,6 +496,10 @@ class SVD:
     def braintreePaypal(self):
 
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         countryCode = profile["countryCode"]
 
         headers = {
@@ -547,6 +556,7 @@ class SVD:
             time.sleep(int(self.task["DELAY"]))
             self.braintreePaypal()
 
+        updateConsoleTitle(False,True,SITE)
         url = storeCookies(checkoutUrl,self.session)
         self.end = time.time() - self.start
         try:
@@ -636,6 +646,10 @@ class SVD:
 
     def braintreeCard(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         countryCode = profile["countryCode"]
 
         logger.info(SITE,self.taskID,'Starting [CREDIT CARD] checkout...')
@@ -882,6 +896,10 @@ class SVD:
 
     def nonThreeDS(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         countryCode = profile["countryCode"]
 
         # 3DS NOT REQUIRED
@@ -1013,6 +1031,7 @@ class SVD:
             self.braintreeCard()
         if r.status_code == 200:
             self.end = time.time() - self.start
+            updateConsoleTitle(False,True,SITE)
             logger.secondary(SITE,self.taskID,'Checkout Complete!')
             sendNotification(SITE,self.productTitle)
             try:
@@ -1036,6 +1055,10 @@ class SVD:
 
     def ThreeDS(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         countryCode = profile["countryCode"]
 
         logger.info(SITE,self.taskID,'Initiating 3DS checkout')
@@ -1255,6 +1278,7 @@ class SVD:
 
         if r.status_code == 200:
             logger.secondary(SITE,self.taskID,'Checkout Complete!')
+            updateConsoleTitle(False,True,SITE)
             try:
                 discord.success(
                     webhook=loadSettings()["webhook"],

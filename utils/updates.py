@@ -19,7 +19,6 @@ class Updater:
     def downloadLatest(VERSION):
         #print(os.path.realpath(__file__))
         for file in os.listdir(os.getcwd()):
-            print(file)
             if 'venetia' in file.lower():
                 name = file.split('.exe')[0]
                 os.rename(file, f'{name}_old.exe')

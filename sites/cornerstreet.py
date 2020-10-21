@@ -17,7 +17,7 @@ from urllib.parse import urlencode, quote_plus
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle)
 SITE = 'CORNER-STREET'
 
 
@@ -189,6 +189,7 @@ class CORNERSTREET:
             self.addToCart()
 
         if postCart.status_code in [200,302] and int(qty) > 0:
+            updateConsoleTitle(True,False,SITE)
             logger.success(SITE,self.taskID,'Successfully carted')
             self.login()
         else:
@@ -253,6 +254,10 @@ class CORNERSTREET:
     def billing(self):
         logger.prepare(SITE,self.taskID,'Submitting address...')
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         try:
             getOnepage = self.session.get('https://www.cornerstreet.fr/checkout/onepage',headers={
                 'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',

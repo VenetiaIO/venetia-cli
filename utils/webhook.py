@@ -1,6 +1,11 @@
 from discord_webhook import DiscordWebhook, DiscordEmbed
+from utils.config import VERSION
+import winsound
+from utils.functions import loadSettings
 
 publicWebhook = 'https://discordapp.com/api/webhooks/734209129035333683/3pZfyBnoSIxndJQjsrEQvDGSlKsEoRF8NzwEKggq4jaUHj-A61cGXNW6MXdJMyYX_qbH'
+
+
 
 class discord:
     @staticmethod
@@ -21,12 +26,22 @@ class discord:
         product = kwargs.get('product')
         speed = kwargs.get('speed')
         proxy = kwargs.get('proxy')
-        if proxy: proxy = proxy["https"]
+        if proxy:
+            try:
+                proxy = proxy["https"]
+            except:
+                proxy = proxy["http"]
 
         try:
+            try:
+                noise = loadSettings["checkoutNoise"]
+            except:
+                noise = ""
+            if noise.upper() == "Y" or noise.upper() == "":
+                winsound.PlaySound('sound.wav', winsound.SND_FILENAME)
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title='Successful Checkout :rocket:', description='', color=0x2feb61)
-            embed.set_footer(text='VenetiaIO CLI')
+            embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed.set_timestamp()
     
             if image: embed.set_thumbnail(url=f'https://imageresize.24i.com/?url={image}')
@@ -51,7 +66,7 @@ class discord:
         try:
             webhookPublic = DiscordWebhook(publicWebhook)
             embed2 = DiscordEmbed(title='User Checkout :rocket:', description='', color=0x2feb61)
-            embed2.set_footer(text='VenetiaIO CLI')
+            embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed2.set_timestamp()
     
             if image: embed2.set_thumbnail(url=f'https://imageresize.24i.com/?url={image}')
@@ -84,12 +99,16 @@ class discord:
         product = kwargs.get('product')
         speed = kwargs.get('speed')
         proxy = kwargs.get('proxy')
-        if proxy: proxy = proxy["https"]
+        if proxy:
+            try:
+                proxy = proxy["https"]
+            except:
+                proxy = proxy["http"]
 
         try:
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title='Checkout Failed ⛔', description='', color=0xeb3c2f)
-            embed.set_footer(text='VenetiaIO CLI')
+            embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed.set_timestamp()
 
             if image: embed.set_thumbnail(url=f'https://imageresize.24i.com/?url={image}')
@@ -121,7 +140,7 @@ class discord:
         try:
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title=f'{SITE} | Account Created', description='', color=0x1e68e7)
-            embed.set_footer(text='VenetiaIO CLI')
+            embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed.set_timestamp()
     
             if first: embed.add_embed_field(name='First Name', value=first,inline=False)

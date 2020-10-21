@@ -16,7 +16,7 @@ SITE = 'BSTN'
 from utils.logger import logger
 from utils.captcha import captcha
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, injection)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, injection, updateConsoleTitle)
 
 
 class BSTN:
@@ -43,18 +43,17 @@ class BSTN:
         )
         self.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
         self.session.proxies = self.proxies
+        self.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/603.1.23 (KHTML, like Gecko) Version/10.0 Mobile/14E5239e Safari/602.1'
 
-
+        self.session.headers.update({
+            'User-Agent':self.userAgent
+        })
 
         self.collect()
 
     def collect(self):
         try:
-            retrieve = self.session.get(self.task["PRODUCT"],headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-    
-            })
+            retrieve = self.session.get(self.task["PRODUCT"])
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -62,7 +61,6 @@ class BSTN:
             time.sleep(int(self.task["DELAY"]))
             self.collect()
 
-        print(retrieve.status_code)
         if retrieve.status_code == 200:
             logger.success(SITE,self.taskID,'Got product page')
             soup = BeautifulSoup(retrieve.text,"html.parser")
@@ -147,7 +145,6 @@ class BSTN:
             self.getIds()
 
             
-        print(getSizeDetails)
         if getSizeDetails.status_code == 200:
             if getSizeDetails.text:
                 jsonDetails = json.loads(getSizeDetails.text)
@@ -173,20 +170,14 @@ class BSTN:
 
 
     def addToCart(self):
-        #captchaResponse = captcha.v3('','6Le9G8cUAAAAANrlPVYknZGUZw8lopZAqe8_SfRQ','https://www.bstn.com/',self.proxies,SITE,self.taskID)
-        r = requests.get('https://www.google.com/recaptcha/api2/anchor?ar=1&k=6Le9G8cUAAAAANrlPVYknZGUZw8lopZAqe8_SfRQ&co=aHR0cHM6Ly93d3cuYnN0bi5jb206NDQz&hl=en&v=nuX0GNR875hMLA1LR7ayD9tc&size=invisible&cb=13o7koobzd0j',headers={
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-        },proxies=self.proxies)
-        soup = BeautifulSoup(r.text,"html.parser")
-        self.cToken = soup.find("input",{"id":"recaptcha-token"})["value"]
+        captchaResponse = captcha.v3('6Le9G8cUAAAAANrlPVYknZGUZw8lopZAqe8_SfRQ','https://www.bstn.com/',self.proxies,SITE,self.taskID)
         payload = {
             'hash': self.hash,
             'secret': self.secret,
             'product_id': self.productId,
             'product_bs_id': self.bsId,
             'amount': 1,
-            'g-recaptcha-response':self.cToken,
+            'g-recaptcha-response':captchaResponse,
             'ajax': True,
             'redirectRooting': '',
             'addToCart': '',
@@ -210,7 +201,8 @@ class BSTN:
             'returnHtmlSnippets[partials][4][module]':'cart',
             'returnHtmlSnippets[partials][4][partialName]': 'modalWasadded'
         }
-        cartUrl = 'https://www.bstn.com{}?g={}'.format(self.cartId,self.cToken)
+        print(self.cartId)
+        cartUrl = 'https://www.bstn.com{}?g={}'.format(self.cartId,captchaResponse)
         print(cartUrl)
         print(payload)
 

@@ -15,7 +15,7 @@ from utils.logger import logger
 from utils.captcha import captcha
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle)
 
 class HOLYPOP:
     def __init__(self,task,taskName):
@@ -195,6 +195,7 @@ class HOLYPOP:
             self.addToCart()
 
         if cart.status_code == 200 and jsonData["success"] == True:
+            updateConsoleTitle(True,False,SITE)
             logger.success(SITE,self.taskID,'Successfully carted')
             self.productTitle = cart.json()["payload"][0]["title"]
             self.size = cart.json()["payload"][0]["attributes"][0]["value"]["title"]
@@ -202,6 +203,7 @@ class HOLYPOP:
             self.productPrice = '{} {}'.format(cart.json()["payload"][0]["price"],cart.json()["payload"][0]["currencyCode"])
             self.productLink = cart.json()["payload"][0]["permalink"]
             if self.task["PAYMENT"].lower() == "cart hold":
+                updateConsoleTitle(False,True,SITE)
                 self.end = time.time() - self.start
                 try:
                     discord.success(
@@ -345,6 +347,7 @@ class HOLYPOP:
         if checkout.status_code == 200 and "paypal" in checkout.url:
             self.end = time.time() - self.start
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+            updateConsoleTitle(False,True,SITE)
 
             url = storeCookies(checkout.url,self.session)
             

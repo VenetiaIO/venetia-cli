@@ -14,7 +14,7 @@ SITE = 'AIRNESS'
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle)
 
 class AIRNESS:
     def __init__(self,task,taskName):
@@ -294,6 +294,7 @@ class AIRNESS:
             self.addToCart()
 
         if response.status_code == 201:
+            updateConsoleTitle(True,False,SITE)
             self.checkoutUrl = response.json()["data"]["attributes"]["checkout_url"]
             self.orderId = response.json()["data"]["id"]
         else:
@@ -482,6 +483,10 @@ class AIRNESS:
 
     def customer(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         countryCode = profile["countryCode"]
 
         headers = {
@@ -655,6 +660,7 @@ class AIRNESS:
                 logger.success(SITE,self.taskID,'Successfully set payment method')
                 self.paypalUrl = postPaypal.json()["data"]["attributes"]["approval_url"]
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+                updateConsoleTitle(False,True,SITE)
 
                 url = storeCookies(self.paypalUrl,self.session)
 

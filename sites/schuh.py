@@ -16,7 +16,7 @@ import string
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle)
 SITE = 'SCHUH'
 
 
@@ -153,6 +153,7 @@ class SCHUH:
                 self.addToCart()
 
         if cart.status_code == 200 and json["d"]["Success"] == True:
+            updateConsoleTitle(True,False,SITE)
             logger.success(SITE,self.taskID,'Successfully carted')
             self.basket()
         else:
@@ -238,6 +239,10 @@ class SCHUH:
         self.session.headers['Referer'] = f'{self.baseURL}/klarnaCheckout.aspx'
 
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
         try:
             payload = {"email":profile["email"]}
             klarnaEmail = self.session.post(f'{self.baseURL}/CheckoutService/RegisterKlarnaEmail',json=payload)
@@ -260,6 +265,10 @@ class SCHUH:
     
     def paypal(self):
         profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
 
         self.session.headers['Accept'] = '*/*'
         self.session.headers['X-Requested-With'] = 'XMLHttpRequest'
@@ -309,6 +318,7 @@ class SCHUH:
                 self.ppURL = 'https://www.paypal.com/checkoutnow?locale.x=en_GB&fundingSource=paypal&env=production&fundingOffered=paypal&logLevel=warn&version=4&token={}&xcomponent=1'.format(self.ppToken)
 
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+                updateConsoleTitle(False,True,SITE)
 
                 url = storeCookies(self.ppURL,self.session)
     
