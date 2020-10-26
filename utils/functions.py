@@ -145,7 +145,8 @@ def sendNotification(site, text):
     except:
         pass
 
-
+def urlEncode(quote):
+    return urllib.parse.quote(str(quote))
 
 def encodeURIComponent(str):
     encoded = urllib.parse.quote(str, safe='~()*!.\'')

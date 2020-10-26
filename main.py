@@ -54,6 +54,7 @@ from sites.footdistrict import FOOTDISTRICT
 from sites.prodirect import PRODIRECT
 from sites.disney import DISNEY
 from sites.cornerstreet import CORNERSTREET
+from sites.snipes import SNIPES
 
 #utils
 from utils.quicktask import QT
@@ -86,7 +87,8 @@ sites = {
     "PRODIRECT":PRODIRECT,
     "DISNEY":DISNEY,
     #"CORNERSTREET":CORNERSTREET,
-    "BSTN":BSTN
+    "BSTN":BSTN,
+    "SNIPES":SNIPES
 
 }
 
@@ -186,7 +188,7 @@ class Menu:
 
     def menu(self):
         headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
-        requests.post('http://venetiacli.io/api/last/opened',headers=headers,json={"key":self.config["key"],"date":str(datetime.datetime.now())})
+        requests.post('https://venetiacli.io/api/last/opened',headers=headers,json={"key":self.config["key"],"date":str(datetime.datetime.now())})
         try:
             self.RPC.update(large_image="image", state=f"Version {VERSION}", details='Main Menu', start=self.rpctime,small_image="image",small_text="@venetiaIO")
         except:

@@ -5,9 +5,9 @@ headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
 class auth:
     @staticmethod
     def auth(key, uuid):
-        checkKey = requests.post('http://venetiacli.io/api/get/key',headers=headers,json={"key":key})
+        checkKey = requests.post('https://venetiacli.io/api/get/key',headers=headers,json={"key":key})
         if checkKey.status_code == 423:
-            validateMachine = requests.post('http://venetiacli.io/api/machine/validate',headers=headers,json={"key":key,"machine":uuid})
+            validateMachine = requests.post('https://venetiacli.io/api/machine/validate',headers=headers,json={"key":key,"machine":uuid})
             if validateMachine.status_code == 200:
                 return {'STATUS':1,'MESSAGE':'Key Authorised'}
             if validateMachine.status_code == 201:
