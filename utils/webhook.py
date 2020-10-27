@@ -2,7 +2,7 @@ from discord_webhook import DiscordWebhook, DiscordEmbed
 from utils.config import VERSION
 import winsound
 from utils.functions import loadSettings
-
+from utils.log import log
 publicWebhook = 'https://discordapp.com/api/webhooks/734209129035333683/3pZfyBnoSIxndJQjsrEQvDGSlKsEoRF8NzwEKggq4jaUHj-A61cGXNW6MXdJMyYX_qbH'
 
 
@@ -44,7 +44,7 @@ class discord:
             embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed.set_timestamp()
     
-            if image: embed.set_thumbnail(url=f'https://imageresize.24i.com/?url={image}')
+            if image: embed.set_thumbnail(url=image)
             if SITE: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
             if productTitle: embed.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
             if productSize: embed.add_embed_field(name='Size', value=str(productSize),inline=True)
@@ -60,6 +60,7 @@ class discord:
     
             webhook.execute()
         except Exception as e:
+            log.info(e)
             pass
 
 
@@ -69,7 +70,7 @@ class discord:
             embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed2.set_timestamp()
     
-            if image: embed2.set_thumbnail(url=f'https://imageresize.24i.com/?url={image}')
+            if image: embed2.set_thumbnail(url=image)
             if SITE: embed2.add_embed_field(name='Site', value=SITE.title(),inline=False)
             if productTitle: embed2.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
             if productSize: embed2.add_embed_field(name='Size', value=str(productSize),inline=False)
@@ -111,7 +112,7 @@ class discord:
             embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed.set_timestamp()
 
-            if image: embed.set_thumbnail(url=f'https://imageresize.24i.com/?url={image}')
+            if image: embed.set_thumbnail(url=image)
             if SITE: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
             if productTitle: embed.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
             if productSize: embed.add_embed_field(name='Size', value=productSize,inline=True)

@@ -1,5 +1,18 @@
-23:26:22,150 root ERROR list index out of range
-23:26:26,247 root ERROR list index out of range
-23:27:10,772 root ERROR list index out of range
-23:27:12,820 root ERROR list index out of range
-00:05:42,599 root ERROR HTTPSConnectionPool(host='www.snipes.com', port=443): Max retries exceeded with url: /p/nike-air_vapormax_360-white%2Fwhite%2Fblack%2Fspeed_yellow-00013801855356.html (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed certificate in certificate chain (_ssl.c:1123)')))
+13:27:25,866 root ERROR HTTPSConnectionPool(host='www.snipes.com', port=443): Max retries exceeded with url: /on/demandware.store/Sites-snse-DE-AT-Site/de_DE/CheckoutShippingServices-SubmitShipping?format=ajax (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+15:06:49,591 root ERROR ('Connection broken: IncompleteRead(1328 bytes read, 8912 more expected)', IncompleteRead(1328 bytes read, 8912 more expected))
+16:11:19,916 root ERROR 'continueUrl'
+16:11:23,298 root ERROR 'continueUrl'
+16:11:25,908 root ERROR 'continueUrl'
+16:11:28,54 root ERROR Expecting value: line 1 column 1 (char 0)
+16:11:30,673 root ERROR Expecting value: line 1 column 1 (char 0)
+16:11:33,273 root ERROR Expecting value: line 1 column 1 (char 0)
+16:11:58,59 root ERROR 'continueUrl'
+16:12:00,777 root ERROR 'continueUrl'
+16:12:03,254 root ERROR 'continueUrl'
+16:12:05,370 root ERROR Expecting value: line 1 column 1 (char 0)
+16:12:44,738 root ERROR 'continueUrl'
+16:12:47,532 root ERROR 'continueUrl'
+16:12:49,888 root ERROR Expecting value: line 1 column 1 (char 0)
+16:13:41,241 root ERROR 'continueUrl'
+16:14:45,596 root ERROR 'continueUrl'
+16:14:56,173 root ERROR 'continueUrl'

@@ -56,10 +56,23 @@ class DISNEY:
     def collect(self):
         if "shopdisney" in self.task["PRODUCT"]:
             self.product = self.task["PRODUCT"]
+
             self.disneyRegion = self.task["PRODUCT"].split('shopdisney.')[1].split('/')[0]
         else:
-            self.disneyRegion = 'co.uk'
+            if self.region == 'fr':
+                self.disneyRegion = 'fr'
+            if self.region == 'de':
+                self.disneyRegion = 'de'
+            if self.region == 'it':
+                self.disneyRegion = 'it'
+            if self.region == 'es':
+                self.disneyRegion = 'es'
+            if self.region == 'us':
+                self.disneyRegion = 'com'
+            else:
+                self.disneyRegion = 'co.uk'
             self.product = "https://www.shopdisney.{}/{}.html".format(self.disneyRegion,self.task["PRODUCT"])
+        
         logger.warning(SITE,self.taskID,'Solving Cloudflare...')
         try:
             retrieve = self.session.get(self.product, headers={

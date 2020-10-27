@@ -87,7 +87,7 @@ sites = {
     "PRODIRECT":PRODIRECT,
     "DISNEY":DISNEY,
     #"CORNERSTREET":CORNERSTREET,
-    "BSTN":BSTN,
+    #"BSTN":BSTN,
     "SNIPES":SNIPES
 
 }
@@ -175,7 +175,7 @@ class Menu:
                 if row["SITE"].lower() == key_chosen.lower():
                     if row["PRODUCT"] != "":
                         try:
-                            win32console.SetConsoleTitle("]Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,key_chosen.title(),"0","0"))
+                            win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,key_chosen.title(),"0","0"))
                             self.RPC.update(large_image="image", state=f"Version {VERSION}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
                         except:
                             pass
