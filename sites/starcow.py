@@ -26,21 +26,24 @@ class STARCOW:
         self.taskID = taskName
 
         twoCap = loadSettings()["2Captcha"]
-        self.session = cloudscraper.create_scraper(
-            requestPostHook=injection,
-            sess=self.sess,
-            interpreter='nodejs',
-            browser={
-                'browser': 'chrome',
-                'mobile': False,
-                'platform': 'windows'
-                #'platform': 'darwin'
-            },
-            captcha={
-                'provider': '2captcha',
-                'api_key': twoCap
-            }
-        )
+        try:
+            self.session = cloudscraper.create_scraper(
+                requestPostHook=injection,
+                sess=self.sess,
+                browser={
+                    'browser': 'chrome',
+                    'mobile': False,
+                    'platform': 'windows'
+                    #'platform': 'darwin'
+                },
+                captcha={
+                    'provider': '2captcha',
+                    'api_key': twoCap
+                }
+            )
+        except Exception as e:
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            self.__init__()
         self.session.headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',

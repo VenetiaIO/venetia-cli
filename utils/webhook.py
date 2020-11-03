@@ -1,11 +1,12 @@
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from utils.config import VERSION
-import winsound
-from utils.functions import loadSettings
 from utils.log import log
+import pymongo
+from utils.functions import getUser
+
 publicWebhook = 'https://discordapp.com/api/webhooks/734209129035333683/3pZfyBnoSIxndJQjsrEQvDGSlKsEoRF8NzwEKggq4jaUHj-A61cGXNW6MXdJMyYX_qbH'
 
-
+mongoConnect = "mongodb+srv://charlieaio:87g[VyhEnY$F?uf8@cluster-main.sqapr.mongodb.net/mydb?retryWrites=true&w=majority"
 
 class discord:
     @staticmethod
@@ -32,13 +33,8 @@ class discord:
             except:
                 proxy = proxy["http"]
 
-        try:
-            try:
-                noise = loadSettings["checkoutNoise"]
-            except:
-                noise = ""
-            if noise.upper() == "Y" or noise.upper() == "":
-                winsound.PlaySound('sound.wav', winsound.SND_FILENAME)
+
+        try:                
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title='Successful Checkout :rocket:', description='', color=0x2feb61)
             embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
@@ -57,9 +53,18 @@ class discord:
             if url: embed.add_embed_field(name='Checkout Link', value=f'[Checkout Here]({url})',inline=False)
             if proxy: embed.add_embed_field(name='Proxy Used', value=f'||`{str(proxy)}`||',inline=False)
             webhook.add_embed(embed)
-    
             webhook.execute()
+
+            myclient = pymongo.MongoClient(mongoConnect)
+            mydb = myclient["mydb"]
+            collection = mydb["collection"]
+
+            user = getUser()["discordName"]
+            data = { "image":image, "site":SITE, "url":product, "product":productTitle, "size":productSize, "price":productPrice, "user":user }
+            x = collection.insert_one(data)
+            
         except Exception as e:
+            print(e)
             log.info(e)
             pass
 

@@ -184,8 +184,11 @@ class TITOLO:
             self.method()
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.addToCart()
+            if self.task['SIZE'].lower() == "random":
+                self.collect()
+            else:
+                time.sleep(int(self.task["DELAY"]))
+                self.addToCart()
 
     def method(self):
         try:

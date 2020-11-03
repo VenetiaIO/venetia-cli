@@ -27,7 +27,7 @@ click.secho = secho
 
 
 # os.system("title VenetiaIO CLI [Version {}]".format(VERSION))
-win32console.SetConsoleTitle("]Version {}] VenetiaIO CLI".format(VERSION))
+win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI".format(VERSION))
 
 #sites
 from sites.svd import SVD
@@ -107,7 +107,7 @@ def taskCount():
 def clearTokens():
     data = {}
     data['TITOLO'] = []
-    data['BSTN'] = []
+    #data['BSTN'] = []
     data['HOLYPOP'] = []
     data['NAKED'] = []
     data['PRODIRECT'] = []

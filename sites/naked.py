@@ -29,22 +29,24 @@ class NAKED:
         self.taskID = taskName
 
         twoCap = loadSettings()["2Captcha"]
-        self.session = cloudscraper.create_scraper(
-            requestPostHook=injection,
-            sess=self.sess,
-            interpreter='nodejs',
-            delay=5,
-            browser={
-                'browser': 'chrome',
-                'mobile': False,
-                'platform': 'windows'
-                #'platform': 'darwin'
-            },
-            captcha={
-                'provider': '2captcha',
-                'api_key': twoCap
-            }
-        )
+        try:
+            self.session = cloudscraper.create_scraper(
+                requestPostHook=injection,
+                sess=self.sess,
+                browser={
+                    'browser': 'chrome',
+                    'mobile': False,
+                    'platform': 'windows'
+                    #'platform': 'darwin'
+                },
+                captcha={
+                    'provider': '2captcha',
+                    'api_key': twoCap
+                }
+            )
+        except Exception as e:
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            self.__init__()
         
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
         self.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/603.1.23 (KHTML, like Gecko) Version/10.0 Mobile/14E5239e Safari/602.1'

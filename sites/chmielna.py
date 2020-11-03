@@ -27,20 +27,24 @@ class CHMIELNA:
         self.taskID = taskName
 
         twoCap = loadSettings()["2Captcha"]
-        self.session = cloudscraper.create_scraper(
-            requestPostHook=injection,
-            sess=self.sess,
-            browser={
-                'browser': 'chrome',
-                'mobile': False,
-                'platform': 'windows'
-                #'platform': 'darwin'
-            },
-            captcha={
-                'provider': '2captcha',
-                'api_key': twoCap
-            }
-        )
+        try:
+            self.session = cloudscraper.create_scraper(
+                requestPostHook=injection,
+                sess=self.sess,
+                browser={
+                    'browser': 'chrome',
+                    'mobile': False,
+                    'platform': 'windows'
+                    #'platform': 'darwin'
+                },
+                captcha={
+                    'provider': '2captcha',
+                    'api_key': twoCap
+                }
+            )
+        except Exception as e:
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            self.__init__()
         self.session.headers={
            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
            'referer': 'https://chmielna20.pl',
