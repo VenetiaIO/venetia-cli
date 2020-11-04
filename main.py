@@ -55,6 +55,7 @@ from sites.prodirect import PRODIRECT
 from sites.disney import DISNEY
 from sites.cornerstreet import CORNERSTREET
 from sites.snipes import SNIPES
+from sites.solebox import SOLEBOX
 
 #utils
 from utils.quicktask import QT
@@ -88,7 +89,8 @@ sites = {
     "DISNEY":DISNEY,
     #"CORNERSTREET":CORNERSTREET,
     #"BSTN":BSTN,
-    "SNIPES":SNIPES
+    "SNIPES":SNIPES,
+    #"SOLEBOX":SOLEBOX
 
 }
 
@@ -179,7 +181,15 @@ class Menu:
                             self.RPC.update(large_image="image", state=f"Version {VERSION}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
                         except:
                             pass
-                        taskName = f'Task {i}'
+                        
+                        if len(str(i)) == 1:
+                            taskName = f'Task 000{i}'
+                        if len(str(i)) == 2:
+                            taskName = f'Task 00{i}'
+                        if len(str(i)) == 3:
+                            taskName = f'Task 0{i}'
+                        if len(str(i)) == 4:
+                            taskName = f'Task {i}'
                         i = i + 1
                         threading.Thread(target=value_chosen,args=(row,taskName)).start()
         
@@ -197,7 +207,6 @@ class Menu:
      
         print('                 Welcome To...                  ')
         logger.logo(logo,VERSION)
-        logger.menu('VENETIA','Menu','{}'.format(colored(f'Key Authorised','green', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('Start All Tasks','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('Start Specific Tasks','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('View Config','red', attrs=["bold"])))
@@ -230,7 +239,15 @@ class Menu:
                                     self.RPC.update(large_image="image", state=f"Version {VERSION}", details=f'Running {taskCount()} Task(s)...'.format(row["SITE"].title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
                                 except:
                                     pass
-                                taskName = f'Task {i}'
+                            
+                                if len(str(i)) == 1:
+                                    taskName = f'Task 000{i}'
+                                if len(str(i)) == 2:
+                                    taskName = f'Task 00{i}'
+                                if len(str(i)) == 3:
+                                    taskName = f'Task 0{i}'
+                                if len(str(i)) == 4:
+                                    taskName = f'Task {i}'
                                 i = i + 1
                                 threading.Thread(target=sites.get(row["SITE"].upper()),args=(row,taskName)).start()
  
@@ -691,7 +708,7 @@ class Menu:
                 siteUrl = 'https://www.nakedcph.com/'
                 siteKey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
                 siteName = 'NAKED'
-            if CaptchasiteSelect == "3":
+            if CaptchasiteSelect == "4":
                 siteUrl = 'https://www.prodirectbasketball.com/'
                 siteKey = '6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g'
                 siteName = 'PRO-DIRECT'
@@ -717,6 +734,7 @@ class Menu:
 
         if option == 8:
             logger.menu('VENETIA','ACCOUNTS','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
+            # logger.menu('VENETIA','ACCOUNTS','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('PRO-DIRECT','cyan')))
             logger.menu('VENETIA','ACCOUNTS','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             AccountsiteSelect = input(' Select a site => ')
@@ -739,6 +757,11 @@ class Menu:
                 sitekey = '6Lc8GBUUAAAAAKMfe1S46jE08TvVKNSnMYnuj6HN'
                 for i in range(int(amount)):
                     threading.Thread(target=ACCOUNTS.holypop,args=(sitekey,proxies,'HOLYPOP',catchall,password, profile)).start()
+            
+            if AccountsiteSelect == "9999":
+                sitekey = '6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g'
+                for i in range(int(amount)):
+                    threading.Thread(target=ACCOUNTS.proDirect,args=(sitekey,proxies,'PRO-DIRECT',catchall,password, profile)).start()
 
         
             while threading.active_count() != 2:
@@ -805,6 +828,7 @@ if __name__ == "__main__":
 
             auth = auth.auth(config["key"], uuid.getnode())
             if auth["STATUS"] == 1:
+                logger.menu('VENETIA','Menu','{}'.format(colored(f'Key Authorised','green', attrs=["bold"])))
                 Menu()
             if auth["STATUS"] == 0:
                 logger.menu('VENETIA','Menu','{}'.format(colored('Failed to auth key. Closing...','red', attrs=["bold"])))
@@ -814,6 +838,7 @@ if __name__ == "__main__":
         else:
             auth = auth.auth(config["key"], uuid.getnode())
             if auth["STATUS"] == 1:
+                logger.menu('VENETIA','Menu','{}'.format(colored(f'Key Authorised','green', attrs=["bold"])))
                 Menu()
             if auth["STATUS"] == 0:
                 logger.menu('VENETIA','Menu','{}'.format(colored('Failed to auth key. Closing...','red', attrs=["bold"])))

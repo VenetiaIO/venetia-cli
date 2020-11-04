@@ -312,14 +312,23 @@ class SNIPES:
                 time.sleep(int(self.task["DELAY"]))
                 self.addToCart()
             try:
-                self.uuid = data['cart']['items'][0]['UUID']
-                self.shipmentUUID = data['cart']['items'][0]['shipmentUUID']
-                self.demandWareBase = data['cart']['actionUrls']['submitCouponCodeUrl'].split('/Cart-AddCoupon')[0]
+                if data['cart']['items']:
+                    self.uuid = data['cart']['items'][0]['UUID']
+                    self.shipmentUUID = data['cart']['items'][0]['shipmentUUID']
+                    self.demandWareBase = data['cart']['actionUrls']['submitCouponCodeUrl'].split('/Cart-AddCoupon')[0]
+                else:
+                    logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    self.addToCart()
             except Exception as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
-                self.addToCart()
+                if self.task["SIZE"].lower() == "random":
+                    self.query()
+                else:
+                    self.addToCart()
+
 
             updateConsoleTitle(True,False,SITE)
             logger.success(SITE,self.taskID,'Successfully Carted')
@@ -339,11 +348,19 @@ class SNIPES:
             self.addToCart()
 
         if cart.status_code == 429:
-            logger.error(SITE,self.taskID,'Rate Limit (Sleeping). Retrying...')
+            logger.error(SITE,self.taskID,'Rate Limit. Retrying...')
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.UA = randomUA()
             self.refer = self.task["PRODUCT"] + "#%253F_={}".format(randomString(20))
-            time.sleep(10)
+            current_px3 = self.session.cookies.get_dict()["_px3"]
+            current_pxvid = self.session.cookies.get_dict()["_pxvid"]
+
+            self.session.cookies.clear()
+
+            cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=current_px3)
+            cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=current_pxvid)
+            self.session.cookies.set_cookie(cookie_obj)
+            self.session.cookies.set_cookie(cookie_obj2)
             self.addToCart()
         
         elif cart.status_code not in [200,403]:
@@ -566,7 +583,8 @@ class SNIPES:
                     profile=self.task["PROFILE"],
                     product=self.task["PRODUCT"],
                     proxy=self.session.proxies,
-                    speed=self.end
+                    speed=self.end,
+                    region=self.countryCode
                 )
                 while True:
                     pass
@@ -593,7 +611,15 @@ class SNIPES:
             self.placeOrder_bt()
 
         elif place.status_code not in [200,403]:
-            logger.error(SITE,self.taskID,f'Failed to place order. Retrying...')
+            try:
+                response = place.json()
+                msg = response["errorMessage"]
+            except Exception as e:
+                log.info(e)
+                msg = 'n/a'
+
+            log.info(str(response))
+            logger.error(SITE,self.taskID,f'Failed to place order [{msg}]. Retrying...')
             time.sleep(int(self.task["DELAY"]))
             self.placeOrder_bt()
 
@@ -627,9 +653,11 @@ class SNIPES:
 
             try:
                 response = place.json()
+                response['continueUrl']
             except Exception as e:
                 logger.error(SITE,self.taskID,'Failed to place order. Retrying...')
                 log.info(e)
+                log.info(str(place.text))
                 time.sleep(int(self.task["DELAY"]))
                 self.placeOrder_card()
 
@@ -667,7 +695,8 @@ class SNIPES:
                     profile=self.task["PROFILE"],
                     product=self.task["PRODUCT"],
                     proxy=self.session.proxies,
-                    speed=self.end
+                    speed=self.end,
+                    region=self.countryCode
                 )
                 while True:
                     pass
@@ -694,10 +723,14 @@ class SNIPES:
             self.placeOrder_card()
 
         elif place.status_code not in [200,403]:
-            if response["errorMessage"]:
+            try:
+                response = place.json()
                 msg = response["errorMessage"]
-            else:
+            except Exception as e:
+                log.info(e)
                 msg = 'n/a'
+
+            log.info(str(response))
             logger.error(SITE,self.taskID,f'Failed to place order [{msg}]. Retrying...')
             time.sleep(int(self.task["DELAY"]))
             self.placeOrder_card()
@@ -733,38 +766,47 @@ class SNIPES:
                 response = place.json()
                 cUrl = response["continueUrl"]
             except Exception as e:
+                logger.error(SITE,self.taskID,'Failed to place order. Retrying...')
+                log.info(e)
+                log.info(str(response))
+                time.sleep(int(self.task["DELAY"]))
+                self.placeOrder_pp()
+            
+            if "paypal" in cUrl:
+                self.end = time.time() - self.start
+                updateConsoleTitle(False,True,SITE)
+                logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+    
+                url = storeCookies(cUrl,self.session)
+    
+                sendNotification(SITE,self.productTitle)
+                try:
+                    discord.success(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=url,
+                        image=self.productImage,
+                        title=self.productTitle,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod='PayPal',
+                        profile=self.task["PROFILE"],
+                        product=self.task["PRODUCT"],
+                        proxy=self.session.proxies,
+                        speed=self.end,
+                        region=self.countryCode
+                    )
+                    while True:
+                        pass
+                except Exception as e:
+                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+            
+            else:
                 logger.error(SITE,self.taskID,'Failed to place order (Cart may have duplicates). Retrying...')
                 log.info(e)
                 log.info(str(response))
                 time.sleep(int(self.task["DELAY"]))
                 self.placeOrder_pp()
-         
-            self.end = time.time() - self.start
-            updateConsoleTitle(False,True,SITE)
-            logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
-
-            url = storeCookies(response["continueUrl"],self.session)
-
-            sendNotification(SITE,self.productTitle)
-            try:
-                discord.success(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=url,
-                    image=self.productImage,
-                    title=self.productTitle,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod='PayPal',
-                    profile=self.task["PROFILE"],
-                    product=self.task["PRODUCT"],
-                    proxy=self.session.proxies,
-                    speed=self.end
-                )
-                while True:
-                    pass
-            except Exception as e:
-                logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
 
         if place.status_code == 403:
             cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
@@ -792,6 +834,8 @@ class SNIPES:
             except Exception as e:
                 log.info(e)
                 msg = 'n/a'
+
+            log.info(str(place.text))
             logger.error(SITE,self.taskID,f'Failed to place order [{msg}]. Retrying...')
             time.sleep(int(self.task["DELAY"]))
             self.placeOrder_pp()

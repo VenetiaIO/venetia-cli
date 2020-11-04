@@ -27,6 +27,7 @@ class discord:
         product = kwargs.get('product')
         speed = kwargs.get('speed')
         proxy = kwargs.get('proxy')
+        region = kwargs.get('region')
         if proxy:
             try:
                 proxy = proxy["https"]
@@ -41,7 +42,9 @@ class discord:
             embed.set_timestamp()
     
             if image: embed.set_thumbnail(url=image)
-            if SITE: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
+            if SITE and region: embed.add_embed_field(name='Site', value=SITE.title() + '  :flag_{}:'.format(region.lower()) ,inline=False)
+            else: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
+
             if productTitle: embed.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
             if productSize: embed.add_embed_field(name='Size', value=str(productSize),inline=True)
             if productPrice: embed.add_embed_field(name='Product Price', value=str(productPrice),inline=True)
@@ -76,7 +79,9 @@ class discord:
             embed2.set_timestamp()
     
             if image: embed2.set_thumbnail(url=image)
-            if SITE: embed2.add_embed_field(name='Site', value=SITE.title(),inline=False)
+            if SITE and region: embed2.add_embed_field(name='Site', value=SITE.title() + '  :flag_{}:'.format(region.lower()) ,inline=False)
+            else: embed2.add_embed_field(name='Site', value=SITE.title(),inline=False)
+
             if productTitle: embed2.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
             if productSize: embed2.add_embed_field(name='Size', value=str(productSize),inline=False)
             if productPrice: embed2.add_embed_field(name='Product Price', value=str(productPrice),inline=False)
@@ -105,6 +110,7 @@ class discord:
         product = kwargs.get('product')
         speed = kwargs.get('speed')
         proxy = kwargs.get('proxy')
+        region = kwargs.get('region')
         if proxy:
             try:
                 proxy = proxy["https"]
@@ -118,7 +124,9 @@ class discord:
             embed.set_timestamp()
 
             if image: embed.set_thumbnail(url=image)
-            if SITE: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
+            if SITE and region: embed.add_embed_field(name='Site', value=SITE.title() + '  :flag_{}:'.format(region) ,inline=False)
+            else: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
+
             if productTitle: embed.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
             if productSize: embed.add_embed_field(name='Size', value=productSize,inline=True)
             if productPrice: embed.add_embed_field(name='Product Price', value=productPrice,inline=True)
