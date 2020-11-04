@@ -19,7 +19,41 @@ from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loa
 SITE = 'DISNEY'
 
 
-
+def findProduct(url, session, taskID, SITE, task, disneyRegion):
+    try:
+        kwget = session.get(url, headers={
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
+        })
+    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+        log.info(e)
+        logger.error(SITE,taskID,'Error: {}'.format(e))
+        time.sleep(int(task["DELAY"]))
+        findProduct("https://www.shopdisney.{}/new?srule=Newest&sz=96&start=0".format(disneyRegion),session,taskID,SITE,task,disneyRegion)
+    if kwget.status_code == 200:
+        kws = task["PRODUCT"].split('|')
+        kws = [x.lower() for x in kws]
+        foundItem = ""
+        soup = BeautifulSoup(kwget.text,"html.parser")
+        section = soup.find('section',{'class':'catlisting__product-grid js-catlisting-product-grid'})
+        # print(section)
+        row = section.find('div',{'class':'row'}).find_all('div')
+        for r in row:
+            # r = BeautifulSoup(r,"htm.parser")
+            try:
+                p = r.find('a',{'class':'product__linkcontainer js-catlisting-productlink-container no-transform'})
+                title = p['title']
+                link = p['href']
+                if all(kw in title.lower() for kw in kws):
+                    link = p['href']
+                    foundItem = '{}|{}'.format(title,link)
+            except:
+                pass
+        if len(foundItem) > 0:
+            return foundItem.split('|')
+        else:
+            return None
+    
 class DISNEY:
     def __init__(self, task,taskName):
         self.task = task
@@ -53,20 +87,43 @@ class DISNEY:
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
         self.collect()
 
+
     def collect(self):
-        if "shopdisney" in self.task["PRODUCT"]:
-            self.product = self.task["PRODUCT"]
-            self.disneyRegion = self.task["PRODUCT"].split('shopdisney.')[1].split('/')[0]
+
+        if self.region == 'fr':
+            self.disneyRegion = 'fr'
+        if self.region == 'de':
+            self.disneyRegion = 'de'
+        if self.region == 'it':
+            self.disneyRegion = 'it'
+        if self.region == 'es':
+            self.disneyRegion = 'es'
+        if self.region == 'us':
+            self.disneyRegion = 'com'
         else:
             self.disneyRegion = 'co.uk'
+        
+
+        if "|" in self.task["PRODUCT"]:
+            self.product = findProduct("https://www.shopdisney.{}/new?srule=Newest&sz=96&start=0".format(self.disneyRegion),self.session,self.taskID,SITE,self.task,self.disneyRegion)
+            while self.product == None:
+                logger.error(SITE,self.taskID,'Failed to find product. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.collect()
+            logger.success(SITE,self.taskID,'Successfully found product => {}'.format(self.product[0]))
+            self.product = self.product[1]
+        elif "shopdisney" in self.task["PRODUCT"]:
+            self.product = self.task["PRODUCT"]
+        else:
             self.product = "https://www.shopdisney.{}/{}.html".format(self.disneyRegion,self.task["PRODUCT"])
-        logger.warning(SITE,self.taskID,'Solving Cloudflare...')
+
+        # logger.warning(SITE,self.taskID,'Solving Cloudflare...')
         try:
             retrieve = self.session.get(self.product, headers={
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
             })
-            logger.success(SITE,self.taskID,'Solved Cloudflare')
+            #logger.success(SITE,self.taskID,'Solved Cloudflare')
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -77,6 +134,11 @@ class DISNEY:
         if retrieve.status_code == 200:
             self.start = time.time()
             logger.success(SITE,self.taskID,'Got product page')
+            regex = r"fe.data.urls.cartShow(.+);"
+            matches = re.search(regex, retrieve.text, re.MULTILINE)
+            if matches:
+
+                self.bag = str(matches.group()).split('= "/')[1].split('"')[0]
             try:
                 soup = BeautifulSoup(retrieve.text, "html.parser")
                 self.productTitle = soup.find("title").text.strip(" ").replace("\n","").split(' - ')[0]
@@ -85,13 +147,11 @@ class DISNEY:
                 self.csrf = soup.find("input",{"name":"csrf_token"})["value"]
                 self.pid = soup.find("input",{"name":"pid"})["value"]
                 self.cartURL = soup.find("form",{"class":"js-pdp-form"})["action"]
-
-                self.siteBase = soup.find('a',{'class':'waymark__link no-transform bc1'})['href']
+                self.siteBase = "https://www.shopdisney.{}".format(self.disneyRegion)
                 self.demandwareBase = self.cartURL.split('Cart-AddProduct')[0]
 
                 self.size = "One Size"
 
-    
                 logger.success(SITE,self.taskID,f'Found Size => {self.size}')
 
                         
@@ -139,8 +199,14 @@ class DISNEY:
 
 
 
-        soup = BeautifulSoup(postCart.text,"html.parser")
-        count = soup.find("span",{"class":"bag-count"}).text
+        try:
+            soup = BeautifulSoup(postCart.text,"html.parser")
+            count = soup.find("span",{"class":"bag-count"}).text
+        except Exception as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.addToCart()
         if postCart.status_code == 200 and int(count) > 0:
             updateConsoleTitle(True,False,SITE)
             logger.success(SITE,self.taskID,'Successfully carted')
@@ -153,7 +219,7 @@ class DISNEY:
     def initiate(self):
         logger.prepare(SITE,self.taskID,'Getting keys...')
         try:
-            bag = self.session.get(self.siteBase + '/bag', headers={
+            bag = self.session.get(self.siteBase + '/' + self.bag, headers={
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'referer': self.product,
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
@@ -165,25 +231,27 @@ class DISNEY:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.initiate()
 
-        
+
         if bag.status_code == 200:
             try:
                 soup = BeautifulSoup(bag.text,"html.parser")
                 self.bagUrl = soup.find('form',{'name':'dwfrm_cart'})['action']
                 self.secureKey = self.bagUrl.split('?dwcont=')[1]
-            except:
+                self.checkoutCart = soup.find('button',{'name':'dwfrm_cart_checkoutCart'})['value']
+            except Exception as e:
+                log.info(e)
                 logger.error(SITE,self.taskID,'Failed to get keys')
                 time.sleep(int(self.task["DELAY"]))
                 self.initiate()
         else:
-            logger.error(SITE,self.taskID,'Failed to get shipping')
+            logger.error(SITE,self.taskID,'Failed to get keys')
             time.sleep(int(self.task["DELAY"]))
             self.initiate()
 
         try:
-            initiate = self.session.post(self.bagUrl,data={"dwfrm_cart_checkoutCart": "Checkout"} ,headers={
+            initiate = self.session.post(self.bagUrl,data={"dwfrm_cart_checkoutCart": self.checkoutCart} ,headers={
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'referer': self.siteBase + "/bag",
+                'referer': self.siteBase + "/" + self.bag,
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
@@ -196,6 +264,7 @@ class DISNEY:
 
         if initiate.status_code == 200:
             soup = BeautifulSoup(initiate.text,"html.parser")
+
             self.bagUrl = soup.find('form',{'id':'checkout-shipping-form'})['action']
             self.shippingKey = soup.find('input',{'name':'dwfrm_singleshipping_securekey'})['value']
     
@@ -214,6 +283,7 @@ class DISNEY:
             logger.error(SITE,self.taskID,'Profile Not Found.')
             time.sleep(10)
             sys.exit()
+
 
         params = {
             'countryCode': profile["countryCode"],
@@ -237,6 +307,7 @@ class DISNEY:
 
 
         if shippingMethods.status_code == 200:
+        
             try:
                 soup = BeautifulSoup(shippingMethods.text,"html.parser")
                 methods = soup.find_all('input',{'name':'dwfrm_singleshipping_shippingAddress_shippingMethodList'})
@@ -368,9 +439,17 @@ class DISNEY:
 
         if postFinal.status_code in [200,302]:
             try:
-                pp = self.session.post(self.demandwareBase + "COSummary-Submit",data={'submit-order': 'Submit Order', 'csrf_token':self.csrf},headers={
+                soup = BeautifulSoup(postFinal.text,"html.parser")
+                self.submitVal = soup.find('button',{'name':'submit-order'})['value']
+            except Exception as e:
+                log.info(e)
+                time.sleep(int(self.task["DELAY"]))
+                logger.error(SITE,self.taskID,'Failed to submit payment. Retrying...')
+
+            try:
+                pp = self.session.post(self.demandwareBase + "COSummary-Submit",data={'submit-order': self.submitVal, 'csrf_token':self.csrf},headers={
                     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                    'referer': self.siteBase + '/bag?dwcont={}'.format(self.secureKey),
+                    'referer': self.siteBase + '/{}?dwcont={}'.format(self.bag,self.secureKey),
                     'content-type': 'application/x-www-form-urlencoded',
                     'authority': f'www.shopdisney.{self.disneyRegion}',
                     'origin': f'https://www.shopdisney.{self.disneyRegion}',
@@ -382,6 +461,7 @@ class DISNEY:
                 time.sleep(int(self.task["DELAY"]))
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 self.paypal()
+            
     
             if pp.status_code in [200,302] and "paypal" in pp.url:
                 self.end = time.time() - self.start
@@ -451,7 +531,6 @@ class DISNEY:
         n = 4
         cardSplit = [number[i:i+n] for i in range(0, len(number), n)]
         cardNumbers = f'{cardSplit[0]} / {cardSplit[1]} / {cardSplit[2]} / {cardSplit[3]}'
-        print(cardNumbers)
 
 
         payload = {
@@ -499,7 +578,7 @@ class DISNEY:
             try:
                 submit = self.session.post(self.demandwareBase + "COSummary-Submit",data={'submit-order': 'Submit Order', 'csrf_token':self.csrf},headers={
                     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                    'referer': self.siteBase + '/bag?dwcont={}'.format(self.secureKey),
+                    'referer': self.siteBase + '/{}?dwcont={}'.format(self.bag,self.secureKey),
                     'content-type': 'application/x-www-form-urlencoded',
                     'authority': f'www.shopdisney.{self.disneyRegion}',
                     'origin': f'https://www.shopdisney.{self.disneyRegion}',

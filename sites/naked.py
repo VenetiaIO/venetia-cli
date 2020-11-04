@@ -29,22 +29,24 @@ class NAKED:
         self.taskID = taskName
 
         twoCap = loadSettings()["2Captcha"]
-        self.session = cloudscraper.create_scraper(
-            requestPostHook=injection,
-            sess=self.sess,
-            interpreter='nodejs',
-            delay=5,
-            browser={
-                'browser': 'chrome',
-                'mobile': False,
-                'platform': 'windows'
-                #'platform': 'darwin'
-            },
-            captcha={
-                'provider': '2captcha',
-                'api_key': twoCap
-            }
-        )
+        try:
+            self.session = cloudscraper.create_scraper(
+                requestPostHook=injection,
+                sess=self.sess,
+                browser={
+                    'browser': 'chrome',
+                    'mobile': False,
+                    'platform': 'windows'
+                    #'platform': 'darwin'
+                },
+                captcha={
+                    'provider': '2captcha',
+                    'api_key': twoCap
+                }
+            )
+        except Exception as e:
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            self.__init__()
         
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
         self.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/603.1.23 (KHTML, like Gecko) Version/10.0 Mobile/14E5239e Safari/602.1'
@@ -52,7 +54,54 @@ class NAKED:
         self.session.headers.update({
             'User-Agent':self.userAgent
         })
-        self.collect()
+        
+        if self.task["ACCOUNT EMAIL"] == "":
+            self.collect()
+        else:
+            self.login()
+        
+
+    def login(self):
+        logger.prepare(SITE,self.taskID,'Preparing login...')
+        captchaResponse = loadToken(SITE)
+        if captchaResponse == "empty":
+            captchaResponse = captcha.v2('6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo',self.task["PRODUCT"],self.session.proxies,SITE,self.taskID)
+
+        payload = {
+            '_AntiCsrfToken': self.antiCsrf,
+            'email': self.task["ACCOUNT EMAIL"],
+            'password': self.task["ACCOUNT PASSWORD"],
+            'g-recaptcha-response':captchaResponse,
+            'action':'login'
+        }
+
+
+        try:
+            login = self.session.post('https://www.nakedcph.com/en/auth/submit', data=payload,headers={
+                'Accept': '*/*',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Accept-Language': 'en-US,en;q=0.9,it;q=0.8',
+                'Referer': 'https://www.nakedcph.com/en/auth/view',
+                'User-Agent': self.userAgent,
+                'X-Requested-With': 'XMLHttpRequest'
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            self.login()
+
+        # self.session.debugRequest(login)
+
+
+        if login.status_code == 200 and login.json()["Response"]["Success"] == True:
+            logger.success(SITE,self.taskID,'Successfully logged in')
+            self.collect()
+        else:
+            logger.error(SITE,self.taskID,'Failed to login. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.login()
 
     def collect(self):
         logger.warning(SITE,self.taskID,'Solving Cloudflare...')
@@ -127,11 +176,7 @@ class NAKED:
                self.collect()
 
 
-            if self.task["ACCOUNT EMAIL"] == "":
-                self.addToCart()
-            else:
-                self.login()
-        
+            self.addToCart()
 
 
         elif retrieve.status_code != 200:
@@ -144,47 +189,6 @@ class NAKED:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.collect()
 
-    def login(self):
-        logger.prepare(SITE,self.taskID,'Preparing login...')
-        captchaResponse = loadToken(SITE)
-        if captchaResponse == "empty":
-            captchaResponse = captcha.v2('6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo',self.task["PRODUCT"],self.session.proxies,SITE,self.taskID)
-
-        payload = {
-            '_AntiCsrfToken': self.antiCsrf,
-            'email': self.task["ACCOUNT EMAIL"],
-            'password': self.task["ACCOUNT PASSWORD"],
-            'g-recaptcha-response':captchaResponse,
-            'action':'login'
-        }
-
-
-        try:
-            login = self.session.post('https://www.nakedcph.com/en/auth/submit', data=payload,headers={
-                'Accept': '*/*',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Accept-Language': 'en-US,en;q=0.9,it;q=0.8',
-                'Referer': 'https://www.nakedcph.com/en/auth/view',
-                'User-Agent': self.userAgent,
-                'X-Requested-With': 'XMLHttpRequest'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.login()
-
-        # self.session.debugRequest(login)
-
-
-        if login.status_code == 200 and login.json()["Response"]["Success"] == True:
-            logger.success(SITE,self.taskID,'Successfully logged in')
-            self.addToCart()
-        else:
-            logger.error(SITE,self.taskID,'Failed to login. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.login()
 
 
     def addToCart(self):

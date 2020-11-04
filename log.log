@@ -1,118 +1,141 @@
-19:45:52,550 root ERROR 'NoneType' object has no attribute 'text'
-19:45:53,973 root ERROR 'NoneType' object has no attribute 'text'
-19:45:55,550 root ERROR 'NoneType' object has no attribute 'text'
-19:46:23,495 root ERROR 'NoneType' object has no attribute 'text'
-19:46:24,976 root ERROR 'NoneType' object has no attribute 'text'
-19:46:26,474 root ERROR 'NoneType' object has no attribute 'text'
-19:46:27,895 root ERROR 'NoneType' object has no attribute 'text'
-20:00:01,333 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1973
-}
-
-20:00:01,339 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1973
-}
-
-20:00:01,433 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1885
-}
-
-20:00:01,693 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1905
-}
-
-20:00:01,694 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1913
-}
-
-20:00:02,25 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1820
-}
-
-20:40:57,606 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
-20:41:05,120 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
-20:41:14,319 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
-20:41:21,335 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
-20:41:31,169 root ERROR ('Connection broken: IncompleteRead(6136 bytes read, 1858 more expected)', IncompleteRead(6136 bytes read, 1858 more expected))
-20:41:39,53 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
-20:41:45,672 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
-20:43:33,188 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
-20:43:45,134 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
-20:43:53,733 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
-20:44:09,118 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
-20:44:16,574 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
-20:44:23,252 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
-20:44:32,423 root ERROR hCaptchaPhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected
-20:44:34,521 root ERROR ('Connection broken: IncompleteRead(6138 bytes read, 2000 more expected)', IncompleteRead(6138 bytes read, 2000 more expected))
-22:59:41,291 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1676
-}
-
-22:59:41,323 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1641
-}
-
-22:59:41,368 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1606
-}
-
-22:59:41,446 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1541
-}
-
-22:59:41,785 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1474
-}
-
-22:59:41,879 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1368
-}
-
-22:59:41,909 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1363
-}
-
-22:59:41,925 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1345
-}
-
-22:59:41,985 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 1050
-}
-
-22:59:43,149 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
-  "global": false, 
-  "message": "You are being rate limited.", 
-  "retry_after": 122
-}
-
+19:40:47,394 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:48,737 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:48,840 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:49,58 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:49,375 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:49,811 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:51,63 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:51,399 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:51,422 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:51,583 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:52,89 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:52,347 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:52,352 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:52,603 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:53,86 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:54,311 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:54,354 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:54,562 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:54,959 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:55,30 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:55,95 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:55,357 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:55,481 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:55,888 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:57,305 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:57,585 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:57,964 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:58,59 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:58,139 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:58,146 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:58,268 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:58,548 root ERROR Expecting value: line 2 column 1 (char 1)
+19:40:58,955 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:00,30 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:00,169 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:00,730 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:00,785 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:00,989 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:01,360 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:01,391 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:01,868 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:01,967 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:02,28 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:02,566 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:02,786 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:03,124 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:03,557 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:03,567 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:04,4 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:04,166 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:04,795 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:04,856 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:05,301 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:05,403 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:05,799 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:05,886 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:06,246 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:06,434 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:06,635 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:06,969 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:07,136 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:07,538 root ERROR Expecting value: line 2 column 1 (char 1)
+19:41:07,968 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:36,293 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:38,96 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:38,718 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:38,762 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:38,958 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:38,995 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:39,37 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:40,755 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:41,330 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:41,401 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:41,692 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:41,830 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:42,108 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:42,128 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:42,524 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:43,437 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:43,967 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:44,272 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:44,476 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:44,839 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:44,899 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:44,942 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:45,165 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:45,458 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:46,372 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:46,417 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:47,263 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:47,525 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:47,871 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:47,880 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:48,307 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:48,506 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:48,527 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:49,47 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:49,62 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:49,938 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:50,177 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:50,632 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:50,997 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:51,58 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:51,90 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:51,560 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:51,718 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:52,617 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:52,871 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:52,880 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:53,485 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:53,522 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:53,904 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:53,998 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:54,327 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:54,693 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:54,700 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:55,234 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:55,602 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:55,803 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:56,173 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:57,93 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:57,185 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:57,447 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:57,497 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:57,662 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:57,782 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:57,833 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:58,109 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:58,287 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:58,681 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:59,1 root ERROR Expecting value: line 2 column 1 (char 1)
+19:51:59,932 root ERROR Expecting value: line 2 column 1 (char 1)
+19:52:00,62 root ERROR Expecting value: line 2 column 1 (char 1)
+19:52:00,353 root ERROR Expecting value: line 2 column 1 (char 1)
+19:52:00,500 root ERROR Expecting value: line 2 column 1 (char 1)
+19:52:00,652 root ERROR Expecting value: line 2 column 1 (char 1)
+19:52:00,958 root ERROR Expecting value: line 2 column 1 (char 1)
+19:52:01,73 root ERROR Expecting value: line 2 column 1 (char 1)
+19:52:01,128 root ERROR Expecting value: line 2 column 1 (char 1)
+19:52:01,300 root ERROR Expecting value: line 2 column 1 (char 1)
+19:52:01,819 root ERROR Expecting value: line 2 column 1 (char 1)

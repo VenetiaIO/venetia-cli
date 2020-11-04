@@ -27,21 +27,24 @@ class ALLIKE:
         self.taskID = taskName
 
         twoCap = loadSettings()["2Captcha"]
-        self.session = cloudscraper.create_scraper(
-            requestPostHook=injection,
-            sess=self.sess,
-            interpreter='nodejs',
-            browser={
-                'browser': 'chrome',
-                'mobile': False,
-                'platform': 'windows'
-                #'platform': 'darwin'
-            },
-            captcha={
-                'provider': '2captcha',
-                'api_key': twoCap
-            }
-        )
+        try:
+            self.session = cloudscraper.create_scraper(
+                requestPostHook=injection,
+                sess=self.sess,
+                browser={
+                    'browser': 'chrome',
+                    'mobile': False,
+                    'platform': 'windows'
+                    #'platform': 'darwin'
+                },
+                captcha={
+                    'provider': '2captcha',
+                    'api_key': twoCap
+                }
+            )
+        except Exception as e:
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            self.__init__()
         
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
 
@@ -201,6 +204,8 @@ class ALLIKE:
             time.sleep(int(self.task["DELAY"]))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.addToCart()
+
+
 
         self.end = time.time() - self.start
         if "paypal" in startExpress.url:

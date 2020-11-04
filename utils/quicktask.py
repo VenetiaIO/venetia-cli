@@ -34,7 +34,7 @@ from sites.footdistrict import FOOTDISTRICT
 from sites.prodirect import PRODIRECT
 from sites.disney import DISNEY
 from sites.cornerstreet import CORNERSTREET
-
+from sites.snipes import SNIPES
 
 sites = {
     "SVD":SVD,
@@ -56,9 +56,12 @@ sites = {
     #"FOOTDISTRICT":FOOTDISTRICT,
     "PRODIRECT":PRODIRECT,
     "DISNEY":DISNEY,
-    "CORNERSTREET":CORNERSTREET
+    #"CORNERSTREET":CORNERSTREET,
+    #"BSTN":BSTN,
+    "SNIPES":SNIPES
 
 }
+
 
 class EndpointAction(object):
 

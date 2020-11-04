@@ -1,11 +1,12 @@
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from utils.config import VERSION
-import winsound
-from utils.functions import loadSettings
+from utils.log import log
+import pymongo
+from utils.functions import getUser
 
 publicWebhook = 'https://discordapp.com/api/webhooks/734209129035333683/3pZfyBnoSIxndJQjsrEQvDGSlKsEoRF8NzwEKggq4jaUHj-A61cGXNW6MXdJMyYX_qbH'
 
-
+mongoConnect = "mongodb+srv://charlieaio:87g[VyhEnY$F?uf8@cluster-main.sqapr.mongodb.net/mydb?retryWrites=true&w=majority"
 
 class discord:
     @staticmethod
@@ -26,26 +27,24 @@ class discord:
         product = kwargs.get('product')
         speed = kwargs.get('speed')
         proxy = kwargs.get('proxy')
+        region = kwargs.get('region')
         if proxy:
             try:
                 proxy = proxy["https"]
             except:
                 proxy = proxy["http"]
 
-        try:
-            try:
-                noise = loadSettings["checkoutNoise"]
-            except:
-                noise = ""
-            if noise.upper() == "Y" or noise.upper() == "":
-                winsound.PlaySound('sound.wav', winsound.SND_FILENAME)
+
+        try:                
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title='Successful Checkout :rocket:', description='', color=0x2feb61)
             embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed.set_timestamp()
     
-            if image: embed.set_thumbnail(url=f'https://imageresize.24i.com/?url={image}')
-            if SITE: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
+            if image: embed.set_thumbnail(url=image)
+            if SITE and region: embed.add_embed_field(name='Site', value=SITE.title() + '  :flag_{}:'.format(region.lower()) ,inline=False)
+            else: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
+
             if productTitle: embed.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
             if productSize: embed.add_embed_field(name='Size', value=str(productSize),inline=True)
             if productPrice: embed.add_embed_field(name='Product Price', value=str(productPrice),inline=True)
@@ -57,9 +56,19 @@ class discord:
             if url: embed.add_embed_field(name='Checkout Link', value=f'[Checkout Here]({url})',inline=False)
             if proxy: embed.add_embed_field(name='Proxy Used', value=f'||`{str(proxy)}`||',inline=False)
             webhook.add_embed(embed)
-    
             webhook.execute()
+
+            myclient = pymongo.MongoClient(mongoConnect)
+            mydb = myclient["mydb"]
+            collection = mydb["collection"]
+
+            user = getUser()["discordName"]
+            data = { "image":image, "site":SITE, "url":product, "product":productTitle, "size":productSize, "price":productPrice, "user":user }
+            x = collection.insert_one(data)
+            
         except Exception as e:
+            print(e)
+            log.info(e)
             pass
 
 
@@ -69,8 +78,10 @@ class discord:
             embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed2.set_timestamp()
     
-            if image: embed2.set_thumbnail(url=f'https://imageresize.24i.com/?url={image}')
-            if SITE: embed2.add_embed_field(name='Site', value=SITE.title(),inline=False)
+            if image: embed2.set_thumbnail(url=image)
+            if SITE and region: embed2.add_embed_field(name='Site', value=SITE.title() + '  :flag_{}:'.format(region.lower()) ,inline=False)
+            else: embed2.add_embed_field(name='Site', value=SITE.title(),inline=False)
+
             if productTitle: embed2.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
             if productSize: embed2.add_embed_field(name='Size', value=str(productSize),inline=False)
             if productPrice: embed2.add_embed_field(name='Product Price', value=str(productPrice),inline=False)
@@ -99,6 +110,7 @@ class discord:
         product = kwargs.get('product')
         speed = kwargs.get('speed')
         proxy = kwargs.get('proxy')
+        region = kwargs.get('region')
         if proxy:
             try:
                 proxy = proxy["https"]
@@ -111,8 +123,10 @@ class discord:
             embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed.set_timestamp()
 
-            if image: embed.set_thumbnail(url=f'https://imageresize.24i.com/?url={image}')
-            if SITE: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
+            if image: embed.set_thumbnail(url=image)
+            if SITE and region: embed.add_embed_field(name='Site', value=SITE.title() + '  :flag_{}:'.format(region) ,inline=False)
+            else: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
+
             if productTitle: embed.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
             if productSize: embed.add_embed_field(name='Size', value=productSize,inline=True)
             if productPrice: embed.add_embed_field(name='Product Price', value=productPrice,inline=True)
