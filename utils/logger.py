@@ -15,7 +15,7 @@ def get_task(SITE,taskID):
     x = datetime.datetime.now()
     x = f'{x.strftime("%X")}.{x.strftime("%f")}'
     #thread = threading.currentThread().getName()
-    status = '[{}{}{}{}{}{}'.format(Fore.CYAN + Style.BRIGHT + x, Fore.WHITE + '][ ', Fore.YELLOW + taskID, Fore.WHITE + ' ][',Fore.WHITE + SITE.title(), Fore.WHITE + ']')
+    status = '[{}{}{}{}{}{}'.format(Fore.CYAN + Style.BRIGHT + x, Fore.WHITE + '][ ', Fore.YELLOW + taskID, Fore.WHITE + ' ][ ',Fore.WHITE + SITE.title(), Fore.WHITE + ' ]')
     return status
 
 

@@ -12,7 +12,10 @@ from pypresence import Presence
 import uuid
 import os
 import click
-import win32console 
+try:
+    import win32console 
+except:
+    pass
 from utils.config import VERSION
 init(autoreset=True)
 
@@ -27,7 +30,10 @@ click.secho = secho
 
 
 # os.system("title VenetiaIO CLI [Version {}]".format(VERSION))
-win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI".format(VERSION))
+try:
+    win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI".format(VERSION))
+except:
+    pass
 
 #sites
 from sites.svd import SVD
@@ -90,6 +96,7 @@ sites = {
     #"CORNERSTREET":CORNERSTREET,
     #"BSTN":BSTN,
     "SNIPES":SNIPES,
+    "COURIR":COURIR
     #"SOLEBOX":SOLEBOX
 
 }
@@ -177,7 +184,10 @@ class Menu:
                 if row["SITE"].lower() == key_chosen.lower():
                     if row["PRODUCT"] != "":
                         try:
-                            win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,key_chosen.title(),"0","0"))
+                            try:
+                                win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,key_chosen.title(),"0","0"))
+                            except:
+                                pass
                             self.RPC.update(large_image="image", state=f"Version {VERSION}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
                         except:
                             pass
@@ -207,16 +217,16 @@ class Menu:
      
         print('                 Welcome To...                  ')
         logger.logo(logo,VERSION)
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('Start All Tasks','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('Start Specific Tasks','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('View Config','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('Edit Config','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('5','red', attrs=["bold"]), colored('Create Profile','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('6','red', attrs=["bold"]), colored('View|Edit Profiles','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('7','red', attrs=["bold"]), colored('Generate Captchas','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('8','red', attrs=["bold"]), colored('Account Gen','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('9','red', attrs=["bold"]), colored('Cookie Gen','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('10','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('01','red', attrs=["bold"]), colored('Start All Tasks','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('02','red', attrs=["bold"]), colored('Start Specific Tasks','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('03','red', attrs=["bold"]), colored('View Config','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('04','red', attrs=["bold"]), colored('Edit Config','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('05','red', attrs=["bold"]), colored('Create Profile','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('06','red', attrs=["bold"]), colored('View|Edit Profiles','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('07','red', attrs=["bold"]), colored('Generate Captchas','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('08','red', attrs=["bold"]), colored('Account Gen','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('09','red', attrs=["bold"]), colored('Cookie Gen','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('10','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
         #sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
         sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
         try:
@@ -226,7 +236,10 @@ class Menu:
             self.menu()
         
         if option == 1:
-            win32console.SetConsoleTitle("] Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,"Running Tasks","0","0"))
+            try:
+                win32console.SetConsoleTitle("] Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,"Running Tasks","0","0"))
+            except:
+                pass
 
             with open('./data/tasks.csv','r') as csvFile:
                 csv_reader = csv.DictReader(csvFile)
@@ -259,14 +272,14 @@ class Menu:
                     availableSites[row] = sites[row]
 
             for s in availableSites:
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored(number,'red', attrs=["bold"]), colored(s.title(),'red', attrs=["bold"])))
+                logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored(number,'red', attrs=["bold"]), colored(s.title(),'red', attrs=["bold"])))
                 number = number + 1
             
 
             
 
             menuNum = number
-            logger.menu('VENETIA','Menu','[{}] => {}'.format(colored(menuNum,'red', attrs=["bold"]), colored('RETURN TO MAIN Menu','red', attrs=["bold"])))
+            logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored(menuNum,'red', attrs=["bold"]), colored('RETURN TO MAIN Menu','red', attrs=["bold"])))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             siteSelection = input(' Select a site => ')
             if int(siteSelection) == menuNum:
@@ -773,13 +786,13 @@ class Menu:
         if option == 9:
             # self.menu()
             
-            #logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('COURIR','cyan')))
+            logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('COURIR','cyan')))
             #logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('STARCOW','cyan')))
-            logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('SLAM JAM','cyan')))
-            logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
+            logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('SLAM JAM','cyan')))
+            logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write(colored(f'\n[{get_time()}][Venetia-Menu]','cyan',attrs=["bold"]))
             cookieSiteSelect = input(' Select a site => ')
-            if cookieSiteSelect == "2":
+            if cookieSiteSelect == "3":
                 self.menu()
 
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
@@ -789,10 +802,13 @@ class Menu:
 
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             amount = input(' Enter amount => ')
-            sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            region = input(' Enter Site Region (example: GB) => ')
 
             if cookieSiteSelect == "1":
+                for i in range(int(amount)):
+                    threading.Thread(target=datadome.courir,args=(proxies,)).start()
+            if cookieSiteSelect == "2":
+                sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
+                region = input(' Enter Site Region (example: GB) => ')
                 for i in range(int(amount)):
                     threading.Thread(target=datadome.slamjam,args=(proxies,region,)).start()
             #if cookieSiteSelect == "2":
