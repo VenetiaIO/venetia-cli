@@ -245,7 +245,7 @@ class SLAMJAM:
         }
         try:
             cart = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/Cart-AddProduct',data=cartPayload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -304,7 +304,7 @@ class SLAMJAM:
 
         try:
             shipping = self.session.get(f'https://www.slamjam.com/en_{self.region}/checkout-begin?stage=shipping#shipping')
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -384,7 +384,7 @@ class SLAMJAM:
         logger.prepare(SITE,self.taskID,'Retrieving shipping rates')
         try:
             shippingMethods = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/CheckoutShippingServices-UpdateShippingMethodsList',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -445,7 +445,7 @@ class SLAMJAM:
         logger.prepare(SITE,self.taskID,'Posting shipping details...')
         try:
             shipping = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/CheckoutShippingServices-SubmitShipping',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -517,7 +517,7 @@ class SLAMJAM:
 
         try:
             payment = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/CheckoutServices-SubmitPayment',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -630,7 +630,7 @@ class SLAMJAM:
         }
         try:
             payment = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/CheckoutServices-SubmitPayment',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)

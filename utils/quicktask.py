@@ -3,6 +3,12 @@ import csv
 import json
 import threading
 import logging
+from utils.config import VERSION
+
+try:
+    import win32console 
+except:
+    pass
 
 app = Flask(__name__)
 app.logger.disabled = True
@@ -111,8 +117,12 @@ def action():
             "ACCOUNT PASSWORD":settings["quickTaskPassword"]
         }
     
-        taskName = 'QUICK-TASK'
+        taskName = 'QT'
         threading.Thread(target=sites.get(row["SITE"].upper()),args=(row,taskName)).start()
+        try:
+            win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,row["SITE"].upper(),"0","0"))
+        except:
+            pass
     
         return 'Executing Quicktask...'
 
