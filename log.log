@@ -1,141 +1,163 @@
-19:40:47,394 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:48,737 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:48,840 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:49,58 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:49,375 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:49,811 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:51,63 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:51,399 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:51,422 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:51,583 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:52,89 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:52,347 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:52,352 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:52,603 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:53,86 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:54,311 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:54,354 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:54,562 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:54,959 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:55,30 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:55,95 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:55,357 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:55,481 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:55,888 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:57,305 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:57,585 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:57,964 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:58,59 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:58,139 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:58,146 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:58,268 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:58,548 root ERROR Expecting value: line 2 column 1 (char 1)
-19:40:58,955 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:00,30 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:00,169 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:00,730 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:00,785 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:00,989 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:01,360 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:01,391 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:01,868 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:01,967 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:02,28 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:02,566 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:02,786 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:03,124 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:03,557 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:03,567 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:04,4 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:04,166 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:04,795 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:04,856 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:05,301 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:05,403 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:05,799 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:05,886 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:06,246 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:06,434 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:06,635 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:06,969 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:07,136 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:07,538 root ERROR Expecting value: line 2 column 1 (char 1)
-19:41:07,968 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:36,293 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:38,96 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:38,718 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:38,762 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:38,958 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:38,995 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:39,37 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:40,755 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:41,330 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:41,401 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:41,692 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:41,830 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:42,108 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:42,128 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:42,524 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:43,437 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:43,967 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:44,272 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:44,476 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:44,839 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:44,899 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:44,942 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:45,165 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:45,458 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:46,372 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:46,417 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:47,263 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:47,525 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:47,871 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:47,880 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:48,307 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:48,506 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:48,527 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:49,47 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:49,62 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:49,938 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:50,177 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:50,632 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:50,997 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:51,58 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:51,90 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:51,560 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:51,718 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:52,617 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:52,871 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:52,880 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:53,485 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:53,522 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:53,904 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:53,998 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:54,327 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:54,693 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:54,700 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:55,234 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:55,602 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:55,803 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:56,173 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:57,93 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:57,185 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:57,447 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:57,497 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:57,662 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:57,782 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:57,833 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:58,109 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:58,287 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:58,681 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:59,1 root ERROR Expecting value: line 2 column 1 (char 1)
-19:51:59,932 root ERROR Expecting value: line 2 column 1 (char 1)
-19:52:00,62 root ERROR Expecting value: line 2 column 1 (char 1)
-19:52:00,353 root ERROR Expecting value: line 2 column 1 (char 1)
-19:52:00,500 root ERROR Expecting value: line 2 column 1 (char 1)
-19:52:00,652 root ERROR Expecting value: line 2 column 1 (char 1)
-19:52:00,958 root ERROR Expecting value: line 2 column 1 (char 1)
-19:52:01,73 root ERROR Expecting value: line 2 column 1 (char 1)
-19:52:01,128 root ERROR Expecting value: line 2 column 1 (char 1)
-19:52:01,300 root ERROR Expecting value: line 2 column 1 (char 1)
-19:52:01,819 root ERROR Expecting value: line 2 column 1 (char 1)
+16:20:13,971 asyncio ERROR Task exception was never retrieved
+future: <Task finished name='Task-43' coro=<BaseClient.read_output() done, defined at C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\pypresence\baseclient.py:97> exception=UnicodeDecodeError('utf-8', b'{"cmd":"SET_ACTIVITY","data":{"state":"Version 0.4.7.5","details":"Running 107 Task(s)...","timestamps":{"start":1605629987000},"assets":{"large_image":"726839661007208518","small_image":"726839661007208518","small_text":"@venetiaIO"},"party":{},"secrets":{},"name":"Venetia IO CLI","application_id":"726839544124670093","flags":1},"evt":null,"nonce":"1605630013.87321424484252929688"}\x01\x00\x00\x00\x81\x01\x00\x00{"cmd":"SET_ACTIVITY","data":{"state":"Version 0.4.7.5","details":"Running 107 Task(s)...","timestamps":{"start":1605629987000},"assets":{"large_image":"726839661007208518","small_image":"726839661007208518","small_text":"@venetiaIO"},"party":{},"secrets":{},"name":"Venetia IO CLI","application_id":"726839544124670093","flags":1},"evt":null,"nonce":"1605630013.95016503334045410156"}', 389, 390, 'invalid start byte')>
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\pypresence\baseclient.py", line 103, in read_output
+    payload = json.loads(data[8:].decode('utf-8'))
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0x81 in position 389: invalid start byte
+16:52:33,278 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,286 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,293 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,302 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,307 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,329 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,334 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,406 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,408 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,456 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,485 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,545 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,545 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,611 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,660 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,676 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,700 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,701 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:33,704 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,165 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,338 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,343 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,343 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,349 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,382 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,384 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,386 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,407 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,411 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,414 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,416 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,418 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,419 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,422 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,424 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,427 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,430 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,434 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,437 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,439 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,441 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,443 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,445 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,447 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,449 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,451 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,454 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,457 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,459 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,461 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,463 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,465 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,468 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:34,592 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,493 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,495 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,496 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,499 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,499 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,504 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,507 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,510 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,511 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,528 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,530 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,533 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,536 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,541 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,550 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,554 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,557 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,559 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,561 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,563 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,565 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,567 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,578 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,580 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,582 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,584 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,588 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,591 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:35,596 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,480 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,528 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,529 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,531 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,532 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,543 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,558 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,561 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,563 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,568 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,592 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,594 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,619 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,625 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,629 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,631 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,634 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,639 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,642 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,645 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,648 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,653 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,656 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,670 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,673 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,676 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,678 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,681 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,683 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,685 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,689 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,717 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,741 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,774 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,889 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:36,892 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:37,12 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:37,33 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:37,80 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:37,90 root ERROR CloudflarePhaseOne() -> Response -> Error -> Invalid Challenge Answer Detected -> 407eb16bb71226c
+16:52:37,127 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:37,174 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:52:37,176 root ERROR Failed to parse: https://proxy.dashproxies.io:7777@customer-dpcharlieaio-cc-uk:294925561359
+16:55:54,616 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABGQ74V646951U072392B/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:55:56,3 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABGY4KA80730MU0952128/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:55:57,170 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABHA4YH208458B081435N/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:55:59,61 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABHQ61T57113LP391301D/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:55:59,777 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABHY3JY717547P846483W/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:55:59,886 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABHY877757259J615460V/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:01,594 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABIA5AS15362GF312124S/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:01,656 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABIA7NF26455TX9033407/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:01,656 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABII899638988N008752E/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:02,315 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABII2NU00362GP4937458/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:02,319 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABII92N92834FA5803715/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:02,651 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABII0SD76422CH3996546/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:03,959 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABIY5NT713653V865770P/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:04,266 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABIY7BV82170P1093871X/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:04,436 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABIY39B17012T25982912/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:05,7 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABJA75R82045HG174734N/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:05,157 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABJA1XC71770115865348/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:05,177 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABJA4HG43205PB871151G/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:05,865 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABJI34G75492FB3351248/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:06,629 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABJQ5LC99471E5106941U/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:07,221 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABJQ92581864WC4507001/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+16:56:07,221 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /smart/api/payment/PAYID-L62ABJQ96G29826DR4577547/ectoken (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 403 Forbidden')))
+22:48:44,211 root ERROR HTTPSConnectionPool(host='www.shopdisney.co.uk', port=443): Max retries exceeded with url: /https://www.snipes.com/p/jordan-air_jordan_1_low-laser_blue%2Fblack%2Fwhite-00013801881150.html.html (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+22:48:47,430 root ERROR HTTPSConnectionPool(host='www.shopdisney.co.uk', port=443): Max retries exceeded with url: /https://www.snipes.com/p/jordan-air_jordan_1_low-laser_blue%2Fblack%2Fwhite-00013801881150.html.html (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+22:48:50,724 root ERROR HTTPSConnectionPool(host='www.shopdisney.co.uk', port=443): Max retries exceeded with url: /https://www.snipes.com/p/jordan-air_jordan_1_low-laser_blue%2Fblack%2Fwhite-00013801881150.html.html (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+22:49:57,816 root ERROR HTTPSConnectionPool(host='www.shopdisney.co.uk', port=443): Max retries exceeded with url: /461019946077.html (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+22:50:00,991 root ERROR HTTPSConnectionPool(host='www.shopdisney.co.uk', port=443): Max retries exceeded with url: /461019946077.html (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+22:50:04,203 root ERROR HTTPSConnectionPool(host='www.shopdisney.co.uk', port=443): Max retries exceeded with url: /461019946077.html (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+22:50:07,353 root ERROR HTTPSConnectionPool(host='www.shopdisney.co.uk', port=443): Max retries exceeded with url: /461019946077.html (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+23:05:30,796 root ERROR HTTPSConnectionPool(host='www.shopdisney.co.uk', port=443): Max retries exceeded with url: /461019946077.html (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+23:05:33,934 root ERROR HTTPSConnectionPool(host='www.shopdisney.co.uk', port=443): Max retries exceeded with url: /461019946077.html (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))

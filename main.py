@@ -786,10 +786,10 @@ class Menu:
         if option == 9:
             # self.menu()
             
-            logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('COURIR','cyan')))
+            logger.menu('VENETIA','Cookies','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('COURIR','cyan')))
             #logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('STARCOW','cyan')))
-            logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('SLAM JAM','cyan')))
-            logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
+            logger.menu('VENETIA','Cookies','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('SLAM JAM','cyan')))
+            logger.menu('VENETIA','Cookies','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write(colored(f'\n[{get_time()}][Venetia-Menu]','cyan',attrs=["bold"]))
             cookieSiteSelect = input(' Select a site => ')
             if cookieSiteSelect == "3":

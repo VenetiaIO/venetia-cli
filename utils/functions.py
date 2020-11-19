@@ -11,7 +11,12 @@ from utils.config import VERSION
 import cloudscraper
 import base64
 from pynotifier import Notification
-# from win10toast import ToastNotifier
+try:
+  from win10toast import ToastNotifier
+except:
+  pass
+
+
 try:
   import winsound
 except:
@@ -70,6 +75,7 @@ def loadProxy(proxies,taskID, SITE):
         proxyList = [i for i in proxyInput]
         p = random.choice(proxyList)
         p = p.split(':')
+
         try:
             proxies = {
                 'http': f'http://{p[2]}:{p[3]}@{p[0]}:{p[1]}',
@@ -190,8 +196,11 @@ def urlEncode(quote):
     return urllib.parse.quote(str(quote))
 
 def encodeURIComponent(str):
+  try:
     encoded = urllib.parse.quote(str, safe='~()*!.\'')
     return encoded
+  except Exception as e:
+    return str
 
 def decodeURIComponent(str):
     decoded = urllib.parse.unquote(str)
