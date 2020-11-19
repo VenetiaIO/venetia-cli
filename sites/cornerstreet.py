@@ -61,7 +61,7 @@ class CORNERSTREET:
                 'authority': 'www.cornerstreet.fr'
             })
             logger.success(SITE,self.taskID,'Solved Cloudflare')
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -170,7 +170,7 @@ class CORNERSTREET:
                 'content-type': 'application/x-www-form-urlencoded',
                 'cookie':'frontend={}; frontend_cid={};'.format(self.frontend,self.frontend_cid)
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -211,7 +211,7 @@ class CORNERSTREET:
                 'referer': 'https://www.cornerstreet.fr/checkout/cart/',
                 'Cookie':'frontend={}; frontend_cid={}; _mcnc=1;'.format(self.frontend,self.frontend_cid)
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -231,7 +231,7 @@ class CORNERSTREET:
                 'content-type': 'application/x-www-form-urlencoded',
                 'cookie':'frontend={}; frontend_cid={}; _mcnc=1;'.format(self.frontend,self.frontend_cid)
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -265,7 +265,7 @@ class CORNERSTREET:
                 'referer': 'https://www.cornerstreet.fr/checkout/onepage/',
                 'Cookie':'frontend={}; frontend_cid={}; _mcnc=1;'.format(self.frontend,self.frontend_cid)
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -333,7 +333,7 @@ class CORNERSTREET:
                     'x-prototype-version':'1.7',
                     'x-requested-with': 'XMLHttpRequest'
                 })
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))

@@ -7,17 +7,29 @@ import urllib.parse
 import time
 import random
 import threading
-import win32console 
 from utils.config import VERSION
 import cloudscraper
 import base64
 from pynotifier import Notification
-from win10toast import ToastNotifier
-import winsound
+try:
+  from win10toast import ToastNotifier
+except:
+  pass
+
+
+try:
+  import winsound
+except:
+  pass
 
 from utils.logger import logger
 from utils.captcha import captcha
 from helheim import helheim
+
+try:
+  import win32console 
+except:
+  pass
 
 def injection(session, response):
     if session.is_New_IUAM_Challenge(response) \
@@ -63,6 +75,7 @@ def loadProxy(proxies,taskID, SITE):
         proxyList = [i for i in proxyInput]
         p = random.choice(proxyList)
         p = p.split(':')
+
         try:
             proxies = {
                 'http': f'http://{p[2]}:{p[3]}@{p[0]}:{p[1]}',
@@ -94,19 +107,25 @@ def getUser():
 
 def updateConsoleTitle(carted,checkedOut, SITE):
     if carted == True:
-        title = win32console.GetConsoleTitle()
-        carted = title.split('Carted: ')[1].split(' |')[0]
-        newCarted = int(carted) + 1
-
-        checked = title.split('Checked Out: ')[1].split(' |')[0]
-        win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,SITE.title(),newCarted,checked))
+        try:
+          title = win32console.GetConsoleTitle()
+          carted = title.split('Carted: ')[1].split(' |')[0]
+          newCarted = int(carted) + 1
+  
+          checked = title.split('Checked Out: ')[1].split(' |')[0]
+          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,SITE.title(),newCarted,checked))
+        except:
+          pass
     if checkedOut == True:
-        title = win32console.GetConsoleTitle()
-        checked = title.split('Checked Out: ')[1].split(' |')[0]
-        newChecked = int(checked) + 1
-
-        carted = title.split('Carted: ')[1].split(' |')[0]
-        win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,SITE.title(),carted,newChecked))
+        try:
+          title = win32console.GetConsoleTitle()
+          checked = title.split('Checked Out: ')[1].split(' |')[0]
+          newChecked = int(checked) + 1
+  
+          carted = title.split('Carted: ')[1].split(' |')[0]
+          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,SITE.title(),carted,newChecked))
+        except:
+          pass
 
 def loadCookie(SITE):
     with open('./data/cookies/datadome.json','r') as tokens:
@@ -145,14 +164,17 @@ def loadToken(SITE):
 
 def sendNotification(site, text):
     try:
-        hr = ToastNotifier()
-
+        noise = loadSettings()["checkoutNoise"]
+    except:
+        noise = ""
+    if noise.upper() == "Y" or noise.upper() == "":
         try:
-            noise = loadSettings()["checkoutNoise"]
+          winsound.PlaySound('sound.wav', winsound.SND_FILENAME)
         except:
-            noise = ""
-        if noise.upper() == "Y" or noise.upper() == "":
-            winsound.PlaySound('sound.wav', winsound.SND_FILENAME)
+          pass
+
+    try:
+        hr = ToastNotifier()
 
         hr.show_toast(
             title='{} | Successful Checkout'.format(site.title()),
@@ -161,14 +183,24 @@ def sendNotification(site, text):
             duration=5
         )
     except:
-        pass
+      
+        Notification(
+          title='{} | Successful Checkout'.format(site.title()),
+          description=f'Checked out {text}',
+          icon_path='E:\\venetia-io-cli\\favicon.ico', # On Windows .ico is required, on Linux - .png
+          duration=5,                              # Duration in seconds
+          urgency=Notification.URGENCY_CRITICAL
+        ).send()
 
 def urlEncode(quote):
     return urllib.parse.quote(str(quote))
 
 def encodeURIComponent(str):
+  try:
     encoded = urllib.parse.quote(str, safe='~()*!.\'')
     return encoded
+  except Exception as e:
+    return str
 
 def decodeURIComponent(str):
     decoded = urllib.parse.unquote(str)
