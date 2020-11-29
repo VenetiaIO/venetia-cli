@@ -41,7 +41,12 @@ class discord:
             embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed.set_timestamp()
     
-            if image: embed.set_thumbnail(url=image)
+            if image:
+                try:
+                    embed.set_thumbnail(url=image)
+                except Exception as e:
+                    log.info(e)
+
             if SITE and region: embed.add_embed_field(name='Site', value=SITE.title() + '  :flag_{}:'.format(region.lower()) ,inline=False)
             else: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
 
@@ -78,7 +83,12 @@ class discord:
             embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed2.set_timestamp()
     
-            if image: embed2.set_thumbnail(url=image)
+            if image:
+                try:
+                    embed2.set_thumbnail(url=image)
+                except Exception as e:
+                    log.info(e)
+
             if SITE and region: embed2.add_embed_field(name='Site', value=SITE.title() + '  :flag_{}:'.format(region.lower()) ,inline=False)
             else: embed2.add_embed_field(name='Site', value=SITE.title(),inline=False)
 

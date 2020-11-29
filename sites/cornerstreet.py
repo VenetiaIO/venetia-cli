@@ -11,6 +11,7 @@ import os
 import base64
 import cloudscraper
 import string
+from urllib3.exceptions import HTTPError
 from urllib.parse import urlencode, quote_plus
 
 
@@ -50,7 +51,7 @@ class CORNERSTREET:
         self.collect()
 
     def collect(self):
-        logger.warning(SITE,self.taskID,'Solving Cloudflare...')
+        logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
             retrieve = self.session.get(self.task["PRODUCT"], headers={
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -60,8 +61,7 @@ class CORNERSTREET:
                 'sec-fetch-site': 'same-origin',
                 'authority': 'www.cornerstreet.fr'
             })
-            logger.success(SITE,self.taskID,'Solved Cloudflare')
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -170,7 +170,7 @@ class CORNERSTREET:
                 'content-type': 'application/x-www-form-urlencoded',
                 'cookie':'frontend={}; frontend_cid={};'.format(self.frontend,self.frontend_cid)
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -211,7 +211,7 @@ class CORNERSTREET:
                 'referer': 'https://www.cornerstreet.fr/checkout/cart/',
                 'Cookie':'frontend={}; frontend_cid={}; _mcnc=1;'.format(self.frontend,self.frontend_cid)
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -231,7 +231,7 @@ class CORNERSTREET:
                 'content-type': 'application/x-www-form-urlencoded',
                 'cookie':'frontend={}; frontend_cid={}; _mcnc=1;'.format(self.frontend,self.frontend_cid)
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -265,7 +265,7 @@ class CORNERSTREET:
                 'referer': 'https://www.cornerstreet.fr/checkout/onepage/',
                 'Cookie':'frontend={}; frontend_cid={}; _mcnc=1;'.format(self.frontend,self.frontend_cid)
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -312,7 +312,6 @@ class CORNERSTREET:
                 'form_key': self.formKey
             }
             payloadEncoded = urlencode(payload, quote_via=quote_plus)
-            #e::cornerstreet.fr::SSIekepEYHjQB+GkHevkaeMt8qBHfun14pt2/+RnD91LyMqTpZ5C0ejGMCk0R+Y2::2	
 
 
 
@@ -333,7 +332,7 @@ class CORNERSTREET:
                     'x-prototype-version':'1.7',
                     'x-requested-with': 'XMLHttpRequest'
                 })
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))

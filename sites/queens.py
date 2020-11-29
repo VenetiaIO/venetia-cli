@@ -9,6 +9,7 @@ import re
 import json
 import base64
 import string
+from urllib3.exceptions import HTTPError
 SITE = 'QUEENS'
 
 from utils.logger import logger
@@ -58,6 +59,7 @@ class QUEENS:
         self.collect()
 
     def collect(self):
+        logger.prepare(SITE,self.taskID,'Getting product page...')
         if 'https' in self.task["PRODUCT"]:
             link = self.task["PRODUCT"]
             mode = 'link'
@@ -68,7 +70,7 @@ class QUEENS:
                 link = f'https://www.queens.{self.region}/new-arrivals/#n=100'
         try:
             retrieve = self.session.get(link)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -166,7 +168,7 @@ class QUEENS:
 
         try:
             postCart = self.session.post(f'https://www.queens.{self.region}/ajax/addcart/',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -177,7 +179,7 @@ class QUEENS:
             checkCart = self.session.get(f'https://www.queens.{self.region}/ajax/cartupdatestatus/')
             soup = BeautifulSoup(checkCart.text,"html.parser")
             cart = soup.find("span",{"class":"cart-notify"}).text
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -232,7 +234,7 @@ class QUEENS:
 
         try:
             getCountry = self.session.get(f'https://www.queens.{self.region}/checkout/country/')
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -249,7 +251,7 @@ class QUEENS:
             }
             try:
                 country = self.session.post(f'https://www.queens.{self.region}/checkout/country/',data=payload)
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -294,7 +296,7 @@ class QUEENS:
         }
         try:
             methods = self.session.post(f'https://www.queens.{self.region}/checkout/shipping/',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -333,7 +335,7 @@ class QUEENS:
         }
         try:
             finish = self.session.post(f'https://www.queens.{self.region}/checkout/delivery/',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -354,7 +356,7 @@ class QUEENS:
             try:
                 smartButton = self.session.get('https://www.paypal.com/smart/buttons/?clientID=AR-aWcHvERa9mDAl3Jwyo39Yc7-4uaiiLom6Rhc8vkfxMkXlx0pzA9aEdoD7WMzsh-E6ICBRR7veqdWd')
                 self.facilitatorAccessToken = smartButton.text.split('"facilitatorAccessToken":"')[1].split('"')[0]
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -364,7 +366,7 @@ class QUEENS:
             self.session.headers["authorization"] = 'Bearer {}'.format(self.facilitatorAccessToken)
             try:
                 paypalOrder = self.session.post('https://www.paypal.com/v2/checkout/orders',json={"purchase_units":[{"amount":{"currency_code":self.orderCurrency,"value":self.orderTotal},"custom_id":orderNumber}],"application_context":{"shipping_preference":"NO_SHIPPING"},"intent":"CAPTURE"})
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))

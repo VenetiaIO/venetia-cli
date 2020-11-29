@@ -11,12 +11,13 @@ import os
 import base64
 import cloudscraper
 import string
+from urllib3.exceptions import HTTPError
 
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
 from utils.px import PX
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, randomUA)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, randomUA, scraper)
 SITE = 'SOLEBOX'
 
 
@@ -27,21 +28,7 @@ class SOLEBOX:
         self.taskID = taskName
 
         twoCap = loadSettings()["2Captcha"]
-        # self.session = cloudscraper.create_scraper(
-            # requestPostHook=injection,
-            # sess=self.sess,
-            # interpreter='nodejs',
-            # browser={
-                # 'browser': 'chrome',
-                # 'mobile': False,
-                # 'platform': 'windows'
-                # 'platform': 'darwin'
-            # },
-            # captcha={
-                # 'provider': '2captcha',
-                # 'api_key': twoCap
-            # }
-        # )
+        self.session = scraper()
         
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
 
@@ -72,6 +59,11 @@ class SOLEBOX:
         while cookies["px3"] == "error":
             cookies = PX.solebox(self.session, f'https://www.solebox.{self.sbxRegion}', self.taskID)
 
+        # cookies = {
+            # "px3":"ac08116f98518486ec5360dd908ce999ee7987bf7e105c7e457da35858141939:7GZ1I82ASmY915G8xfCWCqAOwoII9kaLfdbUygqr7yiyCcFu8aOrNge0X6SZGApHwDwhTYxg+vrOuUDEfpVacA==:1000:sPz2JAE0xx9rG+IzvtFeCvg88gClwqfVNg9OlfjcbcCQfn/rkSDWtzJxl2fr/R5qQ/La9LMK18y2T19cMMBu7ts3YvyEVCvxpKk92YvdRz1Iq3VxR2b1r3XLOGzkaC4cYUb+qA8v08fuNjQlhP+1ZsAWHzUMTmx+VDgMYQ4efvw=",
+            # "vid":"edeee4f2-1c2c-11eb-a3b3-0242ac120007"
+        # }
+
         cookie_obj = requests.cookies.create_cookie(domain=f'www.solebox.{self.sbxRegion}',name='_px3',value=cookies['px3'])
         cookie_obj2 = requests.cookies.create_cookie(domain=f'www.solebox.{self.sbxRegion}',name='_pxvid',value=cookies['vid'])
         self.session.cookies.set_cookie(cookie_obj)
@@ -92,7 +84,7 @@ class SOLEBOX:
         logger.prepare(SITE,self.taskID,'Getting product info...')
         try:
             retrieve = self.session.get(self.queryUrl)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -200,7 +192,7 @@ class SOLEBOX:
 
         try:
             cart = self.session.post(f'https://www.solebox.{self.sbxRegion}/add-product?format=ajax',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)

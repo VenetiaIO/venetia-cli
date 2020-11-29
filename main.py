@@ -62,6 +62,7 @@ from sites.disney import DISNEY
 from sites.cornerstreet import CORNERSTREET
 from sites.snipes import SNIPES
 from sites.solebox import SOLEBOX
+from sites.fenom import FENOM
 
 #utils
 from utils.quicktask import QT
@@ -96,8 +97,9 @@ sites = {
     #"CORNERSTREET":CORNERSTREET,
     #"BSTN":BSTN,
     "SNIPES":SNIPES,
-    "COURIR":COURIR
-    #"SOLEBOX":SOLEBOX
+    #"COURIR":COURIR,
+    #"SOLEBOX":SOLEBOX,
+    #"FENOM":FENOM
 
 }
 
@@ -229,6 +231,7 @@ class Menu:
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('10','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
         #sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
         sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
+        option = ''
         try:
             option = int(input(' Pick an option => '))
         except ValueError:
@@ -264,7 +267,7 @@ class Menu:
                                 i = i + 1
                                 threading.Thread(target=sites.get(row["SITE"].upper()),args=(row,taskName)).start()
  
-        if option == 2:
+        elif option == 2:
             number = 1
             availableSites = {}
             for row in sorted(sites):
@@ -286,7 +289,7 @@ class Menu:
                 self.menu()
             self.siteSelectFunc(availableSites, siteSelection)
 
-        if option == 3:
+        elif option == 3:
             try:
                 with open('./data/config.json') as config:
                     config = json.loads(config.read())
@@ -323,7 +326,7 @@ class Menu:
                 option = input(' [ENTER] TO RETURN TO Menu ')
                 self.menu()
 
-        if option == 4:
+        elif option == 4:
             with open('./data/config.json') as config:
                 config = json.loads(config.read())
                 print(colored(f"[{get_time()}] Configure Config Below (Leave blank to leave unchanged) ", "red",attrs=['bold']))
@@ -415,7 +418,7 @@ class Menu:
                 option = input(' [ENTER] TO RETURN TO Menu ')
                 self.menu()
 
-        if option == 5:
+        elif option == 5:
             try:
                 self.RPC.update(large_image="image", state=f"Version {VERSION}", details='Creating Profiles...', start=self.rpctime,small_image="image",small_text="@venetiaIO")
             except:
@@ -461,7 +464,7 @@ class Menu:
             option = input(' [ENTER] TO RETURN TO Menu ')
             self.menu()
 
-        if option == 6:
+        elif option == 6:
             with open(f'./data/profiles/profiles.json','r') as profileRead:
                 profiles = json.loads(profileRead.read())
 
@@ -692,7 +695,7 @@ class Menu:
 
             
 
-        if option == 7:
+        elif option == 7:
             print('[{}] Would you like to clear current captcha tokens ?   Y | N'.format(colored(get_time(),'red',attrs=['bold'])))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             cleartokenQuestion = input(' Pick an option => ')
@@ -783,16 +786,16 @@ class Menu:
             if threading.active_count() == 2:
                 self.menu()
         
-        if option == 9:
+        elif option == 9:
             # self.menu()
             
             logger.menu('VENETIA','Cookies','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('COURIR','cyan')))
-            #logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('STARCOW','cyan')))
             logger.menu('VENETIA','Cookies','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('SLAM JAM','cyan')))
-            logger.menu('VENETIA','Cookies','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
+            logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('STARCOW','cyan')))
+            logger.menu('VENETIA','Cookies','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write(colored(f'\n[{get_time()}][Venetia-Menu]','cyan',attrs=["bold"]))
             cookieSiteSelect = input(' Select a site => ')
-            if cookieSiteSelect == "3":
+            if cookieSiteSelect == "4":
                 self.menu()
 
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
@@ -805,18 +808,21 @@ class Menu:
 
             if cookieSiteSelect == "1":
                 for i in range(int(amount)):
-                    threading.Thread(target=datadome.courir,args=(proxies,)).start()
+                    threading.Thread(target=datadome.courir,args=(proxies,'Cookies','save')).start()
+
             if cookieSiteSelect == "2":
                 sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
                 region = input(' Enter Site Region (example: GB) => ')
+
                 for i in range(int(amount)):
-                    threading.Thread(target=datadome.slamjam,args=(proxies,region,)).start()
-            #if cookieSiteSelect == "2":
-            #    for i in range(int(amount)):
-            #        threading.Thread(target=datadome.starcow,args=(proxies,)).start()
-            #if cookieSiteSelect == "3":
-            #    for i in range(int(amount)):
-            #        threading.Thread(target=datadome.slamjam,args=(proxies,region,)).start()
+                    threading.Thread(target=datadome.slamjam,args=(proxies,'Cookies','save')).start()
+
+            if cookieSiteSelect == "3":
+                sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
+
+                for i in range(int(amount)):
+                    threading.Thread(target=datadome.starcow,args=(proxies,'Cookies','save')).start()
+
 
             while threading.active_count() != 2:
                 pass
@@ -824,10 +830,15 @@ class Menu:
             if threading.active_count() == 2:
                 self.menu()
 
-        if option == 10:
+        elif option == 10:
             logger.menu('VENETIA','Menu','{}'.format(colored('Goodbye...','yellow', attrs=["bold"])))
             time.sleep(3)
             os._exit(0)
+        
+        elif option > 10:
+            logger.menu('VENETIA','Menu','{}'.format(colored('Invalid menu choice. Try again','yellow', attrs=["bold"])))
+            time.sleep(3)
+            self.menu()
             
                 
 

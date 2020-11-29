@@ -12,12 +12,14 @@ import base64
 import cloudscraper
 import urllib.parse
 import string
+from urllib3.exceptions import HTTPError
+
 
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
 from utils.captcha import captcha
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, scraper)
 SITE = 'NAKED'
 
 
@@ -28,33 +30,13 @@ class NAKED:
         self.sess = requests.session()
         self.taskID = taskName
 
-        twoCap = loadSettings()["2Captcha"]
         try:
-            self.session = cloudscraper.create_scraper(
-                requestPostHook=injection,
-                sess=self.sess,
-                browser={
-                    'browser': 'chrome',
-                    'mobile': False,
-                    'platform': 'windows'
-                    #'platform': 'darwin'
-                },
-                captcha={
-                    'provider': '2captcha',
-                    'api_key': twoCap
-                }
-            )
+            self.session = scraper()
         except Exception as e:
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.__init__(task,taskName)
         
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-        self.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/603.1.23 (KHTML, like Gecko) Version/10.0 Mobile/14E5239e Safari/602.1'
-
-        self.session.headers.update({
-            'User-Agent':self.userAgent
-        })
-        
         if self.task["ACCOUNT EMAIL"] == "":
             self.collect()
         else:
@@ -82,10 +64,9 @@ class NAKED:
                 'Accept-Encoding': 'gzip, deflate, br',
                 'Accept-Language': 'en-US,en;q=0.9,it;q=0.8',
                 'Referer': 'https://www.nakedcph.com/en/auth/view',
-                'User-Agent': self.userAgent,
                 'X-Requested-With': 'XMLHttpRequest'
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -104,11 +85,10 @@ class NAKED:
             self.login()
 
     def collect(self):
-        logger.warning(SITE,self.taskID,'Solving Cloudflare...')
+        logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
             retrieve = self.session.get(self.task["PRODUCT"])
-            logger.success(SITE,self.taskID,'Solved Cloudflare')
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -205,9 +185,8 @@ class NAKED:
                 'referer': self.task["PRODUCT"],
                 'x-requested-with': 'XMLHttpRequest',
                 'x-anticsrftoken':self.antiCsrf,
-                'User-Agent':self.userAgent
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -256,9 +235,8 @@ class NAKED:
                 'referer': 'https://www.nakedcph.com/en/cart/view',
                 'x-requested-with': 'XMLHttpRequest',
                 'x-anticsrftoken':self.antiCsrf,
-                'User-Agent':self.userAgent
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -283,9 +261,8 @@ class NAKED:
                     'referer': 'https://www.nakedcph.com/en/cart/view',
                     'x-requested-with': 'XMLHttpRequest',
                     'x-anticsrftoken':self.antiCsrf,
-                    'User-Agent':self.userAgent
                 })
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -315,9 +292,8 @@ class NAKED:
                 'referer': 'https://www.nakedcph.com/en/cart/view',
                 'x-requested-with': 'XMLHttpRequest',
                 'x-anticsrftoken':self.antiCsrf,
-                'User-Agent':self.userAgent
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -361,22 +337,23 @@ class NAKED:
                 'referer': 'https://www.nakedcph.com/en/cart/view',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'content-type': 'application/x-www-form-urlencoded',
-                'User-Agent':self.userAgent
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.process()
 
+        print(processP)
+        print(processP.url)
         if 'adyen' in processP.url:
             try:
                 adyen = self.session.get(processP.url,headers={
                     'Referer': 'https://www.nakedcph.com/en/cart/view',
                     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 })
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -502,9 +479,8 @@ class NAKED:
                 'Referer': self.referer,
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'content-type': 'application/x-www-form-urlencoded',
-                'User-Agent':self.userAgent
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))

@@ -10,6 +10,7 @@ import json
 import base64
 import string
 import uuid
+from urllib3.exceptions import HTTPError
 
 from utils.logger import logger
 from utils.webhook import discord
@@ -29,13 +30,14 @@ class SVD:
         self.collect()
 
     def collect(self):
+        logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
             url = '{}{}'.format(self.task["PRODUCT"],f"#%253F_={randomString(20)}")
             retrieve = self.session.get(url,headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             #log.info(e)
             logger.error(SITE,self.taskID,'Error retrieving product page')
             time.sleep(int(self.task["DELAY"]))
@@ -56,8 +58,7 @@ class SVD:
                 self.productTitle = soup.find(
                     "span", {"class": "product-data__model"}).text
                 self.productPrice = soup.find("span", {"class": "price"}).text
-                self.productImage = soup.find_all(
-                    "img", {"class": "lazyload"})[0]["src"]
+                self.productImage = soup.find_all("img", {"class": "lazyload"})[0]["src"]
                 self.cartURL = soup.find(
                     "form", {"id": "product_addtocart_form"})["action"]
                 self.productID = soup.find("input", {"name": "item"})["value"]
@@ -157,7 +158,7 @@ class SVD:
                 'cookie': f'form_key={self.formKey}',
                 'x-requested-with': 'XMLHttpRequest'
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -186,7 +187,7 @@ class SVD:
                 'accept': 'application/json, text/javascript, */*; q=0.01'
 
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -236,7 +237,7 @@ class SVD:
         try:
             r = self.session.post('https://payments.braintree-api.com/graphql',
                                   headers=braintreeHeaders, json=braintreeData)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -280,7 +281,7 @@ class SVD:
                 'Upgrade-insecure-requests': '1',
                 'User-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -363,7 +364,7 @@ class SVD:
                     'accept': '*/*',
                     'cookie': f'form_key={self.formKey}'
                 })
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -459,7 +460,7 @@ class SVD:
                         'x-requested-with': 'XMLHttpRequest',
                         'cookie': f'form_key={self.formKey}'
                     })
-                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                     log.info(e)
                     logger.error(SITE,self.taskID,'Error: {}'.format(e))
                     logger.error(SITE,self.taskID,'Connection Error. Retrying...')
@@ -536,7 +537,7 @@ class SVD:
             try:
                 r = self.session.post('https://api.braintreegateway.com/merchants/7rgb8j8vb5f4hdwg/client_api/v1/paypal_hermes/create_payment_resource',
                                         headers=headers, json=data)
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -633,7 +634,7 @@ class SVD:
         try:
             r = self.session.post('https://www.sivasdescalzo.com/en/rest/en/V1/guest-carts/{}/payment-information'.format(
                 self.cartID), headers=headers, json=data)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -1249,7 +1250,7 @@ class SVD:
         try:
             r = self.session.post('https://www.sivasdescalzo.com/en/rest/en/V1/guest-carts/{}/payment-information'.format(
                 self.cartID), headers=headers, json=orderData)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))

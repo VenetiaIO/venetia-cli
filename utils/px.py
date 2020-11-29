@@ -29,7 +29,7 @@ class PX:
         
         r = requests.get('https://px.invincible.services/api/v1/px/solebox',headers=headers,params=params)
         if r.status_code == 200:
-            logger.secondary('SNIPES',taskID,'Successfully Generated PX Cookies')
+            logger.secondary('SOLEBOX',taskID,'Successfully Generated PX Cookies')
             return r.json()
         else:
             return {"px3":"error","vid":"error"}

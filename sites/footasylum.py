@@ -9,13 +9,15 @@ import re
 import json
 import base64
 import string
+from urllib3.exceptions import HTTPError
+
 SITE = 'FOOTASYLUM'
 
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
 from utils.captcha import captcha
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle, encodeURIComponent)
 
 class FOOTASYLUM:
     def __init__(self,task,taskName):
@@ -29,13 +31,14 @@ class FOOTASYLUM:
         self.collect()
 
     def collect(self):
+        logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
             retrieve = self.session.get(self.task["PRODUCT"],headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
     
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -63,10 +66,7 @@ class FOOTASYLUM:
                 sizes = []
                 allSizes = []
                 for s in productData:
-                    if len(s) > 9:
-                        pass
-                    else:
-                        pids.append(s)
+                    pids.append(s)
 
                 for s in pids:
                     p = productData[s]
@@ -139,7 +139,7 @@ class FOOTASYLUM:
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -165,19 +165,26 @@ class FOOTASYLUM:
             'targetar': '',
             'pf_id': '',
             'sku': '',
-            'prelog':self.preLog,
             'rdPassword': 'LOGIN',
+            'prelog':self.preLog,
             'lookup_Validate': 1,
             'email2': self.task["ACCOUNT EMAIL"],
             'password': self.task["ACCOUNT PASSWORD"]
         }
+        payload = "target=&targetar=&pf_id=&sku=&rdPassword=LOGIN&prelog={}&lookup_Validate=1&email2={}&password={}".format(
+            self.preLog,
+            encodeURIComponent(self.task["ACCOUNT EMAIL"]),
+            self.task["ACCOUNT PASSWORD"]
+        )
         try:
-            login = self.session.post('https://www.footasylum.com/page/login/',data=payload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+            login = self.session.request('POST','https://www.footasylum.com/page/login/',data=payload,headers={
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'referer': 'https://www.footasylum.com/page/login/'
+                'referer': 'https://www.footasylum.com/page/login/',
+                'content-type': 'application/x-www-form-urlencoded',
+                'origin':'https://www.footasylum.com'
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -241,7 +248,7 @@ class FOOTASYLUM:
                 'x-requested-with': 'XMLHttpRequest',
                 'referer': 'https://www.footasylum.com/page/basket/'
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -272,7 +279,7 @@ class FOOTASYLUM:
                     'accept': 'application/json',
                     'authority': 'paymentgateway.checkout.footasylum.net',
                 })
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -309,7 +316,7 @@ class FOOTASYLUM:
                 'path': '/prod/customer/details?checkout_client=secure',
                 'referer': 'https://secure.footasylum.com/?checkoutSessionId={}'.format(self.checkoutSessionId)
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -384,7 +391,7 @@ class FOOTASYLUM:
                 'path':'/prod/basket/basketaddaddress?checkout_client=secure',
                 'referer': 'https://secure.footasylum.com/?checkoutSessionId={}'.format(self.checkoutSessionId)
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -406,7 +413,7 @@ class FOOTASYLUM:
                     'sec-fetch-site': 'cross-site',
                     'referer': 'https://secure.footasylum.com/?checkoutSessionId={}'.format(self.checkoutSessionId)
                 })
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -464,7 +471,7 @@ class FOOTASYLUM:
                         'sec-fetch-site': 'cross-site',
                         'referer': 'https://secure.footasylum.com/?checkoutSessionId={}'.format(self.checkoutSessionId)
                     })
-                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                     log.info(e)
                     logger.error(SITE,self.taskID,'Error: {}'.format(e))
                     time.sleep(int(self.task["DELAY"]))
@@ -523,7 +530,7 @@ class FOOTASYLUM:
                 'sec-fetch-site': 'cross-site',
                 'referer': 'https://secure.footasylum.com/?checkoutSessionId={}'.format(self.checkoutSessionId)
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -562,7 +569,7 @@ class FOOTASYLUM:
                 'path': '/paypal/payment-token',
                 'referer': 'https://secure.footasylum.com/?checkoutSessionId={}'.format(self.checkoutSessionId)
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -596,7 +603,7 @@ class FOOTASYLUM:
         }
         try:
             ec = self.session.post('https://www.paypal.com/smart/api/payment/{}/ectoken'.format(self.paymentId),headers=payPalHeaders,json={"meta":{}})
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
