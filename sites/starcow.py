@@ -11,11 +11,13 @@ import os
 import base64
 import cloudscraper
 import string
+from urllib3.exceptions import HTTPError
 
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, starcow_datadome, sendNotification, injection)
+from utils.datadome import datadome
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection, scraper)
 SITE = 'STARCOW'
 
 
@@ -27,20 +29,7 @@ class STARCOW:
 
         twoCap = loadSettings()["2Captcha"]
         try:
-            self.session = cloudscraper.create_scraper(
-                requestPostHook=injection,
-                sess=self.sess,
-                browser={
-                    'browser': 'chrome',
-                    'mobile': False,
-                    'platform': 'windows'
-                    #'platform': 'darwin'
-                },
-                captcha={
-                    'provider': '2captcha',
-                    'api_key': twoCap
-                }
-            )
+            self.session = scraper()
         except Exception as e:
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.__init__(task,taskName)
@@ -69,7 +58,7 @@ class STARCOW:
 
         try:
             retrieve = self.session.get(self.task["PRODUCT"])
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -166,7 +155,7 @@ class STARCOW:
         }
         try:
             cart = self.session.post('https://www.starcowparis.com/panier')
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)

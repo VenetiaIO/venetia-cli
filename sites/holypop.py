@@ -9,6 +9,7 @@ import re
 import json
 import base64
 import string
+from urllib3.exceptions import HTTPError
 SITE = 'HOLYPOP'
 
 from utils.logger import logger
@@ -40,7 +41,7 @@ class HOLYPOP:
         logger.warning(SITE,self.taskID,'Getting product page...')
         try:
             retrieve = self.session.get(self.task["PRODUCT"])
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -107,7 +108,7 @@ class HOLYPOP:
         logger.warning(SITE,self.taskID,'Getting login page...')
         try:
             getLogin = self.session.get('https://www.holypopstore.com/')
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -142,7 +143,7 @@ class HOLYPOP:
             self.session.headers['referer'] = 'https://www.holypopstore.com/en/login/signin'
             try:
                 signIn = self.session.post('https://www.holypopstore.com/index.php',data=payload2)
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -179,7 +180,7 @@ class HOLYPOP:
         }
         try:
             cart = self.session.post('https://www.holypopstore.com/index.php',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -241,7 +242,7 @@ class HOLYPOP:
         self.session.headers['x-requested-with'] = ''
         try:
             checkout = self.session.get('https://www.holypopstore.com/en/orders/review')
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -300,7 +301,7 @@ class HOLYPOP:
             self.session.headers['accept'] = 'application/json, text/javascript, */*; q=0.01'
             try:
                 postCheckout = self.session.post('https://www.holypopstore.com/index.php',data=payload)
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -337,7 +338,7 @@ class HOLYPOP:
         self.session.headers['accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
         try:
             checkout = self.session.get(f'https://www.holypopstore.com/en/orders/checkout/{self.orderId}',params={'paymentMethodId':1,'paymentMethodAccountId':1})
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))

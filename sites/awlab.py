@@ -11,12 +11,13 @@ import os
 import base64
 import cloudscraper
 import string
+from urllib3.exceptions import HTTPError
 
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
 from utils.adyen import ClientSideEncrypter
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, birthday, injection,storeCookies, updateConsoleTitle)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, birthday, injection,storeCookies, updateConsoleTitle, scraper)
 SITE = 'AW-LAB'
 
 
@@ -27,21 +28,7 @@ class AWLAB:
         self.taskID = taskName
 
         twoCap = loadSettings()["2Captcha"]
-        self.session = cloudscraper.create_scraper(
-            requestPostHook=injection,
-            sess=self.sess,
-            interpreter='nodejs',
-            browser={
-                'browser': 'chrome',
-                'mobile': False,
-                'platform': 'windows'
-                #'platform': 'darwin'
-            },
-            captcha={
-                'provider': '2captcha',
-                'api_key': twoCap
-            }
-        )
+        self.session = scraper()
         
         profile = loadProfile(self.task["PROFILE"])
         if profile == None:
@@ -56,15 +43,10 @@ class AWLAB:
         self.collect()
 
     def collect(self):
-        logger.warning(SITE,self.taskID,'Solving Cloudflare...')
+        logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
-            retrieve = self.session.get(self.task["PRODUCT"], headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-
-            })
-            logger.success(SITE,self.taskID,'Solved Cloudflare')
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            retrieve = self.session.get(self.task["PRODUCT"])
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -76,24 +58,26 @@ class AWLAB:
             logger.success(SITE,self.taskID,'Got product page')
             try:
                 soup = BeautifulSoup(retrieve.text, "html.parser")
-                self.productTitle = soup.find('h1',{'class':['b-pdp__product-title','h-hidden-small']}).text.replace('\n','')
-                self.productPrice = soup.find('span',{'class':'b-price__sale'}).text
+                self.productTitle = soup.find('meta',{'name':'description'})["content"]
+                self.productPrice = soup.find_all('span',{'class':'b-price__sale'})[0].text
                 self.productImage = soup.find('link',{'rel':'image_src'})["href"]
                 self.productId = soup.find('div',{'id':'pdpMain'})["data-product-id"]
 
+                print(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Product-Variation?pid={self.productId}&format=ajax')
                 try:
                     retrieveSizes = self.session.get(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Product-Variation?pid={self.productId}&format=ajax', headers={
                         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
                         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
         
                     })
-                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                     log.info(e)
                     logger.error(SITE,self.taskID,'Error: {}'.format(e))
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     time.sleep(int(self.task["DELAY"]))
                     self.collect()
-
+                
+                # https://en.aw-lab.com/on/demandware.store/Sites-awlab-en-Site/en_DE/Product-Variation?pid=AW_22121RBA&format=ajax
                 soup = BeautifulSoup(retrieveSizes.text, "html.parser")
                 foundSizes = soup.find('ul',{'class':'swatches b-size-selector__list b-size-selector_large'})
                 allSizes = []
@@ -165,7 +149,7 @@ class AWLAB:
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest'
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -181,7 +165,7 @@ class AWLAB:
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest'
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -209,7 +193,7 @@ class AWLAB:
                 'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -244,7 +228,7 @@ class AWLAB:
                 'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -304,7 +288,7 @@ class AWLAB:
                 'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -365,7 +349,7 @@ class AWLAB:
                 'accept':'*/*',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -469,7 +453,7 @@ class AWLAB:
                 'accept':'*/*',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -557,7 +541,7 @@ class AWLAB:
                 'accept':'*/*',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -584,7 +568,7 @@ class AWLAB:
                     'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 })
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -603,7 +587,7 @@ class AWLAB:
                         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                         'accept':'*/*',
                     })
-                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                     log.info(e)
                     logger.error(SITE,self.taskID,'Error: {}'.format(e))
                     time.sleep(int(self.task["DELAY"]))
@@ -656,7 +640,7 @@ class AWLAB:
 
                 try:
                     r = self.session.post("https://macs.touchtechpayments.com/v1/confirmTransaction",headers=headers, data=data)
-                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                     log.info(e)
                     logger.error(SITE,self.taskID,'Error: {}'.format(e))
                     time.sleep(int(self.task["DELAY"]))
@@ -674,7 +658,7 @@ class AWLAB:
                         'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
                         'referer':'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
                     }, data=data)
-                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                     log.info(e)
                     logger.error(SITE,self.taskID,'Error: {}'.format(e))
                     time.sleep(int(self.task["DELAY"]))
@@ -690,7 +674,7 @@ class AWLAB:
                             'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
                             'referer':'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
                         }, data={"dwfrm_redirecttotop_redirecttop":"Submit","MD":self.MD,"PaRes":pares,"csrf_token":self.csrf})
-                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                         log.info(e)
                         logger.error(SITE,self.taskID,'Error: {}'.format(e))
                         time.sleep(int(self.task["DELAY"]))
@@ -704,7 +688,7 @@ class AWLAB:
                             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                             'referer':f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Adyen-CloseIFrame',
                         }, data={"MD":None,"PaReq":None})
-                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                         log.info(e)
                         logger.error(SITE,self.taskID,'Error: {}'.format(e))
                         time.sleep(int(self.task["DELAY"]))
@@ -748,7 +732,7 @@ class AWLAB:
                     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                     'referer':f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Adyen-CloseIFrame',
                 }, data={"MD":None,"PaReq":None})
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))

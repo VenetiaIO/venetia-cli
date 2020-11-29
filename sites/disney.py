@@ -11,11 +11,13 @@ import os
 import base64
 import cloudscraper
 import string
+from urllib3.exceptions import HTTPError
+
 
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, scraper)
 SITE = 'DISNEY'
 
 
@@ -25,34 +27,37 @@ def findProduct(url, session, taskID, SITE, task, disneyRegion):
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
         })
-    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
         log.info(e)
         logger.error(SITE,taskID,'Error: {}'.format(e))
         time.sleep(int(task["DELAY"]))
         findProduct("https://www.shopdisney.{}/new?srule=Newest&sz=96&start=0".format(disneyRegion),session,taskID,SITE,task,disneyRegion)
-    if kwget.status_code == 200:
-        kws = task["PRODUCT"].split('|')
-        kws = [x.lower() for x in kws]
-        foundItem = ""
-        soup = BeautifulSoup(kwget.text,"html.parser")
-        section = soup.find('section',{'class':'catlisting__product-grid js-catlisting-product-grid'})
-        # print(section)
-        row = section.find('div',{'class':'row'}).find_all('div')
-        for r in row:
-            # r = BeautifulSoup(r,"htm.parser")
-            try:
-                p = r.find('a',{'class':'product__linkcontainer js-catlisting-productlink-container no-transform'})
-                title = p['title']
-                link = p['href']
-                if all(kw in title.lower() for kw in kws):
+    try:
+        if kwget.status_code == 200:
+            kws = task["PRODUCT"].split('|')
+            kws = [x.lower() for x in kws]
+            foundItem = ""
+            soup = BeautifulSoup(kwget.text,"html.parser")
+            section = soup.find('section',{'class':'catlisting__product-grid js-catlisting-product-grid'})
+            # print(section)
+            row = section.find('div',{'class':'row'}).find_all('div')
+            for r in row:
+                # r = BeautifulSoup(r,"htm.parser")
+                try:
+                    p = r.find('a',{'class':'product__linkcontainer js-catlisting-productlink-container no-transform'})
+                    title = p['title']
                     link = p['href']
-                    foundItem = '{}|{}'.format(title,link)
-            except:
-                pass
-        if len(foundItem) > 0:
-            return foundItem.split('|')
-        else:
-            return None
+                    if all(kw in title.lower() for kw in kws):
+                        link = p['href']
+                        foundItem = '{}|{}'.format(title,link)
+                except:
+                    pass
+            if len(foundItem) > 0:
+                return foundItem.split('|')
+            else:
+                return None
+    except:
+        return None
     
 class DISNEY:
     def __init__(self, task,taskName):
@@ -61,21 +66,7 @@ class DISNEY:
         self.taskID = taskName
 
         twoCap = loadSettings()["2Captcha"]
-        self.session = cloudscraper.create_scraper(
-            requestPostHook=injection,
-            sess=self.sess,
-            interpreter='nodejs',
-            browser={
-                'browser': 'chrome',
-                'mobile': False,
-                'platform': 'windows'
-                #'platform': 'darwin'
-            },
-            captcha={
-                'provider': '2captcha',
-                'api_key': twoCap
-            }
-        )
+        self.session = scraper()
 
         profile = loadProfile(self.task["PROFILE"])
         if profile == None:
@@ -117,14 +108,13 @@ class DISNEY:
         else:
             self.product = "https://www.shopdisney.{}/{}.html".format(self.disneyRegion,self.task["PRODUCT"])
 
-        # logger.warning(SITE,self.taskID,'Solving Cloudflare...')
+        logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
             retrieve = self.session.get(self.product, headers={
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
             })
-            #logger.success(SITE,self.taskID,'Solved Cloudflare')
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -190,7 +180,7 @@ class DISNEY:
                 'x-requested-with': 'XMLHttpRequest',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -224,7 +214,7 @@ class DISNEY:
                 'referer': self.product,
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -254,7 +244,7 @@ class DISNEY:
                 'referer': self.siteBase + "/" + self.bag,
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -298,7 +288,7 @@ class DISNEY:
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest'
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -360,7 +350,7 @@ class DISNEY:
                 'content-type': 'application/x-www-form-urlencoded',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -430,7 +420,7 @@ class DISNEY:
                 'content-type': 'application/x-www-form-urlencoded',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -455,7 +445,7 @@ class DISNEY:
                     'origin': f'https://www.shopdisney.{self.disneyRegion}',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
                 })
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -567,7 +557,7 @@ class DISNEY:
                 'content-type': 'application/x-www-form-urlencoded',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -584,7 +574,7 @@ class DISNEY:
                     'origin': f'https://www.shopdisney.{self.disneyRegion}',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
                 })
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -611,7 +601,7 @@ class DISNEY:
                         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                         'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                     })
-                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                     log.info(e)
                     logger.error(SITE,self.taskID,'Error: {}'.format(e))
                     time.sleep(int(self.task["DELAY"]))
@@ -630,7 +620,7 @@ class DISNEY:
                             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                             'accept':'*/*',
                         })
-                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                         log.info(e)
                         logger.error(SITE,self.taskID,'Error: {}'.format(e))
                         time.sleep(int(self.task["DELAY"]))
@@ -684,7 +674,7 @@ class DISNEY:
 
                     try:
                         r = self.session.post("https://macs.touchtechpayments.com/v1/confirmTransaction",headers=headers, data=data)
-                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                         log.info(e)
                         logger.error(SITE,self.taskID,'Error: {}'.format(e))
                         time.sleep(int(self.task["DELAY"]))
@@ -703,7 +693,7 @@ class DISNEY:
                             'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
                             'referer':'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
                         }, data=data)
-                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                         log.info(e)
                         logger.error(SITE,self.taskID,'Error: {}'.format(e))
                         time.sleep(int(self.task["DELAY"]))

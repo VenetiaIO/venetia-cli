@@ -11,12 +11,13 @@ import os
 import base64
 import cloudscraper
 import string
+from urllib3.exceptions import HTTPError
 
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
 from utils.px import PX
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, urlEncode, randomUA, randomString)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, urlEncode, randomUA, randomString, scraper)
 SITE = 'SNIPES'
 
 
@@ -27,21 +28,7 @@ class SNIPES:
         self.taskID = taskName
 
         twoCap = loadSettings()["2Captcha"]
-        self.session = cloudscraper.create_scraper(
-            requestPostHook=injection,
-            sess=self.sess,
-            interpreter='nodejs',
-            browser={
-                'browser': 'chrome',
-                'mobile': False,
-                'platform': 'windows'
-                #'platform': 'darwin'
-            },
-            captcha={
-                'provider': '2captcha',
-                'api_key': twoCap
-            }
-        )
+        self.session = scraper()
         
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
         self.countryCode = loadProfile(self.task["PROFILE"])["countryCode"]
@@ -111,7 +98,7 @@ class SNIPES:
         logger.prepare(SITE,self.taskID,'Getting product info...')
         try:
             retrieve = self.session.get(self.queryUrl)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -133,6 +120,11 @@ class SNIPES:
             self.productPrice = data["product"]["price"]["sales"]["formatted"]
             self.productImage = data["product"]["images"][0]["pdp"]["srcT"]
             self.csrf = data["csrf"]["token"]
+            self.demandWareBase = data["product"]["quantities"][0]["url"].split('Product-Variation')[0]
+            if self.snipesRegion != 'com':
+                self.atcUrl = f'https://www.snipes.{self.snipesRegion}{self.demandWareBase}Cart-AddProduct?format=ajax'
+            else:
+                self.atcUrl = f'https://www.snipes.{self.snipesRegion}/add-product?format=ajax'
             allSizes = []
             sizes = []
             for s in data["product"]["variationAttributes"][0]["values"]:
@@ -219,7 +211,7 @@ class SNIPES:
         }
         try:
             login = self.session.post('https://www.snipes.{}/authentication?rurl=2&format=ajax'.format(self.snipesRegion),data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -268,7 +260,7 @@ class SNIPES:
             time.sleep(int(self.task["DELAY"]))
             self.login()
     
-
+    
     def addToCart(self):
 
         logger.prepare(SITE,self.taskID,'Adding to cart...')
@@ -294,15 +286,14 @@ class SNIPES:
         }
 
         try:
-            cart = self.session.post(f'https://www.snipes.{self.snipesRegion}/add-product?format=ajax',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            cart = self.session.post(self.atcUrl,data=payload)
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
             self.addToCart()
 
-        
         if cart.status_code == 200:
             try:
                 data = cart.json()
@@ -424,7 +415,7 @@ class SNIPES:
         }
         try:
             submitShipping = self.session.post('https://www.snipes.{}{}/CheckoutShippingServices-SubmitShipping?format=ajax'.format(self.snipesRegion,self.demandWareBase),data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -487,7 +478,7 @@ class SNIPES:
         }
         try:
             submitPayment= self.session.post('https://www.snipes.{}{}/CheckoutServices-SubmitPayment?format=ajax'.format(self.snipesRegion,self.demandWareBase),data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -547,7 +538,7 @@ class SNIPES:
         }
         try:
             place = self.session.post('https://www.snipes.{}{}/CheckoutServices-PlaceOrder?format=ajax'.format(self.snipesRegion,self.demandWareBase))
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -642,7 +633,7 @@ class SNIPES:
         }
         try:
             place = self.session.post('https://www.snipes.{}{}/CheckoutServices-PlaceOrder?format=ajax'.format(self.snipesRegion,self.demandWareBase))
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -754,7 +745,7 @@ class SNIPES:
         }
         try:
             place = self.session.post('https://www.snipes.{}{}/CheckoutServices-PlaceOrder?format=ajax'.format(self.snipesRegion,self.demandWareBase))
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)

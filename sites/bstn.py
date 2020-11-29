@@ -10,13 +10,15 @@ import json
 import base64
 import cloudscraper
 import string
+from urllib3.exceptions import HTTPError
+
 
 SITE = 'BSTN'
 
 from utils.logger import logger
 from utils.captcha import captcha
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, injection, updateConsoleTitle)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, injection, updateConsoleTitle, scraper)
 
 
 class BSTN:
@@ -26,35 +28,17 @@ class BSTN:
         self.taskID = taskName
 
         twoCap = loadSettings()["2Captcha"]
-        self.session = cloudscraper.create_scraper(
-            requestPostHook=injection,
-            sess=self.sess,
-            interpreter='nodejs',
-            browser={
-                'browser': 'chrome',
-                'mobile': False,
-                'platform': 'windows'
-                #'platform': 'darwin'
-            },
-            captcha={
-                'provider': '2captcha',
-                'api_key': twoCap
-            }
-        )
+        self.session = scraper()
         self.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
         self.session.proxies = self.proxies
-        self.userAgent = 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3 like Mac OS X) AppleWebKit/603.1.23 (KHTML, like Gecko) Version/10.0 Mobile/14E5239e Safari/602.1'
-
-        self.session.headers.update({
-            'User-Agent':self.userAgent
-        })
 
         self.collect()
 
     def collect(self):
+        logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
             retrieve = self.session.get(self.task["PRODUCT"])
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -90,8 +74,8 @@ class BSTN:
                 else:
                     for size in all_sizes:
                         if size.split(':')[0] == self.task["SIZE"]:
-                            self.size = size.split(':')[0];
-                            self.sizeValue = size.split(':')[1];
+                            self.size = size.split(':')[0].split(')')[0]
+                            self.sizeValue = size.split(':')[1]
                             logger.success(SITE,self.taskID,f'Found Size => {self.size}')
                             self.getIds()
 
@@ -99,7 +83,7 @@ class BSTN:
             
             elif self.task["SIZE"].lower() == "random":
                 selected = random.choice(all_sizes)
-                self.size = selected.split(":")[0]
+                self.size = selected.split(":")[0].split(')')[0]
                 self.sizeValue = selected.split(":")[1]
                 logger.success(SITE,self.taskID,f'Found Size => {self.size}')
                 self.getIds()
@@ -125,7 +109,7 @@ class BSTN:
 
         try:
             getSizeDetails = self.session.post(self.task["PRODUCT"],data=payload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+                'user-agent': self.userAgent,
                 'accept': '*/*',
                 'authority': 'www.bstn.com',
                 'accept-language': 'en-US,en;q=0.9',
@@ -137,7 +121,7 @@ class BSTN:
                 'sec-fetch-site': 'same-origin',
     
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -170,14 +154,14 @@ class BSTN:
 
 
     def addToCart(self):
-        captchaResponse = captcha.v3('6Le9G8cUAAAAANrlPVYknZGUZw8lopZAqe8_SfRQ','https://www.bstn.com/',self.proxies,SITE,self.taskID)
+        captchaResponse = captcha.v3('6Le9G8cUAAAAANrlPVYknZGUZw8lopZAqe8_SfRQ',self.task["PRODUCT"],self.proxies,SITE,self.taskID)
         payload = {
             'hash': self.hash,
             'secret': self.secret,
             'product_id': self.productId,
             'product_bs_id': self.bsId,
             'amount': 1,
-            'g-recaptcha-response':captchaResponse,
+            # 'g-recaptcha-response':captchaResponse,
             'ajax': True,
             'redirectRooting': '',
             'addToCart': '',
@@ -201,7 +185,6 @@ class BSTN:
             'returnHtmlSnippets[partials][4][module]':'cart',
             'returnHtmlSnippets[partials][4][partialName]': 'modalWasadded'
         }
-        print(self.cartId)
         cartUrl = 'https://www.bstn.com{}?g={}'.format(self.cartId,captchaResponse)
         print(cartUrl)
         print(payload)
@@ -211,9 +194,11 @@ class BSTN:
                 'authority': 'www.bstn.com',
                 'accept': '*/*',
                 'accept-language': 'en-US,en;q=0.9',
+                'accept-encoding': 'gzip, deflate, br',
                 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 'origin': 'https://www.bstn.com',
                 'referer': self.task["PRODUCT"],
+                'x-requested-with': 'XMLHttpRequest',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36'
             })
         except:
@@ -221,9 +206,8 @@ class BSTN:
             time.sleep(int(self.task["DELAY"]))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.addToCart()
-
-            
-        print(postCart)
-        print(postCart.text)
+        if postCart:
+            print(postCart)
+            print(postCart.text)
 
 

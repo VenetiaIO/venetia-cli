@@ -11,11 +11,13 @@ import os
 import base64
 import cloudscraper
 import string
+from urllib3.exceptions import HTTPError
 
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, slamjam_datadome, sendNotification, injection,storeCookies, updateConsoleTitle)
+from utils.datadome import datadome
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, scraper)
 SITE = 'SLAMJAM'
 
 
@@ -27,21 +29,7 @@ class SLAMJAM:
         self.taskID = taskName
 
         twoCap = loadSettings()["2Captcha"]
-        self.session = cloudscraper.create_scraper(
-            requestPostHook=injection,
-            sess=self.sess,
-            interpreter='nodejs',
-            browser={
-                'browser': 'chrome',
-                'mobile': False,
-                'platform': 'windows'
-                #'platform': 'darwin'
-            },
-            captcha={
-                'provider': '2captcha',
-                'api_key': twoCap
-            }
-        )
+        self.session = scraper()
         self.session.headers = {
             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
             "accept-encoding": "gzip, deflate, br",
@@ -77,7 +65,7 @@ class SLAMJAM:
         
         try:
             retrieve = self.session.get(self.url,timeout=10)
-        except (Exception, ConnectionError, ConnectionRefusedError, TimeoutError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -97,7 +85,7 @@ class SLAMJAM:
         self.cookie = loadCookie('SLAMJAM')["cookie"]
         if self.cookie == 'empty':
             del self.session.cookies["datadome"]
-            self.cookie = slamjam_datadome(self.session.proxies,self.taskID,self.pid,self.region)
+            self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
             self.session.cookies["datadome"]  = self.cookie
         else:
             del self.session.cookies["datadome"]
@@ -141,20 +129,21 @@ class SLAMJAM:
         logger.warning(SITE,self.taskID,'Gathering product info...')
         try:
             data = self.session.get(self.queryString)
-        except (Exception, ConnectionError, ConnectionRefusedError, TimeoutError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
             self.collect()
         
+        print(data)
         if data:
             if 'DDUser' in data.url:
                 logger.info(SITE,self.taskID,'Challenge Found, Solving...')
                 self.cookie = loadCookie('SLAMJAM')["cookie"]
                 if self.cookie == 'empty':
                     del self.session.cookies["datadome"]
-                    self.cookie = slamjam_datadome(self.session.proxies,self.taskID,self.pid,self.region)
+                    self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
                     self.session.cookies["datadome"]  = self.cookie
                 else:
                     del self.session.cookies["datadome"]
@@ -170,6 +159,8 @@ class SLAMJAM:
                         logger.error(SITE,self.taskID,'Failed to retrieve product info. Retrying...')
                         time.sleep(int(self.task["DELAY"]))
                         self.collect()
+
+                    print(data)
     
                     self.uuid = data["product"]["uuid"]
                     self.productTitle = data["product"]["productName"]
@@ -217,7 +208,7 @@ class SLAMJAM:
                         self.addToCart()
 
         else:
-            logger.error(SITE,self.taskID,'Size Not Found')
+            logger.error(SITE,self.taskID,'Failed to get product info.')
             time.sleep(int(self.task["DELAY"]))
             self.retrieve()
 
@@ -245,7 +236,7 @@ class SLAMJAM:
         }
         try:
             cart = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/Cart-AddProduct',data=cartPayload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -258,7 +249,7 @@ class SLAMJAM:
                 self.cookie = loadCookie('SLAMJAM')["cookie"]
                 if self.cookie == 'empty':
                     del self.session.cookies["datadome"]
-                    self.cookie = slamjam_datadome(self.session.proxies,self.taskID,self.pid,self.region)
+                    self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
                     self.session.cookies["datadome"]  = self.cookie
                 else:
                     del self.session.cookies["datadome"]
@@ -304,7 +295,7 @@ class SLAMJAM:
 
         try:
             shipping = self.session.get(f'https://www.slamjam.com/en_{self.region}/checkout-begin?stage=shipping#shipping')
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -317,7 +308,7 @@ class SLAMJAM:
                 self.cookie = loadCookie('SLAMJAM')["cookie"]
                 if self.cookie == 'empty':
                     del self.session.cookies["datadome"]
-                    self.cookie = slamjam_datadome(self.session.proxies,self.taskID,self.pid,self.region)
+                    self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
                     self.session.cookies["datadome"]  = self.cookie
                 else:
                     del self.session.cookies["datadome"]
@@ -384,7 +375,7 @@ class SLAMJAM:
         logger.prepare(SITE,self.taskID,'Retrieving shipping rates')
         try:
             shippingMethods = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/CheckoutShippingServices-UpdateShippingMethodsList',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -397,7 +388,7 @@ class SLAMJAM:
                 self.cookie = loadCookie('SLAMJAM')["cookie"]
                 if self.cookie == 'empty':
                     del self.session.cookies["datadome"]
-                    self.cookie = slamjam_datadome(self.session.proxies,self.taskID,self.pid,self.region)
+                    self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
                     self.session.cookies["datadome"]  = self.cookie
                 else:
                     del self.session.cookies["datadome"]
@@ -445,7 +436,7 @@ class SLAMJAM:
         logger.prepare(SITE,self.taskID,'Posting shipping details...')
         try:
             shipping = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/CheckoutShippingServices-SubmitShipping',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -465,7 +456,7 @@ class SLAMJAM:
                 self.cookie = loadCookie('SLAMJAM')["cookie"]
                 if self.cookie == 'empty':
                     del self.session.cookies["datadome"]
-                    self.cookie = slamjam_datadome(self.session.proxies,self.taskID,self.pid,self.region)
+                    self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
                     self.session.cookies["datadome"]  = self.cookie
                 else:
                     del self.session.cookies["datadome"]
@@ -517,7 +508,7 @@ class SLAMJAM:
 
         try:
             payment = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/CheckoutServices-SubmitPayment',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -529,7 +520,7 @@ class SLAMJAM:
                 self.cookie = loadCookie('SLAMJAM')["cookie"]
                 if self.cookie == 'empty':
                     del self.session.cookies["datadome"]
-                    self.cookie = slamjam_datadome(self.session.proxies,self.taskID,self.pid,self.region)
+                    self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
                     self.session.cookies["datadome"]  = self.cookie
                 else:
                     del self.session.cookies["datadome"]
@@ -630,7 +621,7 @@ class SLAMJAM:
         }
         try:
             payment = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/CheckoutServices-SubmitPayment',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)

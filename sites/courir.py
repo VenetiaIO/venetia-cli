@@ -12,11 +12,14 @@ import base64
 import cloudscraper
 import string
 import urllib.parse
+from urllib3.exceptions import HTTPError
+
 
 from utils.logger import logger
 from utils.webhook import discord
 from utils.captcha import captcha
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, courir_datadome)
+from utils.datadome import datadome
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken)
 SITE = 'COURIR'
 
 class COURIR:
@@ -34,6 +37,7 @@ class COURIR:
     
 
     def collect(self):
+        logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
             retrieve = self.session.get(self.task["PRODUCT"])
         except:

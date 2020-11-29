@@ -11,6 +11,7 @@ import os
 import base64
 import cloudscraper
 import string
+from urllib3.exceptions import HTTPError
 
 
 from utils.logger import logger
@@ -36,9 +37,10 @@ class SCHUH:
         self.collect()
 
     def collect(self):
+        logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
             retrieve = self.session.get(self.task["PRODUCT"])
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -136,7 +138,7 @@ class SCHUH:
         self.session.headers['Accept'] = 'application/json, text/javascript, */*; q=0.01'
         try:
             cart = self.session.post(f'{self.baseURL}/BasketService/AddToBasket',json=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -169,7 +171,7 @@ class SCHUH:
         payload = {"action":"delivery","deliveryOptionCode":"0","branchRef":"0"}
         try:
             update = self.session.post(f'{self.baseURL}/BasketService/updateBasket',json=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -183,7 +185,7 @@ class SCHUH:
             self.session.headers['Referer'] = f'{self.baseURL}/basket.aspx'
             try:
                 login = self.session.post(f'{self.baseURL}/login.aspx',json=payload)
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
@@ -217,7 +219,7 @@ class SCHUH:
                 'klarna-sdid': '6e390e93-c3b6-4ef8-8700-97689e3f155f',
                 'klarna-sdid-status': 'new'
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -246,7 +248,7 @@ class SCHUH:
         try:
             payload = {"email":profile["email"]}
             klarnaEmail = self.session.post(f'{self.baseURL}/CheckoutService/RegisterKlarnaEmail',json=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -281,7 +283,7 @@ class SCHUH:
                 'country': profile["countryCode"],
                 'referrer': 'klarna'
             })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
@@ -299,7 +301,7 @@ class SCHUH:
             self.session.headers['x-Requested-With'] = 'XMLHttpRequest'
             try:
                 EC = self.session.post(f'https://www.paypal.com/smart/api/payment/{self.payID}/ectoken',json={"meta":{}})
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.ProxyError, requests.exceptions.SSLError, requests.exceptions.ConnectionError) as e:
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
