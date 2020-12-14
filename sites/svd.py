@@ -46,8 +46,9 @@ class SVD:
 
         if retrieve.status_code == 200:
             self.start = time.time()
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
             try:
+                logger.prepare(SITE,self.taskID,'Getting product data...')
                 soup = BeautifulSoup(retrieve.text, "html.parser")
                 self.formKey = soup.find(
                     "input", {"name": "form_key"})["value"]
@@ -116,7 +117,7 @@ class SVD:
                                 self.size = size.split(':')[0]
                                 self.sizeID = size.split(':')[2]
                                 self.option = size.split(":")[1]
-                                logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                                 self.addToCart()
 
                 elif self.task["SIZE"].lower() == "random":
@@ -124,7 +125,7 @@ class SVD:
                     self.size = selected.split(":")[0]
                     self.sizeID = selected.split(":")[2]
                     self.option = selected.split(":")[1]
-                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                     self.addToCart()
             else:
                 logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
@@ -139,6 +140,7 @@ class SVD:
             self.collect()
 
     def addToCart(self):
+        logger.prepare(SITE,self.taskID,'Carting product...')
 
         cartForm = {
             "product": self.productID,
@@ -167,7 +169,7 @@ class SVD:
 
         if cart.status_code == 200 and cart.json() == []:
             updateConsoleTitle(True,False,SITE)
-            logger.success(SITE,self.taskID,'Successfully carted')
+            logger.warning(SITE,self.taskID,'Successfully carted')
             self.jwt()
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
@@ -175,6 +177,7 @@ class SVD:
             self.addToCart()
 
     def jwt(self):
+        logger.prepare(SITE,self.taskID,'Getting Fingerprint')
         self.sessionId = str(uuid.uuid4())
 
         try:
@@ -205,9 +208,10 @@ class SVD:
             result = base64.b64decode(self.ClientToken)
             self.bearerToken = json.loads(result.decode(
                 'Utf-8'))["authorizationFingerprint"]
+            logger.warning(SITE,self.taskID,'Got fingerprint')
         except Exception as e:
             log.info(e)
-            logger.error(SITE,self.taskID,'Failed to retrieve token. Retrying...')
+            logger.error(SITE,self.taskID,'Failed to retrieve fingerprint. Retrying...')
             self.jwt()
 
         braintreeHeaders = {
@@ -251,7 +255,7 @@ class SVD:
             self.jwt()
 
         if self.config:
-            logger.success(SITE,self.taskID,'Successfully retrieved token')
+            logger.warning(SITE,self.taskID,'Successfully retrieved token')
             self.shipping()
         else:
             logger.error(SITE,self.taskID,'Failed to retrieve token. Retrying...')
@@ -265,6 +269,7 @@ class SVD:
             time.sleep(10)
             sys.exit()
         countryCode = profile["countryCode"]
+        logger.prepare(SITE,self.taskID,'Getting cart ID...')
 
         try:
             shippingPage = self.session.get('https://www.sivasdescalzo.com/en/checkout/',headers={
@@ -316,7 +321,7 @@ class SVD:
                         log.info(e)
                         pass
     
-                    logger.success(SITE,self.taskID,'Retrieved cart ID')
+                    logger.warning(SITE,self.taskID,'Retrieved cart ID')
                 except Exception as e:
                     log.info(e)
                     logger.error(SITE,self.taskID,'Failed to retrieve cart ID. Retrying...')
@@ -328,6 +333,7 @@ class SVD:
                 time.sleep(int(self.task["DELAY"]))
                 self.shipping()
 
+            logger.prepare(SITE,self.taskID,'Getting shipping rates...')
             if self.regionID:
                 ratesForm = {
                     "address": {
@@ -375,6 +381,7 @@ class SVD:
                 try:
                     rate = rates.json()[0]["method_code"]
                     carrier_code = rates.json()[0]["carrier_code"]
+                    logger.warning(SITE,self.taskID,'Got shipping rate')
                 except Exception as e:
                     log.info(e)
                     logger.error(SITE,self.taskID,'Failed to set shipping. Retrying...')
@@ -441,7 +448,7 @@ class SVD:
                         }
                     }
 
-                logger.success(SITE,self.taskID,'Successfully retrieved shipping rates')
+                logger.prepare(SITE,self.taskID,'Submitting shipping...')
                 try:
                     sendShipping = self.session.post(f'https://www.sivasdescalzo.com/en/rest/en/V1/guest-carts/{self.cartID}/shipping-information',json=shippingForm, headers={
                         'authority': 'www.sivasdescalzo.com',
@@ -470,7 +477,7 @@ class SVD:
 
                 if sendShipping.status_code == 200:
                     self.price = sendShipping.json()["totals"]["grand_total"]
-                    logger.success(SITE,self.taskID,'Successfully set shipping')
+                    logger.warning(SITE,self.taskID,'Successfully set shipping')
 
                     if self.task["PAYMENT"].lower() == "paypal":
                         self.braintreePaypal()
@@ -502,6 +509,7 @@ class SVD:
             time.sleep(10)
             sys.exit()
         countryCode = profile["countryCode"]
+        logger.prepare(SITE,self.taskID,'Getting paypal link...')
 
         headers = {
             'Connection': 'keep-alive',
@@ -549,8 +557,8 @@ class SVD:
             token = paypal.split("token=")[1]
             checkoutUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token={}".format(
                 token)
+            logger.warning(SITE,self.taskID,'Got paypal link...')
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord! (DONT CLOSE APPLICATION UNTIL YOU HAVE COMPLETED CHECKOUT)')
-            logger.secondary(SITE,self.taskID,'Polling PayPal Checkout...')
         except:
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout. Retrying...')
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -577,7 +585,7 @@ class SVD:
             )
             sendNotification(SITE,self.productTitle)
         except:
-            logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+            logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
 
         headers = {
             "Host": "api.braintreegateway.com",
@@ -641,7 +649,7 @@ class SVD:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.braintreePaypal()
 
-        logger.secondary(SITE,self.taskID,'PayPal checkout complete')
+        logger.alert(SITE,self.taskID,'PayPal checkout complete')
         while True:
             pass
 
@@ -1033,7 +1041,7 @@ class SVD:
         if r.status_code == 200:
             self.end = time.time() - self.start
             updateConsoleTitle(False,True,SITE)
-            logger.secondary(SITE,self.taskID,'Checkout Complete!')
+            logger.alert(SITE,self.taskID,'Checkout Complete!')
             sendNotification(SITE,self.productTitle)
             try:
                 discord.success(
@@ -1104,7 +1112,7 @@ class SVD:
             self.ThreeDS()
 
         authToken = r.json()['authToken']
-        logger.alert(SITE,self.taskID,'3DS Authorised')
+        logger.success(SITE,self.taskID,'3DS Authorised')
 
         data = '{"transToken":"%s","authToken":"%s"}' % (
             self.transToken, authToken)
@@ -1278,7 +1286,7 @@ class SVD:
             self.braintreeCard()
 
         if r.status_code == 200:
-            logger.secondary(SITE,self.taskID,'Checkout Complete!')
+            logger.alert(SITE,self.taskID,'Checkout Complete!')
             updateConsoleTitle(False,True,SITE)
             try:
                 discord.success(

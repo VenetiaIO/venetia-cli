@@ -22,6 +22,7 @@ SITE = 'DISNEY'
 
 
 def findProduct(url, session, taskID, SITE, task, disneyRegion):
+    logger.prepare(SITE,taskID,'Searching for product...')
     try:
         kwget = session.get(url, headers={
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -31,7 +32,8 @@ def findProduct(url, session, taskID, SITE, task, disneyRegion):
         log.info(e)
         logger.error(SITE,taskID,'Error: {}'.format(e))
         time.sleep(int(task["DELAY"]))
-        findProduct("https://www.shopdisney.{}/new?srule=Newest&sz=96&start=0".format(disneyRegion),session,taskID,SITE,task,disneyRegion)
+        # https://www.shopdisney.{}/new?srule=Newest&sz=96&start=0
+        findProduct("https://www.shopdisney.{}/search?srule=Newest&q={}".format(disneyRegion,"+".join(task["PRODUCT"].split('|'))),session,taskID,SITE,task,disneyRegion)
     try:
         if kwget.status_code == 200:
             kws = task["PRODUCT"].split('|')
@@ -47,7 +49,8 @@ def findProduct(url, session, taskID, SITE, task, disneyRegion):
                     p = r.find('a',{'class':'product__linkcontainer js-catlisting-productlink-container no-transform'})
                     title = p['title']
                     link = p['href']
-                    if all(kw in title.lower() for kw in kws):
+                    title_ = [x.lower() for x in title.split(' ')]
+                    if all(kw in title_ for kw in kws):
                         link = p['href']
                         foundItem = '{}|{}'.format(title,link)
                 except:
@@ -96,12 +99,12 @@ class DISNEY:
         
 
         if "|" in self.task["PRODUCT"]:
-            self.product = findProduct("https://www.shopdisney.{}/new?srule=Newest&sz=96&start=0".format(self.disneyRegion),self.session,self.taskID,SITE,self.task,self.disneyRegion)
+            self.product = findProduct("https://www.shopdisney.{}/search?srule=Newest&q={}".format(self.disneyRegion,"+".join(self.task["PRODUCT"].split('|'))),self.session,self.taskID,SITE,self.task,self.disneyRegion)
             while self.product == None:
                 logger.error(SITE,self.taskID,'Failed to find product. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 self.collect()
-            logger.success(SITE,self.taskID,'Successfully found product => {}'.format(self.product[0]))
+            logger.warning(SITE,self.taskID,'Successfully found product => {}'.format(self.product[0]))
             self.product = self.product[1]
         elif "shopdisney" in self.task["PRODUCT"]:
             self.product = self.task["PRODUCT"]
@@ -123,13 +126,14 @@ class DISNEY:
 
         if retrieve.status_code == 200:
             self.start = time.time()
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
             regex = r"fe.data.urls.cartShow(.+);"
             matches = re.search(regex, retrieve.text, re.MULTILINE)
             if matches:
 
                 self.bag = str(matches.group()).split('= "/')[1].split('"')[0]
             try:
+                logger.prepare(SITE,self.taskID,'Getting product data...')
                 soup = BeautifulSoup(retrieve.text, "html.parser")
                 self.productTitle = soup.find("title").text.strip(" ").replace("\n","").split(' - ')[0]
                 self.productImage = soup.find("meta", {"property": "og:image"})["content"]
@@ -142,7 +146,7 @@ class DISNEY:
 
                 self.size = "One Size"
 
-                logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
                         
             except Exception as e:
@@ -199,7 +203,7 @@ class DISNEY:
             self.addToCart()
         if postCart.status_code == 200 and int(count) > 0:
             updateConsoleTitle(True,False,SITE)
-            logger.success(SITE,self.taskID,'Successfully carted')
+            logger.warning(SITE,self.taskID,'Successfully carted')
             self.initiate()
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
@@ -207,7 +211,7 @@ class DISNEY:
             self.addToCart()
 
     def initiate(self):
-        logger.prepare(SITE,self.taskID,'Getting keys...')
+        logger.prepare(SITE,self.taskID,'Getting bag...')
         try:
             bag = self.session.get(self.siteBase + '/' + self.bag, headers={
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -228,6 +232,7 @@ class DISNEY:
                 self.bagUrl = soup.find('form',{'name':'dwfrm_cart'})['action']
                 self.secureKey = self.bagUrl.split('?dwcont=')[1]
                 self.checkoutCart = soup.find('button',{'name':'dwfrm_cart_checkoutCart'})['value']
+                logger.warning(SITE,self.taskID,'Got bag data')
             except Exception as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Failed to get keys')
@@ -238,6 +243,7 @@ class DISNEY:
             time.sleep(int(self.task["DELAY"]))
             self.initiate()
 
+        logger.prepare(SITE,self.taskID,'Initializing checkout...')
         try:
             initiate = self.session.post(self.bagUrl,data={"dwfrm_cart_checkoutCart": self.checkoutCart} ,headers={
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -253,15 +259,22 @@ class DISNEY:
 
 
         if initiate.status_code == 200:
-            soup = BeautifulSoup(initiate.text,"html.parser")
+            try:
+                soup = BeautifulSoup(initiate.text,"html.parser")
 
-            self.bagUrl = soup.find('form',{'id':'checkout-shipping-form'})['action']
-            self.shippingKey = soup.find('input',{'name':'dwfrm_singleshipping_securekey'})['value']
+                self.bagUrl = soup.find('form',{'id':'checkout-shipping-form'})['action']
+                self.shippingKey = soup.find('input',{'name':'dwfrm_singleshipping_securekey'})['value']
+                logger.warning(SITE,self.taskID,'Checkout initialized')
+            except Exception as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Failed to initialize')
+                time.sleep(int(self.task["DELAY"]))
+                self.initiate()
+
     
-            logger.success(SITE,self.taskID,'Successfully got keys')
             self.methods()
         else:
-            logger.error(SITE,self.taskID,'Failed to get keys')
+            logger.error(SITE,self.taskID,'Failed to initialize')
             time.sleep(int(self.task["DELAY"]))
             self.initiate()
 
@@ -308,7 +321,7 @@ class DISNEY:
                 time.sleep(int(self.task["DELAY"]))
                 self.methods()
 
-            logger.success(SITE,self.taskID,'Retrieved shipping method.')
+            logger.warning(SITE,self.taskID,'Retrieved shipping method.')
             self.shipping()
         else:
             logger.error(SITE,self.taskID,'Failed to get shipping')
@@ -359,7 +372,7 @@ class DISNEY:
 
 
         if postShipping.status_code in [200,302]:
-            logger.success(SITE,self.taskID,'Successfully submitted shipping')
+            logger.warning(SITE,self.taskID,'Successfully submitted shipping')
             try:
                 soup = BeautifulSoup(postShipping.text,"html.parser")
                 self.billingSecureKey = soup.find('input',{'name':'dwfrm_billing_securekey'})['value']
@@ -374,7 +387,7 @@ class DISNEY:
             if self.task["PAYMENT"].lower() == "card":
                 self.card()
         else:
-            logger.info(SITE,self.taskID,'Failed to submit shipping. Retrying...')
+            logger.error(SITE,self.taskID,'Failed to submit shipping. Retrying...')
             time.sleep(int(self.task["DELAY"]))
             self.shipping()
         
@@ -431,11 +444,13 @@ class DISNEY:
             try:
                 soup = BeautifulSoup(postFinal.text,"html.parser")
                 self.submitVal = soup.find('button',{'name':'submit-order'})['value']
+                logger.warning(SITE,self.taskID,'Submitted payment')
             except Exception as e:
                 log.info(e)
                 time.sleep(int(self.task["DELAY"]))
                 logger.error(SITE,self.taskID,'Failed to submit payment. Retrying...')
 
+            logger.prepare(SITE,self.taskID,'Getting paypal link...')
             try:
                 pp = self.session.post(self.demandwareBase + "COSummary-Submit",data={'submit-order': self.submitVal, 'csrf_token':self.csrf},headers={
                     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -454,6 +469,7 @@ class DISNEY:
             
     
             if pp.status_code in [200,302] and "paypal" in pp.url:
+                logger.warning(SITE,self.taskID,'Got paypal link')
                 self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
                 updateConsoleTitle(False,True,SITE)
@@ -548,6 +564,7 @@ class DISNEY:
             'dwfrm_billing_securekey': self.billingSecureKey
         }
 
+        logger.prepare(SITE,self.taskID,'Submitting order data...')
         try:
             postFinal = self.session.post(self.bagUrl,data=payload,headers={
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -565,6 +582,8 @@ class DISNEY:
             self.card()
 
         if postFinal.status_code in [200,302]:
+            logger.warning(SITE,self.taskID,'Submitted order data')
+            logger.prepare(SITE,self.taskID,'Submitting order...')
             try:
                 submit = self.session.post(self.demandwareBase + "COSummary-Submit",data={'submit-order': 'Submit Order', 'csrf_token':self.csrf},headers={
                     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -581,8 +600,9 @@ class DISNEY:
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 self.card()
             
-            logger.success(SITE,self.taskID,'Successfully submitted card details.')
+            logger.warning(SITE,self.taskID,'Successfully submitted order.')
             if submit.status_code == 200:
+                logger.prepare(SITE,self.taskID,'Starting 3DS Process...')
                 try:
                     soup = BeautifulSoup(submit.text, "html.parser")
                     PaReq = soup.find('input',{'name':'PaReq'})['value']

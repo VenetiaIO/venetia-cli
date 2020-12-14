@@ -1,18 +1,31 @@
-17:04:17,434 root ERROR Expecting value: line 1 column 1 (char 0)
-17:04:20,860 root ERROR Expecting value: line 1 column 1 (char 0)
-17:04:24,445 root ERROR Expecting value: line 1 column 1 (char 0)
-17:04:27,898 root ERROR Expecting value: line 1 column 1 (char 0)
-17:04:31,338 root ERROR Expecting value: line 1 column 1 (char 0)
-17:04:34,952 root ERROR Expecting value: line 1 column 1 (char 0)
-17:04:38,455 root ERROR Expecting value: line 1 column 1 (char 0)
-17:04:41,735 root ERROR Expecting value: line 1 column 1 (char 0)
-17:04:45,494 root ERROR Expecting value: line 1 column 1 (char 0)
-17:04:48,804 root ERROR Expecting value: line 1 column 1 (char 0)
-17:27:37,801 root ERROR expected string or bytes-like object
-17:27:39,819 root ERROR expected string or bytes-like object
-17:27:41,827 root ERROR expected string or bytes-like object
-17:27:43,842 root ERROR expected string or bytes-like object
-17:28:29,165 root ERROR expected string or bytes-like object
-17:28:31,176 root ERROR expected string or bytes-like object
-17:28:33,185 root ERROR expected string or bytes-like object
-17:28:35,193 root ERROR expected string or bytes-like object
+20:44:56,753 root ERROR 'NoneType' object is not iterable
+20:44:58,776 root ERROR 'NoneType' object is not iterable
+20:45:00,650 root ERROR 'NoneType' object is not iterable
+23:01:50,95 root ERROR Orchestrate() -> GET -> HTTPSConnectionPool(host='www.nakedcph.com', port=443): Max retries exceeded with url: /cdn-cgi/challenge-platform/h/g/orchestrate/jsch/v1 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
+23:07:55,959 root ERROR hCaptchaPhaseOne() -> POST -> HTTPSConnectionPool(host='www.nakedcph.com', port=443): Max retries exceeded with url: /cdn-cgi/challenge-platform/h/g/generate/ov1/0.6050353004980364:1607900556:93bae1b9352c00448eebe4cb78c56ccc36bafd042009fe3dda9e2317af065aaf/6013576b5c9b0732/4be82844ccc6219 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+23:10:13,746 root ERROR HTTPSConnectionPool(host='www.nakedcph.com', port=443): Max retries exceeded with url: /en/product/9984/jordan-brand-air-jordan-11-retro-ps-378039-011 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:23:23,318 root ERROR HTTPSConnectionPool(host='payments.braintree-api.com', port=443): Max retries exceeded with url: /graphql (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+16:24:39,958 root ERROR ('Connection broken: IncompleteRead(4113 bytes read, 1162 more expected)', IncompleteRead(4113 bytes read, 1162 more expected))
+16:25:23,40 root ERROR 'continueUrl'
+16:25:23,56 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+16:25:32,902 root ERROR 'continueUrl'
+16:25:32,918 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+16:25:38,429 root ERROR HTTPSConnectionPool(host='www.snipes.com', port=443): Max retries exceeded with url: /p/00013801881213.html?dwvar_00013801881213_color=a&format=ajax (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+16:25:42,723 root ERROR 'continueUrl'
+16:25:42,738 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+16:28:23,577 root ERROR HTTPSConnectionPool(host='en.titoloshop.com', port=443): Max retries exceeded with url: /wmns-air-force-1-07-315115-154 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:31:00,771 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:31:01,788 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /cgi-bin/webscr?cmd=_express-checkout&token=EC-3CH697698C470390P (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:31:42,650 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:31:42,650 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:33:51,912 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:34:11,80 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:34:38,914 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /men/shoes/nike-air-jordan-1-mid-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:34:42,437 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+16:34:47,495 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:34:54,953 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /on/demandware.store/Sites-awlab-en-Site/en_DE/Cart-SubmitForm?format=ajax (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:34:59,15 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:35:53,493 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:37:14,256 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:37:21,940 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /on/demandware.store/Sites-awlab-en-Site/en_DE/Cart-SubmitForm?format=ajax (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+16:39:26,194 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /men/shoes-AW_100BAXBAXA.html?cgid=men_shoes&dwvar_AW__100BAXBAXA_color=8019458 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))

@@ -77,6 +77,8 @@ class SNIPES:
         while cookies["px3"] == "error":
             cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
 
+        self.cs = cookies['cs']
+        self.sid = cookies['sid']
         cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
         cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
         self.session.cookies.set_cookie(cookie_obj)
@@ -147,14 +149,14 @@ class SNIPES:
                         if size.split(':')[0] == self.task["SIZE"]:
                             self.size = size.split(':')[0]
                             self.sizePID = size.split(":")[1]
-                            logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
             
             elif self.task["SIZE"].lower() == "random":
                 selected = random.choice(allSizes)
                 self.size = selected.split(":")[0]
                 self.sizePID = selected.split(":")[1]
-                logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
             
             if self.task["ACCOUNT EMAIL"] != "" and self.task["ACCOUNT EMAIL"] != "":
                 self.login()
@@ -162,18 +164,40 @@ class SNIPES:
                 self.addToCart()
 
         if retrieve.status_code == 403:
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            while cookies["px3"] == "error":
-                cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
+            if 'px-captcha' in retrieve.text:
+                uuid = retrieve.text.split("window._pxVid = '")[1].split("';")
+                vid = retrieve.text.split("window._pxUuid = '")[1].split("';")
+                blockedUrl = f'https://www.snipes.{self.snipesRegion}/blocked&uuid={uuid}&vid={vid}'
+                # Captcha required
+                logger.error(SITE,self.taskID,'PX Captcha Found. Solving...')
+                time.sleep(int(self.task["DELAY"]))
 
-            cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
-            cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
-            self.session.cookies.set_cookie(cookie_obj)
-            self.session.cookies.set_cookie(cookie_obj2)
-            logger.error(SITE,self.taskID,'Forbidden. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.query()
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+                while cookies["px3"] == "error":
+                    cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+    
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+
+                self.query()
+            else:
+                logger.error(SITE,self.taskID,'Forbidden. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
+                while cookies["px3"] == "error":
+                    cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
+    
+                self.cs = cookies['cs']
+                self.sid = cookies['sid']
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+                self.query()
 
         if retrieve.status_code == 429:
             logger.error(SITE,self.taskID,'Rate Limit (Sleeping). Retrying...')
@@ -231,22 +255,46 @@ class SNIPES:
                 time.sleep(int(self.task["DELAY"]))
                 self.login()
 
-            logger.success(SITE,self.taskID,'Successfully Logged in.')
+            logger.warning(SITE,self.taskID,'Successfully Logged in.')
             
             
             self.addToCart()
 
         if login.status_code == 403:
-            cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            while cookies["px3"] == "error":
+            if 'px-captcha' in login.text:
+                uuid = login.text.split("window._pxVid = '")[1].split("';")
+                vid = login.text.split("window._pxUuid = '")[1].split("';")
+                blockedUrl = f'https://www.snipes.{self.snipesRegion}/blocked&uuid={uuid}&vid={vid}'
+                # Captcha required
+                logger.error(SITE,self.taskID,'PX Captcha Found. Solving...')
+                time.sleep(int(self.task["DELAY"]))
+
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+                while cookies["px3"] == "error":
+                    cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+    
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+
+                self.query()
+            else:
+                logger.error(SITE,self.taskID,'Forbidden. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
-            cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
-            self.session.cookies.set_cookie(cookie_obj)
-            self.session.cookies.set_cookie(cookie_obj2)
-            logger.error(SITE,self.taskID,'Forbidden. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.login()
+                while cookies["px3"] == "error":
+                    cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
+    
+                self.cs = cookies['cs']
+                self.sid = cookies['sid']
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+                self.query()
 
         if login.status_code == 429:
             logger.error(SITE,self.taskID,'Rate Limit (Sleeping). Retrying...')
@@ -322,21 +370,44 @@ class SNIPES:
 
 
             updateConsoleTitle(True,False,SITE)
-            logger.success(SITE,self.taskID,'Successfully Carted')
+            logger.warning(SITE,self.taskID,'Successfully Carted')
             self.shipping()
         
         if cart.status_code == 403:
-            cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            while cookies["px3"] == "error":
-                cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
+            if 'px-captcha' in cart.text:
+                uuid = cart.text.split("window._pxVid = '")[1].split("';")
+                vid = cart.text.split("window._pxUuid = '")[1].split("';")
+                blockedUrl = f'https://www.snipes.{self.snipesRegion}/blocked&uuid={uuid}&vid={vid}'
+                # Captcha required
+                logger.error(SITE,self.taskID,'PX Captcha Found. Solving...')
+                time.sleep(int(self.task["DELAY"]))
 
-            cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
-            cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
-            self.session.cookies.set_cookie(cookie_obj)
-            self.session.cookies.set_cookie(cookie_obj2)
-            logger.error(SITE,self.taskID,'Forbidden. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.addToCart()
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+                while cookies["px3"] == "error":
+                    cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+    
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+
+                self.addToCart()
+            else:
+                logger.error(SITE,self.taskID,'Forbidden. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
+                while cookies["px3"] == "error":
+                    cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
+    
+                self.cs = cookies['cs']
+                self.sid = cookies['sid']
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+                self.addToCart()
 
         if cart.status_code == 429:
             logger.error(SITE,self.taskID,'Rate Limit. Retrying...')
@@ -422,7 +493,7 @@ class SNIPES:
             time.sleep(int(self.task["DELAY"]))
             self.shipping()
         if submitShipping.status_code == 200:
-            logger.success(SITE,self.taskID,'Shipping submitted successfully')
+            logger.warning(SITE,self.taskID,'Shipping submitted successfully')
             self.payment_method()
 
         if submitShipping.status_code == 429:
@@ -433,16 +504,40 @@ class SNIPES:
             self.shipping()
 
         if submitShipping.status_code == 403:
-            cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            while cookies["px3"] == "error":
+            if 'px-captcha' in submitShipping.text:
+                uuid = submitShipping.text.split("window._pxVid = '")[1].split("';")
+                vid = submitShipping.text.split("window._pxUuid = '")[1].split("';")
+                blockedUrl = f'https://www.snipes.{self.snipesRegion}/blocked&uuid={uuid}&vid={vid}'
+                # Captcha required
+                logger.error(SITE,self.taskID,'PX Captcha Found. Solving...')
+                time.sleep(int(self.task["DELAY"]))
+
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+                while cookies["px3"] == "error":
+                    cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+    
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+
+                self.shipping()
+            else:
+                logger.error(SITE,self.taskID,'Forbidden. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
-            cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
-            self.session.cookies.set_cookie(cookie_obj)
-            self.session.cookies.set_cookie(cookie_obj2)
-            logger.error(SITE,self.taskID,'Forbidden. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.shipping()
+                while cookies["px3"] == "error":
+                    cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
+    
+                self.cs = cookies['cs']
+                self.sid = cookies['sid']
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+                self.shipping()
         elif submitShipping.status_code not in [200,403]:
             logger.error(SITE,self.taskID,'Failed to submit shipping. Retrying...')
             time.sleep(int(self.task("DELAY")))
@@ -486,7 +581,7 @@ class SNIPES:
             self.payment_method()
 
         if submitPayment.status_code == 200:
-            logger.success(SITE,self.taskID,'Successfully set payment method')
+            logger.warning(SITE,self.taskID,'Successfully set payment method')
             if self.task["PAYMENT"].lower() == "paypal":
                 self.placeOrder_pp()
             if self.task["PAYMENT"].lower() == "bt":
@@ -502,16 +597,40 @@ class SNIPES:
             self.payment_method()
 
         if submitPayment.status_code == 403:
-            cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            while cookies["px3"] == "error":
+            if 'px-captcha' in submitPayment.text:
+                uuid = submitPayment.text.split("window._pxVid = '")[1].split("';")
+                vid = submitPayment.text.split("window._pxUuid = '")[1].split("';")
+                blockedUrl = f'https://www.snipes.{self.snipesRegion}/blocked&uuid={uuid}&vid={vid}'
+                # Captcha required
+                logger.error(SITE,self.taskID,'PX Captcha Found. Solving...')
+                time.sleep(int(self.task["DELAY"]))
+
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+                while cookies["px3"] == "error":
+                    cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+    
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+
+                self.payment_method()
+            else:
+                logger.error(SITE,self.taskID,'Forbidden. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
-            cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
-            self.session.cookies.set_cookie(cookie_obj)
-            self.session.cookies.set_cookie(cookie_obj2)
-            logger.error(SITE,self.taskID,'Forbidden. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.payment_method()
+                while cookies["px3"] == "error":
+                    cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
+    
+                self.cs = cookies['cs']
+                self.sid = cookies['sid']
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+                self.payment_method()
 
         elif submitPayment.status_code not in [200,403]:
             logger.error(SITE,self.taskID,'Failed to submit payment method. Retrying...')
@@ -558,7 +677,7 @@ class SNIPES:
 
             self.end = time.time() - self.start
             updateConsoleTitle(False,True,SITE)
-            logger.alert(SITE,self.taskID,'Order confirmed ({}). Check your email to complete bank transfer.'.format(response["orderID"]))
+            logger.alert(SITE,self.taskID,'Order Placed ({}). Check your email to complete bank transfer.'.format(response["orderID"]))
 
 
             sendNotification(SITE,self.productTitle)
@@ -580,7 +699,7 @@ class SNIPES:
                 while True:
                     pass
             except Exception as e:
-                logger.secondary(SITE,self.taskID,'Failed to send webhook.')
+                logger.alert(SITE,self.taskID,'Failed to send webhook.')
         
         if place.status_code == 429:
             logger.error(SITE,self.taskID,'Rate Limit (Sleeping). Retrying...')
@@ -590,16 +709,40 @@ class SNIPES:
             self.placeOrder_bt()
 
         if place.status_code == 403:
-            cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            while cookies["px3"] == "error":
+            if 'px-captcha' in place.text:
+                uuid = place.text.split("window._pxVid = '")[1].split("';")
+                vid = place.text.split("window._pxUuid = '")[1].split("';")
+                blockedUrl = f'https://www.snipes.{self.snipesRegion}/blocked&uuid={uuid}&vid={vid}'
+                # Captcha required
+                logger.error(SITE,self.taskID,'PX Captcha Found. Solving...')
+                time.sleep(int(self.task["DELAY"]))
+
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+                while cookies["px3"] == "error":
+                    cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+    
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+
+                self.placeOrder_bt()
+            else:
+                logger.error(SITE,self.taskID,'Forbidden. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
-            cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
-            self.session.cookies.set_cookie(cookie_obj)
-            self.session.cookies.set_cookie(cookie_obj2)
-            logger.error(SITE,self.taskID,'Forbidden. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.placeOrder_bt()
+                while cookies["px3"] == "error":
+                    cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
+    
+                self.cs = cookies['cs']
+                self.sid = cookies['sid']
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+                self.placeOrder_bt()
 
         elif place.status_code not in [200,403]:
             try:
@@ -612,7 +755,7 @@ class SNIPES:
             log.info(str(response))
             logger.error(SITE,self.taskID,f'Failed to place order [{msg}]. Retrying...')
             time.sleep(int(self.task["DELAY"]))
-            self.placeOrder_bt()
+            self.addToCart()
 
     def placeOrder_card(self):
         logger.prepare(SITE,self.taskID,'Placing order...')
@@ -692,19 +835,43 @@ class SNIPES:
                 while True:
                     pass
             except Exception as e:
-                logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
 
         if place.status_code == 403:
-            cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            while cookies["px3"] == "error":
+            if 'px-captcha' in place.text:
+                uuid = place.text.split("window._pxVid = '")[1].split("';")
+                vid = place.text.split("window._pxUuid = '")[1].split("';")
+                blockedUrl = f'https://www.snipes.{self.snipesRegion}/blocked&uuid={uuid}&vid={vid}'
+                # Captcha required
+                logger.error(SITE,self.taskID,'PX Captcha Found. Solving...')
+                time.sleep(int(self.task["DELAY"]))
+
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+                while cookies["px3"] == "error":
+                    cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+    
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+
+                self.placeOrder_card()
+            else:
+                logger.error(SITE,self.taskID,'Forbidden. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
-            cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
-            self.session.cookies.set_cookie(cookie_obj)
-            self.session.cookies.set_cookie(cookie_obj2)
-            logger.error(SITE,self.taskID,'Forbidden. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.placeOrder_card()
+                while cookies["px3"] == "error":
+                    cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
+    
+                self.cs = cookies['cs']
+                self.sid = cookies['sid']
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+                self.placeOrder_card()
 
         if place.status_code == 429:
             logger.error(SITE,self.taskID,'Rate Limit (Sleeping). Retrying...')
@@ -724,7 +891,7 @@ class SNIPES:
             log.info(str(response))
             logger.error(SITE,self.taskID,f'Failed to place order [{msg}]. Retrying...')
             time.sleep(int(self.task["DELAY"]))
-            self.placeOrder_card()
+            self.addToCart()
 
     def placeOrder_pp(self):
         logger.prepare(SITE,self.taskID,'Placing order...')
@@ -761,9 +928,10 @@ class SNIPES:
                 log.info(e)
                 log.info(str(response))
                 time.sleep(int(self.task["DELAY"]))
-                self.placeOrder_pp()
+                self.addToCart()
             
             if "paypal" in cUrl:
+                logger.warning(SITE,self.taskID,'Order placed')
                 self.end = time.time() - self.start
                 updateConsoleTitle(False,True,SITE)
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
@@ -790,7 +958,7 @@ class SNIPES:
                     while True:
                         pass
                 except Exception as e:
-                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                    logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             
             else:
                 logger.error(SITE,self.taskID,'Failed to place order (Cart may have duplicates). Retrying...')
@@ -800,16 +968,40 @@ class SNIPES:
                 self.placeOrder_pp()
 
         if place.status_code == 403:
-            cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            while cookies["px3"] == "error":
+            if 'px-captcha' in place.text:
+                uuid = place.text.split("window._pxVid = '")[1].split("';")
+                vid = place.text.split("window._pxUuid = '")[1].split("';")
+                blockedUrl = f'https://www.snipes.{self.snipesRegion}/blocked&uuid={uuid}&vid={vid}'
+                # Captcha required
+                logger.error(SITE,self.taskID,'PX Captcha Found. Solving...')
+                time.sleep(int(self.task["DELAY"]))
+
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+                while cookies["px3"] == "error":
+                    cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+    
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+
+                self.placeOrder_pp()
+            else:
+                logger.error(SITE,self.taskID,'Forbidden. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-            cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
-            cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
-            self.session.cookies.set_cookie(cookie_obj)
-            self.session.cookies.set_cookie(cookie_obj2)
-            logger.error(SITE,self.taskID,'Forbidden. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.placeOrder_pp()
+                while cookies["px3"] == "error":
+                    cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
+    
+                self.cs = cookies['cs']
+                self.sid = cookies['sid']
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.session.cookies.set_cookie(cookie_obj2)
+                self.placeOrder_pp()
 
         if place.status_code == 429:
             logger.error(SITE,self.taskID,'Rate Limit (Sleeping). Retrying...')
@@ -829,7 +1021,7 @@ class SNIPES:
             log.info(str(place.text))
             logger.error(SITE,self.taskID,f'Failed to place order [{msg}]. Retrying...')
             time.sleep(int(self.task["DELAY"]))
-            self.placeOrder_pp()
+            self.addToCart()
         
 
 

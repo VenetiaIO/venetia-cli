@@ -49,7 +49,7 @@ class TITOLO:
 
         if retrieve.status_code == 200:
             self.start = time.time()
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
             try:
                 split = self.task["PRODUCT"].split("titoloshop.")[1]
                 self.region = split.split('/')[0]
@@ -59,6 +59,7 @@ class TITOLO:
                 self.region = split.split('/')[0]
                 self.baseSite = 'https://en.titolo.ch'
             try:
+                logger.prepare(SITE,self.taskID,'Getting product data...')
 
                 soup = BeautifulSoup(retrieve.text,"html.parser")
                 self.productTitle = soup.find("img",{"id":"image"})["title"]
@@ -97,7 +98,7 @@ class TITOLO:
                     self.sizeValue = chosen.split(':')[1]
                     self.size = chosen.split(':')[0]
                     self.sizeAttributeId = chosen.split(':')[2]
-                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                 
         
     
@@ -111,7 +112,7 @@ class TITOLO:
                             self.sizeValue = chosen.split(':')[1]
                             self.size = chosen.split(':')[0]
                             self.sizeAttributeId = chosen.split(':')[2]
-                            logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
 
 
@@ -132,6 +133,7 @@ class TITOLO:
             self.collect()
 
     def addToCart(self):
+        logger.prepare(SITE,self.taskID,'Carting product...')
         captchaResponse = loadToken(SITE)
         if captchaResponse == "empty":
             captchaResponse = captcha.v2('6Ldpi-gUAAAAANpo2mKVvIR6u8nUGrInKKik8MME',self.task["PRODUCT"],self.proxies,SITE,self.taskID)
@@ -161,7 +163,7 @@ class TITOLO:
 
         if postCart.status_code == 200 and "/checkout/cart/" in postCart.url:
             updateConsoleTitle(True,False,SITE)
-            logger.success(SITE,self.taskID,'Successfully carted')
+            logger.warning(SITE,self.taskID,'Successfully carted')
             self.method()
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
@@ -172,6 +174,7 @@ class TITOLO:
                 self.addToCart()
 
     def method(self):
+        logger.prepare(SITE,self.taskID,'Setting checkout method...')
         try:
             setMethod = self.session.post(f'{self.baseSite}/checkout/onepage/saveMethod/',data={"method": "guest"},headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
@@ -207,7 +210,7 @@ class TITOLO:
 
 
         if setMethod.status_code == 200 and data == []:
-            logger.success(SITE,self.taskID,'Saved Method')
+            logger.warning(SITE,self.taskID,'Saved Method')
             self.billing()
         else:
             logger.error(SITE,self.taskID,'Failed to save method. Retrying...')
@@ -223,6 +226,7 @@ class TITOLO:
             time.sleep(10)
             sys.exit()
         countryCode = profile["countryCode"]
+        logger.prepare(SITE,self.taskID,'Submitting billing...')
 
         payload = {
             'billing[address_id]': '',
@@ -263,7 +267,7 @@ class TITOLO:
                 shippingHtml = shippingOptions["update_section"]["html"]
                 soup = BeautifulSoup(shippingHtml,"html.parser")
                 self.shippingMethods = soup.find_all('input',{'name':'shipping_method'})
-                logger.success(SITE,self.taskID,'Successfully set shipping')
+                logger.warning(SITE,self.taskID,'Successfully set shipping')
                 self.shippingMethod()
             else:
                 logger.error(SITE,self.taskID,'Failed to set shipping. Retrying...')
@@ -275,6 +279,7 @@ class TITOLO:
             self.billing()
 
     def shippingMethod(self):
+        logger.prepare(SITE,self.taskID,'Submitting shipping method...')
         try:
             setShippingMethod = self.session.post(f'{self.baseSite}/SaferpayCw/onepage/saveShippingMethod/',data={"shipping_method": self.shippingMethods[0]["value"],"form_key":self.formKey},headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
@@ -288,7 +293,7 @@ class TITOLO:
             self.shippingMethod()
 
         if setShippingMethod.status_code == 200:
-            logger.success(SITE,self.taskID,'Successfully set shipping method')
+            logger.warning(SITE,self.taskID,'Successfully set shipping method')
             if self.task["PAYMENT"].lower() == "paypal":
                 self.paypal()
             if self.task["PAYMENT"].lower() == "mastercard":
@@ -308,6 +313,7 @@ class TITOLO:
 
     def paypal(self):
         logger.info(SITE,self.taskID,'Starting [PAYPAL] checkout...')
+        logger.prepare(SITE,self.taskID,'Setting payment method...')
         try:
             setPayment = self.session.post(f'{self.baseSite}/checkout/onepage/savePayment/',data={"payment[method]": "paypal_express","form_key":self.formKey},headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
@@ -321,7 +327,7 @@ class TITOLO:
             self.paypal()
 
         if setPayment.status_code == 200:
-            logger.success(SITE,self.taskID,'Successfully set payment')
+            logger.warning(SITE,self.taskID,'Successfully set payment method')
             try:
                 getPaypal = self.session.get(f'{self.baseSite}/paypal/express/start/',headers={
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
@@ -360,7 +366,7 @@ class TITOLO:
                     while True:
                         pass
                 except:
-                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                    logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             elif "paypal" not in getPaypal.url:
                 try:
                     discord.failed(
@@ -388,6 +394,7 @@ class TITOLO:
 
     def card(self):
         logger.info(SITE,self.taskID,'Starting [CARD] checkout...')
+        logger.prepare(SITE,self.taskID,'Setting payment method...')
         try:
             savePayment = self.session.post(f'{self.baseSite}/checkout/onepage/savePayment/',data={"payment[method]": self.paymentMethod,"form_key":self.formKey},headers={
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
@@ -401,7 +408,7 @@ class TITOLO:
             self.card()
 
         if savePayment.status_code == 200:
-            logger.success(SITE,self.taskID,'Successfully set payment')
+            logger.warning(SITE,self.taskID,'Successfully set payment method')
             self.placeOrder()  
         elif savePayment.status_code != 200:
             logger.error(SITE,self.taskID,'Failed to set payment. Retrying...')
@@ -409,6 +416,7 @@ class TITOLO:
             self.card()
 
     def placeOrder(self):
+        logger.prepare(SITE,self.taskID,'Placing Order...')
         captchaResponse = loadToken(SITE)
         if captchaResponse == "empty":
             captchaResponse = captcha.v2('6Ldpi-gUAAAAANpo2mKVvIR6u8nUGrInKKik8MME',self.task["PRODUCT"],self.proxies,SITE,self.taskID)
@@ -445,7 +453,7 @@ class TITOLO:
             self.placeOrder()
 
         if saveOrder.json()["success"] == True:
-            logger.success(SITE,self.taskID,'Successfully retrieved SaferPay redirect')
+            logger.warning(SITE,self.taskID,'Successfully placed order')
             self.ccRedirect = saveOrder.json()["redirect"]
 #            
             profile = loadProfile(self.task["PROFILE"])
@@ -507,7 +515,7 @@ class TITOLO:
                     while True:
                         pass
                 except:
-                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                    logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             elif submitCard.status_code != 200:
                 logger.error(SITE,self.taskID,'Error submitting card. Retrying...')
                 try:

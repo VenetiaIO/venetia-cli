@@ -55,31 +55,32 @@ class AWLAB:
 
         if retrieve.status_code == 200:
             self.start = time.time()
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
             try:
+                logger.prepare(SITE,self.taskID,'Getting product data...')
                 soup = BeautifulSoup(retrieve.text, "html.parser")
                 self.productTitle = soup.find('meta',{'name':'description'})["content"]
                 self.productPrice = soup.find_all('span',{'class':'b-price__sale'})[0].text
                 self.productImage = soup.find('link',{'rel':'image_src'})["href"]
                 self.productId = soup.find('div',{'id':'pdpMain'})["data-product-id"]
 
-                print(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Product-Variation?pid={self.productId}&format=ajax')
-                try:
-                    retrieveSizes = self.session.get(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Product-Variation?pid={self.productId}&format=ajax', headers={
-                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
-                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-        
-                    })
-                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                    log.info(e)
-                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
+                # try:
+                    # retrieveSizes = self.session.get(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Product-Variation?pid={self.productId}&format=ajax', headers={
+                        # 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
+                        # 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                        # 'referer':self.task['PRODUCT']
+        # 
+                    # })
+                # except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    # log.info(e)
+                    # logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                    # self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    # time.sleep(int(self.task["DELAY"]))
+                    # self.collect()
                 
                 # https://en.aw-lab.com/on/demandware.store/Sites-awlab-en-Site/en_DE/Product-Variation?pid=AW_22121RBA&format=ajax
-                soup = BeautifulSoup(retrieveSizes.text, "html.parser")
-                foundSizes = soup.find('ul',{'class':'swatches b-size-selector__list b-size-selector_large'})
+                # soup = BeautifulSoup(retrieveSizes.text, "html.parser")
+                foundSizes = soup.find('ul',{'class':'swatches b-size-selector__list b-size-selector_large b-size-selector_large-sticky'})
                 allSizes = []
                 sizes = []
                 
@@ -101,7 +102,7 @@ class AWLAB:
                     chosen = random.choice(allSizes)
                     self.pid = chosen.split(':')[1]
                     self.size = chosen.split(':')[0]
-                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                 
         
                 else:
@@ -113,7 +114,7 @@ class AWLAB:
                         if self.task["SIZE"] == size.split(':')[0]:
                             self.pid = size.split(':')[1]
                             self.size = size.split(':')[0]
-                            logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                         
             except Exception as e:
                log.info(e)
@@ -133,6 +134,7 @@ class AWLAB:
             self.collect()
 
     def addToCart(self):
+        logger.prepare(SITE,self.taskID,'Carting product...')
         payload = {
             'Quantity': 1,
             'sizeTable': '',
@@ -173,7 +175,7 @@ class AWLAB:
             self.addToCart()
 
         if postCart.status_code == 200 and submitCart.status_code == 200 and submitCart.json()["success"] == True:
-            logger.success(SITE,self.taskID,'Successfully carted')
+            logger.warning(SITE,self.taskID,'Successfully carted')
             updateConsoleTitle(True,False,SITE)
             self.method()
         else:
@@ -185,6 +187,7 @@ class AWLAB:
                 self.addToCart()
 
     def method(self):
+        logger.prepare(SITE,self.taskID,'Setting checkout method...')
         try:
             checkout = self.session.get(f'https://{self.awlabRegion}/checkout',headers={
                 'accept-language': 'en-US,en;q=0.9',
@@ -202,9 +205,9 @@ class AWLAB:
 
  
         if checkout.status_code == 200:
+            logger.warning(SITE,self.taskID,'Set checkout method')
             soup = BeautifulSoup(checkout.text,"html.parser")
             self.csrf = soup.find('input',{'name':'csrf_token'})['value']
-
             self.shipping()
         
         else:
@@ -213,6 +216,7 @@ class AWLAB:
             self.method()
 
     def shipping(self):
+        logger.prepare(SITE,self.taskID,'Submitting shipping...')
         profile = loadProfile(self.task["PROFILE"])
         if profile == None:
             logger.error(SITE,self.taskID,'Profile Not Found.')
@@ -296,7 +300,7 @@ class AWLAB:
             self.method()
 
         if shipping.status_code == 200:
-            logger.success(SITE,self.taskID,'Successfully submitted shipping')
+            logger.warning(SITE,self.taskID,'Successfully submitted shipping')
             if self.task["PAYMENT"].lower() == "paypal":
                 self.paypal()
             if self.task["PAYMENT"].lower() == "cad":
@@ -339,6 +343,7 @@ class AWLAB:
             'csrf_token': self.csrf
         }
 
+        logger.prepare(SITE,self.taskID,'Submitting payment...')
         try:
             payment = self.session.post(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/COBilling-Billing', data=payload, headers={
                 'accept-language': 'en-US,en;q=0.9',
@@ -357,6 +362,7 @@ class AWLAB:
             self.method()
 
         if payment.status_code == 200:
+            logger.warning(SITE,self.taskID,'Payment submitted')
             self.end = time.time() - self.start
             try:
                 data = payment.json()
@@ -389,7 +395,7 @@ class AWLAB:
                 while True:
                     pass
             except:
-                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                    logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
         
         else:
             try:
@@ -442,7 +448,7 @@ class AWLAB:
             'dwfrm_billing_billingAddress_tersmsOfSale': 'true',
             'csrf_token': self.csrf
         }
-
+        logger.prepare(SITE,self.taskID,'Submitting payment...')
         try:
             payment = self.session.post(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/COBilling-Billing', data=payload, headers={
                 'accept-language': 'en-US,en;q=0.9',
@@ -461,6 +467,7 @@ class AWLAB:
             self.card()
 
         if payment.status_code in [200,302]:
+            logger.warning(SITE,self.taskID,'Payment submitted')
             self.end = time.time() - self.start
             logger.alert(SITE,self.taskID,'Checkout complete!')
             updateConsoleTitle(False,True,SITE)
@@ -530,7 +537,7 @@ class AWLAB:
             'dwfrm_billing_billingAddress_tersmsOfSale': 'true',
             'csrf_token': self.csrf
         }
-
+        logger.prepare(SITE,self.taskID,'Submitting payment...')
         try:
             payment = self.session.post(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/COBilling-Billing', data=payload, headers={
                 'accept-language': 'en-US,en;q=0.9',
@@ -549,6 +556,7 @@ class AWLAB:
             self.card()
 
         if payment.status_code in [200,302] and "orderNo" in payment.url:
+            logger.warning(SITE,self.taskID,'Payment submitted')
             logger.info(SITE,self.taskID,'Initiating 3DS checkout')
             soup = BeautifulSoup(payment.text, 'html.parser')
             self.termURL = soup.find('input',{'name':'TermUrl'})['value'] 
@@ -681,6 +689,7 @@ class AWLAB:
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                         self.card()
 
+                    logger.prepare(SITE,self.taskID,'Confirming Order...')
                     try:
                         confirm = self.session.post(f'https://{self.awlabRegion}/orderconfirmed',headers={
                             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
@@ -696,6 +705,7 @@ class AWLAB:
                         self.card()
 
                     if confirm.status_code == 200 and "orderconfirmed" in confirm.url or "riepilogoordine" in confirm.url:
+                        logger.warning(SITE,self.taskID,'Order confirmed')
                         self.end = time.time() - self.start
                         logger.alert(SITE,self.taskID,'Checkout complete!')
                         updateConsoleTitle(False,True,SITE)
@@ -725,6 +735,7 @@ class AWLAB:
                         self.card()
 
         if payment.status_code in [200,302] and "revieworder" in payment.url:
+            logger.prepare(SITE,self.taskID,'Confirming Order...')
             try:
                 confirm = self.session.post(f'https://{self.awlabRegion}/orderconfirmed',headers={
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
@@ -740,6 +751,7 @@ class AWLAB:
                 self.card()
 
             if confirm.status_code == 200 and "orderconfirmed" in confirm.url:
+                logger.warning(SITE,self.taskID,'Order confirmed')
                 self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Checkout complete!')
     

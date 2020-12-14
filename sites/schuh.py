@@ -49,8 +49,9 @@ class SCHUH:
 
         if retrieve.status_code == 200:
             self.start = time.time()
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
             try:
+                logger.prepare(SITE,self.taskID,'Getting product data...')
                 soup = BeautifulSoup(retrieve.text,"html.parser")
                 self.productImage = soup.find('img',{'class':'noScriptImage'})['src']
                 sizeSelect = soup.find('select',{'id':'sizes'})
@@ -82,7 +83,7 @@ class SCHUH:
                     self.size = chosen.split(':')[0]
                     self.icode = chosen.split(':')[2]
                     self.isJunior = chosen.split(':')[3]
-                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                     self.addToCart()
                     
                 else:
@@ -93,7 +94,7 @@ class SCHUH:
                     for size in all_sizes:
                         if self.task["SIZE"] == size.split(':')[0]:
                             self.size = size.split(':')[0]
-                            logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                             self.sizeValue = size.split(':')[1]
                             self.icode = size.split(':')[2]
                             self.isJunior = size.split(':')[3]
@@ -116,7 +117,7 @@ class SCHUH:
             self.collect()
 
     def addToCart(self):
-        logger.warning(SITE,self.taskID,'Carting products...')
+        logger.prepare(SITE,self.taskID,'Carting products...')
         region = self.task["PRODUCT"].split('schuh.')[1].split('/')[0]
         self.baseURL = 'https://secure.schuh.{}'.format(region)
 
@@ -156,7 +157,7 @@ class SCHUH:
 
         if cart.status_code == 200 and json["d"]["Success"] == True:
             updateConsoleTitle(True,False,SITE)
-            logger.success(SITE,self.taskID,'Successfully carted')
+            logger.warning(SITE,self.taskID,'Successfully carted')
             self.basket()
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
@@ -167,7 +168,7 @@ class SCHUH:
                 self.addToCart()
 
     def basket(self):
-        logger.warning(SITE,self.taskID,'Updating basket details...')
+        logger.prepare(SITE,self.taskID,'Updating basket details...')
         payload = {"action":"delivery","deliveryOptionCode":"0","branchRef":"0"}
         try:
             update = self.session.post(f'{self.baseURL}/BasketService/updateBasket',json=payload)
@@ -179,8 +180,9 @@ class SCHUH:
             self.basket()
 
         if update.status_code == 200:
-            logger.success(SITE,self.taskID,'Basket details updated')
+            logger.warning(SITE,self.taskID,'Basket details updated')
 
+            logger.prepare(SITE,self.taskID,'Getting checkout data...')
             self.session.headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
             self.session.headers['Referer'] = f'{self.baseURL}/basket.aspx'
             try:
@@ -193,7 +195,7 @@ class SCHUH:
                 self.basket()
 
             if login.status_code == 200 and 'klarnaCheckout' in login.url:
-                logger.success(SITE,self.taskID,'Successfully got checkout page')
+                logger.warning(SITE,self.taskID,'Successfully got checkout page')
                 self.orderURL = login.text.split('ORDER_URL:')[1].split(',')[0].replace("'",'')
                 self.klarnaID = self.orderURL.split('/orders/')[1]
                 self.klarnaAuth = login.text.split('AUTH_HEADER:')[1].split(',')[0].replace("'",'')
@@ -209,6 +211,7 @@ class SCHUH:
 
     
     def klarnaCheckout(self):
+        logger.prepare(SITE,self.taskID,'Initiating Klarna checkout...')
         try:
             initKlarna = self.session.get(f'https://js.klarna.com/eu/kco/checkout/orders/{self.klarnaID}?type=initial',headers={
                 'accept':'application/vnd.klarna.checkout.server-order-v1+json',
@@ -232,7 +235,7 @@ class SCHUH:
             self.subTotal = int(self.klarnaSession["cart"]["subtotal"]) / 100
             self.currency = self.klarnaSession["shared"]["currency"]
             self.productPrice = f'{self.subTotal} {self.currency}'
-            logger.success(SITE,self.taskID,'Successfully initialized Klarna checkout')
+            logger.warning(SITE,self.taskID,'Successfully initialized Klarna checkout')
         else:
             logger.error(SITE,self.taskID,'Failed to initialize klarna chekout. Retrying...')
 
@@ -245,6 +248,7 @@ class SCHUH:
             logger.error(SITE,self.taskID,'Profile Not Found.')
             time.sleep(10)
             sys.exit()
+        logger.prepare(SITE,self.taskID,'Registering Klarna email...')
         try:
             payload = {"email":profile["email"]}
             klarnaEmail = self.session.post(f'{self.baseURL}/CheckoutService/RegisterKlarnaEmail',json=payload)
@@ -256,11 +260,11 @@ class SCHUH:
             self.klarnaCheckout()
         
         if klarnaEmail.status_code == 200:
-            logger.success(SITE,self.taskID,'Klarna email registered')
+            logger.warning(SITE,self.taskID,'Klarna email registered')
             #self.address()
             self.paypal()
         else:
-            logger.success(SITE,self.taskID,'Failed to register klarna email. Retrying...')
+            logger.error(SITE,self.taskID,'Failed to register klarna email. Retrying...')
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
             self.collect()
@@ -276,6 +280,7 @@ class SCHUH:
         self.session.headers['X-Requested-With'] = 'XMLHttpRequest'
         self.session.headers['Referer'] = f'{self.baseURL}/klarnaCheckout.aspx'
 
+        logger.prepare(SITE,self.taskID,'Getting paypal id...')
         try:
             payID = self.session.post('https://secure.schuh.co.uk/PayWithPayPalInContext.aspx?viewPort=3&repay=0&country=GB&referrer=klarna',data={
                 'viewPort': 3,
@@ -291,7 +296,7 @@ class SCHUH:
             self.paypal()
 
         if payID.status_code == 200:
-            logger.success(SITE,self.taskID,'Successfully Retrieved PayPal PayID')
+            logger.warning(SITE,self.taskID,'Successfully Retrieved PayPal PayID')
             self.payID = payID.text.replace('"','')
 
             self.session.headers['accept'] = 'application/json'
@@ -299,6 +304,7 @@ class SCHUH:
             self.session.headers['x-csrf-jwt'] = '__blank__'
             self.session.headers['x-requested-by'] = 'smart-payment-buttons'
             self.session.headers['x-Requested-With'] = 'XMLHttpRequest'
+            logger.prepare(SITE,self.taskID,'Getting paypal link...')
             try:
                 EC = self.session.post(f'https://www.paypal.com/smart/api/payment/{self.payID}/ectoken',json={"meta":{}})
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -318,6 +324,7 @@ class SCHUH:
                 self.ppToken = EC.json()["data"]["token"]
 
                 self.ppURL = 'https://www.paypal.com/checkoutnow?locale.x=en_GB&fundingSource=paypal&env=production&fundingOffered=paypal&logLevel=warn&version=4&token={}&xcomponent=1'.format(self.ppToken)
+                logger.warning(SITE,self.taskID,'Got paypal link')
 
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
                 updateConsoleTitle(False,True,SITE)
@@ -343,7 +350,7 @@ class SCHUH:
                     while True:
                         pass
                 except:
-                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                    logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             else:
                 logger.error(SITE,self.taskID,'Could not complete PayPal Checkout. Retrying...')
                 try:

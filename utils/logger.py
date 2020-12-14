@@ -43,7 +43,7 @@ class logger:
         lock.acquire()
         try:
             #sys.stdout.write('{} {}'.format(get_task(site,taskID), colored(f'{message}\n', 'yellow')))
-            sys.stdout.write('{} {}'.format(get_task(site,taskID), Fore.YELLOW + Style.NORMAL + message + '\n'))
+            sys.stdout.write('{} {}'.format(get_task(site,taskID), Fore.YELLOW + Style.DIM + message + '\n'))
         finally:
             lock.release()
 
@@ -61,7 +61,7 @@ class logger:
         lock.acquire()
         try:
             #sys.stdout.write('{} {}'.format(get_task(site,taskID), colored(f'{message}\n', 'cyan',attrs=["bold"])))
-            sys.stdout.write('{} {}'.format(get_task(site,taskID), Fore.CYAN + message + '\n'))
+            sys.stdout.write('{} {}'.format(get_task(site,taskID), Fore.CYAN + Style.BRIGHT + message + '\n'))
         finally:
             lock.release()
 
@@ -79,7 +79,7 @@ class logger:
         lock.acquire()
         try:
             #sys.stdout.write('{} {}'.format(get_task(site,taskID), colored(f'{message}\n', 'magenta',attrs=["bold"])))
-            sys.stdout.write('{} {}'.format(get_task(site,taskID), Fore.WHITE + message + '\n'))
+            sys.stdout.write('{} {}'.format(get_task(site,taskID), Fore.WHITE + Style.BRIGHT + message + '\n'))
         finally:
             lock.release()
 

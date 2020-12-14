@@ -52,8 +52,9 @@ class ALLIKE:
 
         if retrieve.status_code == 200:
             self.start = time.time()
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
             try:
+                logger.prepare(SITE,self.taskID,'Getting product data...')
                 soup = BeautifulSoup(retrieve.text, "html.parser")
                 self.productTitle = soup.find("title").text
                 self.productImage = soup.find("img", {"id": "image-0"})["src"]
@@ -94,7 +95,7 @@ class ALLIKE:
                                     self.size = size.split(':')[0]
                                     self.sizeID = size.split(':')[2]
                                     self.option = size.split(":")[1]
-                                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
         
                     
                     elif self.task["SIZE"].lower() == "random":
@@ -102,7 +103,7 @@ class ALLIKE:
                         self.size = selected.split(":")[0]
                         self.sizeID = selected.split(":")[2]
                         self.option = selected.split(":")[1]
-                        logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
                 
                 else:
@@ -129,6 +130,7 @@ class ALLIKE:
             self.collect()
 
     def addToCart(self):
+        logger.prepare(SITE,self.taskID,'Carting product...')
         payload = {
             'isAjax': 1,
             'form_key': self.formKey,
@@ -167,9 +169,9 @@ class ALLIKE:
 
         if postCart.status_code == 200 and data["status"] == "SUCCESS":
             updateConsoleTitle(True,False,SITE)
-            logger.success(SITE,self.taskID,'Successfully carted')
+            logger.warning(SITE,self.taskID,'Successfully carted')
             if self.task["PAYMENT"].lower() == "paypal":
-                self.ppExpress()
+                self.method()
             else:
                 self.method()
         else:
@@ -241,6 +243,7 @@ class ALLIKE:
             self.ppExpress()
 
     def method(self):
+        logger.prepare(SITE,self.taskID,'Submitting checkout method...')
         try:
             postMethod = self.session.post('https://www.allikestore.com/default/checkout/onepage/saveMethod/', data={"method": "guest"}, headers={
                 'authority': 'www.allikestore.com',
@@ -262,7 +265,7 @@ class ALLIKE:
             self.method()
 
         if postMethod.status_code == 200:
-            logger.success(SITE,self.taskID,'Saved Method')
+            logger.warning(SITE,self.taskID,'Saved Method')
             self.billing()
         else:
             logger.error(SITE,self.taskID,'Failed to save method. Retrying...')
@@ -270,6 +273,7 @@ class ALLIKE:
             self.method()
 
     def billing(self):
+        logger.prepare(SITE,self.taskID,'Submitting billing...')
         profile = loadProfile(self.task["PROFILE"])
         if profile == None:
             logger.error(SITE,self.taskID,'Profile Not Found.')
@@ -331,7 +335,7 @@ class ALLIKE:
                 soup = BeautifulSoup(shippingHtml,"html.parser")
                 self.shippingMethods = soup.find_all('input',{'class':'radio'})
                 #self.shippingMethod = shippingMethods[0]["value"]
-                logger.success(SITE,self.taskID,'Successfully set shipping')
+                logger.warning(SITE,self.taskID,'Successfully set shipping')
                 self.shippingMethod()
             else:
                 logger.error(SITE,self.taskID,'Failed to set shipping. Retrying...')
@@ -344,6 +348,7 @@ class ALLIKE:
 
 
     def shippingMethod(self):
+        logger.prepare(SITE,self.taskID,'Submitting shipping method...')
         try:
             postShippingMethod = self.session.post('https://www.allikestore.com/default/checkout/onepage/saveShippingMethod/', data={"shipping_method": self.shippingMethods[0]["value"], "form_key": self.formKey}, headers={
                 'authority': 'www.allikestore.com',
@@ -363,7 +368,7 @@ class ALLIKE:
             self.shippingMethod()
 
         if postShippingMethod.status_code == 200:
-            logger.success(SITE,self.taskID,'Successfully set shipping method')
+            logger.warning(SITE,self.taskID,'Successfully set shipping method')
             if self.task["PAYMENT"] == "paypal":
                 self.paypal()
             if self.task["PAYMENT"] == "card":
@@ -402,6 +407,7 @@ class ALLIKE:
 
         if postVerifyPayment.status_code == 200:
             self.end = time.time() - self.start
+            logger.prepare(SITE,self.taskID,'Getting paypal link...')
             try:
                 startExpress = self.session.get('https://www.allikestore.com/default/paypal/express/start/', headers={
                     'authority': 'www.allikestore.com',
@@ -418,6 +424,7 @@ class ALLIKE:
                 time.sleep(int(self.task["DELAY"]))
                 self.paypal()
             if "paypal" in startExpress.url:
+                logger.warning(SITE,self.taskID,'Successfully got paypal link')
                 updateConsoleTitle(False,True,SITE)
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
  
@@ -443,7 +450,7 @@ class ALLIKE:
                     while True:
                         pass
                 except:
-                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                    logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             else:
                 try:
                     discord.failed(
@@ -489,6 +496,7 @@ class ALLIKE:
         cardyear = profile["card"]["cardYear"]
         cvv = profile["card"]["cardCVV"]
         url = f'https://secure.pay1.de/client-api/?aid={self.aid}&encoding=UTF-8&errorurl=&hash={self.hash}&integrator_name=&integrator_version=&key=&language=&mid={self.mid}&mode=live&portalid={self.portalid}&request=creditcardcheck&responsetype=JSON&solution_name=&solution_version=&storecarddata=yes&successurl=&cardpan={cardplan}&cardexpiremonth={cardmonth}&cardexpireyear={cardyear}&cardtype={cType}&channelDetail=payoneHosted&cardcvc2={cvv}&callback_method=PayoneGlobals.callback'
+        logger.prepare(SITE,self.taskID,'Getting SecurePay details...')
         try:
             securePay = self.session.get(url,headers={
                 'Accept':'*/*',
@@ -511,7 +519,7 @@ class ALLIKE:
         if securePay.status_code == 200:
             split = securePay.text.split('PayoneGlobals.callback(')[1]
             secure = json.loads(split.split(');')[0])
-            logger.success(SITE,self.taskID,'Got SecurePay callback')
+            logger.warning(SITE,self.taskID,'Got SecurePay details')
 
             verifyPayload = {
                 'payment[method]': 'payone_creditcard',
@@ -526,6 +534,7 @@ class ALLIKE:
                 'form_key': self.formKey,
             }
 
+            logger.prepare(SITE,self.taskID,'Verifiyng payment...')
             try:
                 verifyPayment = self.session.post('https://www.allikestore.com/default/payone_core/checkout_onepage/verifyPayment/',data=verifyPayload,headers={
                     'authority': 'www.allikestore.com',
@@ -544,7 +553,7 @@ class ALLIKE:
                 self.creditCard()
 
             if verifyPayment.status_code == 200:
-                logger.success(SITE,self.taskID,'Payment Verified')
+                logger.warning(SITE,self.taskID,'Payment Verified')
                 savePayload = {
                     'payment[method]': 'payone_creditcard',
                     'payone_creditcard_cc_type_select': '4_V',
@@ -561,6 +570,7 @@ class ALLIKE:
                     'customer_order_comment': ''
                 }
                 
+                logger.prepare(SITE,self.taskID,'Saving Order...')
                 try:
                     saveOrder = self.session.post('https://www.allikestore.com/default/checkout/onepage/saveOrder/',data=savePayload,headers={
                         'authority': 'www.allikestore.com',
@@ -579,7 +589,7 @@ class ALLIKE:
                     self.creditCard()
 
                 if saveOrder.status_code == 200:
-
+                    logger.warning(SITE,self.taskID,'Order saved')
                     response = json.loads(saveOrder.text)
                     if response["success"] == False:
                         logger.error(SITE,self.taskID,'ERROR => {}'.format(response["error_messages"]))
