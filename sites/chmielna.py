@@ -17,7 +17,7 @@ from urllib3.exceptions import HTTPError
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, scraper)
 SITE = 'CHMIELNA20'
 
 
@@ -30,28 +30,11 @@ class CHMIELNA:
 
         twoCap = loadSettings()["2Captcha"]
         try:
-            self.session = cloudscraper.create_scraper(
-                requestPostHook=injection,
-                sess=self.sess,
-                browser={
-                    'browser': 'chrome',
-                    'mobile': False,
-                    'platform': 'windows'
-                    #'platform': 'darwin'
-                },
-                captcha={
-                    'provider': '2captcha',
-                    'api_key': twoCap
-                }
-            )
+            self.session = scraper()
         except Exception as e:
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.__init__(task,taskName)
-        self.session.headers={
-           'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-           'referer': 'https://chmielna20.pl',
-           'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36'
-        }
+
         
 
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -78,8 +61,9 @@ class CHMIELNA:
                 self.collect()
 
 
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
             try:
+                logger.prepare(SITE,self.taskID,'Getting product data...')
                 soup = BeautifulSoup(retrieve.text, "html.parser")
                 self.cartURL = soup.find('form',{'name':'product__add'})["action"]
                 self.token = soup.find('input',{'name':'_token'})["value"]
@@ -113,12 +97,12 @@ class CHMIELNA:
                             for size in sizes:
                                 if size == self.task["SIZE"]:
                                     self.size = size
-                                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
         
                     
                     elif self.task["SIZE"].lower() == "random":
                         self.size = random.choice(sizes)
-                        logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                 
                 else:
                     logger.error(SITE,self.taskID,'Size Not Found')
@@ -145,17 +129,14 @@ class CHMIELNA:
             self.collect()
 
     def addToCart(self):
+        logger.prepare(SITE,self.taskID,'Carting product...')
         payload = {
             '_token': self.token,
             'size': self.size
         }
 
         try:
-            postCart = self.session.post(self.cartURL, data=payload, headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
-                'referer':self.task["PRODUCT"],
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-            })
+            postCart = self.session.post(self.cartURL, data=payload)
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -165,7 +146,7 @@ class CHMIELNA:
 
         if postCart.status_code in [200,302] and "basket" in postCart.url:
             updateConsoleTitle(True,False,SITE)
-            logger.success(SITE,self.taskID,'Successfully carted')
+            logger.warning(SITE,self.taskID,'Successfully carted')
             self.method()
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
@@ -175,11 +156,7 @@ class CHMIELNA:
     def method(self):
         logger.prepare(SITE,self.taskID,'Setting method...')
         try:
-            method = self.session.get('https://chmielna20.pl/order/anonymous',headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
-                'referer':'https://chmielna20.pl/login',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-            })
+            method = self.session.get('https://chmielna20.pl/order/anonymous')
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -188,7 +165,7 @@ class CHMIELNA:
             self.method()
 
         if method.status_code in [200,302] and 'order' in method.url:
-            logger.success(SITE,self.taskID,'Successfully set method.')
+            logger.warning(SITE,self.taskID,'Successfully set method.')
             self.address() 
         else:
             logger.error(SITE,self.taskID,'Failed to set method. Retrying...')
@@ -231,12 +208,7 @@ class CHMIELNA:
         }
 
         try:
-            postOrder = self.session.post('https://chmielna20.pl/en/order', data=payload, headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
-                'referer':'https://chmielna20.pl/en/order',
-                'content-type': 'application/x-www-form-urlencoded',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-            })
+            postOrder = self.session.post('https://chmielna20.pl/en/order', data=payload)
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -245,7 +217,7 @@ class CHMIELNA:
             self.address()
 
         if postOrder.status_code == 200 and "delivery" in postOrder.url:
-            logger.success(SITE,self.taskID,'Successfully set address.')
+            logger.warning(SITE,self.taskID,'Successfully set address.')
             self.delivery()
         else:
             logger.error(SITE,self.taskID,'Failed to set address. Retrying...')
@@ -255,11 +227,7 @@ class CHMIELNA:
     def delivery(self):
         logger.prepare(SITE,self.taskID,'Setting delivery option...')
         try:
-            delivery = self.session.get('https://chmielna20.pl/en/order/delivery', headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
-                'referer':'https://chmielna20.pl/en/order',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-            })
+            delivery = self.session.get('https://chmielna20.pl/en/order/delivery')
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -296,12 +264,7 @@ class CHMIELNA:
             }
             
             try:
-                postDelivery = self.session.post('https://chmielna20.pl/en/order/delivery', data=payload, headers={
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
-                    'referer':'https://chmielna20.pl/en/order/delivery',
-                    'content-type': 'application/x-www-form-urlencoded',
-                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-                })
+                postDelivery = self.session.post('https://chmielna20.pl/en/order/delivery', data=payload)
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -311,7 +274,7 @@ class CHMIELNA:
 
 
             if postDelivery.status_code == 200 and "confirm" in postDelivery.url:
-                logger.success(SITE,self.taskID,'Successfully set delivery method.')
+                logger.warning(SITE,self.taskID,'Successfully set delivery method.')
                 self.confirm()
             else:
                 logger.error(SITE,self.taskID,'Failed to set delivery method. Retrying...')
@@ -325,12 +288,7 @@ class CHMIELNA:
     def confirm(self):
         logger.prepare(SITE,self.taskID,'Submitting checkout...')
         try:
-            conf = self.session.post('https://chmielna20.pl/en/order/confirm', data={"_token":self.token}, headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
-                'referer':'https://chmielna20.pl/en/order/confirm',
-                'content-type': 'application/x-www-form-urlencoded',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-            })
+            conf = self.session.post('https://chmielna20.pl/en/order/confirm', data={"_token":self.token})
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -350,12 +308,7 @@ class CHMIELNA:
 
 
             try:
-                payCreate = self.session.post(createUrl, data={"_token":self.token}, headers={
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
-                    'referer':conf.url,
-                    'content-type': 'application/x-www-form-urlencoded',
-                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-                })
+                payCreate = self.session.post(createUrl, data={"_token":self.token})
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -364,6 +317,7 @@ class CHMIELNA:
                 self.confirm()
 
             if payCreate.status_code in [200,302] and "paypal" in payCreate.url:
+                logger.prepare(SITE,self.taskID,'Checkout submitted')
                 self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
                 updateConsoleTitle(False,True,SITE)
@@ -389,7 +343,7 @@ class CHMIELNA:
                     while True:
                         pass
                 except:
-                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                    logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             else:
                 logger.error(SITE,self.taskID,'Failed to get PayPal checkout link. Retrying...')
                 time.sleep(int(self.task["DELAY"]))

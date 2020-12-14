@@ -96,7 +96,7 @@ class SLAMJAM:
         if retrieve.status_code == 200:
             
             self.redirectUrl = retrieve.url
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
             try:
                 soup = BeautifulSoup(retrieve.text, "html.parser")
                 #self.pid = retrieve.text.split("criteoProductsArray.push('")[1].split("');")[0]
@@ -126,9 +126,11 @@ class SLAMJAM:
 
 
     def retrieve(self):
-        logger.warning(SITE,self.taskID,'Gathering product info...')
+        logger.prepare(SITE,self.taskID,'Getting product info...')
         try:
-            data = self.session.get(self.queryString)
+            data = self.session.get(self.queryString,headers={
+                'referer':self.url
+            })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -136,7 +138,6 @@ class SLAMJAM:
             time.sleep(int(self.task["DELAY"]))
             self.collect()
         
-        print(data)
         if data:
             if 'DDUser' in data.url:
                 logger.info(SITE,self.taskID,'Challenge Found, Solving...')
@@ -160,7 +161,6 @@ class SLAMJAM:
                         time.sleep(int(self.task["DELAY"]))
                         self.collect()
 
-                    print(data)
     
                     self.uuid = data["product"]["uuid"]
                     self.productTitle = data["product"]["productName"]
@@ -195,7 +195,7 @@ class SLAMJAM:
                                     self.size = size.split(':')[0]
                                     self.sizeID = size.split(':')[1]
                                     self.sizeProductID = size.split(":")[2]
-                                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                                     self.addToCart()
         
                     
@@ -204,7 +204,7 @@ class SLAMJAM:
                         self.size = selected.split(':')[0]
                         self.sizeProductID = selected.split(":")[2]
                         self.sizeID = selected.split(':')[1]
-                        logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                         self.addToCart()
 
         else:
@@ -266,7 +266,7 @@ class SLAMJAM:
         
                 if cart.status_code == 200 and int(cart.json()["quantityTotal"]) > 0:
                     updateConsoleTitle(True,False,SITE)
-                    logger.success(SITE,self.taskID,'Successfully Carted Product!')
+                    logger.warning(SITE,self.taskID,'Successfully Carted Product!')
                     self.shipping()
                 else:
                     logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
@@ -318,6 +318,7 @@ class SLAMJAM:
                 self.shipping()
             else:
                 if shipping.status_code == 200:
+                    logger.warning(SITE,self.taskID,'Got checkout page')
                     soup = BeautifulSoup(shipping.text,"html.parser")
                     # try:
                     self.shipmentUUID = soup.find("input",{"name":"shipmentUUID"})["value"]
@@ -401,6 +402,7 @@ class SLAMJAM:
                 if shippingMethods.status_code == 200:
                     try:
                         self.shippingMethodId = shippingMethods.json()["order"]["shipping"][0]["applicableShippingMethods"][0]["ID"]
+                        logger.warning(SITE,self.taskID,'Got shipping rate')
                     except Exception as e:
                         log.info(e)
                         logger.error(SITE,self.taskID,'Failed to get shipping methods. Retrying...')
@@ -433,7 +435,7 @@ class SLAMJAM:
             'dwfrm_shipping_shippingAddress_shippingMethodID': self.shippingMethodId,
             'csrf_token': self.csrfToken,
         }
-        logger.prepare(SITE,self.taskID,'Posting shipping details...')
+        logger.prepare(SITE,self.taskID,'Submitting shipping details...')
         try:
             shipping = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/CheckoutShippingServices-SubmitShipping',data=payload)
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -466,16 +468,16 @@ class SLAMJAM:
                 self.shipping()
             else:
                 if shipping.status_code == 200 and data:
-                    logger.success(SITE,self.taskID,'Successfully posted shipping details')
+                    logger.warning(SITE,self.taskID,'Submitted shipping details')
                     self.PayPalpayment()
                 else:
-                    logger.error(SITE,self.taskID,'Failed to post shipping details. Retrying...')
+                    logger.error(SITE,self.taskID,'Failed to submit shipping details. Retrying...')
                     time.sleep(int(self.task["DELAY"]))
                     self.shipping()
 
 
     def PayPalpayment(self):
-        logger.warning(SITE,self.taskID,'Submitting payment...')
+        logger.preare(SITE,self.taskID,'Submitting payment...')
         profile = loadProfile(self.task["PROFILE"])
         if profile == None:
             logger.error(SITE,self.taskID,'Profile Not Found.')
@@ -538,7 +540,7 @@ class SLAMJAM:
         
                 if payment.status_code == 200 and data:
                     self.end = time.time() - self.start
-                    logger.success(SITE,self.taskID,'Successfully submitted payment')
+                    logger.warning(SITE,self.taskID,'Successfully submitted payment')
                     
                     try:
                         self.paypalToken = data["paypalProcessorResult"]["paypalToken"]
@@ -572,7 +574,7 @@ class SLAMJAM:
                         while True:
                             pass
                     except:
-                        logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                        logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
                     
                 else:
                     logger.error(SITE,self.taskID,'Failed to submit payment. Retrying...')
@@ -580,7 +582,7 @@ class SLAMJAM:
                     self.PayPalpayment()
 
     def ccPayment(self):
-        logger.warning(SITE,self.taskID,'Submitting payment...')
+        logger.prepare(SITE,self.taskID,'Submitting payment...')
         profile = loadProfile(self.task["PROFILE"])
         if profile == None:
             logger.error(SITE,self.taskID,'Profile Not Found.')

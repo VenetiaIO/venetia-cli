@@ -19,6 +19,7 @@ from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loa
 
 
 def findProduct(text, kws, SITE, taskID, region):
+    logger.prepare(SITE,taskID,'Searching for product...')
     soup = BeautifulSoup(text, "html.parser")
     items = soup.find("div",{"id":"categoryItems"})
     
@@ -34,7 +35,7 @@ def findProduct(text, kws, SITE, taskID, region):
                 foundItem.append('https://www.queens.{}{}|{}'.format(region,aLink, aTag.text))
     
     if len(foundItem) > 0:
-        logger.success(SITE,taskID,'Successfully found product => {}'.format(foundItem[0].split('|')[1]))
+        logger.warning(SITE,taskID,'Successfully found product => {}'.format(foundItem[0].split('|')[1]))
         return foundItem[0].split('|')[0]
     else:
         return None
@@ -88,8 +89,9 @@ class QUEENS:
                     kwProduct = findProduct(retrieve.text, kws, SITE, self.taskID, self.region)
 
                 self.task["PRODUCT"] = kwProduct
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
             try:
+                logger.prepare(SITE,self.taskID,'Getting product data...')
                 soup = BeautifulSoup(retrieve.text,"html.parser")
                 self.item_id = soup.find("i",{"class":"icon-star"})["data-id"]
                 self.csrf = soup.find("input",{"name":"_csrf"})["value"]
@@ -122,7 +124,7 @@ class QUEENS:
                     chosen = random.choice(all_sizes)
                     self.sizeValue = chosen.split(':')[1]
                     self.size = chosen.split(':')[0]
-                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                 
     
                 else:
@@ -133,7 +135,7 @@ class QUEENS:
                     for size in all_sizes:
                         if self.task["SIZE"] == size.split(':')[0]:
                             self.size = size.split(':')[0]
-                            logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                             self.sizeValue = size.split(':')[1]
 
             except Exception as e:
@@ -159,6 +161,7 @@ class QUEENS:
 
 
     def addToCart(self):
+        logger.prepare(SITE,self.taskID,'Carting product...')
         payload = {
             '_csrf': self.csrf,
             'variant': self.sizeValue,
@@ -188,7 +191,7 @@ class QUEENS:
 
         if postCart.status_code == 200 and checkCart.status_code == 200 and int(cart) > 0:
             updateConsoleTitle(True,False,SITE)
-            logger.success(SITE,self.taskID,'Successfully carted')
+            logger.warning(SITE,self.taskID,'Successfully carted')
             self.country()
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
@@ -231,6 +234,7 @@ class QUEENS:
             time.sleep(10)
             sys.exit()
         countryCode = profile["countryCode"]
+        logger.prepare(SITE,self.taskID,'Setting country...')
 
         try:
             getCountry = self.session.get(f'https://www.queens.{self.region}/checkout/country/')
@@ -259,7 +263,7 @@ class QUEENS:
                 self.country()
 
             if country.status_code == 200:
-                logger.success(SITE,self.taskID,'Country Set')
+                logger.warning(SITE,self.taskID,'Country Set')
                 self.shipping()
             else:
                 logger.error(SITE,self.taskID,'Failed to set Country. Retrying...')
@@ -272,6 +276,7 @@ class QUEENS:
             self.country()
 
     def shipping(self):
+        logger.prepare(SITE,self.taskID,'Setting shipping...')
         try:
             shipping = self.session.get(f'https://www.queens.{self.region}/checkout/shipping/')
         except:
@@ -283,7 +288,6 @@ class QUEENS:
         if shipping.status_code == 200:
             soup = BeautifulSoup(shipping.text,"html.parser")
             self.shippingID = soup.find_all('input',{'name':'shipping'})[0]["value"]
-            logger.success(SITE,self.taskID,'Retrieved shipping ID')
         else:
             logger.error(SITE,self.taskID,'Faile to retrieve shipping ID')
             time.sleep(int(self.task["DELAY"]))
@@ -304,7 +308,7 @@ class QUEENS:
             self.shipping()
 
         if methods.status_code == 200:
-            logger.success(SITE,self.taskID,'Successfully set shipping')
+            logger.warning(SITE,self.taskID,'Successfully set shipping')
             self.delivery()
         else:
             logger.error(SITE,self.taskID,'Failed to set shipping. Retrying...')
@@ -318,6 +322,7 @@ class QUEENS:
             logger.error(SITE,self.taskID,'Profile Not Found.')
             time.sleep(10)
             sys.exit()
+        logger.prepare(SITE,self.taskID,'Submitting delivery....')
         payload = {
             '_csrf': self.csrf,
             'CheckoutForm[first_name]': profile["firstName"],
@@ -343,7 +348,7 @@ class QUEENS:
             self.delivery()
             
         if finish.status_code == 200 and 'checkout/done' in finish.url:
-            logger.secondary(SITE,self.taskID,'Finalized checkout!')
+            logger.warning(SITE,self.taskID,'Submitted delivery')
             split = finish.text.split('return actions.order.create(')[1].split(',application_context')[0].replace('purchase_units','"purchase_units"').replace('amount','"amount"').replace('custom_id','"custom_id"').replace("'",'"')
             checkoutDetails = json.loads(split + '}')
             orderNumber = checkoutDetails["purchase_units"][0]["custom_id"]
@@ -353,6 +358,7 @@ class QUEENS:
             tracking = f'https://www.queens.{self.region}' + finish.text.split('Track your order <b><a href="')[1].split('">here</a></b>.')[0]
 
 
+            logger.prepare(SITE,self.taskID,'Getting paypal link...')
             try:
                 smartButton = self.session.get('https://www.paypal.com/smart/buttons/?clientID=AR-aWcHvERa9mDAl3Jwyo39Yc7-4uaiiLom6Rhc8vkfxMkXlx0pzA9aEdoD7WMzsh-E6ICBRR7veqdWd')
                 self.facilitatorAccessToken = smartButton.text.split('"facilitatorAccessToken":"')[1].split('"')[0]
@@ -374,6 +380,7 @@ class QUEENS:
                 self.delivery()
 
             if paypalOrder.status_code == 201 and paypalOrder.json()["status"] == "CREATED":
+                logger.warning(SITE,self.taskID,'Got paypal link')
                 self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
                 updateConsoleTitle(False,True,SITE)
@@ -400,7 +407,7 @@ class QUEENS:
                     while True:
                         pass
                 except:
-                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                    logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             
             elif paypalOrder.status_code != 201:
                 logger.error(SITE,self.taskID,'Could not complete PayPal Checkout. Retrying...')

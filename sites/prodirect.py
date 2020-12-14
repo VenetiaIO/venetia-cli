@@ -50,8 +50,9 @@ class PRODIRECT:
 
         if retrieve.status_code == 200:
             self.start = time.time()
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
             try:
+                logger.prepare(SITE,self.taskID,'Getting product data...')
                 soup = BeautifulSoup(retrieve.text, "html.parser")
                 self.productTitle = soup.find('title').text.replace('\n','')
                 self.productPrice = soup.find('p',{'class':'price'}).text
@@ -92,13 +93,13 @@ class PRODIRECT:
                             for size in sizes:
                                 if size == self.task["SIZE"]:
                                     self.size = size
-                                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
         
                     
                     elif self.task["SIZE"].lower() == "random":
                         chosen = random.choice(sizes)
                         self.size = chosen
-                        logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                 
                 else:
                     logger.error(SITE,self.taskID,'Size Not Found')
@@ -157,7 +158,7 @@ class PRODIRECT:
 
 
         if login.status_code in [200,302,301]:
-            logger.success(SITE,self.taskID,'Successfully logged in')
+            logger.warning(SITE,self.taskID,'Successfully logged in')
             self.addToCart()
         else:
             logger.error(SITE,self.taskID,'Failed to login. Retrying...')
@@ -187,7 +188,7 @@ class PRODIRECT:
             self.addToCart()
 
         if postCart.status_code == 200 and 'successfully' in postCart.text:
-            logger.success(SITE,self.taskID,'Successfully carted')
+            logger.warning(SITE,self.taskID,'Successfully carted')
             updateConsoleTitle(True,False,SITE)
             self.address()
         else:
@@ -252,7 +253,7 @@ class PRODIRECT:
                 self.address()
     
             if postAddy.status_code in [200,302,301] and 'Checkout.aspx?ACC=PAYD' in postAddy.url:
-                logger.success(SITE,self.taskID,'Address submitted')
+                logger.warning(SITE,self.taskID,'Address submitted')
                 self.pay()
             else:
                 logger.error(SITE,self.taskID,'Failed to submit address. Retrying...')
@@ -266,7 +267,7 @@ class PRODIRECT:
 
 
     def pay(self):
-        logger.prepare(SITE,self.taskID,'Submitting payment')
+        logger.prepare(SITE,self.taskID,'Getting payment data...')
         encryptedInfo = ClientSideEncrypter("10001|9D82A3F3F81509D2638BEB784DBD525FB3156EE4E0742E195E0DCB79354AC45FA5422E36B224EB082B63CF09F8355B7C28C3D1BB4C6E091CC07022CF6FB76194BD2B166B44452624AF7D770D6DD98CF9D1943979C342005A6F6016DB3CF192BD06E2A56AE46552647581B29A07D2A3E7AD32CEFE6FF03BFDEFB51419855BFD209343B60F963B8AEC00E68764B6471B8CDF66585BBCA31584BB35A7660C3B4D4862E7518C4369C5E1E176E3A9FEA76A641442DFA01707098A6E94AF847C1534F6E164427CFCEA92295327431D1B2256A222E4EDBAD7B86EC5931F5529A75977A07EDF441B581EF60C09357227AFAA234824B03AD411DFA1723F4441B5BCA29115", "_0_1_18")
         adyenEncrypted = str(encryptedInfo.generate_adyen_nonce("John Doe", 5555444433331111, 737, "06",  "2016").replace("b'", "").replace("'", ""))
 
@@ -355,6 +356,7 @@ class PRODIRECT:
                         logger.error(SITE,self.taskID,'Failed to scrape payment details. Retrying...')
                         self.pay()
 
+                    logger.warning(SITE,self.taskID,'Got payment data')
                     self.finish()
                 else:
                     logger.error(SITE,self.taskID,'Failed to submit payment. Retrying...')
@@ -377,6 +379,7 @@ class PRODIRECT:
                 self.addToCart()
 
     def finish(self):
+        logger.prepare(SITE,self.taskID,'Getting paypal link...')
         try:
             pp = self.session.post('https://live.adyen.com/hpp/skipDetails.shtml',data=self.payload,headers={
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
@@ -392,6 +395,7 @@ class PRODIRECT:
             self.finish()
 
         if pp.status_code in [200,302] and 'paypal' in pp.url:
+            logger.warning(SITE,self.taskID,'Got paypal link')
             self.end = time.time() - self.start
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
             updateConsoleTitle(False,True,SITE)
@@ -416,7 +420,7 @@ class PRODIRECT:
                 while True:
                     pass
             except:
-                logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
 
         else:
             logger.error(SITE,self.taskID,'Could not complete PayPal Checkout. Retrying...')

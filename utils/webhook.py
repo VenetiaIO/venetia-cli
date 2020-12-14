@@ -2,6 +2,7 @@ from discord_webhook import DiscordWebhook, DiscordEmbed
 from utils.config import VERSION
 from utils.log import log
 import pymongo
+from utils.logger import logger
 from utils.functions import getUser
 
 publicWebhook = 'https://discordapp.com/api/webhooks/734209129035333683/3pZfyBnoSIxndJQjsrEQvDGSlKsEoRF8NzwEKggq4jaUHj-A61cGXNW6MXdJMyYX_qbH'
@@ -35,9 +36,10 @@ class discord:
                 proxy = proxy["http"]
 
 
+        logger.secondary(SITE,'Task Link',url)
         try:                
             webhook = DiscordWebhook(webhook)
-            embed = DiscordEmbed(title='Successful Checkout :rocket:', description='', color=0x2feb61)
+            embed = DiscordEmbed(title=':rocket: Successful Checkout :rocket:', description='', color=0x2feb61)
             embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed.set_timestamp()
     
@@ -79,7 +81,7 @@ class discord:
 
         try:
             webhookPublic = DiscordWebhook(publicWebhook)
-            embed2 = DiscordEmbed(title='User Checkout :rocket:', description='', color=0x2feb61)
+            embed2 = DiscordEmbed(title=':rocket: User Checkout :rocket:', description='', color=0x2feb61)
             embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed2.set_timestamp()
     
@@ -129,7 +131,7 @@ class discord:
 
         try:
             webhook = DiscordWebhook(webhook)
-            embed = DiscordEmbed(title='Checkout Failed ⛔', description='', color=0xeb3c2f)
+            embed = DiscordEmbed(title='⛔ Checkout Failed ⛔', description='', color=0xeb3c2f)
             embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
             embed.set_timestamp()
 

@@ -65,7 +65,7 @@ class WCH:
 
         if retrieve.status_code == 200:
             self.start = time.time()
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
             try:
                 soup = BeautifulSoup(retrieve.text, "html.parser")
                 self.pid = soup.find('input',{'id':'currentProduct'})["value"]          
@@ -75,6 +75,7 @@ class WCH:
                time.sleep(int(self.task["DELAY"]))
                self.collect()
 
+            logger.prepare(SITE,self.taskID,'Getting product data...')
             try:
                 attrbs = self.session.post('https://www.workingclassheroes.co.uk/wsCitrusStore.asmx/GetAttributes', headers={
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
@@ -129,7 +130,7 @@ class WCH:
                                 self.size = size.split(':')[1]
                                 self.iAttributeDetailID = size.split(':')[2]
                                 self.iAttributeID = size.split(":")[3]
-                                logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
     
                 
                 elif self.task["SIZE"].lower() == "random":
@@ -137,7 +138,7 @@ class WCH:
                     self.size = selected.split(':')[1]
                     self.iAttributeDetailID = selected.split(':')[2]
                     self.iAttributeID = selected.split(":")[3]
-                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
                 self.addToCart()
                     
@@ -156,6 +157,7 @@ class WCH:
             self.collect()
 
     def addToCart(self):
+        logger.prepare(SITE,self.taskID,'Carting product...')
         payload = {
             "iProductID":self.pid,
             "iQuantity":1,
@@ -186,7 +188,7 @@ class WCH:
             self.addToCart()
 
         if postCart.status_code == 200 and data:
-            logger.success(SITE,self.taskID,'Successfully carted')
+            logger.warning(SITE,self.taskID,'Successfully carted')
             updateConsoleTitle(True,False,SITE)
             if self.task["PAYMENT"].lower() == "paypal":
                 self.paypal()
@@ -198,7 +200,7 @@ class WCH:
             self.addToCart()
 
     def paypal(self):
-        print("paypal")
+        logger.prepare(SITE,self.taskID,'Getting paypal token...')
         try:
             cart = self.session.post('https://www.workingclassheroes.co.uk/wsCitrusStore.asmx/WightPaypalBtnCallback', headers={
                 'authority': 'www.workingclassheroes.co.uk',
@@ -224,6 +226,7 @@ class WCH:
 
 
         if cart.status_code == 200 and data["d"]["status"] == True:
+            logger.warning(SITE,self.taskID,'Got paypal token')
             self.end = time.time() - self.start
 
             try:
@@ -273,7 +276,7 @@ class WCH:
                 while True:
                     pass
             except:
-                logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
         
         else:
             logger.error(SITE,self.taskID,'Failed to get paypal token. Retrying...')
@@ -284,6 +287,7 @@ class WCH:
 
     
     def login(self):
+        logger.prepare(SITE,self.taskID,'Logging In...')
         payload = {"emailAddress":self.task["ACCOUNT EMAIL"] , "password":self.task["ACCOUNT PASSWORD"]}
         try:
             login = self.session.post('https://www.workingclassheroes.co.uk/wsCitrusStore.asmx/WightValidateCustomerLogin', json=payload, headers={
@@ -311,7 +315,7 @@ class WCH:
             self.login()
 
         if login.status_code == 200 and status == True:
-            logger.success(SITE,self.taskID,'Successfully logged in')
+            logger.warning(SITE,self.taskID,'Successfully logged in')
             self.delivery()
         else:
             logger.error(SITE,self.taskID,'Failed to login. Retrying...')
@@ -324,6 +328,8 @@ class WCH:
             logger.error(SITE,self.taskID,'Profile Not Found.')
             time.sleep(10)
             sys.exit()
+
+        logger.prepare(SITE,self.taskID,'Getting shipping methods...')
         payload = {
             "firstName":profile["firstName"],
             "lastName":profile["lastName"],
@@ -367,6 +373,8 @@ class WCH:
                 time.sleep(int(self.task["DELAY"]))
                 self.delivery()
 
+            logger.warning(SITE,self.taskID,'Got shipping methods')
+
             payload = {
                 "firstName":profile["firstName"],
                 "lastName":profile["lastName"],
@@ -380,6 +388,7 @@ class WCH:
                 "selectedShipping":self.shipMethod,
                 "nickname":""
             }
+            logger.prepare(SITE,self.taskID,'Submitting shipping...')
             try:
                 shipDetails = self.session.post('https://www.workingclassheroes.co.uk/wsCitrusStore.asmx/WightPostShippingDetails', json=payload, headers={
                     'authority': 'www.workingclassheroes.co.uk',
@@ -407,7 +416,7 @@ class WCH:
                 self.delivery()
 
             if shipDetails.status_code == 200 and status == True:
-                logger.success(SITE,self.taskID,'Successfully posted shipping details')
+                logger.warning(SITE,self.taskID,'Submitted shipping details')
                 self.card()
                 
             else:

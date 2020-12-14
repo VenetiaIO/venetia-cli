@@ -38,7 +38,7 @@ class HOLYPOP:
             self.login()
 
     def collect(self):
-        logger.warning(SITE,self.taskID,'Getting product page...')
+        logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
             retrieve = self.session.get(self.task["PRODUCT"])
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -49,6 +49,8 @@ class HOLYPOP:
             self.collect()
         if retrieve:
             if retrieve.status_code == 200:
+                logger.warning(SITE,self.taskID,'Got product page')
+                logger.prepare(SITE,self.taskID,'Getting product data...')
                 self.start = time.time()
                 regex = r"preloadedStock =(.+)"
                 matches = re.search(regex, retrieve.text, re.MULTILINE)
@@ -80,7 +82,7 @@ class HOLYPOP:
                                 if size.split(':')[0] == self.task["SIZE"]:
                                     self.size = size.split(':')[0]
                                     self.itemId = size.split(':')[1]
-                                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                                     self.login()
         
                     
@@ -88,7 +90,7 @@ class HOLYPOP:
                         selected = random.choice(allSizes)
                         self.size = selected.split(":")[0]
                         self.itemId = selected.split(":")[1]
-                        logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                         self.login()
                 else:
                     logger.error(SITE,self.taskID,'Failed to scrape page. Retrying....')
@@ -105,7 +107,7 @@ class HOLYPOP:
 
 
     def login(self):
-        logger.warning(SITE,self.taskID,'Getting login page...')
+        logger.prepare(SITE,self.taskID,'Logging in...')
         try:
             getLogin = self.session.get('https://www.holypopstore.com/')
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -116,7 +118,6 @@ class HOLYPOP:
             self.login()
 
         if getLogin.status_code == 200:
-            logger.warning(SITE,self.taskID,'Logging in...')
             try:
                 self.version = getLogin.text.split("b.version = '")[1].split("';")[0]
                 self.cookieVersion = getLogin.text.split("b.cookieVersion = '")[1].split("';")[0]
@@ -154,7 +155,7 @@ class HOLYPOP:
                 time.sleep(int(self.task["DELAY"]))
                 self.login()
             else:
-                logger.success(SITE,self.taskID,'Successfully logged in')
+                logger.warning(SITE,self.taskID,'Successfully logged in')
                 self.addToCart()
         
         else:
@@ -167,6 +168,7 @@ class HOLYPOP:
     
     def addToCart(self):
         self.session.headers['referer'] = self.task["PRODUCT"]
+        logger.prepare(SITE,self.taskID,'Carting product...')
 
         payload = {
             'controller': 'orders',
@@ -197,7 +199,7 @@ class HOLYPOP:
 
         if cart.status_code == 200 and jsonData["success"] == True:
             updateConsoleTitle(True,False,SITE)
-            logger.success(SITE,self.taskID,'Successfully carted')
+            logger.warning(SITE,self.taskID,'Successfully carted')
             self.productTitle = cart.json()["payload"][0]["title"]
             self.size = cart.json()["payload"][0]["attributes"][0]["value"]["title"]
             self.productImage = cart.json()["payload"][0]["imageObject"]["imageUrl"]
@@ -236,7 +238,7 @@ class HOLYPOP:
 
     
     def checkout(self):
-        logger.warning(SITE,self.taskID,'Getting checkout page...')
+        logger.prepare(SITE,self.taskID,'Getting checkout page...')
         self.session.headers['accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
         self.session.headers['referer'] = 'https://www.holypopstore.com/{}'.format(self.region.lower())
         self.session.headers['x-requested-with'] = ''
@@ -250,7 +252,7 @@ class HOLYPOP:
             self.checkout()
 
         if checkout.status_code == 200:
-            logger.success(SITE,self.taskID,'Successfully got checkout page')
+            logger.warning(SITE,self.taskID,'Successfully got checkout page')
             soup = BeautifulSoup(checkout.text,"html.parser")
             addressId = soup.find('option',{'selected':'selected'})["value"]
             regex = r"preloadedShippers =(.+)"
@@ -296,6 +298,7 @@ class HOLYPOP:
                 'version': self.version,
                 'cookieVersion': self.cookieVersion
             }
+            logger.prepare(SITE,self.taskID,'Submitting shipping...')
             self.session.headers['referer'] = 'https://www.holypopstore.com/{}/orders/review'.format(self.region.lower())
             self.session.headers['x-requested-with'] = 'XMLHttpRequest'
             self.session.headers['accept'] = 'application/json, text/javascript, */*; q=0.01'
@@ -318,7 +321,7 @@ class HOLYPOP:
 
             if postCheckout.status_code == 200:
                 self.orderId = jsonData["payload"]["orderId"]
-                logger.success(SITE,self.taskID,'Successfully submitted shipping')
+                logger.warning(SITE,self.taskID,'Successfully submitted shipping')
                 self.startPP()
             else:
                 logger.error(SITE,self.taskID,'Failed to submit shipping. Retrying...')
@@ -326,16 +329,17 @@ class HOLYPOP:
                 self.checkout()
 
         else:
-            logger.success(SITE,self.taskID,'Failed to get checkout. Retrying...')
+            logger.error(SITE,self.taskID,'Failed to get checkout. Retrying...')
             time.sleep(int(self.task["DELAY"]))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.checkout()
 
     def startPP(self):
-        logger.warning(SITE,self.taskID,'Starting PayPal Checkout...')
+        logger.info(SITE,self.taskID,'Starting [PAYPAL] checkout...')
         self.session.headers['referer'] = 'https://www.holypopstore.com/{}/orders/review'.format(self.region.lower())
         self.session.headers['x-requested-with'] = ''
         self.session.headers['accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+        logger.prepare(SITE,self.taskID,'Getting paypal link...')
         try:
             checkout = self.session.get(f'https://www.holypopstore.com/en/orders/checkout/{self.orderId}',params={'paymentMethodId':1,'paymentMethodAccountId':1})
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -346,6 +350,7 @@ class HOLYPOP:
             self.startPP()
 
         if checkout.status_code == 200 and "paypal" in checkout.url:
+            logger.warning(SITE,self.taskID,'Successfully got paypal link')
             self.end = time.time() - self.start
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
             updateConsoleTitle(False,True,SITE)
@@ -371,7 +376,7 @@ class HOLYPOP:
                 while True:
                     pass
             except:
-                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                    logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
         else:
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout. Retrying...')
             try:

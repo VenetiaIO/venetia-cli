@@ -66,6 +66,8 @@ def loadProfile(profile):
         for p in profiles["profiles"]:
             if p["profileName"] == profile:
                 profileFound.append('1')
+
+
                 return p
     
     if len(profileFound) == 0:
@@ -187,7 +189,8 @@ def sendNotification(site, text):
           winsound.PlaySound('sound.wav', winsound.SND_FILENAME)
         except:
           pass
-
+        
+    time.sleep(1)
     try:
         Notification(
           title='{} | Successful Checkout'.format(site.title()),

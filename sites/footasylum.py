@@ -17,6 +17,7 @@ from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
 from utils.captcha import captcha
+from utils.akamai import AKAMAI
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle, encodeURIComponent)
 
 class FOOTASYLUM:
@@ -31,6 +32,14 @@ class FOOTASYLUM:
         self.collect()
 
     def collect(self):
+        cookies = AKAMAI.footasylum(self.session, self.taskID)
+        while cookies["cookies"] == "error":
+            cookies = AKAMAI.footasylum(self.session, self.taskID)
+
+
+        cookie_obj = requests.cookies.create_cookie(domain=f'.footasylum.com',name='_abck',value=cookies['cookies']['_abck'])
+        self.session.cookies.set_cookie(cookie_obj)
+
         logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
             retrieve = self.session.get(self.task["PRODUCT"],headers={
@@ -45,10 +54,10 @@ class FOOTASYLUM:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.collect()
 
-
         if retrieve.status_code == 200:
             self.start = time.time()
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
+            logger.prepare(SITE,self.taskID,'Getting product data...')
             try:
                 soup = BeautifulSoup(retrieve.text,"html.parser")
                 pf_id = soup.find("input",{"name":"pf_id"})["value"]
@@ -104,7 +113,7 @@ class FOOTASYLUM:
                                 self.productPrice = size.split("#")[3]
                                 self.productImage = size.split("#")[4]
                                 self.productTitle = size.split("#")[5]
-                                logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                                 self.login()
         
                     
@@ -116,7 +125,7 @@ class FOOTASYLUM:
                     self.productPrice = selected.split("#")[3]
                     self.productImage = selected.split("#")[4]
                     self.productTitle = selected.split("#")[5]
-                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                     self.login()
             else:
                 logger.error(SITE,self.taskID,'Sizes Not Found')
@@ -133,11 +142,11 @@ class FOOTASYLUM:
             self.collect()
             
     def login(self):
-        logger.warning(SITE,self.taskID,'Logging In...')
+        logger.prepare(SITE,self.taskID,'Logging In...')
         try:
             GETlogin = self.session.get('https://www.footasylum.com/page/login/',headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -160,6 +169,7 @@ class FOOTASYLUM:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.login()
 
+
         payload = {
             'target': '',
             'targetar': '',
@@ -173,16 +183,24 @@ class FOOTASYLUM:
         }
         payload = "target=&targetar=&pf_id=&sku=&rdPassword=LOGIN&prelog={}&lookup_Validate=1&email2={}&password={}".format(
             self.preLog,
-            encodeURIComponent(self.task["ACCOUNT EMAIL"]),
+            self.task["ACCOUNT EMAIL"],
             self.task["ACCOUNT PASSWORD"]
         )
+
         try:
-            login = self.session.request('POST','https://www.footasylum.com/page/login/',data=payload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Safari/537.36',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            login = self.session.post('https://www.footasylum.com/page/login/',data=payload,headers={
+                'origin': 'https://www.footasylum.com',
                 'referer': 'https://www.footasylum.com/page/login/',
-                'content-type': 'application/x-www-form-urlencoded',
-                'origin':'https://www.footasylum.com'
+                'sec-fetch-dest': 'document',
+                'sec-fetch-mode': 'navigate',
+                'sec-fetch-site': 'same-origin',
+                'sec-fetch-user': '?1',
+                'upgrade-insecure-requests': '1',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36',
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'accept-encoding': 'gzip, deflate, br',
+                'accept-language': 'en-US,en;q=0.9',
+                'content-type': 'application/x-www-form-urlencoded'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -192,7 +210,7 @@ class FOOTASYLUM:
             self.login()
 
         if login.status_code == 200 and '?sessionid=' in login.url: 
-            logger.success(SITE,self.taskID,'Successfully logged in')
+            logger.warning(SITE,self.taskID,'Successfully logged in')
             self.sessionId = login.url.split('?sessionid=')[1]
             self.addToCart()
         
@@ -205,7 +223,7 @@ class FOOTASYLUM:
 
 
     def addToCart(self):
-        logger.warning(SITE,self.taskID,'Carting Products...')
+        logger.prepare(SITE,self.taskID,'Carting Products...')
 
         params = {
             "target":"ajx_basket.asp",
@@ -230,7 +248,7 @@ class FOOTASYLUM:
 
         if initCart.status_code in [200,302]:
             updateConsoleTitle(True,False,SITE)
-            logger.success(SITE,self.taskID,'Successfully carted')
+            logger.warning(SITE,self.taskID,'Successfully carted')
             self.initiateCheckout()
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
@@ -239,7 +257,7 @@ class FOOTASYLUM:
 
     
     def initiateCheckout(self):
-        logger.info(SITE,self.taskID,'Initializing checkout...')
+        logger.prepare(SITE,self.taskID,'Initializing checkout...')
         try:
             initCheckout = self.session.post('https://www.footasylum.com/page/nw-api/initiatecheckout/?sessionid={}'.format(self.sessionId),headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
@@ -261,11 +279,12 @@ class FOOTASYLUM:
             self.collect()
 
         elif initCheckout.status_code == 200 and initCheckout.text != '{"error":"1"}':
-            logger.success(SITE,self.taskID,'Successfully Initialized checkout')
+            logger.warning(SITE,self.taskID,'Successfully Initialized checkout')
             self.checkoutSessionId = initCheckout.json()["checkoutSessionId"]
             self.basketId = initCheckout.json()["basket"]["id"]
             self.basketCustomerId = initCheckout.json()["basket"]["customerId"]
 
+            logger.prepare(SITE,self.taskID,'Getting session info...')
             try:
                 p = {
                     "orderNum":self.checkoutSessionId,
@@ -293,7 +312,7 @@ class FOOTASYLUM:
                 self.channelId = paymentGateway.json()["basket"]["channel_id"]
                 self.fascia_id = paymentGateway.json()["basket"]["fascia_id"]
                 self.parasparSessionId = paymentGateway.json()["basket"]["paraspar_session_id"]
-                logger.success(SITE,self.taskID,'Successfully retrieved session info')
+                logger.warning(SITE,self.taskID,'Successfully retrieved session info')
                 self.basketDetails()
 
             elif paymentGateway.status_code != 200:
@@ -303,6 +322,7 @@ class FOOTASYLUM:
                 
 
     def basketDetails(self):
+        logger.prepare(SITE,self.taskID,'Getting customer info...')
         try:
             payload = {"fascia_id":self.fascia_id,"channel_id":self.channelId,"currency_code":self.currency,"customer":{"customer_id":self.customerId,"sessionID":self.parasparSessionId,"request_address":1,"request_basket":1}}
             details = self.session.post('https://r9udv3ar7g.execute-api.eu-west-2.amazonaws.com/prod/customer/details?checkout_client=secure',json=payload,headers={
@@ -330,7 +350,7 @@ class FOOTASYLUM:
             self.shippingMethodName = details.json()["basket"]["shipping_method_name"]
             self.shippingTotal = details.json()["basket"]["shipping_total"]
             self.authState = details.json()["customer"]["session_state"]
-            logger.success(SITE,self.taskID,'Successfully retrieved customer info')
+            logger.warning(SITE,self.taskID,'Successfully retrieved customer info')
             self.basketAddress()
         
         else:
@@ -339,6 +359,7 @@ class FOOTASYLUM:
             self.initiateCheckout()
 
     def basketAddress(self):
+        logger.prepare(SITE,self.taskID,'Submitting address...')
         payload = {
             "fascia_id":self.fascia_id,
             "channel_id":self.channelId,
@@ -399,9 +420,11 @@ class FOOTASYLUM:
             self.initiateCheckout()
 
         if address.status_code == 200:
+            logger.warning(SITE,self.taskID,'Submitted address')
             self.productPrice = '{} {}'.format(address.json()["basket"]["total"],address.json()["basket"]["currency_code"])
             params = {"medium": "web","apiKey": "lGJjE+ccd0SiBdu3I6yByRp3/yY8uVIRFa9afLx+2YSrSwkWDfxq0YKUsh96/tP84CZO4phvoR+0y9wtm9Dh5w==","checkout_client": "secure"}
             payload = {"basketId":self.pasparBasketId,"type":"shipping","shippingTotal":self.shippingTotal,"shippingCode":self.shippingMethodCode,"shippingCarrier":self.shippingMethodName}
+            logger.prepare(SITE,self.taskID,'Submitting shipping method...')
             try:
                 method = self.session.put('https://paymentgateway.checkout.footasylum.net/basket/shipping',params=params,json=payload,headers={
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
@@ -421,7 +444,7 @@ class FOOTASYLUM:
                 self.basketAddress()
 
             if method.status_code == 200 and method.json()["status"] == "Success":
-                logger.success(SITE,self.taskID,'Successfully set shipping')
+                logger.warning(SITE,self.taskID,'Successfully set shipping')
 
                 payload = {
                     "cartId":self.pasparBasketId,
@@ -459,6 +482,7 @@ class FOOTASYLUM:
                 }
 
                 params = {"medium": "web","apiKey": "lGJjE+ccd0SiBdu3I6yByRp3/yY8uVIRFa9afLx+2YSrSwkWDfxq0YKUsh96/tP84CZO4phvoR+0y9wtm9Dh5w==","checkout_client": "secure"}
+                logger.prepare(SITE,self.taskID,'Updating customer data...')
 
                 try:
                     customer = self.session.put('https://paymentgateway.checkout.footasylum.net/customer',params=params,json=payload,headers={
@@ -479,7 +503,7 @@ class FOOTASYLUM:
                     self.basketAddress()
 
                 if customer.status_code == 200 and customer.json()["status"] == "success":
-                    logger.success(SITE,self.taskID,'Customer updated')
+                    logger.warning(SITE,self.taskID,'Customer updated')
                     if self.task["PAYMENT"].lower() == "paypal":
                         self.paymentToken()
                     else:
@@ -518,6 +542,7 @@ class FOOTASYLUM:
             'apiKey': 'lGJjE+ccd0SiBdu3I6yByRp3/yY8uVIRFa9afLx+2YSrSwkWDfxq0YKUsh96/tP84CZO4phvoR+0y9wtm9Dh5w==',
             'checkout_client': 'secure'
         }
+        logger.prepare(SITE,self.taskID,'Creating checkout...')
 
         try:
             basketCheck = self.session.post('https://paymentgateway.checkout.footasylum.net/basket/check',params=params,json=payload,headers={
@@ -545,7 +570,7 @@ class FOOTASYLUM:
             self.basketCheck()
 
         if basketCheck.status_code == 200 and basketCheck.json()["status"] == "success":
-            logger.success(SITE,self.taskID,'Successfully created new checkout')
+            logger.warning(SITE,self.taskID,'Successfully created new checkout')
             if self.task["PAYMENT"].lower() == "paypal":
                 self.paymentToken()
             else:
@@ -557,6 +582,7 @@ class FOOTASYLUM:
 
     
     def paymentToken(self):
+        logger.prepare(SITE,self.taskID,'Getting payment token...')
         try:
             pt = self.session.post('https://paymentgateway.checkout.footasylum.net/paypal/payment-token',data={"basketId":self.pasparBasketId},headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
@@ -576,11 +602,11 @@ class FOOTASYLUM:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
 
         if pt.status_code == 200 and pt.json()["status"] == "success":
-            logger.success(SITE,self.taskID,'Successfully retrieved payment ID')
+            logger.warning(SITE,self.taskID,'Successfully retrieved payment token')
             self.paymentId = pt.json()["data"]["payment_id"]
             self.payPal()
         else:
-            logger.error(SITE,self.taskID,'Failed to retrieve payment ID. Retrying...')
+            logger.error(SITE,self.taskID,'Failed to retrieve payment token. Retrying...')
             time.sleep(int(self.task["DELAY"]))
             self.paymentToken()
 
@@ -601,6 +627,7 @@ class FOOTASYLUM:
             'origin': 'https://www.paypal.com'
 
         }
+        logger.prepare(SITE,self.taskID,'Getting paypal checkout token...')
         try:
             ec = self.session.post('https://www.paypal.com/smart/api/payment/{}/ectoken'.format(self.paymentId),headers=payPalHeaders,json={"meta":{}})
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -612,7 +639,7 @@ class FOOTASYLUM:
 
         if ec.status_code == 200 and ec.json()["ack"] == "success":
             self.end = time.time() - self.start
-            logger.success(SITE,self.taskID,'Successfully retrieved PayPal checkout token')
+            logger.warning(SITE,self.taskID,'Successfully retrieved PayPal checkout token')
             self.ecToken = ec.json()["data"]["token"]
             paypalURL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token={}&useraction=commit'.format(self.ecToken)
 
@@ -641,7 +668,7 @@ class FOOTASYLUM:
                 while True:
                     pass
             except:
-                logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
         
         else:
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout token. Retrying...')

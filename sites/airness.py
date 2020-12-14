@@ -48,7 +48,8 @@ class AIRNESS:
         if retrieve.status_code == 200:
             self.start = time.time()
 
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
+            logger.prepare(SITE,self.taskID,'Getting Oauth Token...')
             try:
                 getToken = self.session.post('https://airness-2.commercelayer.io/oauth/token',data={'scope':'market:2392','grant_type':'client_credentials'},headers={
                     'authorization': 'Basic b01tNXJtOGdOZDJoS01UZHZfZGMxSFd4Q1BPZXBrZHRHd2FxLWFiczhudzo=',
@@ -66,7 +67,7 @@ class AIRNESS:
 
             if getToken.status_code == 200:
                 self.accesToken = getToken.json()["access_token"]
-                logger.alert(SITE,self.taskID,'Retrieved oauth token')
+                logger.warning(SITE,self.taskID,'Retrieved oauth token')
                 self.skus()
             elif getToken.status_code != 200:
                 logger.error(SITE,self.taskID,'Failed to retrieve oauth token. Retrying...')
@@ -82,6 +83,7 @@ class AIRNESS:
     def skus(self):
 
             try:
+                logger.prepare(SITE,self.taskID,'Getting product data...')
                 if '/en/' in self.task["PRODUCT"]:
                     self.region = '/en/'
                 elif '/it/' in self.task["PRODUCT"]:
@@ -132,7 +134,7 @@ class AIRNESS:
                             self.comingSoon = False
     
                         if self.comingSoon == True:
-                            logger.secondary(SITE,self.taskID,'Product "Coming Soon". Retrying...')
+                            logger.warning(SITE,self.taskID,'Product "Coming Soon". Retrying...')
                             time.sleep(int(self.task["DELAY"]))
                             self.skus()
     
@@ -175,6 +177,7 @@ class AIRNESS:
             #    self.skus()
 
             try:
+                logger.prepare(SITE,self.taskID,'Getting product skus...')
                 url = "https://airness-2.commercelayer.io/api/skus"
 
                 querystring = {"filter[q][reference_eq]":self.sku,"page[number]":"1","page[size]":"25"}
@@ -241,7 +244,7 @@ class AIRNESS:
                                 self.skuORDER = s.split(':')[4]
                                 self.skuCategory = s.split(':')[5]
                                 self.skuId = s.split(':')[6]
-                                logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
                 elif self.task["SIZE"] == "random":
                     s = random.choice(allSizes)
@@ -252,12 +255,13 @@ class AIRNESS:
                     self.skuORDER = s.split(':')[4]
                     self.skuCategory = s.split(':')[5]
                     self.skuId = s.split(':')[6]
-                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
                 
                 self.addToCart()
 
     def addToCart(self):
+        logger.prepare(SITE,self.taskID,'Carting product...')
 
         try:
             payload = {
@@ -297,7 +301,7 @@ class AIRNESS:
             self.addToCart()
 
         if response.status_code == 201:
-            updateConsoleTitle(True,False,SITE)
+    
             self.checkoutUrl = response.json()["data"]["attributes"]["checkout_url"]
             self.orderId = response.json()["data"]["id"]
         else:
@@ -414,7 +418,8 @@ class AIRNESS:
             self.addToCart()
 
         if response.status_code == 201:
-            logger.success(SITE,self.taskID,'Successfully carted')
+            updateConsoleTitle(True,False,SITE)
+            logger.warning(SITE,self.taskID,'Successfully carted')
             self.checkout()
         if response.status_code == 422:
             logger.error(SITE,self.taskID,'Failed to cart. [{}]'.format(response.json()["errors"][0]["meta"]["error"]))
@@ -430,6 +435,7 @@ class AIRNESS:
 
 
     def checkout(self):
+        logger.info(SITE,self.taskID,'Initializing checkout...')
         headers = {
             'authority': 'checkout.airness.it',
             'scheme': 'https',
@@ -452,8 +458,9 @@ class AIRNESS:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.checkout()
 
+        logger.warning(SITE,self.taskID,'Checkout initialized')
         if getCheckout.status_code == 200:
-            logger.info(SITE,self.taskID,'Initializing checkout...')
+            logger.prepare(SITE,self.taskID,'Getting Oauth Token...')
 
             try:
                 getToken = self.session.post('https://airness-2.commercelayer.io/oauth/token',json={'client_id':'oMm5rm8gNd2hKMTdv_dc1HWxCPOepkdtGwaq-abs8nw','grant_type':'client_credentials'},headers={
@@ -471,7 +478,7 @@ class AIRNESS:
 
             if getToken.status_code == 200:
                 self.accesToken = getToken.json()["access_token"]
-                logger.alert(SITE,self.taskID,'Retrieved oauth token')
+                logger.warning(SITE,self.taskID,'Retrieved oauth token')
                 self.customer()
             elif getToken.status_code != 200:
                 logger.error(SITE,self.taskID,'Failed to retrieve oauth token. Retrying...')
@@ -491,7 +498,7 @@ class AIRNESS:
             time.sleep(10)
             sys.exit()
         countryCode = profile["countryCode"]
-
+        logger.prepare(SITE,self.taskID,'Submitting customer email...')
         headers = {
             'authority': 'airness-2.commercelayer.io',
             'scheme': 'https',
@@ -517,7 +524,7 @@ class AIRNESS:
             self.checkout()
 
         if getCheckout.status_code == 200:
-            logger.success(SITE,self.taskID,'Successfully set email')
+            logger.warning(SITE,self.taskID,'Successfully set email')
             payload = {
                 "data":{
                     "type":"addresses",
@@ -535,6 +542,7 @@ class AIRNESS:
                     }
                 }
             }
+            logger.prepare(SITE,self.taskID,'Submitting customer address...')
             try:
                 setAddress = self.session.post('https://airness-2.commercelayer.io/api/addresses',headers=headers,json=payload)
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -565,7 +573,7 @@ class AIRNESS:
                         time.sleep(int(self.task["DELAY"]))
                         self.checkout()
                         
-                    logger.success(SITE,self.taskID,'Successfully set shipping')
+                    logger.warning(SITE,self.taskID,'Successfully set shipping')
                     self.shippingMethod()
                 else:
                     logger.error(SITE,self.taskID,'Failed to set shipping. Retrying...')
@@ -583,6 +591,7 @@ class AIRNESS:
             self.checkout()
 
     def shippingMethod(self):
+        logger.prepare(SITE,self.taskID,'Submitting shipping method....')
         headers = {
             'authority': 'airness-2.commercelayer.io',
             'scheme': 'https',
@@ -613,7 +622,7 @@ class AIRNESS:
                 if i["type"] == "line_items":
                     self.productPrice = i["attributes"]["formatted_total_amount"]
 
-            logger.success(SITE,self.taskID,'Successfully set shipping method')
+            logger.warning(SITE,self.taskID,'Successfully set shipping method')
             self.payment()
         else:
             logger.error(SITE,self.taskID,'Failed to set shipping method. Retrying...')
@@ -648,6 +657,7 @@ class AIRNESS:
 
 
         if patchPayment.status_code == 200:
+            logger.prepare(SITE,self.taskID,'Setting payment method...')
             try:
                 payload = {"data":{"type":"paypal_payments","attributes":{"return_url":"https://checkout.airness.it/{}/paypal".format(self.orderId),"cancel_url":self.checkoutUrl},"relationships":{"order":{"data":{"type":"orders","id":self.orderId}}}}}
                 postPaypal = self.session.post('https://airness-2.commercelayer.io/api/paypal_payments',headers=headers,json=payload)
@@ -660,7 +670,7 @@ class AIRNESS:
 
             if postPaypal.status_code == 201:
                 self.end = time.time() - self.start
-                logger.success(SITE,self.taskID,'Successfully set payment method')
+                logger.warning(SITE,self.taskID,'Successfully set payment method')
                 self.paypalUrl = postPaypal.json()["data"]["attributes"]["approval_url"]
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
                 updateConsoleTitle(False,True,SITE)
@@ -687,7 +697,7 @@ class AIRNESS:
                     while True:
                         pass
                 except:
-                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+                    logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             else:
                 self.productImage = 'https:{}'.format(self.image)
                 try:

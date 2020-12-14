@@ -36,6 +36,7 @@ class NAKED:
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.__init__(task,taskName)
         
+        self.captchaRequired = False
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
         if self.task["ACCOUNT EMAIL"] == "":
             self.collect()
@@ -44,11 +45,30 @@ class NAKED:
         
 
     def login(self):
-        logger.prepare(SITE,self.taskID,'Preparing login...')
+        logger.prepare(SITE,self.taskID,'Logging In...')
+
+        try:
+            loginPage = self.session.get('https://www.nakedcph.com/en/auth/submit',headers={
+                'Accept': '*/*',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Accept-Language': 'en-US,en;q=0.9,it;q=0.8',
+                'Referer': 'https://www.nakedcph.com/en/auth/view',
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            self.login()
+
+        soup = BeautifulSoup(loginPage.text, "html.parser")
+        self.antiCsrf = self.session.cookies["AntiCsrfToken"]
+
         captchaResponse = loadToken(SITE)
         if captchaResponse == "empty":
             captchaResponse = captcha.v2('6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo',self.task["PRODUCT"],self.session.proxies,SITE,self.taskID)
 
+        
         payload = {
             '_AntiCsrfToken': self.antiCsrf,
             'email': self.task["ACCOUNT EMAIL"],
@@ -77,7 +97,7 @@ class NAKED:
 
 
         if login.status_code == 200 and login.json()["Response"]["Success"] == True:
-            logger.success(SITE,self.taskID,'Successfully logged in')
+            logger.warning(SITE,self.taskID,'Successfully logged in')
             self.collect()
         else:
             logger.error(SITE,self.taskID,'Failed to login. Retrying...')
@@ -97,8 +117,9 @@ class NAKED:
 
         if retrieve.status_code == 200:
             self.start = time.time()
-            logger.success(SITE,self.taskID,'Got product page')
+            logger.warning(SITE,self.taskID,'Got product page')
             try:
+                logger.prepare(SITE,self.taskID,'Getting product data...')
                 soup = BeautifulSoup(retrieve.text, "html.parser")
                 self.antiCsrf = self.session.cookies["AntiCsrfToken"]
                 self.productTitle = soup.find('title').text
@@ -135,14 +156,14 @@ class NAKED:
                                 if size.split(':')[0] == self.task["SIZE"]:
                                     self.size = size.split(':')[0]
                                     self.sizeId = size.split(':')[1]
-                                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
         
                     
                     elif self.task["SIZE"].lower() == "random":
                         chosen = random.choice(allSizes)
                         self.size = chosen.split(':')[0]
                         self.sizeId = chosen.split(':')[1]
-                        logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                 
                 else:
                     logger.error(SITE,self.taskID,'Size Not Found')
@@ -172,12 +193,22 @@ class NAKED:
 
 
     def addToCart(self):
-        logger.prepare(SITE,self.taskID,'Carting Product...')
+
         payload = {
             '_AntiCsrfToken': self.antiCsrf,
             'id': self.sizeId,
             'partial': 'ajax-cart',
         }
+
+        if self.captchaRequired == True:
+            captchaResponse = loadToken(SITE)
+            if captchaResponse == "empty":
+                captchaResponse = captcha.v2('6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo',self.task["PRODUCT"],self.session.proxies,SITE,self.taskID)
+            
+            payload['g-recaptcha-response'] = captchaResponse
+        
+        logger.prepare(SITE,self.taskID,'Carting Product...')
+
 
         try:
             postCart = self.session.post('https://www.nakedcph.com/en/cart/add', data=payload, headers={
@@ -195,27 +226,26 @@ class NAKED:
     
 
 
-        if postCart:
-            if postCart.status_code == 200:
-                updateConsoleTitle(True,False,SITE)
-                logger.success(SITE,self.taskID,'Successfully carted')
-                self.shipping()
+        if postCart.status_code == 200:
+            updateConsoleTitle(True,False,SITE)
+            logger.warning(SITE,self.taskID,'Successfully carted')
+            self.shipping()
+        else:
+            if 'ReCaptchaFailed' in postCart.text:
+                logger.error(SITE,self.taskID,'Failed to cart (Captcha Required). Retrying...')
+                self.captchaRequired = True
             else:
                 logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                if self.task["SIZE"].lower() == "random":
-                    self.collect()
-                else:
-                    self.addToCart()
-        else:
-            logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
+                self.captchaRequired = False
             time.sleep(int(self.task["DELAY"]))
             if self.task["SIZE"].lower() == "random":
                 self.collect()
             else:
                 self.addToCart()
 
+
     def shipping(self):
+        
         profile = loadProfile(self.task["PROFILE"])
         if profile == None:
             logger.error(SITE,self.taskID,'Profile Not Found.')
@@ -223,6 +253,7 @@ class NAKED:
             sys.exit()
         countryCode = profile["countryCode"]
 
+        logger.prepare(SITE,self.taskID,'Submitting shipping...')
         params = {
             'partial': 'shipping-quotes',
             'zip': profile["zip"],
@@ -270,7 +301,7 @@ class NAKED:
                 self.shipping()
 
             if shippingQuote.status_code == 200:
-                logger.success(SITE,self.taskID,'Successfully saved shipping details')
+                logger.warning(SITE,self.taskID,'Successfully saved shipping details')
                 self.payment()
             else:
                 logger.error(SITE,self.taskID,'Failed to save shipping details.Retrying...')
@@ -285,6 +316,7 @@ class NAKED:
 
     
     def payment(self):
+        logger.prepare(SITE,self.taskID,'Setting payment details...')
 
         try:
             paymentMethod = self.session.post('https://www.nakedcph.com/en/cart/setpaymentmethod', data={'id': '5', 'partial': 'ajax-cart'}, headers={
@@ -301,7 +333,7 @@ class NAKED:
             self.payment()
 
         if paymentMethod.status_code == 200:
-            logger.success(SITE,self.taskID,'Successfully saved payment details')
+            logger.warning(SITE,self.taskID,'Successfully saved payment details')
             self.process()
         else:
             logger.error(SITE,self.taskID,'Failed to save payment details.Retrying...')
@@ -314,6 +346,7 @@ class NAKED:
             logger.error(SITE,self.taskID,'Profile Not Found.')
             time.sleep(10)
             sys.exit()
+        logger.prepare(SITE,self.taskID,'Getting checkout data...')
         payload = {
             '_AntiCsrfToken': self.antiCsrf,
             'country': profile["countryCode"],
@@ -345,9 +378,13 @@ class NAKED:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.process()
 
-        print(processP)
-        print(processP.url)
-        if 'adyen' in processP.url:
+
+        if 'paypal' in processP.url:
+            logger.warning(SITE,self.taskID,'Got paypal link')
+            self.ppUrl = processP.url
+            self.end = time.time() - self.start
+            self.sendPaypal()
+        elif 'adyen' in processP.url:
             try:
                 adyen = self.session.get(processP.url,headers={
                     'Referer': 'https://www.nakedcph.com/en/cart/view',
@@ -413,7 +450,7 @@ class NAKED:
                 self.merchantSig = decodeURIComponent(url.split('merchantSig=')[1].split('&')[0])
                 self.shopperSig = decodeURIComponent(url.split('shopperSig=')[1].split('&')[0])
                 self.riskDataSig = decodeURIComponent(url.split('riskdata.sig=')[1].split('&')[0])
-                logger.success(SITE,self.taskID,'Successfully got checkout data')
+                logger.warning(SITE,self.taskID,'Successfully got checkout data')
                 self.paypal()
         
         else:
@@ -424,6 +461,7 @@ class NAKED:
             
 
     def paypal(self):
+        logger.prepare(SITE,self.taskID,'Getting paypal link...')
         adyenForm = {
             'displayGroup': 'paypal',
             'pay': 'pay',
@@ -474,6 +512,7 @@ class NAKED:
             'usingPopUp': False,
             'shopperBehaviorLog': ''
         }
+        
         try:
             getPaypal = self.session.post('https://live.adyen.com/hpp/redirectPayPal.shtml', data=adyenForm, headers={
                 'Referer': self.referer,
@@ -489,32 +528,10 @@ class NAKED:
 
 
         if getPaypal.status_code in [200,302] and 'paypal' in getPaypal.url:
+            logger.warning(SITE,self.taskID,'Got paypal link')
             self.end = time.time() - self.start
-            updateConsoleTitle(False,True,SITE)
-            logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
-
-            url = storeCookies(getPaypal.url,self.session)
-            
-            try:
-                discord.success(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=url,
-                    image=self.productImage,
-                    title=self.productTitle,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod='PayPal',
-                    profile=self.task["PROFILE"],
-                    product=self.task["PRODUCT"],
-                    proxy=self.session.proxies,
-                    speed=self.end
-                )
-                sendNotification(SITE,self.productTitle)
-                while True:
-                    pass
-            except:
-                logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+            self.ppUrl = getPaypal.url
+            self.sendPaypal()
 
         else:
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout. Retrying...')
@@ -535,6 +552,34 @@ class NAKED:
                 pass
             time.sleep(int(self.task["DELAY"]))
             self.paypal()
+
+    def sendPaypal(self):
+        updateConsoleTitle(False,True,SITE)
+        logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+        url = storeCookies(self.ppUrl,self.session)
+        
+        try:
+            discord.success(
+                webhook=loadSettings()["webhook"],
+                site=SITE,
+                url=url,
+                image=self.productImage,
+                title=self.productTitle,
+                size=self.size,
+                price=self.productPrice,
+                paymentMethod='PayPal',
+                profile=self.task["PROFILE"],
+                product=self.task["PRODUCT"],
+                proxy=self.session.proxies,
+                speed=self.end
+            )
+            sendNotification(SITE,self.productTitle)
+            while True:
+                pass
+        except Exception as e:
+            log.info(e)
+            logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
+
 
 
         
