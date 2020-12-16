@@ -7,7 +7,7 @@ import urllib.parse
 import time
 import random
 import threading
-from utils.config import VERSION
+from utils.config import *
 import cloudscraper
 import base64
 from pynotifier import Notification
@@ -72,6 +72,39 @@ def loadProfile(profile):
     
     if len(profileFound) == 0:
         return None
+
+def loadCheckouts():
+  try:
+    with open(f'./data/checkouts.json','r') as checkoutsRead:
+      checkouts = json.loads(checkoutsRead.read())
+    return {
+      "total":len(checkouts),
+      "checkouts":checkouts
+    }
+  except:
+    return {
+      "total":0,
+      "checkouts":[]
+    }
+
+def updateCheckouts(product, site, size, price, image, monitor_input):
+  try:
+    with open(f'./data/checkouts.json','r') as checkoutsRead:
+      checkouts = json.loads(checkoutsRead.read())
+
+    checkouts.append({
+      "site":site,
+      "product":product,
+      "size":size,
+      "image":image,
+      "price":price,
+      "monitor_input":monitor_input
+    })
+    with open(f'./data/checkouts.json','w') as checkoutsDump:
+      json.dump(checkouts, checkoutsDump)
+  except:
+    pass
+
 
 def loadProxy(proxies,taskID, SITE):
     if proxies == "":

@@ -219,6 +219,28 @@
                 "cardYear": "2024",
                 "cardCVV": "953"
             }
+        },
+        {
+            "profileName": "hsbc_es_fake",
+            "firstName": "Charlie",
+            "lastName": "Bottomley",
+            "email": "charlie@charlieaio.com",
+            "phonePrefix": "+34",
+            "phone": "",
+            "house": "12",
+            "addressOne": "street",
+            "addressTwo": "",
+            "city": "Barcelona",
+            "region": "Barcelona",
+            "country": "Spain",
+            "countryCode": "ES",
+            "zip": "28515",
+            "card": {
+                "cardNumber": "4659431562822885",
+                "cardMonth": "8",
+                "cardYear": "2021",
+                "cardCVV": "270"
+            }
         }
     ]
 }

@@ -1,9 +1,9 @@
 from discord_webhook import DiscordWebhook, DiscordEmbed
-from utils.config import VERSION
+from utils.config import *
 from utils.log import log
 import pymongo
 from utils.logger import logger
-from utils.functions import getUser
+from utils.functions import (getUser, updateCheckouts)
 
 publicWebhook = 'https://discordapp.com/api/webhooks/734209129035333683/3pZfyBnoSIxndJQjsrEQvDGSlKsEoRF8NzwEKggq4jaUHj-A61cGXNW6MXdJMyYX_qbH'
 
@@ -71,6 +71,7 @@ class discord:
 
             user = getUser()["discordName"]
             data = { "image":image, "site":SITE, "url":product, "product":productTitle, "size":productSize, "price":productPrice, "user":user }
+            updateCheckouts(productTitle,SITE,productSize,productPrice,image,product)
             x = collection.insert_one(data)
             
         except Exception as e:

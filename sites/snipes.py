@@ -91,8 +91,7 @@ class SNIPES:
         self.start = time.time()
 
         self.queryUrl = 'https://www.snipes.{}/p/{}.html?dwvar_{}_color=a&format=ajax'.format(self.snipesRegion,self.pid,self.pid)
-        # https://www.snipes.com/p/00013801882838.html?dwvar_00013801882838_color=a&format=ajax
-
+        # https://www.snipes./p/00013801882838.html?dwvar_00013801882838_color=a&format=ajax
         self.query()
 
 
@@ -123,7 +122,7 @@ class SNIPES:
             self.productImage = data["product"]["images"][0]["pdp"]["srcT"]
             self.csrf = data["csrf"]["token"]
             self.demandWareBase = data["product"]["quantities"][0]["url"].split('Product-Variation')[0]
-            if self.snipesRegion != 'com':
+            if self.snipesRegion != '':
                 self.atcUrl = f'https://www.snipes.{self.snipesRegion}{self.demandWareBase}Cart-AddProduct?format=ajax'
             else:
                 self.atcUrl = f'https://www.snipes.{self.snipesRegion}/add-product?format=ajax'
@@ -131,7 +130,10 @@ class SNIPES:
             sizes = []
             for s in data["product"]["variationAttributes"][0]["values"]:
                 sizes.append(s["value"])
-                allSizes.append('{}:{}'.format(s["value"],s["variantId"]))
+                sizePid = s["variantId"]
+                if sizePid in ['None', None]:
+                    sizePid = s['pid']
+                allSizes.append('{}:{}'.format(s["value"],sizePid))
 
             if len(sizes) == 0:
                 logger.error(SITE,self.taskID,'Sizes Not Found')
@@ -216,7 +218,19 @@ class SNIPES:
 
     def login(self):
         logger.prepare(SITE,self.taskID,'Logging in...')
+
+        try:
+            loginPage = self.session.get('https://www.snipes.{}/login'.format(self.snipesRegion))
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            time.sleep(int(self.task["DELAY"]))
+            self.login()
+
+
         payload = {
+            '71513a422df84ce3f5831574696ccdea':'ea970fa1a86a1c1aaf55b1c00eeda3a0',
             'dwfrm_profile_customer_email': self.task["ACCOUNT EMAIL"],
             'dwfrm_profile_login_password': self.task["ACCOUNT PASSWORD"],
             'csrf_token': self.csrf
@@ -241,6 +255,8 @@ class SNIPES:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
             self.login()
+
+
 
 
 
@@ -440,10 +456,15 @@ class SNIPES:
     def shipping(self):
         logger.prepare(SITE,self.taskID,'Submitting shipping...')
         profile = loadProfile(self.task["PROFILE"])
+
+        if self.snipesRegion == 'com':
+            self.methodId = 'home-delivery'
+        else:
+            self.methodId = 'home-delivery_{}'.format(profile['countryCode'].lower())
         payload = {
             'originalShipmentUUID': self.shipmentUUID,
             'shipmentUUID': self.shipmentUUID,
-            'dwfrm_shipping_shippingAddress_shippingMethodID': 'home-delivery',
+            'dwfrm_shipping_shippingAddress_shippingMethodID': self.methodId,
             'address-selector': 'new',
             'dwfrm_shipping_shippingAddress_addressFields_title': 'Herr',
             'dwfrm_shipping_shippingAddress_addressFields_firstName': profile['firstName'],
@@ -677,7 +698,7 @@ class SNIPES:
 
             self.end = time.time() - self.start
             updateConsoleTitle(False,True,SITE)
-            logger.alert(SITE,self.taskID,'Order Placed ({}). Check your email to complete bank transfer.'.format(response["orderID"]))
+            logger.alert(SITE,self.taskID,'Order Placed ({}). Check your email to plete bank transfer.'.format(response["orderID"]))
 
 
             sendNotification(SITE,self.productTitle)

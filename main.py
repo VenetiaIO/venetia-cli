@@ -16,7 +16,7 @@ try:
     import win32console 
 except:
     pass
-from utils.config import VERSION
+from utils.config import *
 init(autoreset=True)
 
 def secho(text, file=None, nl=None, err=None, color=None, **styles):
@@ -35,34 +35,6 @@ try:
 except:
     pass
 
-#sites
-from sites.svd import SVD
-from sites.queens import QUEENS
-from sites.allike import ALLIKE
-from sites.titolo import TITOLO
-from sites.grosbasket import GROSBASKET
-from sites.airness import AIRNESS
-from sites.footasylum import FOOTASYLUM
-from sites.holypop import HOLYPOP
-from sites.schuh import SCHUH
-from sites.starcow import STARCOW
-from sites.slamjam import SLAMJAM
-from sites.consortium import CONSORTIUM
-from sites.courir import COURIR
-from sites.bstn import BSTN
-from sites.overkill import OVERKILL
-from sites.awlab import AWLAB
-from sites.einhalb import EINHALB
-from sites.chmielna import CHMIELNA
-from sites.workingClassHeroes import WCH
-from sites.naked import NAKED
-from sites.footdistrict import FOOTDISTRICT
-from sites.prodirect import PRODIRECT
-from sites.disney import DISNEY
-from sites.cornerstreet import CORNERSTREET
-from sites.snipes import SNIPES
-from sites.solebox import SOLEBOX
-from sites.fenom import FENOM
 
 #utils
 from utils.quicktask import QT
@@ -73,35 +45,8 @@ from utils.auth import auth
 from utils.datadome import datadome
 from utils.ascii import logo
 from utils.updates import Updater
+from utils.functions import loadCheckouts
 
-sites = {
-    "SVD":SVD,
-    "QUEENS":QUEENS,
-    "TITOLO":TITOLO,
-    "AIRNESS":AIRNESS,
-    "FOOTASYLUM":FOOTASYLUM,
-    "HOLYPOP":HOLYPOP,
-    "ALLIKE":ALLIKE,
-    "GROSBASKET":GROSBASKET,
-    "SCHUH":SCHUH,
-    "SLAMJAM":SLAMJAM,
-    "AWLAB":AWLAB,
-    #"EINHALB":EINHALB,
-    #"STARCOW":STARCOW,
-    "CHMIELNA20":CHMIELNA,
-    "WCH":WCH,
-    "NAKED":NAKED,
-    #"FOOTDISTRICT":FOOTDISTRICT,
-    "PRODIRECT":PRODIRECT,
-    "DISNEY":DISNEY,
-    #"CORNERSTREET":CORNERSTREET,
-    #"BSTN":BSTN,
-    "SNIPES":SNIPES,
-    #"COURIR":COURIR,
-    #"SOLEBOX":SOLEBOX,
-    #"FENOM":FENOM
-
-}
 
 
 def get_time():
@@ -228,7 +173,8 @@ class Menu:
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('07','red', attrs=["bold"]), colored('Generate Captchas','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('08','red', attrs=["bold"]), colored('Account Gen','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('09','red', attrs=["bold"]), colored('Cookie Gen','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('10','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('10','red', attrs=["bold"]), colored('View Checkouts','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('11','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
         #sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
         sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
         option = ''
@@ -240,7 +186,7 @@ class Menu:
         
         if option == 1:
             try:
-                win32console.SetConsoleTitle("] Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,"Running Tasks","0","0"))
+                win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,"Running Tasks","0","0"))
             except:
                 pass
 
@@ -830,12 +776,39 @@ class Menu:
             if threading.active_count() == 2:
                 self.menu()
 
+
         elif option == 10:
+            checkoutData = loadCheckouts()
+            logger.other_yellow('Total Checkouts: ', checkoutData['total'])
+            logger.other_yellow('Recent Checkouts...', '')
+            print("")
+            count = 0
+            if int(checkoutData['total']) == 0:
+                self.menu()
+
+            elif int(checkoutData['total']) <= 20:
+                count = int(checkoutData['total'])
+            else:
+                count  = int(checkoutData['total']) - 20
+
+            logger.other_grey('##|     Sites                 Product')
+            for i in range(count):
+                if i < 10:
+                    i_ = f'0{i}'
+                else:
+                    i_ = i
+                data = checkoutData['checkouts'][i]
+                logger.other_green('{}|     {}                {}'.format(i_,data['site'].title(), data['product']))
+
+            time.sleep(5)
+            self.menu()
+
+        elif option == 11:
             logger.menu('VENETIA','Menu','{}'.format(colored('Goodbye...','yellow', attrs=["bold"])))
             time.sleep(3)
             os._exit(0)
         
-        elif option > 10:
+        elif option > 11:
             logger.menu('VENETIA','Menu','{}'.format(colored('Invalid menu choice. Try again','yellow', attrs=["bold"])))
             time.sleep(3)
             self.menu()

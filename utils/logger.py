@@ -93,6 +93,33 @@ class logger:
         finally:
             lock.release()
 
+    @staticmethod
+    def other_grey(message):
+        lock.acquire()
+        try:
+            #sys.stdout.write('{} {}'.format(get_task(site,taskID), f'{message}\n'))
+            sys.stdout.write(Fore.WHITE + Style.DIM + message + '\n')
+        finally:
+            lock.release()
+
+    @staticmethod
+    def other_green(message):
+        lock.acquire()
+        try:
+            #sys.stdout.write('{} {}'.format(get_task(site,taskID), f'{message}\n'))
+            sys.stdout.write(Fore.GREEN + Style.NORMAL + message + '\n')
+        finally:
+            lock.release()
+
+    @staticmethod
+    def other_yellow(message, other):
+        lock.acquire()
+        try:
+            #sys.stdout.write('{} {}'.format(get_task(site,taskID), f'{message}\n'))
+            sys.stdout.write('{}{} \n'.format(Fore.YELLOW + Style.DIM + message, Fore.GREEN + Style.DIM + str(other)))
+        finally:
+            lock.release()
+
 
     @staticmethod
     def logo(text,VERSION):
