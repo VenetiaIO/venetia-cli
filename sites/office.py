@@ -18,10 +18,10 @@ from utils.log import log
 from utils.captcha import captcha
 from utils.akamai import AKAMAI
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, scraper, offspring_session)
-SITE = 'OFFSPRING'
+SITE = 'OFFICE'
 
 
-class OFFSPRING:
+class OFFICE:
     def __init__(self, task,taskName):
         self.task = task
         self.session = requests.session()
@@ -35,16 +35,7 @@ class OFFSPRING:
         self.collect()
 
     def collect(self):
-        cookies = AKAMAI.offspring(self.session, self.taskID)
-        while cookies["_abck"] == "error":
-            cookies = AKAMAI.offspring(self.session, self.taskID)
 
-
-        # print(cookies)
-        # cookies['_abck']
-        cookie_obj = requests.cookies.create_cookie(domain=f'.offspring.co.uk',name='_abck',value=cookies['_abck'])
-        self.session.cookies.set_cookie(cookie_obj)
-# 
 
         logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
@@ -61,14 +52,16 @@ class OFFSPRING:
             time.sleep(int(self.task["DELAY"]))
             self.collect()
         
-        currentVal = self.task['PRODUCT'].split('/offspring_catalog/')[1].split(',')[0]
+        currentVal = self.task['PRODUCT'].split('/office_catalog/')[1].split(',')[0]
         self.task['PRODUCT'] = self.task['PRODUCT'].replace(currentVal + ',', str(random.randint(1,99)) + ',')
 
-        if 'f5avraaaaaaaaaaaaaaaa_session_' not in retrieve.headers['set-cookie']:
-            logger.error(SITE,self.taskID,'Failed to get session. Retrying...')
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task['DELAY']))
-            self.__init__(self.task, self.taskID)
+        # if 'f5avraaaaaaaaaaaaaaaa_session_' not in retrieve.headers['set-cookie']:
+            # currentVal = self.task['PRODUCT'].split('/office_catalog/')[1].split(',')[0]
+            # self.task['PRODUCT'] = self.task['PRODUCT'].replace(currentVal + ',', str(random.randint(1,99)) + ',')
+            # logger.error(SITE,self.taskID,'Failed to get session. Retrying...')
+            # self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            # time.sleep(int(self.task['DELAY']))
+            # self.__init__(self.task, self.taskID)
         
 
         if retrieve.status_code == 200:
@@ -155,11 +148,11 @@ class OFFSPRING:
             "wishlist":False
         }
     
-        cookie_obj = requests.cookies.create_cookie(domain=f'.offspring.co.uk',name='CSRFToken',value=self.csrf)
+        cookie_obj = requests.cookies.create_cookie(domain=f'www.office.co.uk',name='CSRFToken',value=self.csrf)
         self.session.cookies.set_cookie(cookie_obj)
 
         try:
-            capCheck = self.session.post('https://www.offspring.co.uk/view/captcha/isCaptchaEnabledForProduct', data={"productCode":self.pid},headers={
+            capCheck = self.session.post('https://www.office.co.uk/view/captcha/isCaptchaEnabledForProduct', data={"productCode":self.pid},headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': '*/*',
                 'x-requested-with': 'XMLHttpRequest',
@@ -189,7 +182,7 @@ class OFFSPRING:
 
         logger.prepare(SITE,self.taskID,'Carting Product...')
         try:
-            atcResponse = self.session.post('https://www.offspring.co.uk/view/basket/add',data=cartPayload,headers={
+            atcResponse = self.session.post('https://www.office.co.uk/view/basket/add',data=cartPayload,headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': '*/*',
                 'x-requested-with': 'XMLHttpRequest',
@@ -197,8 +190,8 @@ class OFFSPRING:
                 'csrftoken':self.csrf,
                 'accept-encoding': 'gzip, deflate, br',
                 'accept-language': 'en-US,en;q=0.9',
-                'origin': 'https://www.offspring.co.uk',
-                'authority': 'www.offspring.co.uk',
+                'origin': 'https://www.office.co.uk',
+                'authority': 'www.office.co.uk',
                 'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
                 'cookie':f'CSRFToken={self.csrf};',
                 'sec-fetch-dest': 'empty',
@@ -234,6 +227,7 @@ class OFFSPRING:
             self.addToCart()
 
     def delivery(self):
+
         logger.prepare(SITE,self.taskID,'Setting shipping country...')
 
         profile = loadProfile(self.task["PROFILE"])
@@ -249,10 +243,10 @@ class OFFSPRING:
 
 
         try:
-            shippingCountry = self.session.post('https://www.offspring.co.uk/view/component/singlepagecheckout/setDeliveryCountry',data=payload,headers={
+            shippingCountry = self.session.post('https://www.office.co.uk/view/component/singlepagecheckout/setDeliveryCountry',data=payload,headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': '*/*',
-                'referer':'https://www.offspring.co.uk/checkout/singlePageCheckout',
+                'referer':'https://www.office.co.uk/checkout/singlePageCheckout',
                 'accept-encoding': 'gzip, deflate, br',
                 'accept-language': 'en-US,en;q=0.9',
                 'x-requested-with': 'XMLHttpRequest',
@@ -296,14 +290,15 @@ class OFFSPRING:
         }
 
         try:
-            deliveryResponse = self.session.post('https://www.offspring.co.uk/view/component/singlepagecheckout/setDeliveryMode', data=deliveryPayload,headers={
+            deliveryResponse = self.session.post('https://www.office.co.uk/view/component/singlepagecheckout/setDeliveryMode', data=deliveryPayload,headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': '*/*',
                 'x-requested-with': 'XMLHttpRequest',
-                'referer':'https://www.offspring.co.uk/checkout/singlePageCheckout',
+                'referer':'https://www.office.co.uk/checkout/singlePageCheckout',
                 'accept-encoding': 'gzip, deflate, br',
                 'accept-language': 'en-US,en;q=0.9',
                 'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
+
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -354,10 +349,10 @@ class OFFSPRING:
         }
 
         try:
-            addyResponse = self.session.post('https://www.offspring.co.uk/view/component/singlepagecheckout/addEditDeliveryAddress', data=addyPayload,headers={
+            addyResponse = self.session.post('https://www.office.co.uk/view/component/singlepagecheckout/addEditDeliveryAddress', data=addyPayload,headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': '*/*',
-                'referer':'https://www.offspring.co.uk/checkout/singlePageCheckout',
+                'referer':'https://www.office.co.uk/checkout/singlePageCheckout',
                 'accept-encoding': 'gzip, deflate, br',
                 'accept-language': 'en-US,en;q=0.9',
                 'x-requested-with': 'XMLHttpRequest',
@@ -370,11 +365,11 @@ class OFFSPRING:
             time.sleep(int(self.task["DELAY"]))
             self.address()
 
+
         if addyResponse.status_code == 200:
             logger.warning(SITE,self.taskID,'Submitted Address')
             if self.task["PAYMENT"].lower() == "paypal":
                 self.paypal()
-
         else:
             logger.error(SITE,self.taskID,'Failed to submit address. Retrying...')
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -392,10 +387,10 @@ class OFFSPRING:
             'CSRFToken': self.csrf
         }
         try:
-            paymentPost = self.session.post('https://www.offspring.co.uk/view/component/singlepagecheckout/continueToPaymentDetails', data=payPayload,headers={
+            paymentPost = self.session.post('https://www.office.co.uk/view/component/singlepagecheckout/continueToPaymentDetails', data=payPayload,headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'referer':'https://www.offspring.co.uk/checkout/singlePageCheckout',
+                'referer':'https://www.office.co.uk/checkout/singlePageCheckout',
                 'accept-encoding': 'gzip, deflate, br',
                 'accept-language': 'en-US,en;q=0.9',
                 'x-requested-with': 'XMLHttpRequest',

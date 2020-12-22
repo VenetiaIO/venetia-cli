@@ -12,10 +12,27 @@ from pypresence import Presence
 import uuid
 import os
 import click
+from pprint import pprint
+import inquirer
+import webbrowser
+
+
+
+
 try:
     import win32console 
 except:
     pass
+#utils
+from utils.quicktask import QT
+from utils.captcha import captcha
+from utils.logger import logger
+from utils.accounts import ACCOUNTS
+from utils.auth import auth
+from utils.datadome import datadome
+from utils.ascii import logo
+from utils.updates import Updater
+from utils.functions import loadCheckouts
 from utils.config import *
 init(autoreset=True)
 
@@ -31,21 +48,11 @@ click.secho = secho
 
 # os.system("title VenetiaIO CLI [Version {}]".format(VERSION))
 try:
-    win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI".format(VERSION))
+    win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI".format(VERSION()))
 except:
     pass
 
 
-#utils
-from utils.quicktask import QT
-from utils.captcha import captcha
-from utils.logger import logger
-from utils.accounts import ACCOUNTS
-from utils.auth import auth
-from utils.datadome import datadome
-from utils.ascii import logo
-from utils.updates import Updater
-from utils.functions import loadCheckouts
 
 
 
@@ -85,10 +92,10 @@ def checkTasks(site):
         return False
 
 def checkUpdate():
-    status = Updater.checkForUpdate(VERSION)
+    status = Updater.checkForUpdate(VERSION())
     if status["error"] == False:
         if status["latest"] == True:
-            logger.menu('VENETIA','Menu','{}'.format(colored(f'You are on the latest version! {VERSION}','green', attrs=["bold"])))
+            logger.menu('VENETIA','Menu','{}'.format(colored(f'You are on the latest version! {VERSION()}','green', attrs=["bold"])))
             return True
         if status["latest"] == False:
             logger.menu('VENETIA','Menu','{}'.format(colored(f'Updating...','magenta', attrs=["bold"])))
@@ -132,10 +139,10 @@ class Menu:
                     if row["PRODUCT"] != "":
                         try:
                             try:
-                                win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,key_chosen.title(),"0","0"))
+                                win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),key_chosen.title(),"0","0"))
                             except:
                                 pass
-                            self.RPC.update(large_image="image", state=f"Version {VERSION}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
+                            self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
                         except:
                             pass
                         
@@ -157,13 +164,13 @@ class Menu:
         headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
         requests.post('https://venetiacli.io/api/last/opened',headers=headers,json={"key":self.config["key"],"date":str(datetime.datetime.now())})
         try:
-            self.RPC.update(large_image="image", state=f"Version {VERSION}", details='Main Menu', start=self.rpctime,small_image="image",small_text="@venetiaIO")
+            self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Main Menu', start=self.rpctime,small_image="image",small_text="@venetiaIO")
         except:
             pass
 
      
         print('                 Welcome To...                  ')
-        logger.logo(logo,VERSION)
+        logger.logo(logo,VERSION())
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('01','red', attrs=["bold"]), colored('Start All Tasks','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('02','red', attrs=["bold"]), colored('Start Specific Tasks','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('03','red', attrs=["bold"]), colored('View Config','red', attrs=["bold"])))
@@ -186,7 +193,7 @@ class Menu:
         
         if option == 1:
             try:
-                win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,"Running Tasks","0","0"))
+                win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),"Running Tasks","0","0"))
             except:
                 pass
 
@@ -198,7 +205,7 @@ class Menu:
                         if sites.get(row["SITE"].upper()) != None:
                             if row["PRODUCT"] != "":
                                 try:
-                                    self.RPC.update(large_image="image", state=f"Version {VERSION}", details=f'Running {taskCount()} Task(s)...'.format(row["SITE"].title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
+                                    self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format(row["SITE"].title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
                                 except:
                                     pass
                             
@@ -366,7 +373,7 @@ class Menu:
 
         elif option == 5:
             try:
-                self.RPC.update(large_image="image", state=f"Version {VERSION}", details='Creating Profiles...', start=self.rpctime,small_image="image",small_text="@venetiaIO")
+                self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Creating Profiles...', start=self.rpctime,small_image="image",small_text="@venetiaIO")
             except:
                 pass
 
@@ -781,7 +788,6 @@ class Menu:
             checkoutData = loadCheckouts()
             logger.other_yellow('Total Checkouts: ', checkoutData['total'])
             logger.other_yellow('Recent Checkouts...', '')
-            print("")
             count = 0
             if int(checkoutData['total']) == 0:
                 self.menu()
@@ -791,17 +797,41 @@ class Menu:
             else:
                 count  = int(checkoutData['total']) - 20
 
-            logger.other_grey('##|     Sites                 Product')
+            options = []
+            options.append('[XX] Back to Menu')
             for i in range(count):
                 if i < 10:
                     i_ = f'0{i}'
                 else:
                     i_ = i
                 data = checkoutData['checkouts'][i]
-                logger.other_green('{}|     {}                {}'.format(i_,data['site'].title(), data['product']))
+                # logger.other_green('{}|     {}                {}'.format(i_,data['site'].title(), data['product']))
+                options.append('[{}]     {}                {}'.format(i_,data['site'].title(), data['product']))
+            
+            def selector():
+                questions = [
+                    inquirer.List(
+                        "checkouts",
+                        message="Select a checkout",
+                        choices=options,
+                    ),
+                ]
+                answers = inquirer.prompt(questions)
+                num = answers['checkouts'].split('[')[1].split(']')[0]
+                if num == 'XX':
+                    self.menu()
+                link = checkoutData['checkouts'][int(num)]['checkout_url']
+                webbrowser.open_new_tab(link)
+                return num
 
-            time.sleep(5)
-            self.menu()
+            n = selector()
+            while n != 'XX':
+                n = selector()
+
+            
+
+            
+
 
         elif option == 11:
             logger.menu('VENETIA','Menu','{}'.format(colored('Goodbye...','yellow', attrs=["bold"])))

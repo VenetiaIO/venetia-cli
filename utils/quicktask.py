@@ -69,7 +69,7 @@ def action():
         taskName = 'QT'
         threading.Thread(target=sites.get(row["SITE"].upper()),args=(row,taskName)).start()
         try:
-            win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,row["SITE"].upper(),"0","0"))
+            win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),row["SITE"].upper(),"0","0"))
         except:
             pass
     

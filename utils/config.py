@@ -27,6 +27,7 @@ from sites.snipes import SNIPES
 from sites.solebox import SOLEBOX
 from sites.fenom import FENOM
 from sites.offspring import OFFSPRING
+from sites.office import OFFICE
 
 sites = {
     "SVD":SVD,
@@ -54,7 +55,8 @@ sites = {
     #"COURIR":COURIR,
     #"SOLEBOX":SOLEBOX,
     #"FENOM":FENOM,
-    "OFFSPRING":OFFSPRING
+    "OFFSPRING":OFFSPRING,
+    "OFFICE":OFFICE
 }
 
-VERSION = '0.5.0'
+def VERSION(): return '0.5.0'

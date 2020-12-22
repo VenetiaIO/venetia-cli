@@ -1,13 +1,12 @@
 from discord_webhook import DiscordWebhook, DiscordEmbed
-from utils.config import *
+import utils.config as CONFIG
 from utils.log import log
 import pymongo
 from utils.logger import logger
 from utils.functions import (getUser, updateCheckouts)
-
 publicWebhook = 'https://discordapp.com/api/webhooks/734209129035333683/3pZfyBnoSIxndJQjsrEQvDGSlKsEoRF8NzwEKggq4jaUHj-A61cGXNW6MXdJMyYX_qbH'
-
 mongoConnect = "mongodb+srv://charlieaio:87g[VyhEnY$F?uf8@cluster-main.sqapr.mongodb.net/mydb?retryWrites=true&w=majority"
+
 
 class discord:
     @staticmethod
@@ -40,7 +39,7 @@ class discord:
         try:                
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title=':rocket: Successful Checkout :rocket:', description='', color=0x2feb61)
-            embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
+            embed.set_footer(text='VenetiaIO CLI | {}'.format(CONFIG.VERSION()))
             embed.set_timestamp()
     
             if image:
@@ -71,7 +70,7 @@ class discord:
 
             user = getUser()["discordName"]
             data = { "image":image, "site":SITE, "url":product, "product":productTitle, "size":productSize, "price":productPrice, "user":user }
-            updateCheckouts(productTitle,SITE,productSize,productPrice,image,product)
+            updateCheckouts(productTitle,SITE,productSize,productPrice,image,product,url)
             x = collection.insert_one(data)
             
         except Exception as e:
@@ -83,7 +82,7 @@ class discord:
         try:
             webhookPublic = DiscordWebhook(publicWebhook)
             embed2 = DiscordEmbed(title=':rocket: User Checkout :rocket:', description='', color=0x2feb61)
-            embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
+            embed.set_footer(text='VenetiaIO CLI | {}'.format(CONFIG.VERSION()))
             embed2.set_timestamp()
     
             if image:
@@ -133,7 +132,7 @@ class discord:
         try:
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title='⛔ Checkout Failed ⛔', description='', color=0xeb3c2f)
-            embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
+            embed.set_footer(text='VenetiaIO CLI | {}'.format(CONFIG.VERSION()))
             embed.set_timestamp()
 
             if image: embed.set_thumbnail(url=image)
@@ -167,7 +166,7 @@ class discord:
         try:
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title=f'{SITE} | Account Created', description='', color=0x1e68e7)
-            embed.set_footer(text='VenetiaIO CLI | {}'.format(VERSION))
+            embed.set_footer(text='VenetiaIO CLI | {}'.format(CONFIG.VERSION()))
             embed.set_timestamp()
     
             if first: embed.add_embed_field(name='First Name', value=first,inline=False)

@@ -11,7 +11,7 @@ from utils.config import *
 import cloudscraper
 import base64
 from pynotifier import Notification
-
+import uuid
 
 
 try:
@@ -35,6 +35,21 @@ def injection(session, response):
     else:
         return response
 
+
+def offspring_session(pid):
+  return {
+    "eventId": str(uuid.uuid4()),
+    "appId": 'live1-offspring_uk',
+    "anId": '1zq87h23spsq1piqndkgle5v317ptwxa16dx1xuk1z3cx',
+    "sessionId": str(uuid.uuid4()),
+    "version": '20.1.0',
+    "previousOrigin": {
+      "originQuery": "?fh_secondid=" + pid
+    },
+    "originId":str(uuid.uuid4()),
+    "productId": pid,
+    "quantity": 1,
+}
 
 def scraper():
   scraper = cloudscraper.create_scraper(
@@ -87,7 +102,7 @@ def loadCheckouts():
       "checkouts":[]
     }
 
-def updateCheckouts(product, site, size, price, image, monitor_input):
+def updateCheckouts(product, site, size, price, image, monitor_input, checkout_url):
   try:
     with open(f'./data/checkouts.json','r') as checkoutsRead:
       checkouts = json.loads(checkoutsRead.read())
@@ -98,7 +113,8 @@ def updateCheckouts(product, site, size, price, image, monitor_input):
       "size":size,
       "image":image,
       "price":price,
-      "monitor_input":monitor_input
+      "monitor_input":monitor_input,
+      "checkout_url":checkout_url
     })
     with open(f'./data/checkouts.json','w') as checkoutsDump:
       json.dump(checkouts, checkoutsDump)
@@ -163,7 +179,7 @@ def updateConsoleTitle(carted,checkedOut, SITE):
           newCarted = int(carted) + 1
   
           checked = title.split('Checked Out: ')[1].split(' |')[0]
-          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,SITE.title(),newCarted,checked))
+          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),SITE.title(),newCarted,checked))
         except:
           pass
     if checkedOut == True:
@@ -173,7 +189,7 @@ def updateConsoleTitle(carted,checkedOut, SITE):
           newChecked = int(checked) + 1
   
           carted = title.split('Carted: ')[1].split(' |')[0]
-          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,SITE.title(),carted,newChecked))
+          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),SITE.title(),carted,newChecked))
         except:
           pass
 
