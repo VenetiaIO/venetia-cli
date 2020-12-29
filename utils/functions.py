@@ -7,7 +7,7 @@ import urllib.parse
 import time
 import random
 import threading
-from utils.config import *
+import utils.config as CONFIG
 import cloudscraper
 import base64
 from pynotifier import Notification
@@ -179,8 +179,8 @@ def updateConsoleTitle(carted,checkedOut, SITE):
           newCarted = int(carted) + 1
   
           checked = title.split('Checked Out: ')[1].split(' |')[0]
-          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),SITE.title(),newCarted,checked))
-        except:
+          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(CONFIG.VERSION(),SITE.title(),newCarted,checked))
+        except Exception as e:
           pass
     if checkedOut == True:
         try:
@@ -189,8 +189,8 @@ def updateConsoleTitle(carted,checkedOut, SITE):
           newChecked = int(checked) + 1
   
           carted = title.split('Carted: ')[1].split(' |')[0]
-          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),SITE.title(),carted,newChecked))
-        except:
+          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(CONFIG.VERSION(),SITE.title(),carted,newChecked))
+        except Exception as e:
           pass
 
 def loadCookie(SITE):

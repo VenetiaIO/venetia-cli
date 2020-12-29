@@ -184,7 +184,7 @@ class OFFSPRING:
             logger.warning(SITE,self.taskID,'Captcha Required')
             captchaResponse = loadToken(SITE)
             if captchaResponse == "empty":
-                captchaResponse = captcha.v3('6Ld-VBsUAAAAABeqZuOqiQmZ-1WAMVeTKjdq2-bJ',self.task["PRODUCT"],self.session.proxies,SITE,self.taskID)
+                captchaResponse = captcha.v2('6Ld-VBsUAAAAABeqZuOqiQmZ-1WAMVeTKjdq2-bJ',self.task["PRODUCT"],self.session.proxies,SITE,self.taskID)
             cartPayload['grecaptcharesponse'] = captchaResponse
 
         logger.prepare(SITE,self.taskID,'Carting Product...')

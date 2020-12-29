@@ -32,8 +32,9 @@ from utils.auth import auth
 from utils.datadome import datadome
 from utils.ascii import logo
 from utils.updates import Updater
-from utils.functions import loadCheckouts
+from utils.functions import (loadCheckouts, getUser)
 from utils.config import *
+import utils.create_data_files as dataFiles
 init(autoreset=True)
 
 def secho(text, file=None, nl=None, err=None, color=None, **styles):
@@ -69,11 +70,8 @@ def taskCount():
 
 def clearTokens():
     data = {}
-    data['TITOLO'] = []
-    #data['BSTN'] = []
-    data['HOLYPOP'] = []
-    data['NAKED'] = []
-    data['PRODIRECT'] = []
+    for k in sites.keys():
+        data[k.upper()] = []
     with open('./data/captcha/tokens.json','w') as tokenFile:
         json.dump(data,tokenFile)
     return 'complete'
@@ -111,8 +109,11 @@ def checkUpdate():
 
 class Menu:
     def __init__(self):
+        clearTokens()
         checkUpdate()
         threading.Thread(target=QT,daemon=True).start()
+
+        self.user = getUser()
         
         try:
             client_id = 726839544124670093
@@ -169,7 +170,7 @@ class Menu:
             pass
 
      
-        print('                 Welcome To...                  ')
+        print('                 Welcome {}...                  '.format(self.user['discordName']))
         logger.logo(logo,VERSION())
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('01','red', attrs=["bold"]), colored('Start All Tasks','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('02','red', attrs=["bold"]), colored('Start Specific Tasks','red', attrs=["bold"])))
@@ -662,7 +663,9 @@ class Menu:
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('NAKED','cyan')))
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('PRO-DIRECT','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('5','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
+            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('5','red', attrs=["bold"]), colored('OFFSPRING','cyan')))
+            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('6','red', attrs=["bold"]), colored('OFFICE','cyan')))
+            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('7','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             CaptchasiteSelect = input(' Select a site => ')
             if CaptchasiteSelect == "1":
@@ -682,6 +685,14 @@ class Menu:
                 siteKey = '6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g'
                 siteName = 'PRO-DIRECT'
             if CaptchasiteSelect == "5":
+                siteUrl = 'https://www.offspring.co.uk'
+                siteKey = '6Ld-VBsUAAAAABeqZuOqiQmZ-1WAMVeTKjdq2-bJ'
+                siteName = 'OFFSPRING'
+            if CaptchasiteSelect == "6":
+                siteUrl = 'https://www.office.co.uk/'
+                siteKey = '6Ld-VBsUAAAAABeqZuOqiQmZ-1WAMVeTKjdq2-bJ'
+                siteName = 'OFFICE'
+            if CaptchasiteSelect == "7":
                 self.menu()
 
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
@@ -792,23 +803,28 @@ class Menu:
             if int(checkoutData['total']) == 0:
                 self.menu()
 
-            elif int(checkoutData['total']) <= 20:
+            elif int(checkoutData['total']) <= 30:
                 count = int(checkoutData['total'])
             else:
-                count  = int(checkoutData['total']) - 20
+                count  = 30
 
             options = []
             options.append('[XX] Back to Menu')
-            for i in range(count):
-                if i < 10:
-                    i_ = f'0{i}'
+            i__ = 1
+            for i in checkoutData['checkouts'][-count:]:
+                if i__ < 10:
+                    i_ = f'0{i__}'
                 else:
-                    i_ = i
-                data = checkoutData['checkouts'][i]
-                # logger.other_green('{}|     {}                {}'.format(i_,data['site'].title(), data['product']))
-                options.append('[{}]     {}                {}'.format(i_,data['site'].title(), data['product']))
+                    i_ = i__
+                data = i
+                i__ = i__ + 1
+                # options.append('[{}]     {}                {}'.format(i_,data['site'].title(), data['product']))
+                site = data['site'].title()
+                prod = data['product']
+                options.append(f'[{i_:<3}]   {site:<10}   {prod:<20}')
             
             def selector():
+                logger.other_grey('=' * 50)
                 questions = [
                     inquirer.List(
                         "checkouts",
@@ -847,6 +863,7 @@ class Menu:
 
 
 if __name__ == "__main__":
+    dataFiles.execute()
     with open('./data/config.json') as config:
         config = json.loads(config.read())
         if config["key"] == "":
@@ -862,6 +879,9 @@ if __name__ == "__main__":
                 Menu()
             if auth["STATUS"] == 0:
                 logger.menu('VENETIA','Menu','{}'.format(colored('Failed to auth key. Closing...','red', attrs=["bold"])))
+                config["key"] = ""
+                with open("./data/config.json","w") as updated:
+                    json.dump(config, updated)
                 time.sleep(3)
                 os._exit(0)
 
@@ -872,5 +892,8 @@ if __name__ == "__main__":
                 Menu()
             if auth["STATUS"] == 0:
                 logger.menu('VENETIA','Menu','{}'.format(colored('Failed to auth key. Closing...','red', attrs=["bold"])))
+                config["key"] = ""
+                with open("./data/config.json","w") as updated:
+                    json.dump(config, updated)
                 time.sleep(3)
                 os._exit(0)

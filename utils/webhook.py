@@ -36,12 +36,13 @@ class discord:
 
 
         logger.secondary(SITE,'Task Link',url)
+
+        user = getUser()
         try:                
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title=':rocket: Successful Checkout :rocket:', description='', color=0x2feb61)
             embed.set_footer(text='VenetiaIO CLI | {}'.format(CONFIG.VERSION()))
-            embed.set_timestamp()
-    
+            embed.set_timestamp()    
             if image:
                 try:
                     embed.set_thumbnail(url=image)
