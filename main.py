@@ -12,11 +12,29 @@ from pypresence import Presence
 import uuid
 import os
 import click
+from pprint import pprint
+import inquirer
+import webbrowser
+
+
+
+
 try:
     import win32console 
 except:
     pass
-from utils.config import VERSION
+#utils
+from utils.quicktask import QT
+from utils.captcha import captcha
+from utils.logger import logger
+from utils.accounts import ACCOUNTS
+from utils.auth import auth
+from utils.datadome import datadome
+from utils.ascii import logo
+from utils.updates import Updater
+from utils.functions import (loadCheckouts, getUser)
+from utils.config import *
+import utils.create_data_files as dataFiles
 init(autoreset=True)
 
 def secho(text, file=None, nl=None, err=None, color=None, **styles):
@@ -31,77 +49,12 @@ click.secho = secho
 
 # os.system("title VenetiaIO CLI [Version {}]".format(VERSION))
 try:
-    win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI".format(VERSION))
+    win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI".format(VERSION()))
 except:
     pass
 
-#sites
-from sites.svd import SVD
-from sites.queens import QUEENS
-from sites.allike import ALLIKE
-from sites.titolo import TITOLO
-from sites.grosbasket import GROSBASKET
-from sites.airness import AIRNESS
-from sites.footasylum import FOOTASYLUM
-from sites.holypop import HOLYPOP
-from sites.schuh import SCHUH
-from sites.starcow import STARCOW
-from sites.slamjam import SLAMJAM
-from sites.consortium import CONSORTIUM
-from sites.courir import COURIR
-from sites.bstn import BSTN
-from sites.overkill import OVERKILL
-from sites.awlab import AWLAB
-from sites.einhalb import EINHALB
-from sites.chmielna import CHMIELNA
-from sites.workingClassHeroes import WCH
-from sites.naked import NAKED
-from sites.footdistrict import FOOTDISTRICT
-from sites.prodirect import PRODIRECT
-from sites.disney import DISNEY
-from sites.cornerstreet import CORNERSTREET
-from sites.snipes import SNIPES
-from sites.solebox import SOLEBOX
-from sites.fenom import FENOM
 
-#utils
-from utils.quicktask import QT
-from utils.captcha import captcha
-from utils.logger import logger
-from utils.accounts import ACCOUNTS
-from utils.auth import auth
-from utils.datadome import datadome
-from utils.ascii import logo
-from utils.updates import Updater
 
-sites = {
-    "SVD":SVD,
-    "QUEENS":QUEENS,
-    "TITOLO":TITOLO,
-    "AIRNESS":AIRNESS,
-    "FOOTASYLUM":FOOTASYLUM,
-    "HOLYPOP":HOLYPOP,
-    "ALLIKE":ALLIKE,
-    "GROSBASKET":GROSBASKET,
-    "SCHUH":SCHUH,
-    "SLAMJAM":SLAMJAM,
-    "AWLAB":AWLAB,
-    #"EINHALB":EINHALB,
-    #"STARCOW":STARCOW,
-    "CHMIELNA20":CHMIELNA,
-    "WCH":WCH,
-    "NAKED":NAKED,
-    #"FOOTDISTRICT":FOOTDISTRICT,
-    "PRODIRECT":PRODIRECT,
-    "DISNEY":DISNEY,
-    #"CORNERSTREET":CORNERSTREET,
-    #"BSTN":BSTN,
-    "SNIPES":SNIPES,
-    #"COURIR":COURIR,
-    #"SOLEBOX":SOLEBOX,
-    #"FENOM":FENOM
-
-}
 
 
 def get_time():
@@ -117,11 +70,8 @@ def taskCount():
 
 def clearTokens():
     data = {}
-    data['TITOLO'] = []
-    #data['BSTN'] = []
-    data['HOLYPOP'] = []
-    data['NAKED'] = []
-    data['PRODIRECT'] = []
+    for k in sites.keys():
+        data[k.upper()] = []
     with open('./data/captcha/tokens.json','w') as tokenFile:
         json.dump(data,tokenFile)
     return 'complete'
@@ -140,10 +90,10 @@ def checkTasks(site):
         return False
 
 def checkUpdate():
-    status = Updater.checkForUpdate(VERSION)
+    status = Updater.checkForUpdate(VERSION())
     if status["error"] == False:
         if status["latest"] == True:
-            logger.menu('VENETIA','Menu','{}'.format(colored(f'You are on the latest version! {VERSION}','green', attrs=["bold"])))
+            logger.menu('VENETIA','Menu','{}'.format(colored(f'You are on the latest version! {VERSION()}','green', attrs=["bold"])))
             return True
         if status["latest"] == False:
             logger.menu('VENETIA','Menu','{}'.format(colored(f'Updating...','magenta', attrs=["bold"])))
@@ -159,8 +109,11 @@ def checkUpdate():
 
 class Menu:
     def __init__(self):
+        clearTokens()
         checkUpdate()
         threading.Thread(target=QT,daemon=True).start()
+
+        self.user = getUser()
         
         try:
             client_id = 726839544124670093
@@ -187,10 +140,10 @@ class Menu:
                     if row["PRODUCT"] != "":
                         try:
                             try:
-                                win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,key_chosen.title(),"0","0"))
+                                win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),key_chosen.title(),"0","0"))
                             except:
                                 pass
-                            self.RPC.update(large_image="image", state=f"Version {VERSION}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
+                            self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
                         except:
                             pass
                         
@@ -212,13 +165,13 @@ class Menu:
         headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
         requests.post('https://venetiacli.io/api/last/opened',headers=headers,json={"key":self.config["key"],"date":str(datetime.datetime.now())})
         try:
-            self.RPC.update(large_image="image", state=f"Version {VERSION}", details='Main Menu', start=self.rpctime,small_image="image",small_text="@venetiaIO")
+            self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Main Menu', start=self.rpctime,small_image="image",small_text="@venetiaIO")
         except:
             pass
 
      
-        print('                 Welcome To...                  ')
-        logger.logo(logo,VERSION)
+        print('                 Welcome {}...                  '.format(self.user['discordName']))
+        logger.logo(logo,VERSION())
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('01','red', attrs=["bold"]), colored('Start All Tasks','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('02','red', attrs=["bold"]), colored('Start Specific Tasks','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('03','red', attrs=["bold"]), colored('View Config','red', attrs=["bold"])))
@@ -228,7 +181,8 @@ class Menu:
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('07','red', attrs=["bold"]), colored('Generate Captchas','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('08','red', attrs=["bold"]), colored('Account Gen','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('09','red', attrs=["bold"]), colored('Cookie Gen','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('10','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('10','red', attrs=["bold"]), colored('View Checkouts','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('11','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
         #sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
         sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
         option = ''
@@ -240,7 +194,7 @@ class Menu:
         
         if option == 1:
             try:
-                win32console.SetConsoleTitle("] Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,"Running Tasks","0","0"))
+                win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),"Running Tasks","0","0"))
             except:
                 pass
 
@@ -252,7 +206,7 @@ class Menu:
                         if sites.get(row["SITE"].upper()) != None:
                             if row["PRODUCT"] != "":
                                 try:
-                                    self.RPC.update(large_image="image", state=f"Version {VERSION}", details=f'Running {taskCount()} Task(s)...'.format(row["SITE"].title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
+                                    self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format(row["SITE"].title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
                                 except:
                                     pass
                             
@@ -420,7 +374,7 @@ class Menu:
 
         elif option == 5:
             try:
-                self.RPC.update(large_image="image", state=f"Version {VERSION}", details='Creating Profiles...', start=self.rpctime,small_image="image",small_text="@venetiaIO")
+                self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Creating Profiles...', start=self.rpctime,small_image="image",small_text="@venetiaIO")
             except:
                 pass
 
@@ -709,7 +663,9 @@ class Menu:
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('NAKED','cyan')))
             logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('PRO-DIRECT','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('5','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
+            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('5','red', attrs=["bold"]), colored('OFFSPRING','cyan')))
+            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('6','red', attrs=["bold"]), colored('OFFICE','cyan')))
+            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('7','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             CaptchasiteSelect = input(' Select a site => ')
             if CaptchasiteSelect == "1":
@@ -729,6 +685,14 @@ class Menu:
                 siteKey = '6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g'
                 siteName = 'PRO-DIRECT'
             if CaptchasiteSelect == "5":
+                siteUrl = 'https://www.offspring.co.uk'
+                siteKey = '6Ld-VBsUAAAAABeqZuOqiQmZ-1WAMVeTKjdq2-bJ'
+                siteName = 'OFFSPRING'
+            if CaptchasiteSelect == "6":
+                siteUrl = 'https://www.office.co.uk/'
+                siteKey = '6Ld-VBsUAAAAABeqZuOqiQmZ-1WAMVeTKjdq2-bJ'
+                siteName = 'OFFICE'
+            if CaptchasiteSelect == "7":
                 self.menu()
 
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
@@ -830,12 +794,67 @@ class Menu:
             if threading.active_count() == 2:
                 self.menu()
 
+
         elif option == 10:
+            checkoutData = loadCheckouts()
+            logger.other_yellow('Total Checkouts: ', checkoutData['total'])
+            logger.other_yellow('Recent Checkouts...', '')
+            count = 0
+            if int(checkoutData['total']) == 0:
+                self.menu()
+
+            elif int(checkoutData['total']) <= 30:
+                count = int(checkoutData['total'])
+            else:
+                count  = 30
+
+            options = []
+            options.append('[XX] Back to Menu')
+            i__ = 1
+            for i in checkoutData['checkouts'][-count:]:
+                if i__ < 10:
+                    i_ = f'0{i__}'
+                else:
+                    i_ = i__
+                data = i
+                i__ = i__ + 1
+                # options.append('[{}]     {}                {}'.format(i_,data['site'].title(), data['product']))
+                site = data['site'].title()
+                prod = data['product']
+                options.append(f'[{i_:<3}]   {site:<10}   {prod:<20}')
+            
+            def selector():
+                logger.other_grey('=' * 50)
+                questions = [
+                    inquirer.List(
+                        "checkouts",
+                        message="Select a checkout",
+                        choices=options,
+                    ),
+                ]
+                answers = inquirer.prompt(questions)
+                num = answers['checkouts'].split('[')[1].split(']')[0]
+                if num == 'XX':
+                    self.menu()
+                link = checkoutData['checkouts'][int(num)]['checkout_url']
+                webbrowser.open_new_tab(link)
+                return num
+
+            n = selector()
+            while n != 'XX':
+                n = selector()
+
+            
+
+            
+
+
+        elif option == 11:
             logger.menu('VENETIA','Menu','{}'.format(colored('Goodbye...','yellow', attrs=["bold"])))
             time.sleep(3)
             os._exit(0)
         
-        elif option > 10:
+        elif option > 11:
             logger.menu('VENETIA','Menu','{}'.format(colored('Invalid menu choice. Try again','yellow', attrs=["bold"])))
             time.sleep(3)
             self.menu()
@@ -844,6 +863,7 @@ class Menu:
 
 
 if __name__ == "__main__":
+    dataFiles.execute()
     with open('./data/config.json') as config:
         config = json.loads(config.read())
         if config["key"] == "":
@@ -859,6 +879,9 @@ if __name__ == "__main__":
                 Menu()
             if auth["STATUS"] == 0:
                 logger.menu('VENETIA','Menu','{}'.format(colored('Failed to auth key. Closing...','red', attrs=["bold"])))
+                config["key"] = ""
+                with open("./data/config.json","w") as updated:
+                    json.dump(config, updated)
                 time.sleep(3)
                 os._exit(0)
 
@@ -869,5 +892,8 @@ if __name__ == "__main__":
                 Menu()
             if auth["STATUS"] == 0:
                 logger.menu('VENETIA','Menu','{}'.format(colored('Failed to auth key. Closing...','red', attrs=["bold"])))
+                config["key"] = ""
+                with open("./data/config.json","w") as updated:
+                    json.dump(config, updated)
                 time.sleep(3)
                 os._exit(0)

@@ -7,11 +7,11 @@ import urllib.parse
 import time
 import random
 import threading
-from utils.config import VERSION
+import utils.config as CONFIG
 import cloudscraper
 import base64
 from pynotifier import Notification
-
+import uuid
 
 
 try:
@@ -35,6 +35,21 @@ def injection(session, response):
     else:
         return response
 
+
+def offspring_session(pid):
+  return {
+    "eventId": str(uuid.uuid4()),
+    "appId": 'live1-offspring_uk',
+    "anId": '1zq87h23spsq1piqndkgle5v317ptwxa16dx1xuk1z3cx',
+    "sessionId": str(uuid.uuid4()),
+    "version": '20.1.0',
+    "previousOrigin": {
+      "originQuery": "?fh_secondid=" + pid
+    },
+    "originId":str(uuid.uuid4()),
+    "productId": pid,
+    "quantity": 1,
+}
 
 def scraper():
   scraper = cloudscraper.create_scraper(
@@ -72,6 +87,40 @@ def loadProfile(profile):
     
     if len(profileFound) == 0:
         return None
+
+def loadCheckouts():
+  try:
+    with open(f'./data/checkouts.json','r') as checkoutsRead:
+      checkouts = json.loads(checkoutsRead.read())
+    return {
+      "total":len(checkouts),
+      "checkouts":checkouts
+    }
+  except:
+    return {
+      "total":0,
+      "checkouts":[]
+    }
+
+def updateCheckouts(product, site, size, price, image, monitor_input, checkout_url):
+  try:
+    with open(f'./data/checkouts.json','r') as checkoutsRead:
+      checkouts = json.loads(checkoutsRead.read())
+
+    checkouts.append({
+      "site":site,
+      "product":product,
+      "size":size,
+      "image":image,
+      "price":price,
+      "monitor_input":monitor_input,
+      "checkout_url":checkout_url
+    })
+    with open(f'./data/checkouts.json','w') as checkoutsDump:
+      json.dump(checkouts, checkoutsDump)
+  except:
+    pass
+
 
 def loadProxy(proxies,taskID, SITE):
     if proxies == "":
@@ -130,8 +179,8 @@ def updateConsoleTitle(carted,checkedOut, SITE):
           newCarted = int(carted) + 1
   
           checked = title.split('Checked Out: ')[1].split(' |')[0]
-          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,SITE.title(),newCarted,checked))
-        except:
+          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(CONFIG.VERSION(),SITE.title(),newCarted,checked))
+        except Exception as e:
           pass
     if checkedOut == True:
         try:
@@ -140,8 +189,8 @@ def updateConsoleTitle(carted,checkedOut, SITE):
           newChecked = int(checked) + 1
   
           carted = title.split('Carted: ')[1].split(' |')[0]
-          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION,SITE.title(),carted,newChecked))
-        except:
+          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(CONFIG.VERSION(),SITE.title(),carted,newChecked))
+        except Exception as e:
           pass
 
 def loadCookie(SITE):

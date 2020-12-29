@@ -1,31 +1,39 @@
-20:44:56,753 root ERROR 'NoneType' object is not iterable
-20:44:58,776 root ERROR 'NoneType' object is not iterable
-20:45:00,650 root ERROR 'NoneType' object is not iterable
-23:01:50,95 root ERROR Orchestrate() -> GET -> HTTPSConnectionPool(host='www.nakedcph.com', port=443): Max retries exceeded with url: /cdn-cgi/challenge-platform/h/g/orchestrate/jsch/v1 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
-23:07:55,959 root ERROR hCaptchaPhaseOne() -> POST -> HTTPSConnectionPool(host='www.nakedcph.com', port=443): Max retries exceeded with url: /cdn-cgi/challenge-platform/h/g/generate/ov1/0.6050353004980364:1607900556:93bae1b9352c00448eebe4cb78c56ccc36bafd042009fe3dda9e2317af065aaf/6013576b5c9b0732/4be82844ccc6219 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-23:10:13,746 root ERROR HTTPSConnectionPool(host='www.nakedcph.com', port=443): Max retries exceeded with url: /en/product/9984/jordan-brand-air-jordan-11-retro-ps-378039-011 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:23:23,318 root ERROR HTTPSConnectionPool(host='payments.braintree-api.com', port=443): Max retries exceeded with url: /graphql (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
-16:24:39,958 root ERROR ('Connection broken: IncompleteRead(4113 bytes read, 1162 more expected)', IncompleteRead(4113 bytes read, 1162 more expected))
-16:25:23,40 root ERROR 'continueUrl'
-16:25:23,56 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
-16:25:32,902 root ERROR 'continueUrl'
-16:25:32,918 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
-16:25:38,429 root ERROR HTTPSConnectionPool(host='www.snipes.com', port=443): Max retries exceeded with url: /p/00013801881213.html?dwvar_00013801881213_color=a&format=ajax (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
-16:25:42,723 root ERROR 'continueUrl'
-16:25:42,738 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
-16:28:23,577 root ERROR HTTPSConnectionPool(host='en.titoloshop.com', port=443): Max retries exceeded with url: /wmns-air-force-1-07-315115-154 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:31:00,771 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:31:01,788 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /cgi-bin/webscr?cmd=_express-checkout&token=EC-3CH697698C470390P (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:31:42,650 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:31:42,650 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:33:51,912 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:34:11,80 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:34:38,914 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /men/shoes/nike-air-jordan-1-mid-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:34:42,437 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
-16:34:47,495 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:34:54,953 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /on/demandware.store/Sites-awlab-en-Site/en_DE/Cart-SubmitForm?format=ajax (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:34:59,15 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:35:53,493 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:37:14,256 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /-/-/-/-AW_846ZJLJA_8042756_10.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:37:21,940 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /on/demandware.store/Sites-awlab-en-Site/en_DE/Cart-SubmitForm?format=ajax (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-16:39:26,194 root ERROR HTTPSConnectionPool(host='en.aw-lab.com', port=443): Max retries exceeded with url: /men/shoes-AW_100BAXBAXA.html?cgid=men_shoes&dwvar_AW__100BAXBAXA_color=8019458 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+19:11:14,977 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,21/4143196614 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
+19:11:33,658 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/64,21/4143196614 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
+19:22:16,62 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/79,21/4143196614 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
+19:22:22,306 root ERROR Invalid return character or leading space in header: content-type
+19:22:23,319 root ERROR Invalid return character or leading space in header: content-type
+19:22:24,329 root ERROR Invalid return character or leading space in header: content-type
+19:22:25,343 root ERROR Invalid return character or leading space in header: content-type
+19:22:26,360 root ERROR Invalid return character or leading space in header: content-type
+19:22:27,376 root ERROR Invalid return character or leading space in header: content-type
+19:22:28,391 root ERROR Invalid return character or leading space in header: content-type
+19:22:29,406 root ERROR Invalid return character or leading space in header: content-type
+19:22:30,437 root ERROR Invalid return character or leading space in header: content-type
+19:22:31,451 root ERROR Invalid return character or leading space in header: content-type
+19:22:32,462 root ERROR Invalid return character or leading space in header: content-type
+19:22:51,392 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,21/4143196614 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (destination unreachable)')))
+10:59:25,933 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,21/4143196614 (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+11:01:47,460 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,21/4082535423 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (destination unreachable)')))
+11:01:57,242 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,21/4082535423 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+11:03:26,966 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,21/4082535423 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+11:07:06,463 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /cgi-bin/webscr?cmd=_express-checkout&useraction=commit&token=EC-22N37625S3476725J&language=en_GB_offspring (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
+11:07:12,873 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/component/singlepagecheckout/setDeliveryMode (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+11:09:18,700 root ERROR 'NoneType' object is not subscriptable
+11:09:44,52 root ERROR 'NoneType' object is not subscriptable
+11:09:44,770 root ERROR 'NoneType' object is not subscriptable
+11:09:44,861 root ERROR 'NoneType' object is not subscriptable
+11:37:28,873 root ERROR 'NoneType' object is not subscriptable
+11:37:31,434 root ERROR 'NoneType' object is not subscriptable
+11:38:29,195 root ERROR 'NoneType' object is not subscriptable
+11:38:32,142 root ERROR 'NoneType' object is not subscriptable
+11:38:33,218 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /cgi-bin/webscr?cmd=_express-checkout&useraction=commit&token=EC-5J5047804K463414B&language=en_GB_office (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
+11:38:34,918 root ERROR 'NoneType' object is not subscriptable
+11:38:47,117 root ERROR 'NoneType' object is not subscriptable
+11:38:49,701 root ERROR 'NoneType' object is not subscriptable
+11:38:52,860 root ERROR 'NoneType' object is not subscriptable
+11:38:56,349 root ERROR 'NoneType' object is not subscriptable
+11:38:59,36 root ERROR 'NoneType' object is not subscriptable
+11:39:25,370 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/65,22/2360108448 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
+11:39:31,155 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/65,22/2360108448 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
+09:19:05,78 root ERROR HTTPSConnectionPool(host='www.sivasdescalzo.com', port=443): Max retries exceeded with url: /en/checkout/cart/add/uenc/aHR0cHM6Ly93d3cuc2l2YXNkZXNjYWx6by5jb20vZW4vYWlyLW1heC05NS1kYzkyMTUtMjAw/product/409502/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))

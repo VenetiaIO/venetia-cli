@@ -32,6 +32,7 @@ class SNIPES:
         
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
         self.countryCode = loadProfile(self.task["PROFILE"])["countryCode"]
+        self.logged = False
 
 
         self.collect()
@@ -91,8 +92,7 @@ class SNIPES:
         self.start = time.time()
 
         self.queryUrl = 'https://www.snipes.{}/p/{}.html?dwvar_{}_color=a&format=ajax'.format(self.snipesRegion,self.pid,self.pid)
-        # https://www.snipes.com/p/00013801882838.html?dwvar_00013801882838_color=a&format=ajax
-
+        # https://www.snipes./p/00013801882838.html?dwvar_00013801882838_color=a&format=ajax
         self.query()
 
 
@@ -131,7 +131,10 @@ class SNIPES:
             sizes = []
             for s in data["product"]["variationAttributes"][0]["values"]:
                 sizes.append(s["value"])
-                allSizes.append('{}:{}'.format(s["value"],s["variantId"]))
+                sizePid = s["variantId"]
+                if sizePid in ['None', None]:
+                    sizePid = s['pid']
+                allSizes.append('{}:{}'.format(s["value"],sizePid))
 
             if len(sizes) == 0:
                 logger.error(SITE,self.taskID,'Sizes Not Found')
@@ -215,8 +218,36 @@ class SNIPES:
 
 
     def login(self):
+        if self.logged == True:
+            self.addToCart()
         logger.prepare(SITE,self.taskID,'Logging in...')
+
+        try:
+            loginPage = self.session.get('https://www.snipes.{}/login'.format(self.snipesRegion))
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            time.sleep(int(self.task["DELAY"]))
+            self.login()
+
+        soup = BeautifulSoup(loginPage.text,"html.parser")
+        div = soup.find('div',{'data-cmp':'recommendations'})
+        # self.csrf = soup.find('input',{'name':'csrf_token'})['value']
+        try:
+            spans = div.find_all('span')
+            for s in spans:
+                if 'data-value' in str(s):
+                    self.s1 = s['data-id']
+                    self.s2 = s['data-value']
+        except Exception as e:
+            log.info(e)
+            pass
+        
+
+
         payload = {
+            self.s1:self.s2,
             'dwfrm_profile_customer_email': self.task["ACCOUNT EMAIL"],
             'dwfrm_profile_login_password': self.task["ACCOUNT PASSWORD"],
             'csrf_token': self.csrf
@@ -234,13 +265,14 @@ class SNIPES:
             'x-requested-with': 'XMLHttpRequest'
         }
         try:
-            login = self.session.post('https://www.snipes.{}/authentication?rurl=2&format=ajax'.format(self.snipesRegion),data=payload)
+            login = self.session.post('https://www.snipes.{}/authentication?rurl=1&format=ajax'.format(self.snipesRegion),data=payload)
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
             self.login()
+
 
 
 
@@ -256,6 +288,7 @@ class SNIPES:
                 self.login()
 
             logger.warning(SITE,self.taskID,'Successfully Logged in.')
+            self.logged = True
             
             
             self.addToCart()
@@ -372,6 +405,9 @@ class SNIPES:
             updateConsoleTitle(True,False,SITE)
             logger.warning(SITE,self.taskID,'Successfully Carted')
             self.shipping()
+
+        # if cart.status_code == 410:
+            # print(cart.text)
         
         if cart.status_code == 403:
             if 'px-captcha' in cart.text:
@@ -440,10 +476,31 @@ class SNIPES:
     def shipping(self):
         logger.prepare(SITE,self.taskID,'Submitting shipping...')
         profile = loadProfile(self.task["PROFILE"])
+
+        try:
+            getShiping = self.session.get('https://www.snipes.{}/Checkout'.format(self.snipesRegion))
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            time.sleep(int(self.task["DELAY"]))
+            self.shipping()
+        
+        try:
+            soup = BeautifulSoup(getShiping.text,'html.parser')
+            self.csrf = soup.find('input',{'name':'csrf_token'})['value']
+        except:
+            pass
+
+
+        if self.snipesRegion == 'com':
+            self.methodId = 'home-delivery'
+        else:
+            self.methodId = 'home-delivery_{}'.format(profile['countryCode'].lower())
         payload = {
             'originalShipmentUUID': self.shipmentUUID,
             'shipmentUUID': self.shipmentUUID,
-            'dwfrm_shipping_shippingAddress_shippingMethodID': 'home-delivery',
+            'dwfrm_shipping_shippingAddress_shippingMethodID': self.methodId,
             'address-selector': 'new',
             'dwfrm_shipping_shippingAddress_addressFields_title': 'Herr',
             'dwfrm_shipping_shippingAddress_addressFields_firstName': profile['firstName'],
@@ -677,7 +734,7 @@ class SNIPES:
 
             self.end = time.time() - self.start
             updateConsoleTitle(False,True,SITE)
-            logger.alert(SITE,self.taskID,'Order Placed ({}). Check your email to complete bank transfer.'.format(response["orderID"]))
+            logger.alert(SITE,self.taskID,'Order Placed ({}). Check your email to plete bank transfer.'.format(response["orderID"]))
 
 
             sendNotification(SITE,self.productTitle)
@@ -919,16 +976,21 @@ class SNIPES:
             time.sleep(int(self.task["DELAY"]))
             self.placeOrder_pp()
 
+
         if place.status_code in [200,302]:
             try:
                 response = place.json()
                 cUrl = response["continueUrl"]
             except Exception as e:
-                logger.error(SITE,self.taskID,'Failed to place order. Retrying...')
                 log.info(e)
                 log.info(str(response))
                 time.sleep(int(self.task["DELAY"]))
-                self.addToCart()
+                if place.json()['cartError'] == True:
+                    logger.error(SITE,self.taskID,'Failed to place order (Cart Error) Redirect=> {}. Retrying...'.format(place.json()['redirectUrl']))
+                    self.query()
+                else:
+                    logger.error(SITE,self.taskID,'Failed to place order. Retrying...')
+                    self.addToCart()
             
             if "paypal" in cUrl:
                 logger.warning(SITE,self.taskID,'Order placed')
@@ -962,7 +1024,6 @@ class SNIPES:
             
             else:
                 logger.error(SITE,self.taskID,'Failed to place order (Cart may have duplicates). Retrying...')
-                log.info(e)
                 log.info(str(response))
                 time.sleep(int(self.task["DELAY"]))
                 self.placeOrder_pp()

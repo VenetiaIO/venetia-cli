@@ -15,7 +15,7 @@ def get_task(SITE,taskID):
     x = datetime.datetime.now()
     x = f'{x.strftime("%X")}.{x.strftime("%f")}'
     #thread = threading.currentThread().getName()
-    status = '[{}{}{}{}{}{}'.format(Fore.CYAN + Style.BRIGHT + x, Fore.WHITE + '][ ', Fore.YELLOW + taskID, Fore.WHITE + ' ][ ',Fore.WHITE + SITE.title(), Fore.WHITE + ' ]')
+    status = '[{}{}{}{}{:<12}{}'.format(Fore.CYAN + Style.BRIGHT + x, Fore.WHITE + '][ ', Fore.YELLOW + taskID, Fore.WHITE + ' ][ ',Fore.WHITE + SITE.title(), Fore.WHITE + ' ]')
     return status
 
 
@@ -90,6 +90,33 @@ class logger:
         try:
             #sys.stdout.write('{} {}'.format(get_task(site,taskID), f'{message}\n'))
             sys.stdout.write('{} {}'.format(get_task(site,taskID), message + '\n'))
+        finally:
+            lock.release()
+
+    @staticmethod
+    def other_grey(message):
+        lock.acquire()
+        try:
+            #sys.stdout.write('{} {}'.format(get_task(site,taskID), f'{message}\n'))
+            sys.stdout.write(Fore.WHITE + Style.DIM + message + '\n')
+        finally:
+            lock.release()
+
+    @staticmethod
+    def other_green(message):
+        lock.acquire()
+        try:
+            #sys.stdout.write('{} {}'.format(get_task(site,taskID), f'{message}\n'))
+            sys.stdout.write(Fore.GREEN + Style.NORMAL + message + '\n')
+        finally:
+            lock.release()
+
+    @staticmethod
+    def other_yellow(message, other):
+        lock.acquire()
+        try:
+            #sys.stdout.write('{} {}'.format(get_task(site,taskID), f'{message}\n'))
+            sys.stdout.write('{}{} \n'.format(Fore.YELLOW + Style.DIM + message, Fore.GREEN + Style.DIM + str(other)))
         finally:
             lock.release()
 
