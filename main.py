@@ -55,18 +55,20 @@ except:
 
 
 
-
-
 def get_time():
     x = datetime.datetime.now()
     x = f'{x.strftime("%X")}.{x.strftime("%f")}'
     return x
 
 def taskCount():
-    with open('./data/tasks.csv','r') as csvFile:
-        csv_reader = csv.DictReader(csvFile)
-        length = len(list(csv_reader))
-        return length
+    total = 0
+    for k in sites.keys():
+        with open(f'./{k.lower()}/tasks.csv','r') as csvFile:
+            csv_reader = csv.DictReader(csvFile)
+            total = total + len(list(csv_reader))
+    
+    return total
+
 
 def clearTokens():
     data = {}
@@ -78,12 +80,12 @@ def clearTokens():
 
 def checkTasks(site):
     tasks = []
-    with open('./data/tasks.csv','r') as csvFile:
+    with open(f'./{site.lower()}/tasks.csv','r') as csvFile:
         csv_reader = csv.DictReader(csvFile)
         for r in csv_reader:
-            if site.lower() in r["SITE"].lower():
+            if len(r['PRODUCT']) > 1:
                 tasks.append(1)
-
+        
     if len(tasks) > 0:
         return True
     elif len(tasks) == 0:
@@ -109,7 +111,6 @@ def checkUpdate():
 
 class Menu:
     def __init__(self):
-        clearTokens()
         checkUpdate()
         threading.Thread(target=QT,daemon=True).start()
 
@@ -131,12 +132,12 @@ class Menu:
 
 
     def siteSelectFunc(self, availableSites, siteSelection):
-        key_chosen, value_chosen = sorted(availableSites.items())[int(siteSelection) -1 ]
-        with open('./data/tasks.csv','r') as csvFile:
-            csv_reader = csv.DictReader(csvFile)
-            i = 1
-            for row in csv_reader:
-                if row["SITE"].lower() == key_chosen.lower():
+        try:
+            key_chosen, value_chosen = sorted(availableSites.items())[int(siteSelection) -1 ]
+            with open('./{}/tasks.csv'.format(key_chosen.lower()),'r') as csvFile:
+                csv_reader = csv.DictReader(csvFile)
+                i = 1
+                for row in csv_reader:
                     if row["PRODUCT"] != "":
                         try:
                             try:
@@ -146,7 +147,7 @@ class Menu:
                             self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
                         except:
                             pass
-                        
+    
                         if len(str(i)) == 1:
                             taskName = f'Task 000{i}'
                         if len(str(i)) == 2:
@@ -156,10 +157,12 @@ class Menu:
                         if len(str(i)) == 4:
                             taskName = f'Task {i}'
                         i = i + 1
+                        row['PROXIES'] = 'proxies'
                         threading.Thread(target=value_chosen,args=(row,taskName)).start()
+        except:
+            pass
+
         
-
-
 
     def menu(self):
         headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
@@ -198,28 +201,33 @@ class Menu:
             except:
                 pass
 
-            with open('./data/tasks.csv','r') as csvFile:
-                csv_reader = csv.DictReader(csvFile)
-                i = 1
-                for row in csv_reader:
-                    if [row["SITE"].upper() in sites.keys()]:
-                        if sites.get(row["SITE"].upper()) != None:
-                            if row["PRODUCT"] != "":
-                                try:
-                                    self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format(row["SITE"].title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
-                                except:
-                                    pass
-                            
-                                if len(str(i)) == 1:
-                                    taskName = f'Task 000{i}'
-                                if len(str(i)) == 2:
-                                    taskName = f'Task 00{i}'
-                                if len(str(i)) == 3:
-                                    taskName = f'Task 0{i}'
-                                if len(str(i)) == 4:
-                                    taskName = f'Task {i}'
-                                i = i + 1
-                                threading.Thread(target=sites.get(row["SITE"].upper()),args=(row,taskName)).start()
+            total = 0
+            for k in sites.keys():
+                with open(f'./{k.lower()}/tasks.csv','r') as csvFile:
+                    csv_reader = csv.DictReader(csvFile)
+                    # total =  total + sum(1 for row in csv_reader)
+                    i = 1
+                    for row in csv_reader:
+                        if row["PRODUCT"] != "":
+                            try:
+                                self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format(k.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
+                            except:
+                                pass
+                        
+                            if len(str(i)) == 1:
+                                taskName = f'Task 000{i}'
+                            if len(str(i)) == 2:
+                                taskName = f'Task 00{i}'
+                            if len(str(i)) == 3:
+                                taskName = f'Task 0{i}'
+                            if len(str(i)) == 4:
+                                taskName = f'Task {i}'
+                            i = i + 1
+                            row['PROXIES'] = 'proxies'
+                            threading.Thread(target=sites.get(k.upper()),args=(row,taskName)).start()
+            
+            # if total == 0:
+                # self.menu()
  
         elif option == 2:
             number = 1
@@ -233,8 +241,7 @@ class Menu:
                 number = number + 1
             
 
-            
-
+        
             menuNum = number
             logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored(menuNum,'red', attrs=["bold"]), colored('RETURN TO MAIN Menu','red', attrs=["bold"])))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))

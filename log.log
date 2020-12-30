@@ -37,3 +37,91 @@
 11:39:25,370 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/65,22/2360108448 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
 11:39:31,155 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/65,22/2360108448 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
 09:19:05,78 root ERROR HTTPSConnectionPool(host='www.sivasdescalzo.com', port=443): Max retries exceeded with url: /en/checkout/cart/add/uenc/aHR0cHM6Ly93d3cuc2l2YXNkZXNjYWx6by5jb20vZW4vYWlyLW1heC05NS1kYzkyMTUtMjAw/product/409502/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+13:16:53,893 root ERROR 'NoneType' object has no attribute 'find'
+13:16:57,588 root ERROR 'NoneType' object has no attribute 'find'
+13:16:59,220 root ERROR 'NoneType' object has no attribute 'find'
+13:16:59,748 root ERROR 'NoneType' object has no attribute 'find'
+13:17:00,800 root ERROR 'NoneType' object has no attribute 'find'
+13:17:01,630 root ERROR 'NoneType' object has no attribute 'find'
+13:17:02,651 root ERROR 'NoneType' object has no attribute 'find'
+13:17:03,347 root ERROR 'NoneType' object has no attribute 'find'
+13:17:05,878 root ERROR 'NoneType' object has no attribute 'find'
+13:45:32,272 root ERROR HTTPSConnectionPool(host='chmielna20.pl', port=443): Max retries exceeded with url: /en/buty-air-jordan-6-retro-q54-cz4152-100.html (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
+13:45:57,135 root ERROR 'NoneType' object has no attribute 'find'
+13:45:58,162 root ERROR 'NoneType' object has no attribute 'find'
+13:45:58,686 root ERROR 'NoneType' object has no attribute 'find'
+13:45:59,849 root ERROR 'NoneType' object has no attribute 'find'
+13:46:00,413 root ERROR 'NoneType' object has no attribute 'find'
+13:46:01,446 root ERROR 'NoneType' object has no attribute 'find'
+13:46:01,542 root ERROR 'NoneType' object has no attribute 'find'
+13:46:02,37 root ERROR 'NoneType' object has no attribute 'find'
+13:46:02,994 root ERROR 'NoneType' object has no attribute 'find'
+13:46:03,159 root ERROR 'NoneType' object has no attribute 'find'
+13:46:03,266 root ERROR 'NoneType' object has no attribute 'find'
+13:46:03,496 root ERROR HTTPSConnectionPool(host='chmielna20.pl', port=443): Max retries exceeded with url: /en/buty-air-jordan-6-retro-q54-cz4152-100.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+13:46:04,593 root ERROR 'NoneType' object has no attribute 'find'
+13:46:04,942 root ERROR 'NoneType' object has no attribute 'find'
+13:46:05,44 root ERROR 'NoneType' object has no attribute 'find'
+15:34:19,620 root ERROR 'NoneType' object is not subscriptable
+15:34:19,805 root ERROR 'NoneType' object is not subscriptable
+15:34:20,117 root ERROR 'NoneType' object is not subscriptable
+15:34:20,319 root ERROR 'NoneType' object is not subscriptable
+15:34:21,882 root ERROR 'NoneType' object is not subscriptable
+15:34:22,199 root ERROR 'NoneType' object is not subscriptable
+15:34:22,814 root ERROR 'NoneType' object is not subscriptable
+15:34:23,171 root ERROR 'NoneType' object is not subscriptable
+15:34:23,365 root ERROR 'NoneType' object is not subscriptable
+15:34:23,602 root ERROR 'NoneType' object is not subscriptable
+15:34:24,213 root ERROR 'NoneType' object is not subscriptable
+15:34:24,801 root ERROR 'NoneType' object is not subscriptable
+15:34:24,845 root ERROR 'NoneType' object is not subscriptable
+15:34:25,120 root ERROR 'NoneType' object is not subscriptable
+15:34:25,637 root ERROR 'NoneType' object is not subscriptable
+15:34:26,447 root ERROR 'NoneType' object is not subscriptable
+15:34:26,491 root ERROR 'NoneType' object is not subscriptable
+15:34:26,535 root ERROR 'NoneType' object is not subscriptable
+15:34:26,994 root ERROR 'NoneType' object is not subscriptable
+15:34:28,435 root ERROR 'NoneType' object is not subscriptable
+15:34:28,479 root ERROR 'NoneType' object is not subscriptable
+15:34:28,528 root ERROR 'NoneType' object is not subscriptable
+15:34:28,718 root ERROR 'NoneType' object is not subscriptable
+15:34:29,786 root ERROR 'NoneType' object is not subscriptable
+15:34:29,899 root ERROR 'NoneType' object is not subscriptable
+15:34:29,981 root ERROR 'NoneType' object is not subscriptable
+15:34:30,212 root ERROR 'NoneType' object is not subscriptable
+15:34:31,148 root ERROR 'NoneType' object is not subscriptable
+15:34:31,302 root ERROR 'NoneType' object is not subscriptable
+15:34:31,447 root ERROR 'NoneType' object is not subscriptable
+15:34:31,876 root ERROR 'NoneType' object is not subscriptable
+15:34:32,517 root ERROR 'NoneType' object is not subscriptable
+15:34:32,699 root ERROR 'NoneType' object is not subscriptable
+15:34:32,894 root ERROR 'NoneType' object is not subscriptable
+15:34:33,513 root ERROR 'NoneType' object is not subscriptable
+15:34:34,927 root ERROR 'NoneType' object is not iterable
+15:34:34,988 root ERROR 'NoneType' object is not iterable
+15:34:35,54 root ERROR 'NoneType' object is not iterable
+15:34:35,277 root ERROR 'NoneType' object is not iterable
+15:34:36,391 root ERROR 'NoneType' object is not iterable
+15:34:36,446 root ERROR 'NoneType' object is not iterable
+15:34:36,752 root ERROR 'NoneType' object is not iterable
+15:34:36,968 root ERROR 'NoneType' object is not iterable
+15:34:37,860 root ERROR 'NoneType' object is not iterable
+15:34:37,914 root ERROR 'NoneType' object is not iterable
+15:34:38,219 root ERROR 'NoneType' object is not iterable
+15:34:38,452 root ERROR 'NoneType' object is not iterable
+15:34:39,266 root ERROR 'NoneType' object is not iterable
+15:34:39,397 root ERROR 'NoneType' object is not iterable
+15:34:39,705 root ERROR 'NoneType' object is not iterable
+15:34:39,816 root ERROR 'NoneType' object is not iterable
+15:34:40,732 root ERROR 'NoneType' object is not iterable
+15:34:40,812 root ERROR 'NoneType' object is not iterable
+15:34:41,397 root ERROR 'NoneType' object is not iterable
+15:34:41,454 root ERROR 'NoneType' object is not iterable
+15:34:42,184 root ERROR 'NoneType' object is not iterable
+15:34:42,326 root ERROR 'NoneType' object is not iterable
+15:35:06,698 root ERROR 'NoneType' object is not iterable
+15:35:06,764 root ERROR 'NoneType' object is not iterable
+15:35:08,376 root ERROR 'NoneType' object is not iterable
+15:35:08,454 root ERROR 'NoneType' object is not iterable
+15:35:09,835 root ERROR 'NoneType' object is not iterable
+15:35:09,898 root ERROR 'NoneType' object is not iterable

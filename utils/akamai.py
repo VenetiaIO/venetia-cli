@@ -10,7 +10,7 @@ class AKAMAI:
         if session.proxies == None: params = {}
         
         # https://akamai.invincible.services/api/v1/abck/footasylum
-        r = requests.get('http://127.0.0.1:5000/api/v1/abck/footasylum',headers=headers,params=params)
+        r = requests.get('https://akamai.invincible.services/api/v1/abck/footasylum',headers=headers,params=params)
         if r.status_code == 200:
             logger.success('FOOTASYLUM',taskID,'Successfully Generated Akamai Cookies')
             return r.json()

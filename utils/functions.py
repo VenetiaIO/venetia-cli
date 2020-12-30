@@ -127,7 +127,7 @@ def loadProxy(proxies,taskID, SITE):
         return None
     elif proxies != "":
         try:
-            with open(f'./data/{proxies}.txt', 'r') as proxyIn:
+            with open(f'./data/{SITE.lower()}/{proxies}.txt', 'r') as proxyIn:
                 try:
                     proxyInput = proxyIn.read().splitlines()
                 except:
