@@ -3,18 +3,30 @@ import json
 import utils.config as CONFIG
 
 def execute():
-    #Check tasks.csv
+
+    #check site folders
     try:
-        f = open('./data/tasks.csv')
-        f.readlines()
-    except IOError:
-        try:
-            os.mkdir('data')
-        except:
-            pass
-        print('Creating tasks.csv')
-        with open('./data/tasks.csv','w') as tasks:
-            tasks.write('SITE,PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,PROXIES,ACCOUNT EMAIL,ACCOUNT PASSWORD')
+        for k in CONFIG.sites.keys():
+            try:
+                f = open('./{}/tasks.csv'.format(k.lower()))
+                f.readlines()
+            except IOError:
+                try:
+                    os.mkdir('{}'.format(k.lower()))
+                except:
+                    pass
+                print("Creating files for {}".format(k.lower()))
+
+                open('./{}/proxies.txt'.format(k.lower()),'w')
+                if k.lower() in ['holypop','naked','footasylum','snipes','wch','prodirect']:
+                    # open('./data/{}/accounts.txt'.format(k.lower()),'w')
+                    task = 'PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,ACCOUNT EMAIL,ACCOUNT PASSWORD'
+                else:
+                    task = 'PRODUCT,SIZE,DELAY,PROFILE,PAYMENT'
+                with open('./{}/tasks.csv'.format(k.lower()),'w') as tasks:
+                    tasks.write(task)
+    except:
+        pass
 
     #check checkouts.json
     try:

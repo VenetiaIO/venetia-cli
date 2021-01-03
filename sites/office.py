@@ -408,7 +408,7 @@ class OFFICE:
             logger.warning(SITE,self.taskID,'Successfully got paypal link')
             updateConsoleTitle(False,True,SITE)
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
-            url = storeCookies(paymentPost.url,self.session)
+            url = storeCookies(paymentPost.url,self.session, self.productTitle, self.productImage, self.productPrice)
 
             sendNotification(SITE,self.productTitle)
             try:

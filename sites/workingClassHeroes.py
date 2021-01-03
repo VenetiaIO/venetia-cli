@@ -254,7 +254,7 @@ class WCH:
 
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
             updateConsoleTitle(False,True,SITE)
-            url = storeCookies(data["d"]["errorMsg"],self.session)               
+            url = storeCookies(data["d"]["errorMsg"],self.session, self.productTitle, self.productImage, self.productPrice)               
             sendNotification(SITE,productData["Name"])
 
 

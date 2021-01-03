@@ -18,13 +18,14 @@ from utils.webhook import discord
 from utils.log import log
 from utils.captcha import captcha
 from utils.akamai import AKAMAI
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle, encodeURIComponent)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle, encodeURIComponent, scraper)
 
 class FOOTASYLUM:
     def __init__(self,task,taskName):
         self.task = task
-        self.session = requests.session()
+        # self.session = requests.session()
         self.taskID = taskName
+        self.session = scraper()
 
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
 
@@ -32,13 +33,13 @@ class FOOTASYLUM:
         self.collect()
 
     def collect(self):
-        cookies = AKAMAI.footasylum(self.session, self.taskID)
-        while cookies["_abck"] == "error":
-            cookies = AKAMAI.footasylum(self.session, self.taskID)
-
-
-        cookie_obj = requests.cookies.create_cookie(domain=f'.footasylum.com',name='_abck',value=cookies['_abck'])
-        self.session.cookies.set_cookie(cookie_obj)
+        # cookies = AKAMAI.footasylum(self.session, self.taskID)
+        # while cookies["_abck"] == "error":
+            # cookies = AKAMAI.footasylum(self.session, self.taskID)
+# 
+# 
+        # cookie_obj = requests.cookies.create_cookie(domain=f'.footasylum.com',name='_abck',value='9A0F5ABED3E05EF1B97621C1ABAC3F5E~0~YAAQHux7XD3GlrN2AQAADLMrxAU8KDJmNhLbKclnSr0RN/MEGcoNjpeW/dfPghn9xJ2w2wFOcvXCwdobJri75aA5WPVmWIvM0jri8yOTorxoKqbWQpO17+QUdzcVvJ9QX+Qjcm3A9+2yggb8ByWzNXQZw3+3CbH02Yw6NzeEbNZuyQgr1xT9DKEHhSijkxtDZUDe+LwEvwC1oiifHBMLBcrS3/IiWEvHvI4uigRWcpx1S7TgvGDGrPeLTpyItINZBLzJLO9y9DfK8oHI50VpwKRWW7/S5FODIdRVhqqD/SRrCdfQfW8Poo7a44B0nURyRP8ErilLkJsfaJm6Md/TVbIsD15G7h8oXwI=~-1~-1~-1')
+        # self.session.cookies.set_cookie(cookie_obj)
 
         logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
@@ -145,7 +146,7 @@ class FOOTASYLUM:
         logger.prepare(SITE,self.taskID,'Logging In...')
         try:
             GETlogin = self.session.get('https://www.footasylum.com/page/login/',headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'x-xss-protection':'0'
             })
@@ -155,6 +156,7 @@ class FOOTASYLUM:
             time.sleep(int(self.task["DELAY"]))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.login()
+        
         if GETlogin.status_code == 200:
             try:
                 soup = BeautifulSoup(GETlogin.text,"html.parser")
@@ -235,7 +237,7 @@ class FOOTASYLUM:
         }
         try:
             initCart = self.session.get('https://www.footasylum.com/page/xt_orderform_additem/',timeout=20,params=params,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': '*/*',
                 'referer':'{}?sessionid={}'.format(self.task["PRODUCT"],self.sessionId),
                 'authority': 'www.footasylum.com',
@@ -262,11 +264,11 @@ class FOOTASYLUM:
         logger.prepare(SITE,self.taskID,'Initializing checkout...')
         try:
             initCheckout = self.session.post('https://www.footasylum.com/page/nw-api/initiatecheckout/?sessionid={}'.format(self.sessionId),headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': 'text/plain, */*; q=0.01',
                 'origin':'https://www.footasylum.com',
                 'x-requested-with': 'XMLHttpRequest',
-                'referer': 'https://www.footasylum.com/page/basket/'
+                'referer': 'https://www.footasylum.com/page/basket/' + self.sessionId
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -292,11 +294,11 @@ class FOOTASYLUM:
                     "orderNum":self.checkoutSessionId,
                     "refresh":True,
                     "medium":"web",
-                    "apiKey":"lGJjE+ccd0SiBdu3I6yByRp3/yY8uVIRFa9afLx+2YSrSwkWDfxq0YKUsh96/tP84CZO4phvoR+0y9wtm9Dh5w==",
+                    "apiKey":"lGJjE ccd0SiBdu3I6yByRp3/yY8uVIRFa9afLx 2YSrSwkWDfxq0YKUsh96/tP84CZO4phvoR 0y9wtm9Dh5w==",
                     "checkout_client":"secure"
                 }
                 paymentGateway = self.session.get('https://paymentgateway.checkout.footasylum.net/basket',params=p,headers={
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                     'accept': 'application/json',
                     'authority': 'paymentgateway.checkout.footasylum.net',
                 })
@@ -328,7 +330,7 @@ class FOOTASYLUM:
         try:
             payload = {"fascia_id":self.fascia_id,"channel_id":self.channelId,"currency_code":self.currency,"customer":{"customer_id":self.customerId,"sessionID":self.parasparSessionId,"request_address":1,"request_basket":1}}
             details = self.session.post('https://r9udv3ar7g.execute-api.eu-west-2.amazonaws.com/prod/customer/details?checkout_client=secure',json=payload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': 'application/json',
                 'authority': 'r9udv3ar7g.execute-api.eu-west-2.amazonaws.com',
                 'origin':'https://secure.footasylum.com',
@@ -404,7 +406,7 @@ class FOOTASYLUM:
         }
         try:
             address = self.session.post('https://r9udv3ar7g.execute-api.eu-west-2.amazonaws.com/prod/basket/basketaddaddress?checkout_client=secure',json=payload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': 'application/json',
                 'authority': 'r9udv3ar7g.execute-api.eu-west-2.amazonaws.com',
                 'origin':'https://secure.footasylum.com',
@@ -424,12 +426,12 @@ class FOOTASYLUM:
         if address.status_code == 200:
             logger.warning(SITE,self.taskID,'Submitted address')
             self.productPrice = '{} {}'.format(address.json()["basket"]["total"],address.json()["basket"]["currency_code"])
-            params = {"medium": "web","apiKey": "lGJjE+ccd0SiBdu3I6yByRp3/yY8uVIRFa9afLx+2YSrSwkWDfxq0YKUsh96/tP84CZO4phvoR+0y9wtm9Dh5w==","checkout_client": "secure"}
+            params = {"medium": "web","apiKey": "lGJjE ccd0SiBdu3I6yByRp3/yY8uVIRFa9afLx 2YSrSwkWDfxq0YKUsh96/tP84CZO4phvoR 0y9wtm9Dh5w==","checkout_client": "secure"}
             payload = {"basketId":self.pasparBasketId,"type":"shipping","shippingTotal":self.shippingTotal,"shippingCode":self.shippingMethodCode,"shippingCarrier":self.shippingMethodName}
             logger.prepare(SITE,self.taskID,'Submitting shipping method...')
             try:
                 method = self.session.put('https://paymentgateway.checkout.footasylum.net/basket/shipping',params=params,json=payload,headers={
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                     'accept': 'application/json',
                     'authority': 'paymentgateway.checkout.footasylum.net',
                     'origin':'https://secure.footasylum.com',
@@ -483,12 +485,12 @@ class FOOTASYLUM:
                     "authState":self.authState
                 }
 
-                params = {"medium": "web","apiKey": "lGJjE+ccd0SiBdu3I6yByRp3/yY8uVIRFa9afLx+2YSrSwkWDfxq0YKUsh96/tP84CZO4phvoR+0y9wtm9Dh5w==","checkout_client": "secure"}
+                params = {"medium": "web","apiKey": "lGJjE ccd0SiBdu3I6yByRp3/yY8uVIRFa9afLx 2YSrSwkWDfxq0YKUsh96/tP84CZO4phvoR 0y9wtm9Dh5w==","checkout_client": "secure"}
                 logger.prepare(SITE,self.taskID,'Updating customer data...')
 
                 try:
                     customer = self.session.put('https://paymentgateway.checkout.footasylum.net/customer',params=params,json=payload,headers={
-                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                         'accept': 'application/json',
                         'authority': 'paymentgateway.checkout.footasylum.net',
                         'origin':'https://secure.footasylum.com',
@@ -541,14 +543,14 @@ class FOOTASYLUM:
         }
         params = {
             'medium': 'web',
-            'apiKey': 'lGJjE+ccd0SiBdu3I6yByRp3/yY8uVIRFa9afLx+2YSrSwkWDfxq0YKUsh96/tP84CZO4phvoR+0y9wtm9Dh5w==',
+            'apiKey': 'lGJjE ccd0SiBdu3I6yByRp3/yY8uVIRFa9afLx 2YSrSwkWDfxq0YKUsh96/tP84CZO4phvoR 0y9wtm9Dh5w==',
             'checkout_client': 'secure'
         }
         logger.prepare(SITE,self.taskID,'Creating checkout...')
 
         try:
             basketCheck = self.session.post('https://paymentgateway.checkout.footasylum.net/basket/check',params=params,json=payload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': 'application/json',
                 'authority': 'paymentgateway.checkout.footasylum.net',
                 'origin':'https://secure.footasylum.com',
@@ -587,7 +589,7 @@ class FOOTASYLUM:
         logger.prepare(SITE,self.taskID,'Getting payment token...')
         try:
             pt = self.session.post('https://paymentgateway.checkout.footasylum.net/paypal/payment-token',data={"basketId":self.pasparBasketId},headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': 'application/json',
                 'authority': 'paymentgateway.checkout.footasylum.net',
                 'origin':'https://secure.footasylum.com',
@@ -620,7 +622,7 @@ class FOOTASYLUM:
             'sec-fetch-dest': 'empty',
             'sec-fetch-mode': 'cors',
             'sec-fetch-site': 'same-origin',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
             'x-csrf-jwt': '__blank__',
             'x-requested-by': 'smart-payment-buttons',
             'x-requested-with': 'XMLHttpRequest',
@@ -649,7 +651,7 @@ class FOOTASYLUM:
             updateConsoleTitle(False,True,SITE)
  
 
-            url = storeCookies(paypalURL,self.session)
+            url = storeCookies(paypalURL,self.session, self.productTitle, self.productImage, self.productPrice)
 
             try:
                 discord.success(

@@ -566,7 +566,7 @@ class SVD:
             self.braintreePaypal()
 
         updateConsoleTitle(False,True,SITE)
-        url = storeCookies(checkoutUrl,self.session)
+        url = storeCookies(checkoutUrl,self.session, self.productTitle, self.productImage, self.productPrice)
         self.end = time.time() - self.start
         try:
             discord.success(

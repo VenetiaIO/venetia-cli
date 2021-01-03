@@ -385,7 +385,7 @@ class QUEENS:
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
                 updateConsoleTitle(False,True,SITE)
 
-                url = storeCookies(paypalOrder.json()["links"][1]["href"],self.session)
+                url = storeCookies(paypalOrder.json()["links"][1]["href"],self.session, self.productTitle, self.productImage, self.productPrice)
                 try:
                     discord.success(
                         webhook=loadSettings()["webhook"],

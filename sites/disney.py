@@ -473,7 +473,7 @@ class DISNEY:
                 self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
                 updateConsoleTitle(False,True,SITE)
-                url = storeCookies(pp.url,self.session)
+                url = storeCookies(pp.url,self.session, self.productTitle, self.productImage, self.productPrice)
                 sendNotification(SITE,self.productTitle)
                 try:
                     discord.success(

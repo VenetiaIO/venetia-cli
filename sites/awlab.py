@@ -374,7 +374,7 @@ class AWLAB:
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
             ppURL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token={}&useraction=commit'.format(data["token"])
 
-            url = storeCookies(ppURL,self.session)
+            url = storeCookies(ppURL,self.session, self.productTitle, self.productImage, self.productPrice)
             updateConsoleTitle(False,True,SITE)
             sendNotification(SITE,self.productTitle)
             try:

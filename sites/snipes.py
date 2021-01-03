@@ -869,7 +869,7 @@ class SNIPES:
             self.end = time.time() - self.start
             updateConsoleTitle(False,True,SITE)
             logger.alert(SITE,self.taskID,'Sending card checkout to discord...'.format())
-            url = storeCookies( response['continueUrl'],self.session)
+            url = storeCookies( response['continueUrl'],self.session, self.productTitle, self.productImage, self.productPrice)
 
 
             sendNotification(SITE,self.productTitle)
@@ -998,7 +998,7 @@ class SNIPES:
                 updateConsoleTitle(False,True,SITE)
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
     
-                url = storeCookies(cUrl,self.session)
+                url = storeCookies(cUrl,self.session, self.productTitle, self.productImage, self.productPrice)
     
                 sendNotification(SITE,self.productTitle)
                 try:

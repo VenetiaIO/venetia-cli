@@ -344,7 +344,7 @@ class TITOLO:
             if "paypal" in getPaypal.url:
                 self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
-                url = storeCookies(getPaypal.url,self.session)
+                url = storeCookies(getPaypal.url,self.session, self.productTitle, self.productImage, self.productPrice)
                 updateConsoleTitle(False,True,SITE)
                 
                 sendNotification(SITE,self.productTitle)
@@ -495,7 +495,7 @@ class TITOLO:
                 self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending Card checkout to Discord!')
                 updateConsoleTitle(False,True,SITE)
-                url = storeCookies(submitCard.url,self.session)
+                url = storeCookies(submitCard.url,self.session, self.productTitle, self.productImage, self.productPrice)
     
                 try:
                     discord.success(

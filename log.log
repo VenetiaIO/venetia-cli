@@ -1,39 +1,5 @@
-19:11:14,977 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,21/4143196614 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
-19:11:33,658 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/64,21/4143196614 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
-19:22:16,62 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/79,21/4143196614 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
-19:22:22,306 root ERROR Invalid return character or leading space in header: content-type
-19:22:23,319 root ERROR Invalid return character or leading space in header: content-type
-19:22:24,329 root ERROR Invalid return character or leading space in header: content-type
-19:22:25,343 root ERROR Invalid return character or leading space in header: content-type
-19:22:26,360 root ERROR Invalid return character or leading space in header: content-type
-19:22:27,376 root ERROR Invalid return character or leading space in header: content-type
-19:22:28,391 root ERROR Invalid return character or leading space in header: content-type
-19:22:29,406 root ERROR Invalid return character or leading space in header: content-type
-19:22:30,437 root ERROR Invalid return character or leading space in header: content-type
-19:22:31,451 root ERROR Invalid return character or leading space in header: content-type
-19:22:32,462 root ERROR Invalid return character or leading space in header: content-type
-19:22:51,392 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,21/4143196614 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (destination unreachable)')))
-10:59:25,933 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,21/4143196614 (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
-11:01:47,460 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,21/4082535423 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (destination unreachable)')))
-11:01:57,242 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,21/4082535423 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-11:03:26,966 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,21/4082535423 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-11:07:06,463 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /cgi-bin/webscr?cmd=_express-checkout&useraction=commit&token=EC-22N37625S3476725J&language=en_GB_offspring (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
-11:07:12,873 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/component/singlepagecheckout/setDeliveryMode (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
-11:09:18,700 root ERROR 'NoneType' object is not subscriptable
-11:09:44,52 root ERROR 'NoneType' object is not subscriptable
-11:09:44,770 root ERROR 'NoneType' object is not subscriptable
-11:09:44,861 root ERROR 'NoneType' object is not subscriptable
-11:37:28,873 root ERROR 'NoneType' object is not subscriptable
-11:37:31,434 root ERROR 'NoneType' object is not subscriptable
-11:38:29,195 root ERROR 'NoneType' object is not subscriptable
-11:38:32,142 root ERROR 'NoneType' object is not subscriptable
-11:38:33,218 root ERROR HTTPSConnectionPool(host='www.paypal.com', port=443): Max retries exceeded with url: /cgi-bin/webscr?cmd=_express-checkout&useraction=commit&token=EC-5J5047804K463414B&language=en_GB_office (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
-11:38:34,918 root ERROR 'NoneType' object is not subscriptable
-11:38:47,117 root ERROR 'NoneType' object is not subscriptable
-11:38:49,701 root ERROR 'NoneType' object is not subscriptable
-11:38:52,860 root ERROR 'NoneType' object is not subscriptable
-11:38:56,349 root ERROR 'NoneType' object is not subscriptable
-11:38:59,36 root ERROR 'NoneType' object is not subscriptable
-11:39:25,370 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/65,22/2360108448 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
-11:39:31,155 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/65,22/2360108448 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
-09:19:05,78 root ERROR HTTPSConnectionPool(host='www.sivasdescalzo.com', port=443): Max retries exceeded with url: /en/checkout/cart/add/uenc/aHR0cHM6Ly93d3cuc2l2YXNkZXNjYWx6by5jb20vZW4vYWlyLW1heC05NS1kYzkyMTUtMjAw/product/409502/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+18:05:28,69 root ERROR Expecting value: line 2 column 1 (char 1)
+18:05:29,496 root ERROR Expecting value: line 2 column 1 (char 1)
+18:05:30,793 root ERROR 'continueUrl'
+18:05:30,794 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'errorStage': {'stage': 'payment', 'step': 'paymentInstrument'}, 'errorMessage': 'Deine Angaben zur Zahlungsart sind ungültig. Bitte gib sie erneut ein.', 'missingPayment': True}
+18:05:30,864 root ERROR Expecting value: line 2 column 1 (char 1)

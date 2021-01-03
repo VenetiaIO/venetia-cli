@@ -321,7 +321,7 @@ class CHMIELNA:
                 self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
                 updateConsoleTitle(False,True,SITE)
-                url = storeCookies(payCreate.url,self.session)               
+                url = storeCookies(payCreate.url,self.session, self.productTitle, self.productImage, self.productPrice)               
                 sendNotification(SITE,self.productTitle)
                 
 
