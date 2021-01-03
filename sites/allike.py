@@ -428,7 +428,7 @@ class ALLIKE:
                 updateConsoleTitle(False,True,SITE)
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
  
-                url = storeCookies(startExpress.url,self.session)
+                url = storeCookies(startExpress.url,self.session, self.productTitle, self.productImage, self.productPrice)
 
                 
                 sendNotification(SITE,self.productTitle)
@@ -615,7 +615,7 @@ class ALLIKE:
                         updateConsoleTitle(False,True,SITE)
                         logger.alert(SITE,self.taskID,'Sending Card checkout to Discord!')
                         
-                        url = storeCookies(response["redirect"],self.session)
+                        url = storeCookies(response["redirect"],self.session, self.productTitle, self.productImage, self.productPrice)
     
                         discord.success(
                             webhook=loadSettings()["webhook"],

@@ -3,18 +3,6 @@ import json
 import utils.config as CONFIG
 
 def execute():
-    #Check tasks.csv
-    try:
-        f = open('./data/tasks.csv')
-        f.readlines()
-    except IOError:
-        try:
-            os.mkdir('data')
-        except:
-            pass
-        print('Creating tasks.csv')
-        with open('./data/tasks.csv','w') as tasks:
-            tasks.write('SITE,PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,PROXIES,ACCOUNT EMAIL,ACCOUNT PASSWORD')
 
     #check site folders
     try:

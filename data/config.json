@@ -1,14 +1,1 @@
-{
-  "key": "VENETIA-5V9I4-TGN8P-PU40S-X3N35-YN51V",
-  "checkoutNoise":"Y",
-  "webhook": "https://discordapp.com/api/webhooks/719650652904751104/ODo2VMgJWP3kJ7Gy1Lu7GFe4-n7o86A8m5pk0ikcEQdKkUq4IARneQh6i5jGMSxHJYDM",
-  "2Captcha": "1de098851f54d4eaeb6e90ca883afcd8",
-  "AntiCaptcha": "",
-  "quickTaskSize": "random",
-  "quickTaskProfile": "hsbc",
-  "quickTaskProxies": "proxies",
-  "quickTaskDelay": "0",
-  "quickTaskPayment": "paypal",
-  "quickTaskEmail": "charliebottomley15@gmail.com",
-  "quickTaskPassword": "Cab200310"
-}
+{"key": "VENETIA-5V9I4-TGN8P-PU40S-X3N35-YN51V", "checkoutNoise": "Y", "webhook": "https://discordapp.com/api/webhooks/719650652904751104/ODo2VMgJWP3kJ7Gy1Lu7GFe4-n7o86A8m5pk0ikcEQdKkUq4IARneQh6i5jGMSxHJYDM", "2Captcha": "1de098851f54d4eaeb6e90ca883afcd8", "AntiCaptcha": "", "quickTaskSize": "random", "quickTaskProfile": "hsbc", "quickTaskProxies": "proxies", "quickTaskDelay": "0", "quickTaskPayment": "paypal", "quickTaskEmail": "charliebottomley15@gmail.com", "quickTaskPassword": "Cab200310"}

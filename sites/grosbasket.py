@@ -367,7 +367,7 @@ class GROSBASKET:
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
             updateConsoleTitle(False,True,SITE)
 
-            url = storeCookies(startExpress.url,self.session)
+            url = storeCookies(startExpress.url,self.session, self.productTitle, self.productImage, self.productPrice)
 
             try:
                 quote = self.session.post('https://www.grosbasket.com/en/braintree/checkout/quoteTotal/',headers={

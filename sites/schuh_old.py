@@ -13,11 +13,9 @@ import cloudscraper
 import string
 from urllib3.exceptions import HTTPError
 
-
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
-from utils.adyen import ClientSideEncrypter
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle)
 SITE = 'SCHUH'
 
@@ -58,9 +56,7 @@ class SCHUH:
                 sizeSelect = soup.find('select',{'id':'sizes'})
                 self.locale = soup.find('span',{'id':'cultureCI-val'}).text
                 self.hidPrice = soup.find('input',{'id':'hidPrice'})['value']
-                self.productTitle = soup.find('title').text.split('|')[0]
-                self.productPrice = soup.find('span',{'id':'price'}).text
-
+                
                 all_sizes = []
                 sizes = []
     
@@ -177,7 +173,7 @@ class SCHUH:
 
     def basket(self):
         logger.prepare(SITE,self.taskID,'Updating basket details...')
-        payload = {"action":"checkout","deliveryOptionCode":"0","viewPort":"3","branchRef":"0","chosenDate":""}
+        payload = {"action":"delivery","deliveryOptionCode":"0","branchRef":"0"}
         try:
             update = self.session.post(f'{self.baseURL}/BasketService/updateBasket',json=payload)
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -190,178 +186,180 @@ class SCHUH:
         if update.status_code == 200:
             logger.warning(SITE,self.taskID,'Basket details updated')
 
-            self.checkoutLogin()
-
-        else:
-            logger.error(SITE,self.taskID,'Failed to update basket details. Retrying...')
-            self.basket()
-
-    def checkoutLogin(self):
-
-        profile = loadProfile(self.task["PROFILE"])
-        if profile == None:
-            logger.error(SITE,self.taskID,'Profile Not Found.')
-            time.sleep(10)
-            sys.exit()
-
-        logger.prepare(SITE,self.taskID,'Initiating checkout...')
-        
-
-        payload = {"loginType":"new","email":profile['email'],"password":"-1","mailOrderEmail":"-1","page":"login.aspx"}
-
-        try:
-            checkoutLog = self.session.post(f'{self.baseURL}/CheckoutService/checkoutLogin',json=payload,headers={
-                'Accept':'application/json, text/javascript, */*; q=0.01n',
-                'referer':f'{self.baseURL}/login.aspx',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
-                'X-Requested-With': 'XMLHttpRequest'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.checkoutLogin()
-
-        try:
-            data = checkoutLog.json()
-            stat = data['d']['Success']
-        except Exception as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Failed to initiate checkout.Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.checkoutLogin()
-
-        if checkoutLog.status_code == 200 and stat == True:
-            logger.warning(SITE,self.taskID,'Successfully Initiated checkout')
-            self.addressSubmit()
-        else:
-            logger.error(SITE,self.taskID,'Failed to initiate checkout.Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.checkoutLogin()
-
-
-    def addressSubmit(self):
-        profile = loadProfile(self.task["PROFILE"])
-        if profile == None:
-            logger.error(SITE,self.taskID,'Profile Not Found.')
-            time.sleep(10)
-            sys.exit()
-
-        logger.prepare(SITE,self.taskID,'Submitting address...')
-
-
-        country = 'UK'
-        region2 = 'england'
-
-        js = {
-            "addressID": 0,
-            "title": "Mr",
-            "firstName": profile['firstName'],
-            "surname": profile['lastName'],
-            "phone": profile['phone'],
-            "line1": profile['house'] + ' ' + profile['addressOne'],
-            "line2": profile['addressTwo'],
-            "cityTown": profile['city'],
-            "county": profile['region'],
-            "postcode": profile['zip'],
-            "country": country,
-            "countryDelOptionCode": 0,
-            "addressBookCount": 0,
-            "addressType": "d",
-            "billingSameAsDelivery": True,
-            "region": region2
-        }
-        payload = {"addressString":str(json.dumps(js)),"addressType":"d"}
-
-        try:
-            addressSub = self.session.post(f'{self.baseURL}/CheckoutService/AddressBookSubmit',json=payload,headers={
-                'Accept':'application/json, text/javascript, */*; q=0.01n',
-                'referer':f'{self.baseURL}/delivery.aspx',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
-                'X-Requested-With': 'XMLHttpRequest'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.addressSubmit()
-
-        try:
-            data = addressSub.json()
-            stat = data['d']['Success']
-        except Exception as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Failed to submit address.Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.addressSubmit()
-
-        
-        if addressSub.status_code == 200 and stat == True:
-            logger.warning(SITE,self.taskID,'Successfully submitted address')
-
-            if self.task['PAYMENT'].lower() == 'paypal':
-                self.paypalPayment()
-            else:
-                self.cardPayment()
-
-        else:
-            logger.error(SITE,self.taskID,'Failed to submit address.Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.addressSubmit()
-
-        sys.exit()
-
-
-    def paypalPayment(self):
-        logger.prepare(SITE,self.taskID,'Submitting payment...')
-        try:
-            paymentProcess = self.session.post(f'{self.baseURL}/CheckoutService/PaymentProcess',json={"type":"paypal","repayment":False,"viewPort":"3","repaymentid":"0"},headers={
-                'Accept':'application/json, text/javascript, */*; q=0.01n',
-                'referer':f'{self.baseURL}/billing.aspx',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
-                'X-Requested-With': 'XMLHttpRequest'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.paypalPayment()
-
-
-
-        if paymentProcess.status_code == 200:
+            logger.prepare(SITE,self.taskID,'Getting checkout data...')
+            self.session.headers['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+            self.session.headers['Referer'] = f'{self.baseURL}/basket.aspx'
             try:
-                finalUrl = '{}/{}'.format(self.baseURL, paymentProcess.json()['d'].split('success:')[1]).replace('viewPort=3','viewPort=1')
-            except:
-                logger.error(SITE,self.taskID,'Failed to submit payment.Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                self.paypalPayment()
-        
-            try:
-                getPayal = self.session.get(finalUrl, headers={
-                    'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9n',
-                    'referer':f'{self.baseURL}/billing.aspx',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
-                })
+                login = self.session.post(f'{self.baseURL}/login.aspx',json=payload)
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                self.paypalPayment()
-            if 'paypal' in getPayal.url:
-                logger.warning(SITE,self.taskID,'Payment submitted')
+                self.basket()
 
-                self.end = time.time() - self.start
-                logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
-                url = storeCookies(getPayal.url,self.session, self.productTitle, self.productImage, self.productPrice)
+            if login.status_code == 200 and 'klarnaCheckout' in login.url:
+                logger.warning(SITE,self.taskID,'Successfully got checkout page')
+                self.orderURL = login.text.split('ORDER_URL:')[1].split(',')[0].replace("'",'')
+                self.klarnaID = self.orderURL.split('/orders/')[1]
+                self.klarnaAuth = login.text.split('AUTH_HEADER:')[1].split(',')[0].replace("'",'')
+                self.klarnaCheckout()
+            else:
+                logger.error(SITE,self.taskID,'Failed to get checkout page. Retrying...')
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                self.collect()
+
+        else:
+            logger.error(SITE,self.taskID,'Failed to update basket details. Retrying...')
+
     
+    def klarnaCheckout(self):
+        logger.prepare(SITE,self.taskID,'Initiating Klarna checkout...')
+        try:
+            initKlarna = self.session.get(f'https://js.klarna.com/eu/kco/checkout/orders/{self.klarnaID}?type=initial',headers={
+                'accept':'application/vnd.klarna.checkout.server-order-v1+json',
+                'authorization':self.klarnaAuth,
+                'referer':'https://js.klarna.com/kcoc/200729-bdbb575/checkout-template.html',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
+                'klarna-client-version': '200713-dd02c1f',
+                'klarna-sdid': '6e390e93-c3b6-4ef8-8700-97689e3f155f',
+                'klarna-sdid-status': 'new'
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            self.klarnaCheckout()
+        
+        if initKlarna.status_code == 200:
+            self.klarnaSession = initKlarna.json()
+            self.productTitle = self.klarnaSession["cart"]["items"][0]["name"]
+            self.subTotal = int(self.klarnaSession["cart"]["subtotal"]) / 100
+            self.currency = self.klarnaSession["shared"]["currency"]
+            self.productPrice = f'{self.subTotal} {self.currency}'
+            logger.warning(SITE,self.taskID,'Successfully initialized Klarna checkout')
+        else:
+            logger.error(SITE,self.taskID,'Failed to initialize klarna chekout. Retrying...')
 
+        self.session.headers['Accept'] = 'application/json, text/javascript, */*; q=0.01'
+        self.session.headers['X-Requested-With'] = 'XMLHttpRequest'
+        self.session.headers['Referer'] = f'{self.baseURL}/klarnaCheckout.aspx'
+
+        profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
+        logger.prepare(SITE,self.taskID,'Registering Klarna email...')
+        try:
+            payload = {"email":profile["email"]}
+            klarnaEmail = self.session.post(f'{self.baseURL}/CheckoutService/RegisterKlarnaEmail',json=payload)
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            time.sleep(int(self.task["DELAY"]))
+            self.klarnaCheckout()
+        
+        if klarnaEmail.status_code == 200:
+            logger.warning(SITE,self.taskID,'Klarna email registered')
+            #self.address()
+            self.paypal()
+        else:
+            logger.error(SITE,self.taskID,'Failed to register klarna email. Retrying...')
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            time.sleep(int(self.task["DELAY"]))
+            self.collect()
+    
+    def paypal(self):
+        profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
+
+        self.session.headers['Accept'] = '*/*'
+        self.session.headers['X-Requested-With'] = 'XMLHttpRequest'
+        self.session.headers['Referer'] = f'{self.baseURL}/klarnaCheckout.aspx'
+
+        logger.prepare(SITE,self.taskID,'Getting paypal id...')
+
+        page = self.session.get('https://secure.schuh.co.uk/klarnaCheckout.aspx',headers={
+            "Host": "secure.schuh.co.uk",
+            "Referer": "https://secure.schuh.co.uk/basket.aspx",
+            "sec-ch-ua": '"Google Chrome";v="87", " Not;A Brand";v="99", "Chromium";v="87"',
+            "sec-ch-ua-mobile": "?0",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "same-origin",
+            "Sec-Fetch-User": "?1",
+            "Upgrade-Insecure-Requests": "1",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Cache-Control": "max-age=0",
+            "Connection": "keep-alive"
+        })
+        with open('schuh.html','w') as schuh:
+            schuh.write(page.text)
+            schuh.close()
+
+
+        try:
+            payID = self.session.post('https://secure.schuh.co.uk/PayWithPayPalInContext.aspx?viewPort=3&repay=0&country=GB&referrer=klarna',data={
+                'viewPort': 3,
+                'repay': 0,
+                'country': profile["countryCode"],
+                'referrer': 'klarna'
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            self.paypal()
+
+
+        if payID.status_code == 200:
+            logger.warning(SITE,self.taskID,'Successfully Retrieved PayPal PayID')
+            self.payID = payID.text.replace('"','')
+
+            self.session.headers['accept'] = 'application/json'
+            self.session.headers['x-cookies'] = '{}'
+            self.session.headers['x-csrf-jwt'] = '__blank__'
+            self.session.headers['x-requested-by'] = 'smart-payment-buttons'
+            self.session.headers['x-Requested-With'] = 'XMLHttpRequest'
+            logger.prepare(SITE,self.taskID,'Getting paypal link...')
+
+            try:
+                EC = self.session.post(f'https://www.paypal.com/smart/api/payment/{self.payID}/ectoken',json={"meta":{}})
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                self.paypal()
+            try:
+                EC.json()
+            except:
+                logger.error(SITE,self.taskID,'Failed to retrieve paypal checkout info. Retrying...')
+                time.sleep(int(self.task['DELAY']))
+                self.paypal()
+            if EC.status_code == 200:
+                self.end = time.time() - self.start
+                self.ppToken = EC.json()["data"]["token"]
+
+                self.ppURL = 'https://www.paypal.com/checkoutnow?locale.x=en_GB&fundingSource=paypal&env=production&fundingOffered=paypal&logLevel=warn&version=4&token={}&xcomponent=1'.format(self.ppToken)
+                logger.warning(SITE,self.taskID,'Got paypal link')
+
+                logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
+                updateConsoleTitle(False,True,SITE)
+
+                url = storeCookies(self.ppURL,self.session)
+    
                 try:
                     discord.success(
                         webhook=loadSettings()["webhook"],
@@ -380,10 +378,10 @@ class SCHUH:
                     sendNotification(SITE,self.productTitle)
                     while True:
                         pass
-                except Exception as e:
-                    print(e)
+                except:
                     logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
             else:
+                logger.error(SITE,self.taskID,'Could not complete PayPal Checkout. Retrying...')
                 try:
                     discord.failed(
                         webhook=loadSettings()["webhook"],
@@ -399,101 +397,39 @@ class SCHUH:
                     )
                 except:
                     pass
+                logger.error(SITE,self.taskID,'Failed to retrieve paypal checkout info. Retrying...')
+                time.sleep(int(self.task['DELAY']))
+                self.paypal()
 
-                logger.error(SITE,self.taskID,'Failed to submit payment.Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                self.paypalPayment()
-        
         else:
-            logger.error(SITE,self.taskID,'Failed to submit payment.Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.paypalPayment()
+            logger.error(SITE,self.taskID,'Failed to retrieve paypal payID. Retrying...')
+            time.sleep(int(self.task['DELAY']))
+            self.paypal()
 
-    def cardPayment(self):
-        profile = loadProfile(self.task["PROFILE"])
-        if profile == None:
-            logger.error(SITE,self.taskID,'Profile Not Found.')
-            time.sleep(10)
-            sys.exit()
-
-        logger.prepare(SITE,self.taskID,'Setting payment method...')
-        try:
-            paymentProcess = self.session.post(f'{self.baseURL}/CheckoutService/PaymentProcess',json={"type":"adyen","repayment":False,"viewPort":"1","repaymentid":"0"},headers={
-                'Accept':'application/json, text/javascript, */*; q=0.01n',
-                'referer':f'{self.baseURL}/billing.aspx',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
-                'X-Requested-With': 'XMLHttpRequest'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.cardPayment()
-
-        if paymentProcess.status_code == 200 and 'adyen' in paymentProcess.text:
-            logger.warning(SITE,self.taskID,'Successfully set payment method')
-            self.orderNumber = paymentProcess.text.split('success:adyen:')[1].split('|')[0]
-            self.orderTotal = paymentProcess.text.split('|')[1].split('"}')['0']
-
-            logger.prepare(SITE,self.taskID,'Starting Adyen checkout...')
-
-            number = profile["card"]["cardNumber"]
-            if str(number[0]) == "3":
-                cType = 'amex'
-            if str(number[0]) == "4":
-                cType = 'visa'
-            if str(number[0]) == "5":
-                cType = 'mastercard'
     
-    
-            encryptedInfo = ClientSideEncrypter("", "_0_1_25")
-            encryptedCardNum = str(encryptedInfo.generate_adyen_nonce(profile["firstName"] + " " + profile["lastName"], profile["card"]["cardNumber"], '', '', '').replace("b'", "").replace("'", ""))
-            encryptedExpMonth = str(encryptedInfo.generate_adyen_nonce(profile["firstName"] + " " + profile["lastName"], '', '', profile["card"]["cardMonth"], '').replace("b'", "").replace("'", ""))
-            encryptedExpYear = str(encryptedInfo.generate_adyen_nonce(profile["firstName"] + " " + profile["lastName"], '', '', '', profile["card"]["cardYear"]).replace("b'", "").replace("'", ""))
-            encryptedCVV = str(encryptedInfo.generate_adyen_nonce(profile["firstName"] + " " + profile["lastName"], '', profile["card"]["cardCVV"], '', '').replace("b'", "").replace("'", ""))
-
-            data = {
-                "orderNumber": self.orderNumber,
-                "orderTotal": self.orderTotal,
-                "paymentMethodObj": {
-                    "type": "scheme",
-                    "holderName": profile['firstName'] + ' ' + profile['lastName'],
-                    "encryptedCardNumber": encryptedCardNum,
-                    "encryptedExpiryMonth": encryptedExpMonth,
-                    "encryptedExpiryYear": encryptedExpYear,
-                    "encryptedSecurityCode": encryptedCVV,
-                    "bi": {
-                        "acceptHeader": "",
-                        "colorDepth": 24,
-                        "javaScriptEnabled": True,
-                        "javaEnabled": False,
-                        "language": "en-US",
-                        "screenHeight": 960,
-                        "screenWidth": 1536,
-                        "timeZoneOffset": -60,
-                        "userAgent": ""
-                    }
-                },
-                "strPaymentPage": "billing"
-            }
-            print(data)
-
-            try:
-                paymentDropIn = self.session.post(f'{self.baseURL}/CheckoutService/AdyenCreatePaymentDropIn',json=data,headers={
-                    'Accept':'application/json, text/javascript, */*; q=0.01n',
-                    'referer':f'{self.baseURL}/billing.aspx',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
-                    'X-Requested-With': 'XMLHttpRequest'
-                })
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                log.info(e)
-                logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                self.cardPayment()
-
-
-
-        
-        
+    #def address(self):
+    #    profile = loadProfile(self.task["PROFILE"])
+    #    payload = {"browser_prefilled":["postal_code"],"customer_details":{"email":profile["email"],"postal_code":profile["zip"]},"skipped_fields":[],"user_submitted":False,"action":"postalCodeChange"}
+    #    try:
+    #        addressKlarna = self.session.get(f'https://js.klarna.com/eu/customer/client/v1/session/{self.klarnaID}')
+    #    except:
+    #        logger.error(SITE,self.taskID,'Connection Error. Retrying...')
+    #        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+    #        time.sleep(int(self.task["DELAY"]))
+    #        self.collect()
+#
+    #    url = 'https://js.klarna.com/eu/address/v2/country/{}/postal/{}/street/{}{}?acquiring_source=kco&source_reference={}'.format(profile["countryCode"],profile["zip"],profile["house"],profile["addressOne"],self.klarnaID)#.replace(' ','%20')
+    #    print(url)
+#
+    #    self.session.headers['accept'] = 'application/json, text/plain, */*'
+    #    self.session.headers['referer'] = 'https://js.klarna.com/kcoc/200729-bdbb575/checkout-template.html'
+    #    try:
+    #        addressKlarna = self.session.get(url)
+    #    except:
+    #        logger.error(SITE,self.taskID,'Connection Error. Retrying...')
+    #        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+    #        time.sleep(int(self.task["DELAY"]))
+    #        self.collect()
+    #    
+    #    print(addressKlarna)
+    #    print(addressKlarna.json())

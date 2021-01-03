@@ -59,4 +59,4 @@ sites = {
     "OFFICE":OFFICE
 }
 
-def VERSION(): return '0.5.2'
+def VERSION(): return '0.5.3'

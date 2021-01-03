@@ -15,7 +15,7 @@ class AKAMAI:
             logger.success('FOOTASYLUM',taskID,'Successfully Generated Akamai Cookies')
             return r.json()
         else:
-            return {"cookies":"error"}
+            return {"_abck":"error"}
 
 
     @staticmethod
@@ -30,5 +30,5 @@ class AKAMAI:
             logger.success('OFFSPRING',taskID,'Successfully Generated Akamai Cookies')
             return r.json()
         else:
-            return {"cookies":"error"}
+            return {"_abck":"error"}
 

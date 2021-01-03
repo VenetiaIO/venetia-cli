@@ -556,7 +556,7 @@ class NAKED:
     def sendPaypal(self):
         updateConsoleTitle(False,True,SITE)
         logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
-        url = storeCookies(self.ppUrl,self.session)
+        url = storeCookies(self.ppUrl,self.session, self.productTitle, self.productImage, self.productPrice)
         
         try:
             discord.success(

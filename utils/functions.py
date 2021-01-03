@@ -137,6 +137,7 @@ def loadProxy(proxies,taskID, SITE):
     
         if len(proxyInput) == 0:
             return None
+        
 
         proxyList = [i for i in proxyInput]
         p = random.choice(proxyList)
@@ -278,20 +279,26 @@ def birthday():
     }
 
 
-def storeCookies(checkoutURL,session):
+def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
     cookieList = []
+    cookieString = ''
     for c in session.cookies:
             try:
-                if 'paypal' in c.domain:
+                # print(f'{c.name} | {c.domain}')
+                if 'paypal'not in c.domain:
                     # url = c.domain.split('.')[1]
                     cookieList.append(
                         {"name": c.name, "value": c.value, "domain": c.domain, "path": c.path})
+                    cookieString += '{}##{}##{}##{}+++'.format(c.name,c.value,c.domain,c.path)
+                # if c.name.lower() in ['session','checkout','schuhcookiecheckoutsession']:
+                  # cookieList.append(
+                        # {"name": c.name, "value": c.value, "domain": c.domain, "path": c.path})
+                        
             except Exception as e:
                 print(e)
                 pass
-
     try:
-        encoded = base64.b64encode(bytes(str(cookieList), 'utf-8'))
+        encoded = base64.b64encode(bytes(str(cookieString), 'utf-8'))
         encoded = str(encoded, 'utf8')
     
         encodedURL = base64.b64encode(
@@ -299,7 +306,7 @@ def storeCookies(checkoutURL,session):
         encodedURL = str(encodedURL, 'utf8')
     
         urlId = createId(15)
-        r = requests.post('https://venetiacli.io/api/checkout/setCookies',headers={"apikey":"27acc458-f01a-48f8-88b8-06583fb39056"},data={"viewId":urlId,"cookies":encoded,"redirect":encodedURL})
+        r = requests.post('https://venetiacli.io/api/checkout/setCookies',headers={"apikey":"27acc458-f01a-48f8-88b8-06583fb39056"},data={"viewId":urlId,"cookies":encoded,"redirect":encodedURL, "productTitle":prodTitle, "productImage":prodImage, "productPrice":prodPrice})
         url = 'https://venetiacli.io/api/checkout/retrieve/?id={}'.format(urlId)
         return url
     except Exception as e:
