@@ -9,3 +9,4 @@ __pycache__/*
 *.DS
 *DS
 .vscode/settings.json
+venetia-success-bots/venetia-cli-reposter/
