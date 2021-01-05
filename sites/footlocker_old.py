@@ -17,7 +17,7 @@ from utils.webhook import discord
 from utils.log import log
 from utils.datadome import datadome
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle,scraper, footlocker_snare)
-SITE = 'FOOTLOCKER EU'
+SITE = 'FOOTLOCKER'
 
 
 class FOOTLOCKER_OLD:
@@ -28,57 +28,90 @@ class FOOTLOCKER_OLD:
 
         twoCap = loadSettings()["2Captcha"]
         # self.session = scraper()
-        
+        profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
+        self.countryCode = profile['countryCode'].lower()
+
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+        self.baseSku = self.task['PRODUCT']
 
-        self.collect()
+        if self.countryCode == 'fr':
+            self.baseUrl = 'https://www.footlocker.fr'
+            self.baseUrl2 = 'https://www.footlocker.de/INTERSHOP/web/FLE/Footlocker-Footlocker_FR-Site/en_GB/-/EUR/'
+        if self.countryCode == 'de':
+            self.baseUrl = 'https://www.footlocker.de'
+            self.baseUrl2 = 'https://www.footlocker.de/INTERSHOP/web/FLE/Footlocker-Footlocker_DE-Site/en_GB/-/EUR/'
+        if self.countryCode == 'nl':
+            self.baseUrl = 'https://www.footlocker.nl'
+            self.baseUrl2 = 'https://www.footlocker.de/INTERSHOP/web/FLE/Footlocker-Footlocker_NL-Site/en_GB/-/EUR/'
+        if self.countryCode == 'gb':
+            self.baseUrl = 'https://www.footlocker.co.uk'
+            self.baseUrl2 = 'https://www.footlocker.co.uk/INTERSHOP/web/FLE/Footlocker-Footlocker_GB-Site/en_GB/-/GBP/'
+        if self.countryCode == 'au':
+            self.baseUrl = 'https://www.footlocker.com.au'
+            self.baseUrl2 = 'https://www.footlocker.co.uk/INTERSHOP/web/FLE/Footlocker-Footlocker_AU-Site/en_GB/-/AUD/'
+        if self.countryCode == 'sg':
+            self.baseUrl = 'https://www.footlocker.co.uk'
+            self.baseUrl2 = 'https://www.footlocker.sg/INTERSHOP/web/FLE/FootlockerAsiaPacific-Footlocker_SG-Site/en_GB/-/SGD/'
+        if self.countryCode == 'my':
+            self.baseUrl = 'https://www.footlocker.my'
+            self.baseUrl2 = 'https://www.footlocker.my/INTERSHOP/web/FLE/FootlockerAsiaPacific-Footlocker_MY-Site/en_GB/-/MYR/'
+        if self.countryCode == 'hk':
+            self.baseUrl = 'https://www.footlocker.hk'
+            self.baseUrl2 = 'https://www.footlocker.hk/INTERSHOP/web/FLE/FootlockerAsiaPacific-Footlocker_HK-Site/en_GB/-/HKD/'
+        
+        self.retrieveSizes()
 
-    def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"])
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-
-
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
-            try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-                soup = BeautifulSoup(retrieve.text, "html.parser")
-                self.syncToken = soup.find('input',{'name':'SynchronizerToken'})['value']
-                self.relayCat = soup.find('input',{'value':'Product Pages'})['name']
-                self.tabgroup = retrieve.text.split('''_st('addTagProperties', {position:"0",id:"''')[1].split('",')[0]
-                self.baseSku = retrieve.text.split('ViewProduct-ProductVariationSelect?BaseSKU=')[1].split('&')[0]
-                
-
-                        
-            except Exception as e:
-               log.info(e)
-               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-               time.sleep(int(self.task["DELAY"]))
-               self.collect()
-
-            self.retrieveSizes()
-
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+    # def collect(self):
+        # logger.prepare(SITE,self.taskID,'Getting product page...')
+        # try:
+            # retrieve = self.session.get(self.task["PRODUCT"])
+        # except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            # log.info(e)
+            # logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            # self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            # time.sleep(int(self.task["DELAY"]))
+            # self.collect()
+# 
+# 
+        # if retrieve.status_code == 200:
+            # self.start = time.time()
+            # logger.warning(SITE,self.taskID,'Got product page')
+            # try:
+                # logger.prepare(SITE,self.taskID,'Getting product data...')
+                # soup = BeautifulSoup(retrieve.text, "html.parser")
+                # self.syncToken = soup.find('input',{'name':'SynchronizerToken'})['value']
+                # self.relayCat = 'Relay42_Category'  #soup.find('input',{'value':'Product Pages'})['name']
+                # self.tabgroup = retrieve.text.split('''_st('addTagProperties', {position:"0",id:"''')[1].split('",')[0]
+                # self.baseSku = retrieve.text.split('ViewProduct-ProductVariationSelect?BaseSKU=')[1].split('&')[0]
+            #   
+            # except Exception as e:
+            #    log.info(e)
+            #    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+            #    time.sleep(int(self.task["DELAY"]))
+            #    self.collect()
+# 
+            # self.retrieveSizes()
+# 
+        # else:
+            # try:
+                # status = retrieve.status_code
+            # except:
+                # status = 'Unknown'
+            # logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
+            # time.sleep(int(self.task["DELAY"]))
+            # self.collect()
 
 
     def retrieveSizes(self):
+        logger.prepare(SITE,self.taskID,'Getting product data...')
+        self.start = time.time()
+        self.relayCat = 'Relay42_Category'  #soup.find('input',{'value':'Product Pages'})['name']
         try:
-            retrieveSizes = self.session.get(f'https://www.footlocker.co.uk/INTERSHOP/web/FLE/Footlocker-Footlocker_GB-Site/en_GB/-/GBP/ViewProduct-ProductVariationSelect?BaseSKU={self.baseSku}&InventoryServerity=ProductDetail',headers={
+            retrieveSizes = self.session.get(f'{self.baseUrl2}ViewProduct-ProductVariationSelect?BaseSKU={self.baseSku}&InventoryServerity=ProductDetail',headers={
                 "accept": "application/json, text/javascript, */*; q=0.01",
                 "accept-language": "en-US,en;q=0.9",
                 "sec-ch-ua": "\"Google Chrome\";v=\"87\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"87\"",
@@ -122,6 +155,8 @@ class FOOTLOCKER_OLD:
                 logger.error(SITE,self.taskID,'Sizes Not Found')
                 time.sleep(int(self.task["DELAY"]))
                 self.collect()
+
+            self.tabgroup = self.baseSku + eu_sizes[0]['data-product-size-select-item']
 
             allSizes = []
             sizes = []
@@ -177,7 +212,7 @@ class FOOTLOCKER_OLD:
         }
 
         try:
-            atcResponse = self.session.post('https://www.footlocker.co.uk/en/addtocart',params=params,headers={
+            atcResponse = self.session.post(f'{self.baseUrl}/en/addtocart',params=params,headers={
                 "accept": "application/json, text/javascript, */*; q=0.01",
                 "accept-language": "en-US,en;q=0.9",
                 "sec-ch-ua": "\"Google Chrome\";v=\"87\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"87\"",
@@ -206,6 +241,8 @@ class FOOTLOCKER_OLD:
             self.addToCart()
 
         elif atcResponse.status_code == 200:
+            self.syncToken = atcResponse.text.split('ViewCart-Checkout?SynchronizerToken=')[1].split('\\"')[0]
+            self.productPrice = atcResponse.text.split('price:\\"')[1].split('\\"')[0]
             logger.warning(SITE,self.taskID,'Successfully carted product')
             self.checkoutDispatch()
 
@@ -227,7 +264,7 @@ class FOOTLOCKER_OLD:
         self.countryCode = profile['countryCode'].lower()
 
         try:
-            checkoutOverviewPage = self.session.get('https://www.footlocker.co.uk/en/checkout-overview?SynchronizerToken=' + self.syncToken,headers={
+            checkoutOverviewPage = self.session.get(f'{self.baseUrl}/en/checkout-overview?SynchronizerToken=' + self.syncToken,headers={
                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
                 "accept-language": "en-US,en;q=0.9",
                 "sec-ch-ua": "\"Google Chrome\";v=\"87\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"87\"",
@@ -270,16 +307,31 @@ class FOOTLOCKER_OLD:
 
         logger.prepare(SITE,self.taskID,'Submitting shipping')
         self.deviceId = footlocker_snare(self.task['PRODUCT'].split('/en')[0])
-        form = "SynchronizerToken={}&isshippingaddress=&billing_Title=common.account.salutation.mr.text&billing_FirstName=charlie&billing_LastName=bottomley&billing_CountryCode=GB&billing_Address1=pilmore+mews&billing_Address2=12&billing_Address3=&billing_City=darlington&billing_PostalCode=dl2+2bq&billing_PhoneHome=07796233905&billing_BirthdayRequired=true&billing_Birthday_Day=10&billing_Birthday_Month=11&billing_Birthday_Year=1995&email_Email=charliebottomley11%40gmail.com&billing_ShippingAddressSameAsBilling=true&isshippingaddress=&shipping_Title=common.account.salutation.mr.text&shipping_FirstName=&shipping_LastName=&SearchTerm=&shipping_CountryCode=GB&shipping_Address1=&shipping_Address2=&shipping_Address3=&shipping_City=&shipping_PostalCode=&shipping_PhoneHome=&shipping_AddressID={}&CheckoutRegisterForm_Password=&promotionCode=&PaymentServiceSelection={}&UserDeviceTypeForPaymentRedirect=Desktop&UserDeviceFingerprintForPaymentRedirect={}&ShippingMethodUUID={}&termsAndConditions=on&GDPRDataComplianceRequired=true&sendOrder=".format(
+        form = "SynchronizerToken={}&isshippingaddress=&billing_Title=common.account.salutation.mr.text&billing_FirstName={}&billing_LastName={}&billing_CountryCode={}&billing_Address1={}&billing_Address2={}&billing_Address3={}&billing_City={}&billing_PostalCode={}&billing_PhoneHome={}&billing_BirthdayRequired=true&billing_Birthday_Day={}&billing_Birthday_Month={}&billing_Birthday_Year={}&email_Email={}&billing_ShippingAddressSameAsBilling=true&isshippingaddress=&shipping_Title=common.account.salutation.mr.text&shipping_FirstName=&shipping_LastName=&SearchTerm=&shipping_CountryCode={}&shipping_Address1=&shipping_Address2=&shipping_Address3=&shipping_City=&shipping_PostalCode=&shipping_PhoneHome=&shipping_AddressID={}&CheckoutRegisterForm_Password=&promotionCode=&PaymentServiceSelection={}&UserDeviceTypeForPaymentRedirect=Desktop&UserDeviceFingerprintForPaymentRedirect={}&ShippingMethodUUID={}&termsAndConditions=on&GDPRDataComplianceRequired=true&sendOrder=".format(
             self.syncToken,
+            profile['firstName'],
+            profile['lastName'],
+            profile['countryCode'],
+            profile['addressOne'],
+            profile['house'],
+            profile['addressTwo'],
+            profile['city'],
+            profile['zip'],
+            profile['phone'],
+            random.randint(1,25),#day
+            random.randint(1,12), #month
+            random.randint(1970,2000), #year
+            profile['email'],
+            profile['countryCode'],
             shippingAddressId,
             PaymentServiceSelection,
             self.deviceId,
             shipMethodUUID
         )
+        # Finish form 
 
         try:
-            checkoutOverviewDispatch = self.session.post('https://www.footlocker.co.uk/INTERSHOP/web/FLE/Footlocker-Footlocker_GB-Site/en_GB/-/GBP/ViewCheckoutOverview-Dispatch',data=form,headers={
+            checkoutOverviewDispatch = self.session.post(f'{self.baseUrl2}ViewCheckoutOverview-Dispatch',data=form,headers={
                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
                 "accept-language": "en-US,en;q=0.9",
                 "accept-encoding": "gzip, deflate, br",
@@ -499,7 +551,7 @@ class FOOTLOCKER_OLD:
         data['referrerURL'] = self.task['PRODUCT'].split('/en')[0]
 
         self.productTitle = data['riskdata.basket.item1.productTitle']
-        self.productPrice = '{} {}'.format(data['riskdata.basket.item1.amountPerItem'], data['currencyCode'])
+        self.productPrice = '{} {}'.format(self.productPrice, data['currencyCode'])
 
         try:
             paypalRedirect = self.session.post('https://live.adyen.com/hpp/redirectPayPal.shtml',data=data,headers={

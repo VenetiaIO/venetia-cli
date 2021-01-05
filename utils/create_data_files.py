@@ -20,7 +20,7 @@ def execute():
                     print("Creating files for footlocker")
                     open('./footlocker/proxies.txt','w')
                     with open('./footlocker/tasks.csv','w') as tasks:
-                        tasks.write('PRODUCT,REGION_CODE,SIZE,DELAY,PROFILE,PAYMENT')
+                        tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT')
 
             elif k.lower() not in ['footlocker_old','footlocker_new'] :
                 try:

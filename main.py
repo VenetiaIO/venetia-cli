@@ -32,7 +32,7 @@ from utils.auth import auth
 from utils.datadome import datadome
 from utils.ascii import logo
 from utils.updates import Updater
-from utils.functions import (loadCheckouts, getUser)
+from utils.functions import (loadCheckouts, getUser, loadProfile)
 from utils.config import *
 import utils.create_data_files as dataFiles
 init(autoreset=True)
@@ -98,9 +98,9 @@ def checkFootlockerTasks():
         csv_reader = csv.DictReader(csvFile)
         for r in csv_reader:
             if len(r['PRODUCT']) > 1:
-                if r['REGION_CODE'].upper() in new_footlockers():
+                if loadProfile(r['PROFILE'])['countryCode'].upper() in new_footlockers():
                     new_ftl.append(1)
-                if r['REGION_CODE'].upper() in old_footlockers():
+                if loadProfile(r['PROFILE'])['countryCode'].upper()in old_footlockers():
                     old_ftl.append(1)
         
     if len(old_ftl) > 0 or len(new_ftl) > 0:
@@ -280,10 +280,10 @@ class Menu:
                                 i = i + 1
                                 row['PROXIES'] = 'proxies'
 
-                                if row['REGION_CODE'].upper() in new_footlockers():
+                                if loadProfile(r['PROFILE'])['countryCode'].upper() in new_footlockers():
                                     threading.Thread(target=sites.get('FOOTLOCKER_NEW'),args=(row,taskName)).start()
 
-                                if row['REGION_CODE'].upper() in old_footlockers():
+                                if loadProfile(r['PROFILE'])['countryCode'].upper() in old_footlockers():
                                     threading.Thread(target=sites.get('FOOTLOCKER_OLD'),args=(row,taskName)).start()
 
                 elif k.upper() not in ['FOOTLOCKER_NEW','FOOTLOCKER_OLD']:
