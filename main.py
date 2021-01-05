@@ -90,6 +90,31 @@ def checkTasks(site):
         return True
     elif len(tasks) == 0:
         return False
+    
+def checkFootlockerTasks():
+    old_ftl = []
+    new_ftl = []
+    with open(f'./footlocker/tasks.csv','r') as csvFile:
+        csv_reader = csv.DictReader(csvFile)
+        for r in csv_reader:
+            if len(r['PRODUCT']) > 1:
+                if r['REGION_CODE'].upper() in new_footlockers():
+                    new_ftl.append(1)
+                if r['REGION_CODE'].upper() in old_footlockers():
+                    old_ftl.append(1)
+        
+    if len(old_ftl) > 0 or len(new_ftl) > 0:
+        return {
+            "status":True,
+            "old_ftl":old_ftl,
+            "new_ftl":new_ftl
+        }
+    elif len(old_ftl) == 0 and len(new_ftl) == 0:
+        return {
+            "status":False,
+            "old_ftl":old_ftl,
+            "new_ftl":new_ftl
+        }
 
 def checkUpdate():
     status = Updater.checkForUpdate(VERSION())
@@ -134,35 +159,62 @@ class Menu:
     def siteSelectFunc(self, availableSites, siteSelection):
         try:
             key_chosen, value_chosen = sorted(availableSites.items())[int(siteSelection) -1 ]
-            with open('./{}/tasks.csv'.format(key_chosen.lower()),'r') as csvFile:
-                csv_reader = csv.DictReader(csvFile)
-                i = 1
-                for row in csv_reader:
-                    if row["PRODUCT"] != "":
-                        try:
+            if  key_chosen == 'Footlocker EU':
+                with open('./footlocker/tasks.csv','r') as csvFile:
+                    csv_reader = csv.DictReader(csvFile)
+                    i = 1
+                    for row in csv_reader:
+                        if row["PRODUCT"] != "":
                             try:
-                                win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),key_chosen.title(),"0","0"))
+                                try:
+                                    win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),key_chosen.title(),"0","0"))
+                                except:
+                                    pass
+                                self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
                             except:
                                 pass
-                            self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
-                        except:
-                            pass
-    
-                        if len(str(i)) == 1:
-                            taskName = f'Task 000{i}'
-                        if len(str(i)) == 2:
-                            taskName = f'Task 00{i}'
-                        if len(str(i)) == 3:
-                            taskName = f'Task 0{i}'
-                        if len(str(i)) == 4:
-                            taskName = f'Task {i}'
-                        i = i + 1
-                        row['PROXIES'] = 'proxies'
-                        threading.Thread(target=value_chosen,args=(row,taskName)).start()
+        
+                            if len(str(i)) == 1:
+                                taskName = f'Task 000{i}'
+                            if len(str(i)) == 2:
+                                taskName = f'Task 00{i}'
+                            if len(str(i)) == 3:
+                                taskName = f'Task 0{i}'
+                            if len(str(i)) == 4:
+                                taskName = f'Task {i}'
+                            i = i + 1
+                            row['PROXIES'] = 'proxies'
+                            threading.Thread(target=value_chosen,args=(row,taskName)).start()
+            else:
+                with open('./{}/tasks.csv'.format(key_chosen.lower()),'r') as csvFile:
+                    csv_reader = csv.DictReader(csvFile)
+                    i = 1
+                    for row in csv_reader:
+                        if row["PRODUCT"] != "":
+                            try:
+                                try:
+                                    win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),key_chosen.title(),"0","0"))
+                                except:
+                                    pass
+                                self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
+                            except:
+                                pass
+        
+                            if len(str(i)) == 1:
+                                taskName = f'Task 000{i}'
+                            if len(str(i)) == 2:
+                                taskName = f'Task 00{i}'
+                            if len(str(i)) == 3:
+                                taskName = f'Task 0{i}'
+                            if len(str(i)) == 4:
+                                taskName = f'Task {i}'
+                            i = i + 1
+                            row['PROXIES'] = 'proxies'
+                            threading.Thread(target=value_chosen,args=(row,taskName)).start()
         except:
             pass
 
-        
+   
 
     def menu(self):
         headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
@@ -203,28 +255,61 @@ class Menu:
 
             total = 0
             for k in sites.keys():
-                with open(f'./{k.lower()}/tasks.csv','r') as csvFile:
-                    csv_reader = csv.DictReader(csvFile)
-                    # total =  total + sum(1 for row in csv_reader)
-                    i = 1
-                    for row in csv_reader:
-                        if row["PRODUCT"] != "":
-                            try:
-                                self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format(k.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
-                            except:
-                                pass
-                        
-                            if len(str(i)) == 1:
-                                taskName = f'Task 000{i}'
-                            if len(str(i)) == 2:
-                                taskName = f'Task 00{i}'
-                            if len(str(i)) == 3:
-                                taskName = f'Task 0{i}'
-                            if len(str(i)) == 4:
-                                taskName = f'Task {i}'
-                            i = i + 1
-                            row['PROXIES'] = 'proxies'
-                            threading.Thread(target=sites.get(k.upper()),args=(row,taskName)).start()
+                if k.upper() == 'FOOTLOCKER_NEW':
+                    pass
+                elif k.upper() == 'FOOTLOCKER_OLD':
+                    with open(f'./footlocker/tasks.csv','r') as csvFile:
+                        csv_reader = csv.DictReader(csvFile)
+                        # total =  total + sum(1 for row in csv_reader)
+                        i = 1
+                        for row in csv_reader:
+                            if row["PRODUCT"] != "":
+                                try:
+                                    self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format('Footlocker EU'), start=self.rpctime,small_image="image",small_text="@venetiaIO")
+                                except:
+                                    pass
+                            
+                                if len(str(i)) == 1:
+                                    taskName = f'Task 000{i}'
+                                if len(str(i)) == 2:
+                                    taskName = f'Task 00{i}'
+                                if len(str(i)) == 3:
+                                    taskName = f'Task 0{i}'
+                                if len(str(i)) == 4:
+                                    taskName = f'Task {i}'
+                                i = i + 1
+                                row['PROXIES'] = 'proxies'
+
+                                if row['REGION_CODE'].upper() in new_footlockers():
+                                    threading.Thread(target=sites.get('FOOTLOCKER_NEW'),args=(row,taskName)).start()
+
+                                if row['REGION_CODE'].upper() in old_footlockers():
+                                    threading.Thread(target=sites.get('FOOTLOCKER_OLD'),args=(row,taskName)).start()
+
+                elif k.upper() not in ['FOOTLOCKER_NEW','FOOTLOCKER_OLD']:
+                    with open(f'./{k.lower()}/tasks.csv','r') as csvFile:
+                        csv_reader = csv.DictReader(csvFile)
+                        # total =  total + sum(1 for row in csv_reader)
+                        i = 1
+                        for row in csv_reader:
+                            if row["PRODUCT"] != "":
+                                try:
+                                    self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format(k.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
+                                except:
+                                    pass
+                            
+                                if len(str(i)) == 1:
+                                    taskName = f'Task 000{i}'
+                                if len(str(i)) == 2:
+                                    taskName = f'Task 00{i}'
+                                if len(str(i)) == 3:
+                                    taskName = f'Task 0{i}'
+                                if len(str(i)) == 4:
+                                    taskName = f'Task {i}'
+                                i = i + 1
+                                row['PROXIES'] = 'proxies'
+                                
+                                threading.Thread(target=sites.get(k.upper()),args=(row,taskName)).start()
             
             # if total == 0:
                 # self.menu()
@@ -233,7 +318,17 @@ class Menu:
             number = 1
             availableSites = {}
             for row in sorted(sites):
-                if(checkTasks(row)):
+                if row.upper() == 'FOOTLOCKER_NEW':
+                    pass
+                elif row.upper() == 'FOOTLOCKER_OLD':
+                    check = checkFootlockerTasks()
+                    if check['status'] == True:
+                        if len(check['old_ftl']) > 0:
+                            availableSites['Footlocker EU'] = sites['FOOTLOCKER_OLD']
+                        if len(check['new_ftl']) > 0:
+                            availableSites['Footlocker EU'] = sites['FOOTLOCKER_NEW']
+
+                elif checkTasks(row) and row.upper() not in ['FOOTLOCKER_NEW','FOOTLOCKER_OLD']:
                     availableSites[row] = sites[row]
 
             for s in availableSites:

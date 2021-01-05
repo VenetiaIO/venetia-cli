@@ -602,6 +602,12 @@ class AWLAB:
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     self.card()
 
+                print(poll.text)
+                if 'You are being rate limited.' in poll.text:
+                    logger.error(SITE,self.taskID,'Rate limited. Sleeping...')
+                    # time.sleep(int(poll.json()['retry_after']))
+                    self.card()
+
                 if poll.json()["status"] == "blocked":
                     logger.error(SITE,self.taskID,'Card Blocked. Retrying...')
                     time.sleep(int(self.task["DELAY"]))

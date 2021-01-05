@@ -128,7 +128,6 @@ class captcha:
             except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
                 v3(sitekey,url,proxy,SITE,taskID)
-            logger.warning(SITE,taskID,r.json()["request"])
             time.sleep(1)
         return r.json()["request"]
 

@@ -99,7 +99,7 @@ class discord:
             if productSize: embed2.add_embed_field(name='Size', value=str(productSize),inline=False)
             if productPrice: embed2.add_embed_field(name='Product Price', value=str(productPrice),inline=False)
     
-            QT_URL = 'http://127.0.0.1:6969/venetia/quicktask?website={}&url={}'.format(SITE.lower(),product)
+            QT_URL = 'http://127.0.0.1:6969/venetia/quicktask?website={}&url={}'.format(SITE.lower().replace(' ',''),product)
             embed2.add_embed_field(name='Quick Task',value=f'[Start QT]({QT_URL})')
     
             webhookPublic.add_embed(embed2)

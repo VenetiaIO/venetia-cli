@@ -127,6 +127,8 @@ class SCHUH:
     def addToCart(self):
         logger.prepare(SITE,self.taskID,'Carting products...')
         region = self.task["PRODUCT"].split('schuh.')[1].split('/')[0]
+        if region == 'eu': region = region + '/en-eu'
+        
         self.baseURL = 'https://secure.schuh.{}'.format(region)
 
         payload = {
@@ -176,8 +178,28 @@ class SCHUH:
                 self.addToCart()
 
     def basket(self):
+        profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
+
+        if profile['countryCode'].upper() == 'FR':
+            payload = {"action":"delivery","deliveryOptionCode":"478","countryLocale":"FR"}
+        if profile['countryCode'].upper() == 'PT':
+            payload = {"action":"delivery","deliveryOptionCode":"578","countryLocale":"PT"}
+        if profile['countryCode'].upper() == 'RO':
+            payload = {"action":"delivery","deliveryOptionCode":"582","countryLocale":"RO"}
+        if profile['countryCode'].upper() == 'ES':
+            payload = {"action":"delivery","deliveryOptionCode":"605","countryLocale":"ES"}
+        if profile['countryCode'].upper() == 'GB':
+            payload = {"action":"checkout","deliveryOptionCode":"0","viewPort":"1","branchRef":"0","chosenDate":""}
+            self.country = 'UK'
+            self.region2 = 'england'
+
+
+
         logger.prepare(SITE,self.taskID,'Updating basket details...')
-        payload = {"action":"checkout","deliveryOptionCode":"0","viewPort":"3","branchRef":"0","chosenDate":""}
         try:
             update = self.session.post(f'{self.baseURL}/BasketService/updateBasket',json=payload)
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -252,8 +274,7 @@ class SCHUH:
         logger.prepare(SITE,self.taskID,'Submitting address...')
 
 
-        country = 'UK'
-        region2 = 'england'
+    
 
         js = {
             "addressID": 0,
@@ -266,12 +287,12 @@ class SCHUH:
             "cityTown": profile['city'],
             "county": profile['region'],
             "postcode": profile['zip'],
-            "country": country,
+            "country": self.country,
             "countryDelOptionCode": 0,
             "addressBookCount": 0,
             "addressType": "d",
             "billingSameAsDelivery": True,
-            "region": region2
+            "region": self.region2
         }
         payload = {"addressString":str(json.dumps(js)),"addressType":"d"}
 

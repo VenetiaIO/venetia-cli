@@ -7,24 +7,42 @@ def execute():
     #check site folders
     try:
         for k in CONFIG.sites.keys():
-            try:
-                f = open('./{}/tasks.csv'.format(k.lower()))
-                f.readlines()
-            except IOError:
+            if k.lower() == 'footlocker_new':
                 try:
-                    os.mkdir('{}'.format(k.lower()))
-                except:
-                    pass
-                print("Creating files for {}".format(k.lower()))
+                    f = open('./footlocker/tasks.csv')
+                    f.readlines()
+                except IOError:
+                    try:
+                        os.mkdir('footlocker')
+                    except:
+                        pass
 
-                open('./{}/proxies.txt'.format(k.lower()),'w')
-                if k.lower() in ['holypop','naked','footasylum','snipes','wch','prodirect']:
-                    # open('./data/{}/accounts.txt'.format(k.lower()),'w')
-                    task = 'PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,ACCOUNT EMAIL,ACCOUNT PASSWORD'
-                else:
-                    task = 'PRODUCT,SIZE,DELAY,PROFILE,PAYMENT'
-                with open('./{}/tasks.csv'.format(k.lower()),'w') as tasks:
-                    tasks.write(task)
+                    print("Creating files for footlocker")
+                    open('./footlocker/proxies.txt','w')
+                    with open('./footlocker/tasks.csv','w') as tasks:
+                        tasks.write('PRODUCT,REGION_CODE,SIZE,DELAY,PROFILE,PAYMENT')
+
+            elif k.lower() not in ['footlocker_old','footlocker_new'] :
+                try:
+                    f = open('./{}/tasks.csv'.format(k.lower()))
+                    f.readlines()
+                except IOError:
+                    try:
+                        os.mkdir('{}'.format(k.lower()))
+                    except:
+                        pass
+    
+                    else:
+                        print("Creating files for {}".format(k.lower()))
+        
+                        open('./{}/proxies.txt'.format(k.lower()),'w')
+                        if k.lower() in ['holypop','naked','footasylum','snipes','wch','prodirect']:
+                            # open('./data/{}/accounts.txt'.format(k.lower()),'w')
+                            task = 'PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,ACCOUNT EMAIL,ACCOUNT PASSWORD'
+                        else:
+                            task = 'PRODUCT,SIZE,DELAY,PROFILE,PAYMENT'
+                        with open('./{}/tasks.csv'.format(k.lower()),'w') as tasks:
+                            tasks.write(task)
     except:
         pass
 
