@@ -602,7 +602,7 @@ class AWLAB:
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     self.card()
 
-                print(poll.text)
+                # print(poll.text)
                 if 'You are being rate limited.' in poll.text:
                     logger.error(SITE,self.taskID,'Rate limited. Sleeping...')
                     # time.sleep(int(poll.json()['retry_after']))

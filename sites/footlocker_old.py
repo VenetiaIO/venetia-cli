@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-import datetime
+from datetime import timezone, datetime
 import threading
 import random
 import sys
@@ -129,6 +129,13 @@ class FOOTLOCKER_OLD:
             time.sleep(int(self.task["DELAY"]))
             self.retrieveSizes()
 
+        if retrieveSizes.status_code == 503:
+            logger.info(SITE,self.taskID,'Queue...')
+            time.sleep(30)
+            self.retrieveSizes()
+
+
+
         try:
             data = retrieveSizes.json()
         except Exception as e:
@@ -139,6 +146,11 @@ class FOOTLOCKER_OLD:
             self.retrieveSizes()
         
         if retrieveSizes.status_code == 200:
+            if 'sold out' in retrieveSizes.text.lower():
+                logger.error(SITE,self.taskID,'Sold Out. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.retrieveSizes()
+                
             try:
                 htmlContent = data['content'].replace('\n','').replace("\\", "")
             except Exception as e:
@@ -197,6 +209,7 @@ class FOOTLOCKER_OLD:
                 logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
             self.addToCart()
+
     
                 
             
@@ -455,6 +468,8 @@ class FOOTLOCKER_OLD:
 
             if self.task['PAYMENT'].lower() == 'paypal':
                 self.paypalCheckout()
+            if self.task['PAYMENT'].lower() == 'card':
+                self.cardPayment()
         else:
             logger.error(SITE,self.taskID,'Failed to submit payment details.Retrying...')
             time.sleep(int(self.task["DELAY"]))
@@ -548,7 +563,7 @@ class FOOTLOCKER_OLD:
         data['brandCode'] = 'paypal'
         data['shopperBehaviorLog'] = {"numberBind":"1","holderNameBind":"1","cvcBind":"1","activate":"12","deactivate":"10"}
         data['dfValue'] = 'ryEGX8eZpJ0030000000000000BTWDfYZVR30089146776cVB94iKzBGLWMw84D0Ss5S16Goh5Mk0045zgp4q8JSa00000qZkTE00000q6IQbnyNfpG2etdcqzfW:40'
-        data['referrerURL'] = self.task['PRODUCT'].split('/en')[0]
+        data['referrerURL'] = self.baseUrl
 
         self.productTitle = data['riskdata.basket.item1.productTitle']
         self.productPrice = '{} {}'.format(self.productPrice, data['currencyCode'])
@@ -623,6 +638,130 @@ class FOOTLOCKER_OLD:
             except:
                 pass
             logger.error(SITE,self.taskID,'Failed to get paypal link. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.paypalCheckout()
+
+
+    def cardPayment(self):
+        logger.prepare(SITE,self.taskID,'Getting card details...')
+
+        profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
+
+        data = {
+                'displayGroup': '',
+                'paypal.storeOcDetails': False,
+                'card.cardNumber': '',
+                'card.cardHolderName': '',
+                'card.expiryMonth': '',
+                'card.expiryYear': '',
+                'card.cvcCode': '',
+                'sig': '',
+                'merchantReference': '',
+                'brandCode': 'paypal',
+                'paymentAmount': '',
+                'currencyCode': '',
+                'shipBeforeDate': '',
+                'skinCode': '',
+                'merchantAccount': '',
+                'shopperLocale': '',
+                'stage': '',
+                'sessionId': '',
+                'sessionValidity': '',
+                'countryCode': '',
+                'shopperEmail': '',
+                'shopperReference': '',
+                'recurringContract': '',
+                'resURL': '',
+                'blockedMethods': '',
+                'merchantReturnData': '',
+                'originalSession': '',
+                'billingAddress.street': '',
+                'billingAddress.houseNumberOrName': '',
+                'billingAddress.city': '',
+                'billingAddress.postalCode': '',
+                'billingAddress.stateOrProvince': '',
+                'billingAddress.country': '',
+                'billingAddressType': '',
+                'billingAddressSig': '',
+                'deliveryAddress.street': '',
+                'deliveryAddress.houseNumberOrName': '',
+                'deliveryAddress.city': '',
+                'deliveryAddress.postalCode': '',
+                'deliveryAddress.stateOrProvince': '',
+                'deliveryAddress.country': '',
+                'deliveryAddressType': '',
+                'deliveryAddressSig': '',
+                'shopper.firstName': '',
+                'shopper.lastName': '',
+                'shopper.gender': '',
+                'shopper.dateOfBirthDayOfMonth': '',
+                'shopper.dateOfBirthMonth': '',
+                'shopper.dateOfBirthYear': '',
+                'shopper.telephoneNumber': '',
+                'shopperType': '',
+                'shopperSig': '',
+                'riskdata.basket.item1.size': '',
+                'riskdata.basket.item1.itemID': '',
+                'riskdata.basket.item1.amountPerItem': '',
+                'riskdata.basket.item1.quantity': '',
+                'riskdata.basket.item1.productTitle': '',
+                'riskdata.basket.item1.color': '',
+                'merchantIntegration.type': '',
+                'riskdata.basket.item1.sku': '',
+                'riskdata.basket.item1.currency': '',
+                'referrerURL': '',
+                'dfValue': '',
+                'usingFrame': '',
+                'usingPopUp': '',
+                'shopperBehaviorLog': '',
+        }
+
+
+
+        soup = BeautifulSoup(self.responseText, "html.parser")
+        for s in data.keys():
+            try:
+                val = soup.find('input',{'name':s})['value']
+                data[s] = val
+            except:
+                pass
+        data['displayGroup'] = 'card'
+        data['brandCode'] = 'brandCodeUndef'
+        data['shopperBehaviorLog'] = {"numberBind":"1","holderNameBind":"1","cvcBind":"1","deactivate":"3","activate":"3","numberFieldFocusCount":"1","numberFieldLog":"fo@130,KN@537,KN@540,KN@549,KN@555,KN@565,KN@567,KN@575,KN@579,KN@588,KN@590,KN@601,KN@604,KN@629,KN@631,KN@633,KN@634,KU@638,ch@638,bl@638","numberFieldKeyCount":"17","numberUnkKeysFieldLog":"9@638","numberFieldChangeCount":"1","numberFieldEvHa":"total=0","numberFieldBlurCount":"1","holderNameFieldFocusCount":"1","holderNameFieldLog":"fo@638,KL@649,KL@650,KL@651,KL@655,KL@655,KL@656,Ks@657,KL@659,KL@660,KL@661,KL@663,KL@664,KL@666,KL@669,KL@670,KL@672,KU@676,ch@676,bl@676","holderNameFieldKeyCount":"17","holderNameUnkKeysFieldLog":"9@676","holderNameFieldChangeCount":"1","holderNameFieldEvHa":"total=0","holderNameFieldBlurCount":"1","cvcFieldFocusCount":"1","cvcFieldLog":"fo@811,cl@812,KN@826,KN@829,KN@831,ch@840,bl@840","cvcFieldClickCount":"1","cvcFieldKeyCount":"3","cvcFieldChangeCount":"1","cvcFieldEvHa":"total=0","cvcFieldBlurCount":"1"}
+        data['dfValue'] = 'ryEGX8eZpJ0030000000000000BTWDfYZVR30089146776cVB94iKzBGLWMw84D0Ss5S16Goh5Mk0045zgp4q8JSa00000qZkTE00000q6IQbnyNfpG2etdcqzfW:40'
+        data['referrerURL'] = self.baseUrl
+
+        data['card.cardNumber'] = profile['card']['cardNumber'] #may need to add spaces between each 4 numbers.
+        data['card.cardHolderName'] = profile['firstName'] + ' ' + profile['lastName']
+        data['card.expiryMonth'] = profile['card']['cardMonth']
+        data['card.expiryYear'] = profile['card']['cardYear']
+        data['card.cvcCode'] = profile['card']['cardCVV']
+
+        self.productTitle = data['riskdata.basket.item1.productTitle']
+        self.productPrice = '{} {}'.format(self.productPrice, data['currencyCode'])
+
+        try:
+            completeCard = self.session.post('https://live.adyen.com/hpp/completeCard.shtml',data=data,headers={
+                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                "accept-language": "en-US,en;q=0.9",
+                "cache-control": "max-age=0",
+                "content-type": "application/x-www-form-urlencoded",
+                "sec-ch-ua": "\"Google Chrome\";v=\"87\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"87\"",
+                "sec-ch-ua-mobile": "?0",
+                "sec-fetch-dest": "document",
+                "sec-fetch-mode": "navigate",
+                "sec-fetch-site": "cross-site",
+                "upgrade-insecure-requests": "1",
+                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
             self.paypalCheckout()
 

@@ -1264,6 +1264,7 @@ class SVD:
             time.sleep(int(self.task["DELAY"]))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.braintreeCard()
+        self.end = time.time() - self.start
 
         if r.status_code == 400:
             logger.error(SITE,self.taskID,'Checkout Failed. Retrying...')
@@ -1300,7 +1301,8 @@ class SVD:
                     paymentMethod='Card',
                     profile=self.task["PROFILE"],
                     product=self.task["PRODUCT"],
-                    proxy=self.session.proxies
+                    proxy=self.session.proxies,
+                    speed=self.end
                 )
                 while True:
                     pass

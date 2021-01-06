@@ -241,6 +241,28 @@
                 "cardYear": "2021",
                 "cardCVV": "270"
             }
+        },
+        {
+            "profileName": "hsbc_it_fake",
+            "firstName": "Claire",
+            "lastName": "Bottomley",
+            "email": "charliebottomley11@gmail.com",
+            "phonePrefix": "+44",
+            "phone": "7796233905",
+            "house": "95",
+            "addressOne": "Via A.G. Alaimo",
+            "addressTwo": "",
+            "city": "Castelfidardo",
+            "region": "Ancona",
+            "country": "Italy",
+            "countryCode": "IT",
+            "zip": "60022",
+            "card": {
+                "cardNumber": "5273468042304418",
+                "cardMonth": "3",
+                "cardYear": "2025",
+                "cardCVV": "521"
+            }
         }
     ]
 }

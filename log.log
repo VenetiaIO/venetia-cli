@@ -1,0 +1,36 @@
+14:03:20,655 root ERROR list indices must be integers or slices, not str
+14:03:21,715 root ERROR list indices must be integers or slices, not str
+14:03:22,778 root ERROR list indices must be integers or slices, not str
+14:05:05,980 root ERROR 0
+14:05:07,68 root ERROR 0
+14:05:08,149 root ERROR 0
+14:05:28,317 root ERROR 0
+14:05:29,386 root ERROR 0
+14:05:30,458 root ERROR 0
+15:41:34,44 root ERROR can only concatenate str (not "float") to str
+15:41:35,50 root ERROR can only concatenate str (not "float") to str
+15:41:36,59 root ERROR can only concatenate str (not "float") to str
+15:41:37,66 root ERROR can only concatenate str (not "float") to str
+15:41:38,79 root ERROR can only concatenate str (not "float") to str
+15:41:39,87 root ERROR can only concatenate str (not "float") to str
+15:41:40,98 root ERROR can only concatenate str (not "float") to str
+15:41:41,112 root ERROR can only concatenate str (not "float") to str
+15:41:42,122 root ERROR can only concatenate str (not "float") to str
+19:40:24,383 root ERROR list indices must be integers or slices, not str
+19:42:30,575 root ERROR 'SCHUH' object has no attribute 'orderTotal'
+19:42:35,250 root ERROR 'SCHUH' object has no attribute 'orderTotal'
+23:12:21,751 root ERROR HTTPSConnectionPool(host='secure.schuh.co.uk', port=443): Max retries exceeded with url: /BasketService/AddToBasket (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+23:17:49,278 root ERROR HTTPSConnectionPool(host='secure.schuh.co.uk', port=443): Max retries exceeded with url: /BasketService/AddToBasket (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+23:18:32,839 root ERROR list index out of range
+23:19:10,158 root ERROR string indices must be integers
+23:21:28,593 root ERROR HTTPSConnectionPool(host='secure.schuh.co.uk', port=443): Max retries exceeded with url: /BasketService/AddToBasket (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+09:26:46,114 root ERROR Expecting value: line 1 column 1 (char 0)
+09:26:47,237 root ERROR Expecting value: line 1 column 1 (char 0)
+09:26:48,364 root ERROR Expecting value: line 1 column 1 (char 0)
+09:26:49,479 root ERROR Expecting value: line 1 column 1 (char 0)
+09:26:50,598 root ERROR Expecting value: line 1 column 1 (char 0)
+09:26:51,731 root ERROR Expecting value: line 1 column 1 (char 0)
+09:26:52,861 root ERROR Expecting value: line 1 column 1 (char 0)
+09:27:12,99 root ERROR Expecting value: line 1 column 1 (char 0)
+09:27:13,226 root ERROR Expecting value: line 1 column 1 (char 0)
+09:27:14,353 root ERROR Expecting value: line 1 column 1 (char 0)

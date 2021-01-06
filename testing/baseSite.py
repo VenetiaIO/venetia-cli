@@ -30,4 +30,5 @@ class SITE:
         
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
 
+
         self.collect()
