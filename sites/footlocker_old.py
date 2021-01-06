@@ -110,6 +110,7 @@ class FOOTLOCKER_OLD:
         logger.prepare(SITE,self.taskID,'Getting product data...')
         self.start = time.time()
         self.relayCat = 'Relay42_Category'  #soup.find('input',{'value':'Product Pages'})['name']
+        self.productImage = f'https://images.footlocker.com/is/image/FLEU/{self.baseSku}_01?wid=763&hei=538&fmt=png-alpha'
         try:
             retrieveSizes = self.session.get(f'{self.baseUrl2}ViewProduct-ProductVariationSelect?BaseSKU={self.baseSku}&InventoryServerity=ProductDetail',headers={
                 "accept": "application/json, text/javascript, */*; q=0.01",
@@ -134,6 +135,10 @@ class FOOTLOCKER_OLD:
             time.sleep(30)
             self.retrieveSizes()
 
+        if retrieveSizes.status_code == 404:
+            logger.error(SITE,self.taskid,'Sold Out. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.retrieveSizes()
 
 
         try:
@@ -150,7 +155,7 @@ class FOOTLOCKER_OLD:
                 logger.error(SITE,self.taskID,'Sold Out. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 self.retrieveSizes()
-                
+
             try:
                 htmlContent = data['content'].replace('\n','').replace("\\", "")
             except Exception as e:
@@ -163,12 +168,13 @@ class FOOTLOCKER_OLD:
             try:
                 soup = BeautifulSoup(htmlContent,"html.parser")
                 eu_sizes = soup.find_all('section',{'class':'fl-accordion-tab--content'})[0].find_all('button')
+                self.tabgroup = self.baseSku + eu_sizes[0]['data-product-size-select-item']
             except:
                 logger.error(SITE,self.taskID,'Sizes Not Found')
                 time.sleep(int(self.task["DELAY"]))
-                self.collect()
+                self.retrieveSizes()
 
-            self.tabgroup = self.baseSku + eu_sizes[0]['data-product-size-select-item']
+            
 
             allSizes = []
             sizes = []
@@ -254,14 +260,19 @@ class FOOTLOCKER_OLD:
             self.addToCart()
 
         elif atcResponse.status_code == 200:
-            self.syncToken = atcResponse.text.split('ViewCart-Checkout?SynchronizerToken=')[1].split('\\"')[0]
-            self.productPrice = atcResponse.text.split('price:\\"')[1].split('\\"')[0]
+            try:
+                self.syncToken = atcResponse.text.split('ViewCart-Checkout?SynchronizerToken=')[1].split('\\"')[0]
+                self.productPrice = atcResponse.text.split('price:\\"')[1].split('\\"')[0]
+            except:
+                logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.addToCart()
+
             logger.warning(SITE,self.taskID,'Successfully carted product')
             self.checkoutDispatch()
 
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
             self.addToCart()
 
@@ -592,7 +603,6 @@ class FOOTLOCKER_OLD:
         if paypalRedirect.status_code == 200 and 'paypal' in paypalRedirect.url:
             logger.warning(SITE,self.taskID, 'Got paypal link')
             self.end = time.time() - self.start
-            self.productImage = f'https://images.footlocker.com/is/image/FLEU/{self.baseSku}_01?wid=763&hei=538&fmt=png-alpha'
 
             updateConsoleTitle(False,True,SITE)
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
@@ -643,7 +653,7 @@ class FOOTLOCKER_OLD:
 
 
     def cardPayment(self):
-        logger.prepare(SITE,self.taskID,'Getting card details...')
+        logger.info(SITE,self.taskID,'Starting [CARD] checkout...')
 
         profile = loadProfile(self.task["PROFILE"])
         if profile == None:
@@ -744,6 +754,9 @@ class FOOTLOCKER_OLD:
         self.productTitle = data['riskdata.basket.item1.productTitle']
         self.productPrice = '{} {}'.format(self.productPrice, data['currencyCode'])
 
+
+
+        logger.prepare(SITE,self.taskID,'Submitting payment...')
         try:
             completeCard = self.session.post('https://live.adyen.com/hpp/completeCard.shtml',data=data,headers={
                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
@@ -765,7 +778,222 @@ class FOOTLOCKER_OLD:
             time.sleep(int(self.task["DELAY"]))
             self.paypalCheckout()
 
+        if completeCard.status_code == 200:
+            # self.PaReq = completeCard.url.split('&paRequest=')[1].split('&')[0]
+            # self.MD = completeCard.url.split('&md=')[1].split('&')[0]
+            try:
+                payerAuth = self.session.get(completeCard.url, headers={
+                    'Referer':'https://live.adyen.com/hpp/pay.shtml',
+                    'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                self.cardPayment()
+
+            try:
+                soup = BeautifulSoup(payerAuth.text, "html.parser")
+                self.pareq = soup.find('input',{'name':'PaReq'})['value']
+                self.MD= soup.find('input',{'name':'MD'})['value']
+            except:
+                logger.error(SITE,self.taskID,'Failed to get checkout details. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.cardPayment()
+            
+            Dpayload = {
+               "TermUrl":"https://live.adyen.com/hpp/complete3dIntermediate.shtml",
+               "PaReq":self.pareq,
+               "MD":self.MD,
+               "shopperBehaviorLog":""
+            }
+
+            try:
+                payerAuth = self.session.post('https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication', data=Dpayload, headers={
+                    'referer':'https://live.adyen.com/',
+                    'content-type': 'application/x-www-form-urlencoded',
+                    'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                self.cardPayment()
+
+            if payerAuth.status_code == 200:
+                soup = BeautifulSoup(payerAuth.text,"html.parser")
+                # print(soup)
+                transToken = str(soup.find_all("script")[0]).split('"')[1]
+
+                try:
+                    payload = {"transToken":transToken}
+                    poll = self.session.post('https://poll.touchtechpayments.com/poll', json=payload, headers={
+                        'authority': 'verifiedbyvisa.acs.touchtechpayments.com',
+                        'accept-language': 'en-US,en;q=0.9',
+                        'referer': 'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+                        'accept':'*/*',
+                    })
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                    time.sleep(int(self.task["DELAY"]))
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    self.cardPayment()
+
+                if 'You are being rate limited.' in poll.text:
+                    logger.error(SITE,self.taskID,'Rate limited. Sleeping...')
+                    # time.sleep(int(poll.json()['retry_after']))
+                    self.cardPayment()
+
+                if poll.json()["status"] == "blocked":
+                    logger.error(SITE,self.taskID,'Card Blocked. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    self.cardPayment()
+                if poll.json()["status"] == "pending":
+                    logger.warning(SITE,self.taskID,'Polling 3DS...')
+                    while poll.json()["status"] == "pending":
+                        poll = self.session.post('https://poll.touchtechpayments.com/poll',headers={
+                            'authority': 'verifiedbyvisa.acs.touchtechpayments.com',
+                            'accept-language': 'en-US,en;q=0.9',
+                            'referer': 'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
+                            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+                            'accept':'*/*',}, json=payload)
+                
+                try:
+                    json = poll.json()
+                except:
+                    logger.error(SITE,self.taskID,'Failed to retrieve auth token for 3DS. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    self.cardPayment()
+                if poll.json()["status"] == "success":
+                    authToken = poll.json()['authToken']
+                else:
+                    logger.error(SITE,self.taskID,'Failed to retrieve auth token for 3DS. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    self.cardPayment()
+
+                authToken = poll.json()['authToken']
+                logger.warning(SITE,self.taskID,'3DS Authorised')
+        
+                data = '{"transToken":"%s","authToken":"%s"}' % (transToken, authToken)
+
+                headers = {
+                    'authority': 'macs.touchtechpayments.com',
+                    'sec-fetch-dest': 'empty',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                    'content-type': 'application/json',
+                    'accept': '*/*',
+                    'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
+                    'referer': 'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
+                    'sec-fetch-site': 'same-site',
+                    'sec-fetch-mode': 'cors',
+                }
+
+                try:
+                    r = self.session.post("https://macs.touchtechpayments.com/v1/confirmTransaction",headers=headers, data=data)
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                    time.sleep(int(self.task["DELAY"]))
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    self.cardPayment()
+
+                pares = r.json()['Response']
+
+                data = {"MD":self.MD, "PaRes":pares}
+                try:
+                    r = self.session.post('https://live.adyen.com/hpp/complete3dIntermediate.shtml',headers={
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                        'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
+                        'referer':'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
+                    }, data=data)
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                    time.sleep(int(self.task["DELAY"]))
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    self.cardPayment()
+
+                if r.status_code in [200,302]:
+                    try:
+                        complete3d = self.session.post('https://live.adyen.com/hpp/complete3d.shtml',data=data,headers={
+                            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                            'content-type': 'application/x-www-form-urlencoded',
+                            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                            'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
+                            'referer':'https://live.adyen.com/hpp/complete3dIntermediate.shtml',
+                        })
+                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                        time.sleep(int(self.task["DELAY"]))
+                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                        self.cardPayment()
+
+                    # if complete3d.status_code == 200:
+                        # self.orderId = complete3d.url.split('?OrderID=')[1].split('&')[0]
 
 
+                    self.end = time.time() - self.start
+                    updateConsoleTitle(False,True,SITE)
+                    logger.alert(SITE,self.taskID,'Completed Card Checkout')
+                    
+
+                    try:
+                        discord.success(
+                            webhook=loadSettings()["webhook"],
+                            site=SITE,
+                            url=self.baseUrl,
+                            image=self.productImage,
+                            title=self.productTitle,
+                            size=self.size,
+                            price=self.productPrice,
+                            paymentMethod='Card',
+                            profile=self.task["PROFILE"],
+                            product=self.task["PRODUCT"],
+                            proxy=self.session.proxies,
+                            speed=self.end,
+                            region=self.countryCode
+                        )
+                        sendNotification(SITE,self.productTitle)
+                    except Exception as e:
+                        log.info(e)
+                        pass
+
+                    while True:
+                        pass
 
 
+                else:
+                    logger.error(SITE,self.taskID,'Failed to complete checkout. Retrying...')
+                    discord.failed(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        url=self.baseUrl,
+                        image=self.productImage,
+                        title=self.productTitle,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod='Card',
+                        profile=self.task["PROFILE"],
+                        proxy=self.session.proxies
+                    )
+                    time.sleep(int(self.task["DELAY"]))
+                    self.cardPayment()
+            
+            else:
+                logger.error(SITE,self.taskID,'Failed to get checkout details. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.cardPayment()
+
+        else:
+            logger.error(SITE,self.taskID,'Failed to get checkout details. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.cardPayment()

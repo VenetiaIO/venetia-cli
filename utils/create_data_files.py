@@ -4,6 +4,11 @@ import utils.config as CONFIG
 
 def execute():
 
+    try:
+        os.mkdir('data')
+    except:
+        pass
+
     #check site folders
     try:
         for k in CONFIG.sites.keys():

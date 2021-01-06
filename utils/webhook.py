@@ -49,7 +49,7 @@ class discord:
                 except Exception as e:
                     log.info(e)
 
-            if SITE and region: embed.add_embed_field(name='Site', value=SITE.title() + '  :flag_{}:'.format(region.lower()) ,inline=False)
+            if SITE and region: embed.add_embed_field(name='Site', value='{}  :flag_{}:'.format(SITE.title(), region.lower()) ,inline=False)
             else: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
 
             if productTitle: embed.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
@@ -92,7 +92,7 @@ class discord:
                 except Exception as e:
                     log.info(e)
 
-            if SITE and region: embed2.add_embed_field(name='Site', value=SITE.title() + '  :flag_{}:'.format(region.lower()) ,inline=False)
+            if SITE and region: embed2.add_embed_field(name='Site', value='{}  :flag_{}:'.format(SITE.title(),region.lower()) ,inline=False)
             else: embed2.add_embed_field(name='Site', value=SITE.title(),inline=False)
 
             if productTitle: embed2.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
@@ -137,7 +137,7 @@ class discord:
             embed.set_timestamp()
 
             if image: embed.set_thumbnail(url=image)
-            if SITE and region: embed.add_embed_field(name='Site', value=SITE.title() + '  :flag_{}:'.format(region) ,inline=False)
+            if SITE and region: embed.add_embed_field(name='Site', value='{}  :flag_{}:'.format(SITE.title(), region) ,inline=False)
             else: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
 
             if productTitle: embed.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
