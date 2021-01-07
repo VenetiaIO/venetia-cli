@@ -11,6 +11,7 @@ import os
 import base64
 import cloudscraper
 import string
+from urllib3.exceptions import HTTPError
 
 from utils.logger import logger
 from utils.webhook import discord
@@ -52,7 +53,7 @@ class FOOTLOCKER_OLD:
             self.baseUrl2 = 'https://www.footlocker.co.uk/INTERSHOP/web/FLE/Footlocker-Footlocker_GB-Site/en_GB/-/GBP/'
         if self.countryCode == 'au':
             self.baseUrl = 'https://www.footlocker.com.au'
-            self.baseUrl2 = 'https://www.footlocker.co.uk/INTERSHOP/web/FLE/Footlocker-Footlocker_AU-Site/en_GB/-/AUD/'
+            self.baseUrl2 = 'https://www.footlocker.com.au/INTERSHOP/web/FLE/Footlocker-Footlocker_AU-Site/en_GB/-/AUD/'
         if self.countryCode == 'sg':
             self.baseUrl = 'https://www.footlocker.co.uk'
             self.baseUrl2 = 'https://www.footlocker.sg/INTERSHOP/web/FLE/FootlockerAsiaPacific-Footlocker_SG-Site/en_GB/-/SGD/'
@@ -168,7 +169,6 @@ class FOOTLOCKER_OLD:
             try:
                 soup = BeautifulSoup(htmlContent,"html.parser")
                 eu_sizes = soup.find_all('section',{'class':'fl-accordion-tab--content'})[0].find_all('button')
-                self.tabgroup = self.baseSku + eu_sizes[0]['data-product-size-select-item']
             except:
                 logger.error(SITE,self.taskID,'Sizes Not Found')
                 time.sleep(int(self.task["DELAY"]))
@@ -181,12 +181,17 @@ class FOOTLOCKER_OLD:
 
             for s in eu_sizes:
                 try:
-                    size = s.find('span').text
-                    sizeSku = s['data-product-size-select-item']
-                    allSizes.append('{}:{}'.format(size,sizeSku))
-                    sizes.append(size)
+                    if 'not-available' in s['class']:
+                        pass
+                    else:
+                        size = s.find('span').text
+                        sizeSku = s['data-product-size-select-item']
+                        allSizes.append('{}:{}'.format(size,sizeSku))
+                        sizes.append(size)
                 except:
                     pass
+
+            self.tabgroup = self.baseSku + allSizes[0].split(':')[1]
 
 
             if len(sizes) == 0:
@@ -251,9 +256,18 @@ class FOOTLOCKER_OLD:
 
         if atcResponse.status_code == 403:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
-            challengeUrl = atcResponse.json()['url']
+            try:
+                challengeUrl = atcResponse.json()['url']
+            except:
+                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                time.sleep(10)
+                self.addToCart()
             cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-            while(cookie == None): cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+            while(cookie['cookie'] == None):
+                del self.session.cookies["datadome"]
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                
 
             del self.session.cookies["datadome"]
             self.session.cookies["datadome"] = cookie['cookie']
@@ -307,6 +321,16 @@ class FOOTLOCKER_OLD:
             time.sleep(int(self.task["DELAY"]))
             self.checkoutDispatch()
 
+        if checkoutOverviewPage.status_code == 403:
+            logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
+            challengeUrl = checkoutOverviewPage.json()['url']
+            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+            while(cookie == None): cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+
+            del self.session.cookies["datadome"]
+            self.session.cookies["datadome"] = cookie['cookie']
+            self.checkoutDispatch()
+
         if checkoutOverviewPage.status_code in [200,302]:
             self.referer = checkoutOverviewPage.url
             try:
@@ -317,7 +341,7 @@ class FOOTLOCKER_OLD:
                 shippingAddressId = soup.find('input',{'name':'shipping_AddressID'})['value']
                 # billingAddressId = soup.find('input',{'name':'billing_AddressID'})['value']
             except Exception as e:
-                print(e)
+                log.info(e)
                 logger.error(SITE,self.taskID,'Failed to get checkout data. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 self.checkoutDispatch()
@@ -378,6 +402,18 @@ class FOOTLOCKER_OLD:
             time.sleep(int(self.task["DELAY"]))
             self.checkoutDispatch()
 
+        print(checkoutOverviewDispatch, checkoutOverviewDispatch.url)
+        if checkoutOverviewDispatch.status_code == 403:
+            logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
+            challengeUrl = checkoutOverviewDispatch.json()['url']
+            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+            while(cookie == None): cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+
+            del self.session.cookies["datadome"]
+            self.session.cookies["datadome"] = cookie['cookie']
+            self.checkoutDispatch()
+
+        
         if checkoutOverviewDispatch.status_code in [200,302] and 'OrderID' in checkoutOverviewDispatch.url:
             logger.warning(SITE,self.taskID,'Shipping submitted')
 

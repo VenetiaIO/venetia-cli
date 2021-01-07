@@ -6,6 +6,7 @@ import time
 import random
 import threading
 import cloudscraper
+import urllib
 
 from utils.logger import logger
 from utils.captcha import captcha
@@ -17,16 +18,19 @@ headers = {"apiKey":"f441379a-8a72-4e41-8332-7749cc69b00f"}
 class datadome:
     @staticmethod
     def reCaptchaMethod(SITE,taskID,session,responseUrl):
-        datadomeCookie = str(session.cookies).split('datadome=')[1].split(' ')[0]
-        geoUrl = 'https://geo.captcha-delivery.com/captcha/'
-        geoParams = {
-            'initialCid': responseUrl.split('?initialCid=')[1].split('&')[0],
-            'referer': responseUrl.split('&referer=')[1].split('&')[0],
-            'hash': responseUrl.split('&hash=')[1].split('&')[0],
-            't': responseUrl.split('&t=')[1].split('&')[0],
-            's': responseUrl.split('&s=')[1],
-            'cid': datadomeCookie
-        }
+        try:
+            datadomeCookie = str(session.cookies).split('datadome=')[1].split(' ')[0]
+            geoUrl = 'https://geo.captcha-delivery.com/captcha/'
+            geoParams = {
+                'initialCid': responseUrl.split('?initialCid=')[1].split('&')[0],
+                'referer': responseUrl.split('&referer=')[1].split('&')[0],
+                'hash': responseUrl.split('&hash=')[1].split('&')[0],
+                't': responseUrl.split('&t=')[1].split('&')[0],
+                's': responseUrl.split('&s=')[1],
+                'cid': datadomeCookie
+            }
+        except Exception:
+            return {"cookie":None}
         try:
             response = session.get(geoUrl,params=geoParams,headers={
                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
@@ -43,8 +47,20 @@ class datadome:
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             logger.error(SITE,taskID,'Error: {}'.format(e))
 
-        siteKey = response.text.split("'sitekey' : '")[1].split("'")[0]
-        capResponse = captcha.v2(siteKey,response.url,session.proxies,SITE,taskID)
+        try:
+            if 'You have been blocked' in response.text:
+                logger.error(SITE,taskID,'Blocked. Rotating Proxy...')
+                # print(session.proxies)
+                time.sleep(5)
+                return {"cookie":None}
+            else:
+                try:
+                    siteKey = response.text.split("'sitekey' : '")[1].split("'")[0]
+                    capResponse = captcha.v2(siteKey,response.url,session.proxies,SITE,taskID)
+                except Exception:
+                    reCaptchaMethod(SITE,taskID,session,responseUrl)
+        except Exception:
+            return {"cookie":None}
 
         params = {
             "cid": encodeURIComponent(datadomeCookie),

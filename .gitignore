@@ -1,7 +1,25 @@
 
-data/tasks.csv
-data/tasks.csv
-data/proxies.txt
+data/*
+airness/*
+allike/*
+awlab/*
+chmielna20/*
+disney/*
+footasylum/*
+footlocker/*
+grosbasket/*
+holypop/*
+naked/*
+office/*
+offspring/*
+prodirect/*
+queens/*
+schuh/*
+slamjam/*
+snipes/*
+svd/*
+titolo/*
+wch/*
 !**/__pycache__/
 *.pyc
 *.pyc
@@ -10,4 +28,4 @@ __pycache__/*
 *DS
 .vscode/settings.json
 venetia-success-bots/venetia-cli-reposter/
-venetia-success-bots_old.exe/venetia-cli-reposter/
+

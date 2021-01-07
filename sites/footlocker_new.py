@@ -11,6 +11,7 @@ import base64
 import cloudscraper
 import string
 import uuid
+from urllib3.exceptions import HTTPError
 
 from utils.logger import logger
 from utils.webhook import discord
@@ -97,6 +98,7 @@ class FOOTLOCKER_NEW:
 
 
         if retrieve.status_code == 200:
+            url = retrieve.text.split('"@id":"')[1].split('"')[0]
             self.start = time.time()
             logger.warning(SITE,self.taskID,'Got product page')
             try:
@@ -104,9 +106,9 @@ class FOOTLOCKER_NEW:
                 regex = r"window.footlocker.STATE_FROM_SERVER = {(.+)}"
                 matches = re.search(regex, retrieve.text, re.MULTILINE)
                 productData = json.loads(matches.group().split('window.footlocker.STATE_FROM_SERVER = ')[1])
-                eu_sizes = productData['details']['sizes']['/en/product/{}/{}.html'.format(self.task['PRODUCT'], self.task['PRODUCT'])]
-                self.productPrice = productData['details']['data']['/en/product/{}/{}.html'.format(self.task['PRODUCT'], self.task['PRODUCT'])][0]['price']['formattedValue']
-                self.productTitle = productData['details']['product']['/en/product/{}/{}.html'.format(self.task['PRODUCT'], self.task['PRODUCT'])]['name']
+                eu_sizes = productData['details']['sizes'][url.split(self.baseUrl)[1]]
+                self.productPrice = productData['details']['data'][url.split(self.baseUrl)[1]][0]['price']['formattedValue']
+                self.productTitle = productData['details']['product'][url.split(self.baseUrl)[1]]['name']
                 self.productImage = f'https://images.footlocker.com/is/image/FLEU/{self.baseSku}_01?wid=763&hei=538&fmt=png-alpha'
             except Exception as e:
                log.info(e)
@@ -233,20 +235,36 @@ class FOOTLOCKER_NEW:
             time.sleep(int(self.task["DELAY"]))
             self.addToCart()
 
+
         if atcResponse.status_code == 403:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
-            challengeUrl = atcResponse.json()['url']
+            try:
+                challengeUrl = atcResponse.json()['url']
+            except:
+                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                time.sleep(10)
+                self.addToCart()
             cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-            while(cookie == None): cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+            while(cookie['cookie'] == None):
+                del self.session.cookies["datadome"]
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                
 
             del self.session.cookies["datadome"]
             self.session.cookies["datadome"] = cookie['cookie']
             self.addToCart()
 
+
         elif atcResponse.status_code == 200:
             logger.warning(SITE,self.taskID,'Successfully carted product')
-
             self.setEmail()
+
+        elif atcResponse.status_code == 531:
+            logger.error(SITE,self.taskID,'Failed to cart (OOS). Retrying...')
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            time.sleep(int(self.task["DELAY"]))
+            self.addToCart()
 
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')

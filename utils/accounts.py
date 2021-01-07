@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from utils.captcha import captcha
 from utils.logger import logger
 from utils.webhook import discord
-from utils.functions import (loadProxy,loadProfile,loadSettings)
+from utils.functions import (loadProxy,loadProfile,loadSettings, scraper)
 
 
 
@@ -30,7 +30,7 @@ class ACCOUNTS:
 
     @staticmethod
     def holypop(sitekey,proxies,SITE,catchall,password,profile):
-        taskID = 'ACCOUNTS'
+        taskID = 'Accounts'
         logger.warning(SITE,taskID,'Getting login page...')
 
         session = requests.session()
@@ -42,13 +42,19 @@ class ACCOUNTS:
             'referer':'https://www.holypopstore.com'
         }
 
-        getLogin = session.get('https://www.holypopstore.com/')
+        try:
+            getLogin = session.get('https://www.holypopstore.com/')
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            return None
         if getLogin.status_code == 200:
             captchaResponse = captcha.Hiddenv2(sitekey,'https://www.holypopstore.com',proxies,SITE,taskID)
 
-            version = getLogin.text.split("b.version = '")[1].split("';")[0]
-            cookieVersion = getLogin.text.split("b.cookieVersion = '")[1].split("';")[0]
-            region = getLogin.text.split("b.locale = '")[1].split("';")[0].upper()
+            try:
+                version = getLogin.text.split("b.version = '")[1].split("';")[0]
+                cookieVersion = getLogin.text.split("b.cookieVersion = '")[1].split("';")[0]
+                region = getLogin.text.split("b.locale = '")[1].split("';")[0].upper()
+            except:
+                return None
 
             customer = genCustomer(catchall)
 
@@ -73,18 +79,24 @@ class ACCOUNTS:
 
             session.headers['x-requested-with'] = 'XMLHttpRequest'
             session.headers['accept'] = 'application/json, text/javascript, */*; q=0.01'
-            postInfo = session.post('https://www.holypopstore.com/index.php',data=payload)
+            try:
+                postInfo = session.post('https://www.holypopstore.com/index.php',data=payload)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                return None
             if postInfo.status_code == 200:
                 logger.success(SITE,taskID,'Created Account - {}'.format(customer["email"]))
                 profile = loadProfile(profile)
 
 
                             
-                soup = BeautifulSoup(holypop_data,"html.parser")
-                options = soup.find_all("option")
-                for s in options:
-                    if str(s.text).lower() == profile["country"].lower():
-                        countryId = s["value"]
+                try:
+                    soup = BeautifulSoup(holypop_data,"html.parser")
+                    options = soup.find_all("option")
+                    for s in options:
+                        if str(s.text).lower() == profile["country"].lower():
+                            countryId = s["value"]
+                except:
+                    return None
 
 
 
@@ -110,7 +122,11 @@ class ACCOUNTS:
                     'version': version,
                     'cookieVersion': cookieVersion
                 }
-                postInfo = session.post('https://www.holypopstore.com/index.php',data=payload)
+                try:
+                    postInfo = session.post('https://www.holypopstore.com/index.php',data=payload)
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    return None
+
                 logger.success(SITE,taskID,'Address Added!')
                 discord.accountMade(
                     webhook=loadSettings()["webhook"],
@@ -119,26 +135,34 @@ class ACCOUNTS:
                     last=customer["last"],
                     email=customer["email"]
                 )
-                with open('./data/accounts/holypop.txt','a') as accounts:
+                with open('./hoylpop/accounts.txt','a') as accounts:
                     accounts.write('\n{}:{}'.format(customer["email"],password))
+
+                return 1
         
         else:
             logger.error(SITE,taskID,'Failed to create account')
+            return None
 
     
     @staticmethod
     def proDirect(sitekey,proxies,SITE,catchall,password,profile):
-        taskID = 'ACCOUNTS'
+        taskID = 'Accounts'
         logger.warning(SITE,taskID,'Creating account...')
 
-        session = requests.session()
-        proxies = loadProxy(proxies,taskID,SITE)
-        session.proxies = proxies
+        session = scraper()
+        session.proxies = loadProxy(proxies,taskID,SITE)
         session.headers = {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'referer':'https://www.prodirectbasketball.com/accounts/MyAccount.aspx'
+            'referer':'https://www.prodirectbasketball.com/accounts/MyAccount.aspx',
         }
+
+        try:
+            getPage = session.get('https://www.prodirectbasketball.com/accounts/MyAccount.aspx')
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            logger.error(SITE,taskID,'Failed to create account')
+            return None
 
         captchaResponse = captcha.v2('6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g',session.headers['referer'],session.proxies,SITE,taskID)
         
@@ -147,14 +171,15 @@ class ACCOUNTS:
             'registeremail': customer['email'],
             'registerpassword': password,
             'g-recaptcha-response': captchaResponse,
-            '__EVENTTARGET': 'Register'
+            '__EVENTTARGET':'Register'
         }
-        postInfo = session.post('https://www.prodirectbasketball.com/accounts/MyAccount.aspx',data=form)
-        print(postInfo)
-        print(postInfo.url)
+        try:
+            postInfo = session.post('https://www.prodirectbasketball.com/accounts/MyAccount.aspx',data=form)
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            logger.error(SITE,taskID,'Failed to create account')
+            return None
         if postInfo.status_code in [200,302]:
             logger.success(SITE,taskID,'Created Account - {}'.format(customer["email"]))
-            print(postInfo.url)
             logger.warning(SITE,taskID,'Adding Address...')
 
             profile = loadProfile(profile)
@@ -171,7 +196,7 @@ class ACCOUNTS:
             session.headers = {
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'referer':'https://www.prodirectbasketball.com/accounts/MyAccount.aspx?acc=ABOOK'
+                'referer':'https://www.prodirectbasketball.com/accounts/MyAccount.aspx?acc=ABOOK',
             }
             
             form2 = {
@@ -187,7 +212,11 @@ class ACCOUNTS:
                 'ddlState': '',
                 '__EVENTTARGET': 'dlw100$SaveNewAddress'
             }
-            addAddress = session.post('https://www.prodirectbasketball.com/accounts/MyAccount.aspx?acc=ABOOK',data=form2)
+            try:
+                addAddress = session.post('https://www.prodirectbasketball.com/accounts/MyAccount.aspx?acc=ABOOK',data=form2)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                logger.error(SITE,taskID,'Failed to create account')
+                return None
             if addAddress.status_code == 200:
                 logger.success(SITE,taskID,'Address Added!')
                 discord.accountMade(
@@ -197,15 +226,92 @@ class ACCOUNTS:
                     last=customer["last"],
                     email=customer["email"]
                 )
-                with open('./data/accounts/prodirect.txt','a') as accounts:
+                with open('./prodirect/accounts.txt','a') as accounts:
                     accounts.write('\n{}:{}'.format(customer["email"],password))
+                return 1
             
             else:
                 logger.error(SITE,taskID,'Failed to add address')
+                return None
         
         else:
             logger.error(SITE,taskID,'Failed to create account')
+            return None
 
+    
+    @staticmethod
+    def footasylum(sitekey,proxies,SITE,catchall,password,profile):
+        taskID = 'Accounts'
+        logger.warning(SITE,taskID,'Creating account...')
+
+        session = scraper()
+        session.proxies = loadProxy(proxies,taskID,SITE)
+        session.headers = {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+        }
+
+        try:
+            page = session.get('https://www.footasylum.com/page/yourdetails/')
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            return None
+
+        customer = genCustomer(catchall)
+        profile = loadProfile(profile)
+
+
+        form = {
+            "target": "",
+            "reg_validate": 1,
+            "cust_reg_type": "REGISTER",
+            "email": customer['email'],
+            "mobile_phone": str(profile['phone']),
+            "mobile_phone_option": 0,
+            "login_password": password,
+            "login_password2": password,
+            "title": "MR",
+            "firstname": customer['first'],
+            "surname": customer['last'],
+            "Country": '{}|{}'.format(profile['countryCode'].upper(), profile['country']),
+            "pcSearch": profile['city'],
+            "address1": profile['house'] + ' ' + profile['addressOne'],
+            "address2": profile['addressTwo'],
+            "address4": profile['city'],
+            "address5": profile['region'],
+            "postcode": profile['zip'],
+            "rdAddSel": "Y",
+            "del_title": "MR",
+            "del_firstname": customer['first'],
+            "del_surname": customer['last'],
+            "del_Country": '{}|{}'.format(profile['countryCode'].upper(), profile['country']),
+            "pcSearch2": "",
+            "del_address1": "",
+            "del_address2": "",
+            "del_address4": "",
+            "del_address5": "",
+        }
+
+        try:
+            formPost = session.post('https://www.footasylum.com/page/yourdetails/',data=form)
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            return None
+
+        if formPost.status_code in [200,302]:
+            logger.success(SITE,taskID,'Account Created!')
+            discord.accountMade(
+                webhook=loadSettings()["webhook"],
+                site=SITE,
+                first=customer["first"],
+                last=customer["last"],
+                email=customer["email"]
+            )
+            with open('./footasylum/accounts.txt','a') as accounts:
+                accounts.write('\n{}:{}'.format(customer["email"],password))
+
+            return 1
+        else:
+            return None
+            
 
 
 

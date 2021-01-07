@@ -555,6 +555,7 @@ class AWLAB:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.card()
 
+
         if payment.status_code in [200,302] and "orderNo" in payment.url:
             logger.warning(SITE,self.taskID,'Payment submitted')
             logger.info(SITE,self.taskID,'Initiating 3DS checkout')

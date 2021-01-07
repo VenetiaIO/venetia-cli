@@ -815,12 +815,13 @@ class Menu:
                 self.menu()
 
         if option == 8:
-            logger.menu('VENETIA','ACCOUNTS','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
-            # logger.menu('VENETIA','ACCOUNTS','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('PRO-DIRECT','cyan')))
-            logger.menu('VENETIA','ACCOUNTS','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
+            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
+            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('PRO-DIRECT','cyan')))
+            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('FOOTASYLUM','cyan')))
+            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             AccountsiteSelect = input(' Select a site => ')
-            if AccountsiteSelect == "2":
+            if AccountsiteSelect == "4":
                 self.menu()
 
             proxies = input(f"[{get_time()}] Enter proxy list name (leave empty for none) ==> ")
@@ -835,15 +836,23 @@ class Menu:
             
             profile = input(f"[{get_time()}] Enter profile name (for address) ==> ")
 
+
+            # completed = []
             if AccountsiteSelect == "1":
                 sitekey = '6Lc8GBUUAAAAAKMfe1S46jE08TvVKNSnMYnuj6HN'
                 for i in range(int(amount)):
                     threading.Thread(target=ACCOUNTS.holypop,args=(sitekey,proxies,'HOLYPOP',catchall,password, profile)).start()
-            
-            if AccountsiteSelect == "9999":
+
+            if AccountsiteSelect == "2":
                 sitekey = '6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g'
                 for i in range(int(amount)):
                     threading.Thread(target=ACCOUNTS.proDirect,args=(sitekey,proxies,'PRO-DIRECT',catchall,password, profile)).start()
+
+            if AccountsiteSelect == "3":
+                sitekey = 'SITE-KEY-NOT-REQUIRED'
+                for i in range(int(amount)):
+                    threading.Thread(target=ACCOUNTS.footasylum,args=(sitekey,proxies,'FOOTASYLUM',catchall,password, profile)).start()
+            
 
         
             while threading.active_count() != 2:
