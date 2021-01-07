@@ -7,6 +7,7 @@ class PX:
 
     @staticmethod
     def snipes(session, link, taskID):
+        logger.prepare('SNIPES',taskID,'Getting PX Cookies...')
         headers = {'apiKey': 'aafff4ad-930d-47a4-98f4-666e644c1fc3'}
         if session.proxies != None: params = {"proxies":session.proxies}
         if session.proxies == None: params = {}
@@ -23,6 +24,7 @@ class PX:
 
     @staticmethod
     def solebox(session, link, taskID):
+        logger.prepare('SOLEBOX',taskID,'Getting PX Cookies...')
         headers = {'apiKey': 'aafff4ad-930d-47a4-98f4-666e644c1fc3'}
         if session.proxies != None: params = {"proxies":session.proxies}
         if session.proxies == None: params = {}

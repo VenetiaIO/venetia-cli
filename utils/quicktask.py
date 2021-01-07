@@ -4,6 +4,7 @@ import json
 import threading
 import logging
 from utils.config import *
+from utils.functions import loadProfile
 
 try:
     import win32console 
@@ -67,7 +68,19 @@ def action():
         }
     
         taskName = 'QT'
-        threading.Thread(target=sites.get(row["SITE"].upper()),args=(row,taskName)).start()
+        
+
+        if site == 'footlocker':
+            if loadProfile(row['PROFILE'])['countryCode'].upper() in new_footlockers():
+                siteModule = sites.get('FOOTLOCKER_NEW')
+            if loadProfile(row['PROFILE'])['countryCode'].upper()in old_footlockers():
+                siteModule = sites.get('FOOTLOCKER_OLD')
+        else:
+            siteModule = sites.get(row["SITE"].upper())
+
+        
+
+        threading.Thread(target=siteModule,args=(row,taskName)).start()
         try:
             win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),row["SITE"].upper(),"0","0"))
         except:

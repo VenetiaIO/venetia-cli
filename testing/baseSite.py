@@ -11,6 +11,7 @@ import os
 import base64
 import cloudscraper
 import string
+from urllib3.exceptions import HTTPError
 
 from utils.logger import logger
 from utils.webhook import discord
@@ -29,5 +30,6 @@ class SITE:
         # self.session = scraper()
         
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+
 
         self.collect()

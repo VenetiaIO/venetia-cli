@@ -127,6 +127,8 @@ class SCHUH:
     def addToCart(self):
         logger.prepare(SITE,self.taskID,'Carting products...')
         region = self.task["PRODUCT"].split('schuh.')[1].split('/')[0]
+        if region == 'eu': region = region + '/en-eu'
+        
         self.baseURL = 'https://secure.schuh.{}'.format(region)
 
         payload = {
@@ -176,8 +178,28 @@ class SCHUH:
                 self.addToCart()
 
     def basket(self):
+        profile = loadProfile(self.task["PROFILE"])
+        if profile == None:
+            logger.error(SITE,self.taskID,'Profile Not Found.')
+            time.sleep(10)
+            sys.exit()
+
+        if profile['countryCode'].upper() == 'FR':
+            payload = {"action":"delivery","deliveryOptionCode":"478","countryLocale":"FR"}
+        if profile['countryCode'].upper() == 'PT':
+            payload = {"action":"delivery","deliveryOptionCode":"578","countryLocale":"PT"}
+        if profile['countryCode'].upper() == 'RO':
+            payload = {"action":"delivery","deliveryOptionCode":"582","countryLocale":"RO"}
+        if profile['countryCode'].upper() == 'ES':
+            payload = {"action":"delivery","deliveryOptionCode":"605","countryLocale":"ES"}
+        if profile['countryCode'].upper() == 'GB':
+            payload = {"action":"checkout","deliveryOptionCode":"0","viewPort":"1","branchRef":"0","chosenDate":""}
+            self.country = 'UK'
+            self.region2 = 'england'
+
+
+
         logger.prepare(SITE,self.taskID,'Updating basket details...')
-        payload = {"action":"checkout","deliveryOptionCode":"0","viewPort":"3","branchRef":"0","chosenDate":""}
         try:
             update = self.session.post(f'{self.baseURL}/BasketService/updateBasket',json=payload)
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -252,8 +274,7 @@ class SCHUH:
         logger.prepare(SITE,self.taskID,'Submitting address...')
 
 
-        country = 'UK'
-        region2 = 'england'
+    
 
         js = {
             "addressID": 0,
@@ -266,12 +287,12 @@ class SCHUH:
             "cityTown": profile['city'],
             "county": profile['region'],
             "postcode": profile['zip'],
-            "country": country,
+            "country": self.country,
             "countryDelOptionCode": 0,
             "addressBookCount": 0,
             "addressType": "d",
             "billingSameAsDelivery": True,
-            "region": region2
+            "region": self.region2
         }
         payload = {"addressString":str(json.dumps(js)),"addressType":"d"}
 
@@ -432,9 +453,15 @@ class SCHUH:
             self.cardPayment()
 
         if paymentProcess.status_code == 200 and 'adyen' in paymentProcess.text:
+            try:
+                self.orderNumber = paymentProcess.text.split('success:adyen:')[1].split('|')[0]
+                self.orderTotal = paymentProcess.text.split('|')[1].split('"}')[0]
+            except Exception as e:
+                logger.error(SITE,self.taskID,'Failed to set payment method. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.cardPayment()
+
             logger.warning(SITE,self.taskID,'Successfully set payment method')
-            self.orderNumber = paymentProcess.text.split('success:adyen:')[1].split('|')[0]
-            self.orderTotal = paymentProcess.text.split('|')[1].split('"}')['0']
 
             logger.prepare(SITE,self.taskID,'Starting Adyen checkout...')
 
@@ -447,7 +474,7 @@ class SCHUH:
                 cType = 'mastercard'
     
     
-            encryptedInfo = ClientSideEncrypter("", "_0_1_25")
+            encryptedInfo = ClientSideEncrypter("10001|A56EE633C9798A4A8908E08338C183038DCD607260FC3E6ECA8466C567053D30932A7DA147906B29CC9C0070F4FD42FB5A4F0C9AAE36123C5662B13A55AB2ED9519E0ED470D71F48669999FD6107C90B9075E4A4DAC76BE804A4BE1252A69D138DC0BB1BAC3B4CF4760D39267E4879F94D0AF1EE373133BF2F1DAC39B8BC9F64DF4A0D05BFCFB64CF511B7064465AB08D7EE145F9163BD46A2159BD17F6305E2F57515027C63D4193C56A33F4779CCA723C0B48D4996AC6B2EF1DC6A203D0EFF1765B298D42C5E98A7F8E01BFF67CFD10685EC406B52FE6BD2FD7E635DB1D0F7D06ECEB052BE5CF0CD6318E7A4B23B6BCED51C86090ECFE55EAF14398C04622B", "_0_1_25")
             encryptedCardNum = str(encryptedInfo.generate_adyen_nonce(profile["firstName"] + " " + profile["lastName"], profile["card"]["cardNumber"], '', '', '').replace("b'", "").replace("'", ""))
             encryptedExpMonth = str(encryptedInfo.generate_adyen_nonce(profile["firstName"] + " " + profile["lastName"], '', '', profile["card"]["cardMonth"], '').replace("b'", "").replace("'", ""))
             encryptedExpYear = str(encryptedInfo.generate_adyen_nonce(profile["firstName"] + " " + profile["lastName"], '', '', '', profile["card"]["cardYear"]).replace("b'", "").replace("'", ""))
@@ -477,7 +504,6 @@ class SCHUH:
                 },
                 "strPaymentPage": "billing"
             }
-            print(data)
 
             try:
                 paymentDropIn = self.session.post(f'{self.baseURL}/CheckoutService/AdyenCreatePaymentDropIn',json=data,headers={
@@ -493,7 +519,16 @@ class SCHUH:
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 self.cardPayment()
 
+            response = json.loads(paymentDropIn.json()['d'].split('|')[1].replace(' ','').replace('\n',''))
 
 
         
+        else:
+            logger.error(SITE,self.taskID,'Failed to set payment method. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.cardPayment()
+
+
+
         
+    

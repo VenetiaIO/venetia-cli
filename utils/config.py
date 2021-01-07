@@ -28,6 +28,8 @@ from sites.solebox import SOLEBOX
 from sites.fenom import FENOM
 from sites.offspring import OFFSPRING
 from sites.office import OFFICE
+from sites.footlocker_old import FOOTLOCKER_OLD
+from sites.footlocker_new import FOOTLOCKER_NEW
 
 sites = {
     "SVD":SVD,
@@ -56,7 +58,12 @@ sites = {
     #"SOLEBOX":SOLEBOX,
     #"FENOM":FENOM,
     "OFFSPRING":OFFSPRING,
-    "OFFICE":OFFICE
+    "OFFICE":OFFICE,
+    "FOOTLOCKER_OLD":FOOTLOCKER_OLD,
+    "FOOTLOCKER_NEW":FOOTLOCKER_NEW
 }
 
-def VERSION(): return '0.5.3'
+def VERSION(): return '0.5.4'
+
+def new_footlockers(): return ['IT','BE','AT','LU','CZ','DK','PL','GR','PT','HU','ES','IE','NO','SE']
+def old_footlockers(): return ['FR','DE','NL','GB','AU','SG','MY','HK']

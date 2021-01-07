@@ -36,6 +36,19 @@ def injection(session, response):
         return response
 
 
+
+def footlocker_snare(url):
+  try:
+      response = requests.get(f'https://venetiacli.io/snare?url={url}',headers={
+          "apiKey": "27acc458-f01a-48f8-88b8-06583fb39056",
+      })
+  except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+      time.sleep(3)
+      footlocker_snare(url)
+  
+  if response.status_code == 200:
+    return response.text
+
 def offspring_session(pid):
   return {
     "eventId": str(uuid.uuid4()),
@@ -127,7 +140,7 @@ def loadProxy(proxies,taskID, SITE):
         return None
     elif proxies != "":
         try:
-            with open(f'./data/{SITE.lower()}/{proxies}.txt', 'r') as proxyIn:
+            with open(f'./{SITE.lower()}/{proxies}.txt', 'r') as proxyIn:
                 try:
                     proxyInput = proxyIn.read().splitlines()
                 except:

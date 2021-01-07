@@ -19,13 +19,13 @@ from utils.webhook import discord
 from utils.log import log
 from utils.captcha import captcha
 from utils.adyen import ClientSideEncrypter
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, scraper)
 SITE = 'PRO-DIRECT'
 
 class PRODIRECT:
     def __init__(self, task,taskName):
         self.task = task
-        self.session = requests.session()
+        self.session = scraper()
         self.taskID = taskName
 
 
@@ -54,7 +54,7 @@ class PRODIRECT:
             try:
                 logger.prepare(SITE,self.taskID,'Getting product data...')
                 soup = BeautifulSoup(retrieve.text, "html.parser")
-                self.productTitle = soup.find('title').text.replace('\n','')
+                self.productTitle = soup.find('title').text.replace('\n','').replace(' ','').replace('\r','')
                 self.productPrice = soup.find('p',{'class':'price'}).text
                 imgs = soup.find_all('img',{'class':'product mainImage'})
                 self.productImage = 'https://www.prodirectbasketball.com/' + imgs[0]["src"]
@@ -256,7 +256,7 @@ class PRODIRECT:
                 logger.warning(SITE,self.taskID,'Address submitted')
                 self.pay()
             else:
-                logger.error(SITE,self.taskID,'Failed to submit address. Retrying...')
+                logger.error(SITE,self.taskID,'Failed to submit address (make sure you have an address linked to your account). Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 self.address()
         

@@ -83,7 +83,7 @@ class FOOTASYLUM:
                     if p["stock_status"] == "in stock":
                         if p["pf_id"] == pf_id:
                             size = p["option2"]
-                            sku = p["pf_id"]
+                            sku = p["sku"]
                             colour = p["option1"]
                             price = p["price"]
                             img = 'https://www.footasylum.com/images/products/medium/' + p["mob_swatch"]
@@ -348,6 +348,7 @@ class FOOTASYLUM:
             self.initiateCheckout()
 
         if details.status_code == 200:
+            print(details.json())
             self.shippingDetails = details.json()["basket"]["shipping_details"]
             self.billingDetails = details.json()["basket"]["billing_details"]
             self.shippingMethodCode = details.json()["basket"]["shipping_method_code"]

@@ -555,6 +555,7 @@ class AWLAB:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.card()
 
+
         if payment.status_code in [200,302] and "orderNo" in payment.url:
             logger.warning(SITE,self.taskID,'Payment submitted')
             logger.info(SITE,self.taskID,'Initiating 3DS checkout')
@@ -600,6 +601,12 @@ class AWLAB:
                     logger.error(SITE,self.taskID,'Error: {}'.format(e))
                     time.sleep(int(self.task["DELAY"]))
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    self.card()
+
+                # print(poll.text)
+                if 'You are being rate limited.' in poll.text:
+                    logger.error(SITE,self.taskID,'Rate limited. Sleeping...')
+                    # time.sleep(int(poll.json()['retry_after']))
                     self.card()
 
                 if poll.json()["status"] == "blocked":
