@@ -9,3 +9,9 @@ __pycache__/*
 *.DS
 *DS
 .vscode/settings.json
+footlocker/tasks.csv
+footlocker/proxies.txt
+footasylum/accounts.txt
+log.log
+prodirect/accounts.txt
+log.log

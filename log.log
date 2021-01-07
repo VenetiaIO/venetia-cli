@@ -1,5 +1,3 @@
-18:05:28,69 root ERROR Expecting value: line 2 column 1 (char 1)
-18:05:29,496 root ERROR Expecting value: line 2 column 1 (char 1)
-18:05:30,793 root ERROR 'continueUrl'
-18:05:30,794 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'errorStage': {'stage': 'payment', 'step': 'paymentInstrument'}, 'errorMessage': 'Deine Angaben zur Zahlungsart sind ungültig. Bitte gib sie erneut ein.', 'missingPayment': True}
-18:05:30,864 root ERROR Expecting value: line 2 column 1 (char 1)
+17:28:13,436 root ERROR HTTPSConnectionPool(host='www.footlocker.it', port=443): Max retries exceeded with url: /api/users/carts/current/entries?timestamp=1610040489050 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
+17:28:23,631 root ERROR HTTPSConnectionPool(host='www.footlocker.it', port=443): Max retries exceeded with url: /api/users/carts/current/entries?timestamp=1610040499760 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
+17:30:15,676 root ERROR HTTPSConnectionPool(host='www.footlocker.it', port=443): Max retries exceeded with url: /api/users/carts/current/entries?timestamp=1610040555282 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
