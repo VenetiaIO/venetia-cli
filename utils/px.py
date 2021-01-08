@@ -9,8 +9,11 @@ class PX:
     def snipes(session, link, taskID):
         logger.prepare('SNIPES',taskID,'Getting PX Cookies...')
         headers = {'apiKey': 'aafff4ad-930d-47a4-98f4-666e644c1fc3'}
-        if session.proxies != None: params = {"proxies":session.proxies}
-        if session.proxies == None: params = {}
+        params = {}
+        if session.proxies != None:
+            encoded = base64.b64encode(bytes(str(session.proxies), 'utf-8'))
+            encoded_proxies = str(encoded, 'utf8')
+            params = {"proxies":encoded_proxies}
 
         params["link"] = link
         
@@ -26,8 +29,11 @@ class PX:
     def solebox(session, link, taskID):
         logger.prepare('SOLEBOX',taskID,'Getting PX Cookies...')
         headers = {'apiKey': 'aafff4ad-930d-47a4-98f4-666e644c1fc3'}
-        if session.proxies != None: params = {"proxies":session.proxies}
-        if session.proxies == None: params = {}
+        params = {}
+        if session.proxies != None:
+            encoded = base64.b64encode(bytes(str(session.proxies), 'utf-8'))
+            encoded_proxies = str(encoded, 'utf8')
+            params = {"proxies":encoded_proxies}
 
         params["link"] = link
         
@@ -42,18 +48,25 @@ class PX:
     @staticmethod
     def captchaSolve(session, link, taskID, site, blockedUrl, cs, sid):
         headers = {'apiKey': 'aafff4ad-930d-47a4-98f4-666e644c1fc3'}
-        if session.proxies != None: params = {"proxies":session.proxies}
+        if session.proxies != None: 
+            encoded = base64.b64encode(bytes(str(session.proxies), 'utf-8'))
+            encoded_proxies = str(encoded, 'utf8')
+            params = {"proxies":encoded_proxies}
         if session.proxies == None: params = {}
-
-        params["link"] = link
-        params["twoCapKEy"] = loadSettings()["2Captcha"]
 
         encoded = base64.b64encode(bytes(str(blockedUrl), 'utf-8'))
         blockedUrlEncoded = str(encoded, 'utf8')
-        
-        r = requests.get(f'https://px.invincible.services/api/v1/px-captcha/{site.lower()}/{blockedUrlEncoded}/{cs}/{sid}',headers=headers,params=params)
+
+        params["link"] = link
+        params["twoCapKey"] = loadSettings()["2Captcha"]
+        params["blocked"] = blockedUrlEncoded
+
+        r = requests.get(f'https://px.invincible.services/api/v1/px-captcha/{site.lower()}/{cs}/{sid}',headers=headers,params=params)
         if r.status_code == 200:
+            print(r.json())
             logger.success(site.upper(),taskID,'Successfully Solved PX Captcha')
             return r.json()
         else:
             return {"px3":"error","vid":"error"}
+
+
