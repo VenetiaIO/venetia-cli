@@ -13,6 +13,11 @@ def execute():
     try:
         for k in CONFIG.sites.keys():
             if k.lower() == 'footlocker_new':
+                try:
+                    os.mkdir('footlocker')
+                except:
+                    pass
+
 
                 try:
                     f = open('./{}/tasks.csv'.format('footlocker'))

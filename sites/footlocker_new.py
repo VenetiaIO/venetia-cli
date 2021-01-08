@@ -115,6 +115,25 @@ class FOOTLOCKER_NEW:
             time.sleep(int(self.task["DELAY"]))
             self.collect()
 
+        if retrieve.status_code == 403:
+            logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
+            try:
+                challengeUrl = retrieve.json()['url']
+            except:
+                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                time.sleep(10)
+                self.collect()
+            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+            while(cookie['cookie'] == None):
+                del self.session.cookies["datadome"]
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                
+
+            del self.session.cookies["datadome"]
+            self.session.cookies["datadome"] = cookie['cookie']
+            self.collect()
+
 
         if retrieve.status_code == 200:
             self.start = time.time()
@@ -207,6 +226,26 @@ class FOOTLOCKER_NEW:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
             self.footlockerSession()
+
+        if response.status_code == 403:
+            logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
+            try:
+                challengeUrl = footlocker_snare.json()['url']
+            except:
+                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                time.sleep(10)
+                self.footlockerSession()
+            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+            while(cookie['cookie'] == None):
+                del self.session.cookies["datadome"]
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                
+
+            del self.session.cookies["datadome"]
+            self.session.cookies["datadome"] = cookie['cookie']
+            self.footlockerSession()
+
                 
 
         # response headers
@@ -325,6 +364,25 @@ class FOOTLOCKER_NEW:
             time.sleep(int(self.task["DELAY"]))
             self.setEmail()
 
+        if emailPage.status_code ==403:
+            logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
+            try:
+                challengeUrl = emailPage.json()['url']
+            except:
+                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                time.sleep(10)
+                self.setEmail()
+            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+            while(cookie['cookie'] == None):
+                del self.session.cookies["datadome"]
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                
+
+            del self.session.cookies["datadome"]
+            self.session.cookies["datadome"] = cookie['cookie']
+            self.setEmail()
+
         if emailPage.status_code in [200,302]:
             logger.warning(SITE,self.taskID,'Email set')
             self.shipping() 
@@ -368,6 +426,25 @@ class FOOTLOCKER_NEW:
             time.sleep(int(self.task["DELAY"]))
             self.shipping()
 
+        if shippingAddress.status_code == 403:
+            logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
+            try:
+                challengeUrl = shippingAddress.json()['url']
+            except:
+                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                time.sleep(10)
+                self.shipping()
+            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+            while(cookie['cookie'] == None):
+                del self.session.cookies["datadome"]
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                
+
+            del self.session.cookies["datadome"]
+            self.session.cookies["datadome"] = cookie['cookie']
+            self.shipping()
+
         data = {"setAsDefaultBilling":False,"setAsDefaultShipping":False,"firstName":profile['firstName'],"lastName":profile['lastName'],"email":profile['email'],"phone":profile['phone'],"country":{"isocode":profile['countryCode'].upper(),"name":profile['country'].title()},"id":None,"setAsBilling":False,"type":"default","line1":profile['addressOne'] + ' ' + profile['addressTwo'],"line2":profile['house'],"companyName":"","postalCode":profile['zip'],"town":profile['city'],"shippingAddress":True}
 
         try:
@@ -392,6 +469,26 @@ class FOOTLOCKER_NEW:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
             self.shipping()
+
+        if billingAddress.status_code == 403:
+            logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
+            try:
+                challengeUrl = billingAddress.json()['url']
+            except:
+                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                time.sleep(10)
+                self.shipping()
+            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+            while(cookie['cookie'] == None):
+                del self.session.cookies["datadome"]
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                
+
+            del self.session.cookies["datadome"]
+            self.session.cookies["datadome"] = cookie['cookie']
+            self.shipping()
+
 
         # print(billingAddress.status_code, shippingAddress.status_code)
         if billingAddress.status_code == 200 and shippingAddress.status_code == 201:
@@ -433,6 +530,25 @@ class FOOTLOCKER_NEW:
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
+            self.paypal()
+
+        if paymentMethods.status_code == 403:
+            logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
+            try:
+                challengeUrl = paymentMethods.json()['url']
+            except:
+                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                time.sleep(10)
+                self.paypal()
+            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+            while(cookie['cookie'] == None):
+                del self.session.cookies["datadome"]
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                
+
+            del self.session.cookies["datadome"]
+            self.session.cookies["datadome"] = cookie['cookie']
             self.paypal()
         
         if paymentMethods.status_code == 200:

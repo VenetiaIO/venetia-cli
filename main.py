@@ -127,6 +127,8 @@ def checkUpdate():
             download = Updater.downloadLatest(status["version"])
             if download == "complete":
                 logger.menu('VENETIA','Menu','{}'.format(colored(f'Update complete. Please delete the old file named "venetiaCLI_old.exe" and open the new one name "venetiaCLI.exe"','cyan', attrs=["bold"])))
+                time.sleep(5)
+                sys.exit()
             else:
                 logger.menu('VENETIA','Menu','{}'.format(colored('Failed to download latest version. Please try again later.','red', attrs=["bold"])))
     if status["error"] == True:
