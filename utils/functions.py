@@ -12,6 +12,7 @@ import cloudscraper
 import base64
 from pynotifier import Notification
 import uuid
+import csv
 
 
 try:

@@ -163,6 +163,7 @@ class Menu:
                 with open('./footlocker/tasks.csv','r') as csvFile:
                     csv_reader = csv.DictReader(csvFile)
                     i = 1
+                    a = 0
                     for row in csv_reader:
                         if row["PRODUCT"] != "":
                             try:
@@ -184,21 +185,25 @@ class Menu:
                                 taskName = f'Task {i}'
                             i = i + 1
                             row['PROXIES'] = 'proxies'
-                            threading.Thread(target=value_chosen,args=(row,taskName)).start()
+                            threading.Thread(target=value_chosen,args=(row,taskName,a)).start()
+                            a = a + 1
             else:
-                accounts = open(f'./{key_chosen.lower()}/accounts.txt','r').readlines()
                 allAccounts = []
-                for a in accounts:
-                    if a.strip() != '':
-                        allAccounts.append(a)
+                try:
+                    accounts = open(f'./{key_chosen.lower()}/accounts.txt','r').readlines()
+                    for a in accounts:
+                        if a.strip() != '':
+                            allAccounts.append(a)
+                except:
+                    pass
                 
                 for i in range(2000):
                     allAccounts.append(':')
 
-                
                 with open('./{}/tasks.csv'.format(key_chosen.lower()),'r') as csvFile:
                     csv_reader = csv.DictReader(csvFile)
                     i = 1
+                    a = 0
                     for row, acc in zip(csv_reader, allAccounts):
                         if row["PRODUCT"] != "":
                             try:
@@ -223,8 +228,10 @@ class Menu:
                             row["ACCOUNT EMAIL"] = acc.split(':')[0]
                             row["ACCOUNT PASSWORD"] = acc.split(':')[1]
 
-                            threading.Thread(target=value_chosen,args=(row,taskName)).start()
-        except:
+                            threading.Thread(target=value_chosen,args=(row,taskName, a)).start()
+                            a = a + 1
+        except Exception as e:
+            print(e)
             pass
 
    

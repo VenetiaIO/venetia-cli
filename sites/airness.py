@@ -10,6 +10,7 @@ import json
 import base64
 import string
 from urllib3.exceptions import HTTPError
+import csv
 
 SITE = 'AIRNESS'
 
@@ -19,14 +20,32 @@ from utils.log import log
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle)
 
 class AIRNESS:
-    def __init__(self,task,taskName):
+    def task_checker(self):
+        originalTask = self.task
+        while True:
+            with open('./{}/tasks.csv'.format(SITE.lower()),'r') as csvFile:
+                csv_reader = csv.DictReader(csvFile)
+                row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
+                self.task = row[0]
+                try:
+                    self.task['ACCOUNT EMAIL'] = originalTask['ACCOUNT EMAIL']
+                    self.task['ACCOUNT PASSWORD'] = originalTask['ACCOUNT PASSWORD']
+                except:
+                    pass
+                self.task['PROXIES'] = 'proxies'
+                csvFile.close()
+            time.sleep(2)
+
+
+    def __init__(self,task,taskName,rowNumber):
         self.task = task
         self.session = requests.session()
         self.taskID = taskName
+        self.rowNumber = rowNumber
 
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
 
-
+        threading.Thread(target=self.task_checker,daemon=True).start()
         self.collect()
 
     def collect(self):
