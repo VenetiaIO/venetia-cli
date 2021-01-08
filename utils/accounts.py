@@ -84,7 +84,7 @@ class ACCOUNTS:
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 return None
             if postInfo.status_code == 200:
-                logger.success(SITE,taskID,'Created Account - {}'.format(customer["email"]))
+                logger.success(SITE,taskID,'Account Created | ' + customer["email"])
                 profile = loadProfile(profile)
 
 
@@ -152,19 +152,18 @@ class ACCOUNTS:
 
         session = scraper()
         session.proxies = loadProxy(proxies,taskID,SITE)
-        session.headers = {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'referer':'https://www.prodirectbasketball.com/accounts/MyAccount.aspx',
-        }
+
 
         try:
-            getPage = session.get('https://www.prodirectbasketball.com/accounts/MyAccount.aspx')
+            getPage = session.get('https://www.prodirectbasketball.com/accounts/MyAccount.aspx',headers={
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+            })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             logger.error(SITE,taskID,'Failed to create account')
             return None
 
-        captchaResponse = captcha.v2('6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g',session.headers['referer'],session.proxies,SITE,taskID)
+        captchaResponse = captcha.v2(sitekey,'https://www.prodirectbasketball.com',session.proxies,SITE,taskID)
         
         customer = genCustomer(catchall)
         form = {
@@ -174,12 +173,19 @@ class ACCOUNTS:
             '__EVENTTARGET':'Register'
         }
         try:
-            postInfo = session.post('https://www.prodirectbasketball.com/accounts/MyAccount.aspx',data=form)
+            postInfo = session.post('https://www.prodirectbasketball.com/accounts/MyAccount.aspx',data=form,headers={
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'referer': 'https://www.prodirectbasketball.com/accounts/MyAccount.aspx',
+                'accept-encoding': 'gzip, deflate, br',
+                'accept-language': 'en-US,en;q=0.9',
+                'content-type': 'application/x-www-form-urlencoded'
+            })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             logger.error(SITE,taskID,'Failed to create account')
             return None
         if postInfo.status_code in [200,302]:
-            logger.success(SITE,taskID,'Created Account - {}'.format(customer["email"]))
+            logger.success(SITE,taskID,'Created Account | ' + customer["email"])
             logger.warning(SITE,taskID,'Adding Address...')
 
             profile = loadProfile(profile)
@@ -190,14 +196,6 @@ class ACCOUNTS:
                 if str(s.text).lower() == profile["country"].lower():
                     countryId = s["value"]
 
-
-
-            session.headers = {}
-            session.headers = {
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'referer':'https://www.prodirectbasketball.com/accounts/MyAccount.aspx?acc=ABOOK',
-            }
             
             form2 = {
                 'txtlookupprop': 'main',
@@ -213,7 +211,14 @@ class ACCOUNTS:
                 '__EVENTTARGET': 'dlw100$SaveNewAddress'
             }
             try:
-                addAddress = session.post('https://www.prodirectbasketball.com/accounts/MyAccount.aspx?acc=ABOOK',data=form2)
+                addAddress = session.post('https://www.prodirectbasketball.com/accounts/MyAccount.aspx?acc=ABOOK',data=form2,headers={
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'referer': 'https://www.prodirectbasketball.com',
+                'accept-encoding': 'gzip, deflate, br',
+                'accept-language': 'en-US,en;q=0.9',
+                'content-type': 'application/x-www-form-urlencoded'
+            })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 logger.error(SITE,taskID,'Failed to create account')
                 return None
@@ -297,7 +302,7 @@ class ACCOUNTS:
             return None
 
         if formPost.status_code in [200,302]:
-            logger.success(SITE,taskID,'Account Created!')
+            logger.success(SITE,taskID,'Account Created | ' + customer["email"])
             discord.accountMade(
                 webhook=loadSettings()["webhook"],
                 site=SITE,
@@ -311,6 +316,241 @@ class ACCOUNTS:
             return 1
         else:
             return None
+
+    @staticmethod
+    def snipes(sitekey,proxies,SITE,catchall,password,profile):
+        taskID = 'Accounts'
+        logger.warning(SITE,taskID,'Creating account...')
+
+        customer = genCustomer(catchall)
+        profile = loadProfile(profile)
+        countryCode = profile['countryCode']
+
+        session = scraper()
+        session.proxies = loadProxy(proxies,taskID,SITE)
+        session.headers = {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'x-px-authorization': '3',
+            'x-px-bypass-reason': 'The%20certificate%20for%20this%20server%20is%20invalid.%20You%20might%20be%20connecting%20to%20a%20server%20that%20is%20pretending%20to%20be%20%E2%80%9Cpx-conf.perimeterx.net%E2%80%9D%20which%20could%20put%20your%20confidential%20information%20at%20risk.',
+        }
+
+        if countryCode.upper() == "DE":
+            snipesRegion = 'com'
+        if countryCode.upper() == "AT":
+            snipesRegion = 'at'
+        if countryCode.upper() == "NL":
+            snipesRegion = 'nl'
+        if countryCode.upper() == "FR":
+            snipesRegion = 'fr'
+        if countryCode.upper() == "CH":
+            snipesRegion = 'ch'
+        if countryCode.upper() == "IT":
+            snipesRegion = 'it'
+        if countryCode.upper() == "ES":
+            snipesRegion = 'es'
+        if countryCode.upper() == "BE":
+            snipesRegion = 'be'
+
+        try:
+            page = session.get(f'https://www.snipes.{snipesRegion}/registration?rurl=1')
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            return None
+
+        try:
+            soup = BeautifulSoup(page.text,"html.parser")
+            csrfToken = soup.find('input',{'name':'csrf_token'})['value']
+            demandwareUrl = soup.find('form',{'data-cmp':'registerForm'})['action']
+            demandwareUrl = f'https://www.snipes.{snipesRegion}' + demandwareUrl + '&format=ajax'
+        except:
+            return None
+
+        form = {
+            "dwfrm_profile_register_title": "Herr",
+            "dwfrm_profile_register_firstName": customer['first'],
+            "dwfrm_profile_register_lastName": customer['last'],
+            "dwfrm_profile_register_email": customer['email'],
+            "dwfrm_profile_register_emailConfirm": customer['email'],
+            "dwfrm_profile_register_password": password,
+            "dwfrm_profile_register_passwordConfirm": password,
+            "dwfrm_profile_register_phone": "",
+            "dwfrm_profile_register_birthday": "",
+            "dwfrm_profile_register_acceptPolicy": True,
+            "csrf_token": csrfToken
+        }
+
+        try:
+            response = session.post(demandwareUrl,data=form,headers={
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
+                'x-requested-with': 'XMLHttpRequest',
+                'accept': 'application/json, text/javascript, */*; q=0.01',
+                'accept-encoding': 'gzip, deflate, br',
+                'accept-language': 'en-US,en;q=0.9',
+                'x-px-authorization': '3',
+                'x-px-bypass-reason': 'The%20certificate%20for%20this%20server%20is%20invalid.%20You%20might%20be%20connecting%20to%20a%20server%20that%20is%20pretending%20to%20be%20%E2%80%9Cpx-conf.perimeterx.net%E2%80%9D%20which%20could%20put%20your%20confidential%20information%20at%20risk.',
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            return None
+
+        if response.status_code in [200,302]:
+            logger.success(SITE,taskID,'Account Created | ' + customer["email"])
+            discord.accountMade(
+                webhook=loadSettings()["webhook"],
+                site=SITE,
+                first=customer["first"],
+                last=customer["last"],
+                email=customer["email"]
+            )
+            with open('./snipes/accounts.txt','a') as accounts:
+                accounts.write('\n{}:{}'.format(customer["email"],password))
+
+            return 1
+        else:
+            return None
+
+    @staticmethod
+    def naked(sitekey,proxies,SITE,catchall,password,profile):
+        taskID = 'Accounts'
+        logger.warning(SITE,taskID,'Creating account...')
+
+        customer = genCustomer(catchall)
+        profile = loadProfile(profile)
+        countryCode = profile['countryCode']
+
+        session = scraper()
+        session.proxies = loadProxy(proxies,taskID,SITE)
+
+        captchaResponse = captcha.v2(sitekey,'https://www.nakedcph.com',session.proxies,SITE,taskID)
+
+        try:
+            page = session.get('https://www.nakedcph.com/en/auth/view?op=register',headers={
+                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                "accept-encoding": "gzip, deflate, br",
+                "accept-language": "en-US,en;q=0.9"
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            print(e)
+            return None
+        
+            
+
+        try:
+            soup = BeautifulSoup(page.text,"html.parser")
+            csrfToken = soup.find('input',{'name':'_AntiCsrfToken'})['value']
+        except:
+            return None
+
+        form = {
+            "_AntiCsrfToken": csrfToken,
+            "firstName": customer['first'],
+            "email": customer['email'],
+            "password": password,
+            "termsAccepted": True,
+            "g-recaptcha-response": captchaResponse,
+            "action": "register"
+        }
+
+        try:
+            response = session.post('https://www.nakedcph.com/en/auth/submit',data=form,headers={
+                "x-anticsrftoken": csrfToken,
+                "x-requested-with": "XMLHttpRequest",
+                "accept": "application/json, text/javascript, */*; q=0.01",
+                "accept-encoding": "gzip, deflate, br",
+                "accept-language": "en-US,en;q=0.9"
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            return None
+
+        if response.status_code in [200,302]:
+            logger.success(SITE,taskID,'Account Created | ' + customer["email"])
+            discord.accountMade(
+                webhook=loadSettings()["webhook"],
+                site=SITE,
+                first=customer["first"],
+                last=customer["last"],
+                email=customer["email"]
+            )
+            with open('./naked/accounts.txt','a') as accounts:
+                accounts.write('\n{}:{}'.format(customer["email"],password))
+
+            return 1
+        else:
+            return None
+
+    @staticmethod
+    def wch(sitekey,proxies,SITE,catchall,password,profile):
+        taskID = 'Accounts'
+        logger.warning(SITE,taskID,'Creating account...')
+
+        customer = genCustomer(catchall)
+        profile = loadProfile(profile)
+        countryCode = profile['countryCode']
+
+        session = scraper()
+        session.proxies = loadProxy(proxies,taskID,SITE)
+
+        try:
+            page = session.get('https://www.workingclassheroes.co.uk/CustSignIn.aspx',headers={
+                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                "accept-encoding": "gzip, deflate, br",
+                "accept-language": "en-US,en;q=0.9",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            return None
+
+        try:
+            soup = BeautifulSoup(page.text,"html.parser")
+            viewStateGenerator = soup.find('input',{'name':'__VIEWSTATEGENERATOR'})['value']
+            eventValidation = soup.find('input',{'name':'__EVENTVALIDATION'})['value']
+            viewState = soup.find('input',{'name':'__VIEWSTATE'})['value']
+        except:
+            return None
+        
+        
+        form = {
+            "__EVENTTARGET": "btnCreate",
+            "__EVENTARGUMENT": "",
+            "txtSIEMail": "",
+            "txtSIPassword": "",
+            "txtCAFirstName": customer['first'],
+            "txtCALastName": customer['last'],
+            "txtCAEMail": customer['email'],
+            "txtCAPassword": password,
+            "txtCAConfirmPassword": password,
+            "chkSubscribe": "on",
+            "__VIEWSTATEGENERATOR": viewStateGenerator,
+            "__EVENTVALIDATION": eventValidation,
+            "__VIEWSTATE": viewState
+        }
+
+        try:
+            response = session.post('https://www.workingclassheroes.co.uk/custsignin.aspx',data=form,headers={
+                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                "accept-encoding": "gzip, deflate, br",
+                "accept-language": "en-US,en;q=0.9",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            return None
+
+        if response.status_code in [200,302]:
+            logger.success(SITE,taskID,'Account Created | ' + customer["email"])
+            discord.accountMade(
+                webhook=loadSettings()["webhook"],
+                site=SITE,
+                first=customer["first"],
+                last=customer["last"],
+                email=customer["email"]
+            )
+            with open('./wch/accounts.txt','a') as accounts:
+                accounts.write('\n{}:{}'.format(customer["email"],password))
+
+            return 1
+        else:
+            return None
+        
+
             
 
 

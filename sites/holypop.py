@@ -10,6 +10,7 @@ import json
 import base64
 import string
 from urllib3.exceptions import HTTPError
+import csv
 SITE = 'HOLYPOP'
 
 from utils.logger import logger
@@ -19,10 +20,27 @@ from utils.log import log
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle)
 
 class HOLYPOP:
-    def __init__(self,task,taskName):
+    def task_checker(self):
+        originalTask = self.task
+        while True:
+            with open('./{}/tasks.csv'.format(SITE.lower()),'r') as csvFile:
+                csv_reader = csv.DictReader(csvFile)
+                row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
+                self.task = row[0]
+                try:
+                    self.task['ACCOUNT EMAIL'] = originalTask['ACCOUNT EMAIL']
+                    self.task['ACCOUNT PASSWORD'] = originalTask['ACCOUNT PASSWORD']
+                except:
+                    pass
+                self.task['PROXIES'] = 'proxies'
+                csvFile.close()
+            time.sleep(2)
+
+    def __init__(self,task,taskName,rowNumber):
         self.task = task
         self.session = requests.session()
         self.taskID = taskName
+        self.rowNumber = rowNumber
 
         self.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
         self.session.proxies = self.proxies
@@ -31,6 +49,8 @@ class HOLYPOP:
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'referer':'https://www.holypopstore.com/en'
         }
+        threading.Thread(target=self.task_checker,daemon=True).start()
+        
         if 'holypop' in self.task["PRODUCT"]:
             self.collect()
         else:

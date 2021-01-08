@@ -10,6 +10,7 @@ import json
 import base64
 import string
 from urllib3.exceptions import HTTPError
+import csv
 
 SITE = 'FOOTASYLUM'
 
@@ -20,16 +21,34 @@ from utils.captcha import captcha
 from utils.akamai import AKAMAI
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification,storeCookies, updateConsoleTitle, encodeURIComponent, scraper)
 
+
 class FOOTASYLUM:
-    def __init__(self,task,taskName):
+    def task_checker(self):
+        originalTask = self.task
+        while True:
+            with open('./{}/tasks.csv'.format(SITE.lower()),'r') as csvFile:
+                csv_reader = csv.DictReader(csvFile)
+                row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
+                self.task = row[0]
+                try:
+                    self.task['ACCOUNT EMAIL'] = originalTask['ACCOUNT EMAIL']
+                    self.task['ACCOUNT PASSWORD'] = originalTask['ACCOUNT PASSWORD']
+                except:
+                    pass
+                self.task['PROXIES'] = 'proxies'
+                csvFile.close()
+            time.sleep(2)
+
+    def __init__(self,task,taskName,rowNumber):
         self.task = task
+        self.rowNumber = rowNumber
         # self.session = requests.session()
         self.taskID = taskName
         self.session = scraper()
 
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
 
-
+        threading.Thread(target=self.task_checker,daemon=True).start()
         self.collect()
 
     def collect(self):
@@ -217,6 +236,7 @@ class FOOTASYLUM:
             logger.warning(SITE,self.taskID,'Successfully logged in')
             self.sessionId = login.url.split('?sessionid=')[1]
             self.addToCart()
+            self.collect()
         
         else:
             logger.error(SITE,self.taskID,'Failed to login. Retrying...')
@@ -348,7 +368,7 @@ class FOOTASYLUM:
             self.initiateCheckout()
 
         if details.status_code == 200:
-            print(details.json())
+            self.title = details.json()["customer"]["title"]
             self.shippingDetails = details.json()["basket"]["shipping_details"]
             self.billingDetails = details.json()["basket"]["billing_details"]
             self.shippingMethodCode = details.json()["basket"]["shipping_method_code"]
@@ -365,46 +385,53 @@ class FOOTASYLUM:
 
     def basketAddress(self):
         logger.prepare(SITE,self.taskID,'Submitting address...')
-        payload = {
-            "fascia_id":self.fascia_id,
-            "channel_id":self.channelId,
-            "currency_code":self.currency,
-            "customer":{
-                "customer_id":self.customerId,
-                "sessionID":self.parasparSessionId
-            },
-            "basket":{
-                "basket_id":self.pasparBasketId
-            },
-            "shipping_details":{
-                "title":self.shippingDetails["title"],
-                "firstname":self.shippingDetails["firstname"],
-                "surname":self.shippingDetails["surname"],
-                "address1":self.shippingDetails["address1"],
-                "address2":self.shippingDetails["address2"],
-                "town":self.shippingDetails["city"],
-                "county":self.shippingDetails["county"],
-                "postcode":self.shippingDetails["postcode"],
-                "country_id":self.shippingDetails["country_id"],
-                "country_name":self.shippingDetails["country_name"],
-                "phone":self.shippingDetails["phone"],
-                "mobile":self.shippingDetails["phone"]
-            },
-            "billing_details":{
-                "title":self.billingDetails["title"],
-                "firstname":self.billingDetails["firstname"],
-                "surname":self.billingDetails["surname"],
-                "address1":self.billingDetails["address1"],
-                "address2":self.billingDetails["address2"],
-                "town":self.billingDetails["city"],
-                "county":self.billingDetails["county"],
-                "postcode":self.billingDetails["postcode"],
-                "country_id":self.billingDetails["country_id"],
-                "country_name":self.billingDetails["country_name"],
-                "phone":self.billingDetails["phone"],
-                "mobile":self.billingDetails["phone"]
+        try:
+            payload = {
+                "fascia_id":self.fascia_id,
+                "channel_id":self.channelId,
+                "currency_code":self.currency,
+                "customer":{
+                    "customer_id":self.customerId,
+                    "sessionID":self.parasparSessionId
+                },
+                "basket":{
+                    "basket_id":self.pasparBasketId
+                },
+                "shipping_details":{
+                    "title":self.title,
+                    "firstname":self.shippingDetails["firstname"],
+                    "surname":self.shippingDetails["surname"],
+                    "address1":self.shippingDetails["address1"],
+                    "address2":self.shippingDetails["address2"],
+                    "town":self.shippingDetails["city"],
+                    "county":self.shippingDetails["county"],
+                    "postcode":self.shippingDetails["postcode"],
+                    "country_id":self.shippingDetails["country_id"],
+                    "country_name":self.shippingDetails["country_name"],
+                    "phone":self.shippingDetails["phone"],
+                    "mobile":self.shippingDetails["phone"]
+                },
+                "billing_details":{
+                    "title":self.title,
+                    "firstname":self.billingDetails["firstname"],
+                    "surname":self.billingDetails["surname"],
+                    "address1":self.billingDetails["address1"],
+                    "address2":self.billingDetails["address2"],
+                    "town":self.billingDetails["city"],
+                    "county":self.billingDetails["county"],
+                    "postcode":self.billingDetails["postcode"],
+                    "country_id":self.billingDetails["country_id"],
+                    "country_name":self.billingDetails["country_name"],
+                    "phone":self.billingDetails["phone"],
+                    "mobile":self.billingDetails["phone"]
+                }
             }
-        }
+        except Exception as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Failed to set shipping. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.basketAddress()
+
         try:
             address = self.session.post('https://r9udv3ar7g.execute-api.eu-west-2.amazonaws.com/prod/basket/basketaddaddress?checkout_client=secure',json=payload,headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
@@ -639,7 +666,7 @@ class FOOTASYLUM:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            self.session.proxies = None
             self.payPal()
 
         if ec.status_code == 200 and ec.json()["ack"] == "success":

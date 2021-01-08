@@ -12,6 +12,7 @@ import base64
 import cloudscraper
 import string
 from urllib3.exceptions import HTTPError
+import csv
 
 from utils.logger import logger
 from utils.webhook import discord
@@ -22,10 +23,27 @@ SITE = 'SNIPES'
 
 
 class SNIPES:
-    def __init__(self, task,taskName):
+    def task_checker(self):
+        originalTask = self.task
+        while True:
+            with open('./{}/tasks.csv'.format(SITE.lower()),'r') as csvFile:
+                csv_reader = csv.DictReader(csvFile)
+                row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
+                self.task = row[0]
+                try:
+                    self.task['ACCOUNT EMAIL'] = originalTask['ACCOUNT EMAIL']
+                    self.task['ACCOUNT PASSWORD'] = originalTask['ACCOUNT PASSWORD']
+                except:
+                    pass
+                self.task['PROXIES'] = 'proxies'
+                csvFile.close()
+            time.sleep(2)
+
+    def __init__(self,task,taskName,rowNumber):
         self.task = task
         self.sess = requests.session()
         self.taskID = taskName
+        self.rowNumber = rowNumber
 
         twoCap = loadSettings()["2Captcha"]
         self.session = scraper()
@@ -93,6 +111,7 @@ class SNIPES:
 
         self.queryUrl = 'https://www.snipes.{}/p/{}.html?dwvar_{}_color=a&format=ajax'.format(self.snipesRegion,self.pid,self.pid)
         # https://www.snipes./p/00013801882838.html?dwvar_00013801882838_color=a&format=ajax
+        threading.Thread(target=self.task_checker,daemon=True).start()
         self.query()
 
 
@@ -161,7 +180,7 @@ class SNIPES:
                 self.sizePID = selected.split(":")[1]
                 logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
             
-            if self.task["ACCOUNT EMAIL"] != "" and self.task["ACCOUNT EMAIL"] != "":
+            if self.task["ACCOUNT EMAIL"] != "" and self.task["ACCOUNT PASSWORD"] != "":
                 self.login()
             else:
                 self.addToCart()

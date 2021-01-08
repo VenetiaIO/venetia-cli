@@ -57,7 +57,7 @@ def solveAES(response):
     
 
 class CONSORTIUM:
-    def __init__(self, task,taskName):
+    def __init__(self,task,taskName,rowNumber):
         self.task = task
         self.sess = requests.session()
         self.taskID = taskName

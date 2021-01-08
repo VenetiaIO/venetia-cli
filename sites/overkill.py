@@ -21,10 +21,11 @@ from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loa
 SITE = 'OVERKILL'
 
 class OVERKILL:
-    def __init__(self, task,taskName):
+    def __init__(self,task,taskName,rowNumber):
         self.task = task
         self.sess = requests.session()
         self.taskID = taskName
+        self.rowNumber = rowNumber
 
         twoCap = loadSettings()["2Captcha"]
         self.session = scraper()

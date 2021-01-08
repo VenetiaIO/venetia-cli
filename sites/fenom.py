@@ -22,7 +22,7 @@ SITE = 'FENOM'
 
 
 class FENOM:
-    def __init__(self, task,taskName):
+    def __init__(self,task,taskName,rowNumber):
         self.task = task
         self.session = requests.session()
         self.taskID = taskName
