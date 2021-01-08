@@ -161,7 +161,7 @@ class SNIPES:
                 self.sizePID = selected.split(":")[1]
                 logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
             
-            if self.task["ACCOUNT EMAIL"] != "" and self.task["ACCOUNT EMAIL"] != "":
+            if self.task["ACCOUNT EMAIL"] != "" and self.task["ACCOUNT PASSWORD"] != "":
                 self.login()
             else:
                 self.addToCart()

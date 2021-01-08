@@ -13,41 +13,68 @@ def execute():
     try:
         for k in CONFIG.sites.keys():
             if k.lower() == 'footlocker_new':
-                try:
-                    f = open('./footlocker/tasks.csv')
-                    f.readlines()
-                except IOError:
-                    try:
-                        os.mkdir('footlocker')
-                    except:
-                        pass
 
-                    print("Creating files for footlocker")
-                    open('./footlocker/proxies.txt','w')
-                    with open('./footlocker/tasks.csv','w') as tasks:
+                try:
+                    f = open('./{}/tasks.csv'.format('footlocker'))
+                    f.readlines()
+                except IOError as e:
+                    print("Creating tasks.csv for {}".format('footlocker'))
+                    with open('./{}/tasks.csv'.format('footlocker'),'w') as tasks:
                         tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT')
+
+                try:
+                    f = open('./{}/proxies.txt'.format('footlocker'))
+                    f.readlines()
+                except IOError as e:
+                    print("Creating proxies.txt for {}".format('footlocker'))
+                    open('./{}/proxies.txt'.format('footlocker'),'w')
+
+                # try:
+                    # f = open('./footlocker/tasks.csv')
+                    # f.readlines()
+                # except IOError:
+                    # try:
+                        # os.mkdir('footlocker')
+                    # except:
+                        # pass
+# 
+                    # print("Creating files for footlocker")
+                    # open('./footlocker/proxies.txt','w')
+                    # with open('./footlocker/tasks.csv','w') as tasks:
+                        # tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT')
 
             elif k.lower() not in ['footlocker_old','footlocker_new'] :
                 try:
+                    os.mkdir('{}'.format(k.lower()))
+                except Exception as e:
+                    pass
+
+                if k.lower() in ['holypop','naked','footasylum','snipes','wch','prodirect']:
+                    try:
+                        f = open('./{}/accounts.txt'.format(k.lower()))
+                        f.readlines()
+                    except IOError as e:
+                        print("Creating accounts.txt for {}".format(k.lower()))
+                        open('./{}/accounts.txt'.format(k.lower()),'w')
+
+                try:
                     f = open('./{}/tasks.csv'.format(k.lower()))
                     f.readlines()
-                except IOError:
-                    try:
-                        os.mkdir('{}'.format(k.lower()))
-                    except:
-                        pass
+                except IOError as e:
+                    print("Creating tasks.csv for {}".format(k.lower()))
+                    with open('./{}/tasks.csv'.format(k.lower()),'w') as tasks:
+                        tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT')
+
+                try:
+                    f = open('./{}/proxies.txt'.format(k.lower()))
+                    f.readlines()
+                except IOError as e:
+                    print("Creating proxies.txt for {}".format(k.lower()))
+                    open('./{}/proxies.txt'.format(k.lower()),'w')
+
     
-                    else:
-                        print("Creating files for {}".format(k.lower()))
-        
-                        open('./{}/proxies.txt'.format(k.lower()),'w')
-                        if k.lower() in ['holypop','naked','footasylum','snipes','wch','prodirect']:
-                            # open('./data/{}/accounts.txt'.format(k.lower()),'w')
-                            task = 'PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,ACCOUNT EMAIL,ACCOUNT PASSWORD'
-                        else:
-                            task = 'PRODUCT,SIZE,DELAY,PROFILE,PAYMENT'
-                        with open('./{}/tasks.csv'.format(k.lower()),'w') as tasks:
-                            tasks.write(task)
+
+    
     except:
         pass
 

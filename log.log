@@ -1,3 +1,230 @@
 17:28:13,436 root ERROR HTTPSConnectionPool(host='www.footlocker.it', port=443): Max retries exceeded with url: /api/users/carts/current/entries?timestamp=1610040489050 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
 17:28:23,631 root ERROR HTTPSConnectionPool(host='www.footlocker.it', port=443): Max retries exceeded with url: /api/users/carts/current/entries?timestamp=1610040499760 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))
 17:30:15,676 root ERROR HTTPSConnectionPool(host='www.footlocker.it', port=443): Max retries exceeded with url: /api/users/carts/current/entries?timestamp=1610040555282 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+23:56:14,332 root ERROR Expecting value: line 2 column 1 (char 1)
+23:56:15,788 root ERROR Expecting value: line 2 column 1 (char 1)
+23:56:17,183 root ERROR Expecting value: line 2 column 1 (char 1)
+23:56:18,699 root ERROR Expecting value: line 2 column 1 (char 1)
+23:56:20,122 root ERROR Expecting value: line 2 column 1 (char 1)
+23:59:18,181 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 40268
+}
+
+23:59:18,447 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 39982
+}
+
+23:59:18,866 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 39581
+}
+
+23:59:19,393 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 39055
+}
+
+23:59:19,654 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 38786
+}
+
+23:59:20,684 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 37759
+}
+
+23:59:21,256 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 37239
+}
+
+23:59:21,530 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 36923
+}
+
+23:59:22,275 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 36178
+}
+
+23:59:23,110 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 35332
+}
+
+23:59:23,637 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 34818
+}
+
+23:59:24,44 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 34394
+}
+
+23:59:24,510 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 33914
+}
+
+23:59:24,955 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 33503
+}
+
+23:59:25,478 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 32968
+}
+
+23:59:25,914 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 32543
+}
+
+23:59:26,633 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 31821
+}
+
+23:59:27,195 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 31233
+}
+
+23:59:27,612 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 30808
+}
+
+23:59:27,874 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 30568
+}
+
+00:06:50,353 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 43377
+}
+
+00:06:50,757 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 42969
+}
+
+00:06:51,768 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 42036
+}
+
+00:06:51,987 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 41757
+}
+
+00:06:52,527 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 41190
+}
+
+00:06:52,802 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 40921
+}
+
+00:06:53,382 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 40348
+}
+
+00:06:53,589 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 40152
+}
+
+00:06:54,467 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 39256
+}
+
+00:06:54,900 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 38849
+}
+
+00:06:55,478 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 38239
+}
+
+00:06:55,910 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 37814
+}
+
+00:06:56,529 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 37193
+}
+
+00:06:56,984 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 36771
+}
+
+00:06:57,683 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 36058
+}
+
+00:06:58,448 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 35268
+}
+
+00:07:17,727 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 16007
+}
+

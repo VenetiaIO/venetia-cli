@@ -67,3 +67,5 @@ def VERSION(): return '0.5.4'
 
 def new_footlockers(): return ['IT','BE','AT','LU','CZ','DK','PL','GR','PT','HU','ES','IE','NO','SE']
 def old_footlockers(): return ['FR','DE','NL','GB','AU','SG','MY','HK']
+
+def account_sites(): return ['holypop','naked','footasylum','snipes','wch','prodirect']

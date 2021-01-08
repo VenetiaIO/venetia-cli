@@ -186,10 +186,20 @@ class Menu:
                             row['PROXIES'] = 'proxies'
                             threading.Thread(target=value_chosen,args=(row,taskName)).start()
             else:
+                accounts = open(f'./{key_chosen.lower()}/accounts.txt','r').readlines()
+                allAccounts = []
+                for a in accounts:
+                    if a.strip() != '':
+                        allAccounts.append(a)
+                
+                for i in range(2000):
+                    allAccounts.append(':')
+
+                
                 with open('./{}/tasks.csv'.format(key_chosen.lower()),'r') as csvFile:
                     csv_reader = csv.DictReader(csvFile)
                     i = 1
-                    for row in csv_reader:
+                    for row, acc in zip(csv_reader, allAccounts):
                         if row["PRODUCT"] != "":
                             try:
                                 try:
@@ -210,6 +220,9 @@ class Menu:
                                 taskName = f'Task {i}'
                             i = i + 1
                             row['PROXIES'] = 'proxies'
+                            row["ACCOUNT EMAIL"] = acc.split(':')[0]
+                            row["ACCOUNT PASSWORD"] = acc.split(':')[1]
+
                             threading.Thread(target=value_chosen,args=(row,taskName)).start()
         except:
             pass
@@ -280,18 +293,28 @@ class Menu:
                                 i = i + 1
                                 row['PROXIES'] = 'proxies'
 
-                                if loadProfile(r['PROFILE'])['countryCode'].upper() in new_footlockers():
+                                if loadProfile(row['PROFILE'])['countryCode'].upper() in new_footlockers():
                                     threading.Thread(target=sites.get('FOOTLOCKER_NEW'),args=(row,taskName)).start()
 
-                                if loadProfile(r['PROFILE'])['countryCode'].upper() in old_footlockers():
+                                if loadProfile(row['PROFILE'])['countryCode'].upper() in old_footlockers():
                                     threading.Thread(target=sites.get('FOOTLOCKER_OLD'),args=(row,taskName)).start()
 
                 elif k.upper() not in ['FOOTLOCKER_NEW','FOOTLOCKER_OLD']:
+                    accounts = open(f'./{k.lower()}/accounts.txt','r').readlines()
+                    allAccounts = []
+                    for a in accounts:
+                        if a.strip() != '':
+                            allAccounts.append(a)
+                    
+                    for i in range(2000):
+                        allAccounts.append(':')
+
                     with open(f'./{k.lower()}/tasks.csv','r') as csvFile:
                         csv_reader = csv.DictReader(csvFile)
                         # total =  total + sum(1 for row in csv_reader)
+        
                         i = 1
-                        for row in csv_reader:
+                        for row, acc in zip(csv_reader, allAccounts):
                             if row["PRODUCT"] != "":
                                 try:
                                     self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format(k.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
@@ -308,6 +331,8 @@ class Menu:
                                     taskName = f'Task {i}'
                                 i = i + 1
                                 row['PROXIES'] = 'proxies'
+                                row["ACCOUNT EMAIL"] = acc.split(':')[0]
+                                row["ACCOUNT PASSWORD"] = acc.split(':')[1]
                                 
                                 threading.Thread(target=sites.get(k.upper()),args=(row,taskName)).start()
             
@@ -818,15 +843,19 @@ class Menu:
             logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
             logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('PRO-DIRECT','cyan')))
             logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('FOOTASYLUM','cyan')))
-            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
+            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('SNIPES','cyan')))
+            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('5','red', attrs=["bold"]), colored('NAKED','cyan')))
+            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('6','red', attrs=["bold"]), colored('WCH','cyan')))
+            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('7','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             AccountsiteSelect = input(' Select a site => ')
-            if AccountsiteSelect == "4":
+            if AccountsiteSelect == "7":
                 self.menu()
 
-            proxies = input(f"[{get_time()}] Enter proxy list name (leave empty for none) ==> ")
-            if proxies == "":
-                proxies = None
+            # proxies = input(f"[{get_time()}] Enter proxy list name (leave empty for none) ==> ")
+            # if proxies == "":
+                # proxies = None
+            proxies = 'proxies'
 
             amount = input(f"[{get_time()}] Enter amount ==> ")
 
@@ -852,6 +881,21 @@ class Menu:
                 sitekey = 'SITE-KEY-NOT-REQUIRED'
                 for i in range(int(amount)):
                     threading.Thread(target=ACCOUNTS.footasylum,args=(sitekey,proxies,'FOOTASYLUM',catchall,password, profile)).start()
+
+            if AccountsiteSelect == "4":
+                sitekey = 'SITE-KEY-NOT-REQUIRED'
+                for i in range(int(amount)):
+                    threading.Thread(target=ACCOUNTS.footasylum,args=(sitekey,proxies,'FOOTASYLUM',catchall,password, profile)).start()
+
+            if AccountsiteSelect == "5":
+                sitekey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
+                for i in range(int(amount)):
+                    threading.Thread(target=ACCOUNTS.naked,args=(sitekey,proxies,'NAKED',catchall,password, profile)).start()
+
+            if AccountsiteSelect == "6":
+                sitekey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
+                for i in range(int(amount)):
+                    threading.Thread(target=ACCOUNTS.wch,args=(sitekey,proxies,'NAKED',catchall,password, profile)).start()
             
 
         
