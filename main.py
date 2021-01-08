@@ -15,8 +15,8 @@ import click
 from pprint import pprint
 import inquirer
 import webbrowser
-
-
+import names
+import random
 
 
 try:
@@ -509,33 +509,234 @@ class Menu:
                 profiles = json.loads(profileRead.read())
             
 
-            profileName = input(f"[{get_time()}] Profile Name ==> ")
-
             
-            profiles["profiles"].append({
-                "profileName":profileName,
-                "firstName":input(f"[{get_time()}] First Name ==> "),
-                "lastName":input(f"[{get_time()}] Last Name ==> "),
-                "email":input(f"[{get_time()}] Email ==> "),
-                "phonePrefix":input(f"[{get_time()}] Phone Prefix (example: +44) ==> "),
-                "phone": input(f"[{get_time()}] Phone ==> "),
-                "house":input(f"[{get_time()}] House (Number / Name ) ==> "),
-                "addressOne":input(f"[{get_time()}] Address 1 ==> "),
-                "addressTwo":input(f"[{get_time()}] Address 2 ==> "),
-                "city":input(f"[{get_time()}] City ==> "),
-                "region":input(f"[{get_time()}] Region/Province/State ==> "),
-                "country":input(f"[{get_time()}] Country (example: United Kingdom) ==> "),
-                "countryCode":input(f"[{get_time()}] Country Code (example: GB) ==> "),
-                "zip":input(f"[{get_time()}] Zipcode/Postcode ==> "),
+            # profiles["profiles"].append({
+                # "profileName":profileName,
+                # "firstName":input(f"[{get_time()}] First Name ==> "),
+                # "lastName":input(f"[{get_time()}] Last Name ==> "),
+                # "email":input(f"[{get_time()}] Email ==> "),
+                # "phonePrefix":input(f"[{get_time()}] Phone Prefix (example: +44) ==> "),
+                # "phone": input(f"[{get_time()}] Phone ==> "),
+                # "house":input(f"[{get_time()}] House (Number / Name ) ==> "),
+                # "addressOne":input(f"[{get_time()}] Address 1 ==> "),
+                # "addressTwo":input(f"[{get_time()}] Address 2 ==> "),
+                # "city":input(f"[{get_time()}] City ==> "),
+                # "region":input(f"[{get_time()}] Region/Province/State ==> "),
+                # "country":input(f"[{get_time()}] Country (example: United Kingdom) ==> "),
+                # "countryCode":input(f"[{get_time()}] Country Code (example: GB) ==> "),
+                # "zip":input(f"[{get_time()}] Zipcode/Postcode ==> "),
+                # "card":{
+                    # "cardNumber":input(f"[{get_time()}] Card Number ==> "),
+                    # "cardMonth": input(f"[{get_time()}] Card Expiry Month (example: 8) ==> "),
+                    # "cardYear":input(f"[{get_time()}] Card Expiry Year (example: 2024) ==> "),
+                    # "cardCVV":input(f"[{get_time()}] Card CVV/CVC ==> ")
+                # }
+            # })
+            p = {
+                "profileName":"",
+                "firstName":"",
+                "lastName":"",
+                "email":"",
+                "phonePrefix":"",
+                "phone": "",
+                "house":"",
+                "addressOne":"",
+                "addressTwo":"",
+                "city":"",
+                "region":"",
+                "country":"",
+                "countryCode":"",
+                "zip":"",
                 "card":{
-                    "cardNumber":input(f"[{get_time()}] Card Number ==> "),
-                    "cardMonth": input(f"[{get_time()}] Card Expiry Month (example: 8) ==> "),
-                    "cardYear":input(f"[{get_time()}] Card Expiry Year (example: 2024) ==> "),
-                    "cardCVV":input(f"[{get_time()}] Card CVV/CVC ==> ")
+                    "cardNumber":"",
+                    "cardMonth":"",
+                    "cardYear":"",
+                    "cardCVV":""
                 }
-            })
+            }
 
 
+            profileName =  input(f"[{get_time()}] Profile Name ==> ")
+            if profileName == "":
+                try:
+                    profileName = p['profileName']
+                except:
+                    profileName = ""
+            else:
+                p['profileName'] = profileName
+
+            gender = random.choice(['male','female'])
+
+            firtn =  input(f"[{get_time()}] First Name (Enter 'random' for a random name) ==> ")
+            if firtn == "":
+                try:
+                    firtn = p['firstName']
+                except:
+                    firtn = ""
+            else:
+                if firtn.lower() == 'random':
+                    p['firstName'] = names.get_first_name(gender=gender)
+                else:    
+                    p['firstName'] = firtn
+
+            lastn =  input(f"[{get_time()}] Last Name (Enter 'random' for a random name) ==> ")
+            if lastn == "":
+                try:
+                    lastn = p['lastName']
+                except:
+                    lastn = ""
+            else:
+                if lastn.lower() == 'random':
+                    p['lastName'] = names.get_last_name()
+                else:
+                    p['lastName'] = lastn
+
+            email =  input(f"[{get_time()}] Email (Enter your catchall with the @ for a random email) ==> ")
+            if email == "":
+                try:
+                    email = p['email']
+                except:
+                    email = ""
+            else:
+                if email.split('@')[0] == '':
+                    p['email'] = '{}{}{}{}{}{}'.format(p['firstName'],p['lastName'],random.randint(1,9),random.randint(1,9),random.randint(1,9),email)
+                else:
+                    p['email'] = email
+
+            prefix =  input(f"[{get_time()}] Phone Prefix (example: +44) ==> ")
+            if prefix == "":
+                try:
+                    prefix = p['phonePrefix']
+                except:
+                    prefix = ""
+            else:
+                p['phonePrefix'] = prefix
+
+            phone =  input(f"[{get_time()}] Phone (Enter 'random' for a random phone) ==> ")
+            if phone == "":
+                try:
+                    phone = p['phone']
+                except:
+                    phone = ""
+            else:
+                if phone.lower() == 'random':
+                    p['phone'] = '{}{}{}{}{}{}{}{}{}{}'.format(random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9))
+                else:
+                    p['phone'] = phone
+
+            house =  input(f"[{get_time()}] House (Number / Name ) ==> ")
+            if house == "":
+                try:
+                    house = p['house']
+                except:
+                    house = ""
+            else:
+                p['house'] = house
+
+            add1 =  input(f"[{get_time()}] Address 1 ==> ")
+            if add1 == "":
+                try:
+                    add1 = p['addressOne']
+                except:
+                    add1 = ""
+            else:
+                p['addressOne'] = add1
+
+            add2 =  input(f"[{get_time()}] Address 2 (Enter 'random' for a random address 2) ==> ")
+            if add2 == "":
+                try:
+                    add2 = p['addressTwo']
+                except:
+                    add2 = ""
+            else:
+                if add2.lower() == 'random':
+                    p['addressTwo'] = 'Unit {}{}{}'.format(random.randint(1,9),random.randint(1,9),random.randint(1,9))
+                else:
+                    p['addressTwo'] = add2
+                    
+            city =  input(f"[{get_time()}] City ==> ")
+            if city == "":
+                try:
+                    city = p['city']
+                except:
+                    city = ""
+            else:
+                p['city'] = city
+
+            region =  input(f"[{get_time()}] Region/Province/State ==> ")
+            if region == "":
+                try:
+                    region = p['region']
+                except:
+                    region = ""
+            else:
+                p['region'] = region
+
+            country =  input(f"[{get_time()}] Country (example: United Kingdom) ==> ")
+            if country == "":
+                try:
+                    country = p['country']
+                except:
+                    country = ""
+            else:
+                p['country'] = country
+            
+            countryC =  input(f"[{get_time()}] Country Code (example: GB) ==> ")
+            if countryC == "":
+                try:
+                    countryC = p['countryCode']
+                except:
+                    countryC = ""
+            else:
+                p['countryCode'] = countryC
+
+            zip =  input(f"[{get_time()}] Zipcode/Postcode ==> ")
+            if zip == "":
+                try:
+                    zip = p['zip']
+                except:
+                    zip = ""
+            else:
+                p['zip'] = zip
+
+            cn =  input(f"[{get_time()}] Card Number ==> ")
+            if cn == "":
+                try:
+                    cn = p['card']['cardNumber']
+                except:
+                    cn = ""
+            else:
+                p['card']['cardNumber'] = cn
+
+            expm =  input(f"[{get_time()}] Card Expiry Month (example: 8) ==> ")
+            if expm == "":
+                try:
+                    expm = p['card']['cardMonth']
+                except:
+                    expm = ""
+            else:
+                p['card']['cardMonth'] = expm
+
+            expy =  input(f"[{get_time()}] Card Expiry Year (example: 2024) ==> ")
+            if expy == "":
+                try:
+                    expy = p['card']['cardYear']
+                except:
+                    expy = ""
+            else:
+                p['card']['cardYear'] = expy
+
+            cvv =  input(f"[{get_time()}] Card CVV/CVC ==> ")
+            if cvv == "":
+                try:
+                    cvv = p['card']['cardCVV']
+                except:
+                    cvv = ""
+            else:
+                p['card']['cardCVV'] = cvv
+
+
+            profiles["profiles"].append(p)
             with open(f'./data/profiles/profiles.json','w') as profileDump:
                 json.dump(profiles, profileDump)
 
@@ -607,32 +808,43 @@ class Menu:
                             else:
                                 p['profileName'] = profileName
 
-                            firtn =  input(f"[{get_time()}] First Name ==> ")
+                            gender = random.choice(['male','female'])
+
+                            firtn =  input(f"[{get_time()}] First Name (Enter 'random' for a random name) ==> ")
                             if firtn == "":
                                 try:
                                     firtn = p['firstName']
                                 except:
                                     firtn = ""
                             else:
-                                p['firstName'] = firtn
+                                if firtn.lower() == 'random':
+                                    p['firstName'] = names.get_first_name(gender=gender)
+                                else:    
+                                    p['firstName'] = firtn
 
-                            lastn =  input(f"[{get_time()}] Last Name ==> ")
+                            lastn =  input(f"[{get_time()}] Last Name (Enter 'random' for a random name) ==> ")
                             if lastn == "":
                                 try:
                                     lastn = p['lastName']
                                 except:
                                     lastn = ""
                             else:
-                                p['lastName'] = lastn
+                                if lastn.lower() == 'random':
+                                    p['lastName'] = names.get_last_name()
+                                else:
+                                    p['lastName'] = lastn
 
-                            email =  input(f"[{get_time()}] Email ==> ")
+                            email =  input(f"[{get_time()}] Email (Enter your catchall with the @ for a random email) ==> ")
                             if email == "":
                                 try:
                                     email = p['email']
                                 except:
                                     email = ""
                             else:
-                                p['email'] = email
+                                if email.split('@')[0] == '':
+                                    p['email'] = '{}{}{}{}{}{}'.format(p['firstName'],p['lastName'],random.randint(1,9),random.randint(1,9),random.randint(1,9),email)
+                                else:
+                                    p['email'] = email
 
                             prefix =  input(f"[{get_time()}] Phone Prefix (example: +44) ==> ")
                             if prefix == "":
@@ -643,14 +855,17 @@ class Menu:
                             else:
                                 p['phonePrefix'] = prefix
 
-                            phone =  input(f"[{get_time()}] Phone ==> ")
+                            phone =  input(f"[{get_time()}] Phone (Enter 'random' for a random phone) ==> ")
                             if phone == "":
                                 try:
                                     phone = p['phone']
                                 except:
                                     phone = ""
                             else:
-                                p['phone'] = phone
+                                if phone.lower() == 'random':
+                                    p['phone'] = '{}{}{}{}{}{}{}{}{}{}'.format(random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9))
+                                else:
+                                    p['phone'] = phone
 
                             house =  input(f"[{get_time()}] House (Number / Name ) ==> ")
                             if house == "":
@@ -670,14 +885,17 @@ class Menu:
                             else:
                                 p['addressOne'] = add1
 
-                            add2 =  input(f"[{get_time()}] Address 2 ==> ")
+                            add2 =  input(f"[{get_time()}] Address 2 (Enter 'random' for a random address 2) ==> ")
                             if add2 == "":
                                 try:
                                     add2 = p['addressTwo']
                                 except:
                                     add2 = ""
                             else:
-                                p['addressTwo'] = add2
+                                if add2.lower() == 'random':
+                                    p['addressTwo'] = 'Unit {}{}{}'.format(random.randint(1,9),random.randint(1,9),random.randint(1,9))
+                                else:
+                                    p['addressTwo'] = add2
                                     
                             city =  input(f"[{get_time()}] City ==> ")
                             if city == "":
@@ -762,7 +980,7 @@ class Menu:
                             
                             
 
-        
+                    
                     with open(f'./data/profiles/profiles.json','w') as profileDump2:
                         json.dump(profiles, profileDump2)
         
@@ -895,7 +1113,7 @@ class Menu:
             if AccountsiteSelect == "6":
                 sitekey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
                 for i in range(int(amount)):
-                    threading.Thread(target=ACCOUNTS.wch,args=(sitekey,proxies,'NAKED',catchall,password, profile)).start()
+                    threading.Thread(target=ACCOUNTS.wch,args=(sitekey,proxies,'WCH',catchall,password, profile)).start()
             
 
         
