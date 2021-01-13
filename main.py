@@ -98,10 +98,20 @@ def checkFootlockerTasks():
         csv_reader = csv.DictReader(csvFile)
         for r in csv_reader:
             if len(r['PRODUCT']) > 1:
-                if loadProfile(r['PROFILE'])['countryCode'].upper() in new_footlockers():
+                try:
+                    cc = loadProfile(r['PROFILE'])['countryCode'].upper()
+                except Exception:
+                    return {
+                        "status":False,
+                        "old_ftl":0,
+                        "new_ftl":0
+                    }
+                if cc in new_footlockers():
                     new_ftl.append(1)
-                if loadProfile(r['PROFILE'])['countryCode'].upper()in old_footlockers():
+                if cc in old_footlockers():
                     old_ftl.append(1)
+                else:
+                    pass
         
     if len(old_ftl) > 0 or len(new_ftl) > 0:
         return {
@@ -265,7 +275,7 @@ class Menu:
         option = ''
         try:
             option = int(input(' Pick an option => '))
-        except ValueError:
+        except Exception:
             logger.error('VENETIA','Menu','Please enter a number')
             self.menu()
         
@@ -387,7 +397,8 @@ class Menu:
                     checkoutN = config["checkoutNoise"]
                     w = config["webhook"]
                     twoC = config["2Captcha"]
-                    ac = config["AntiCaptcha"]
+                    cm = config["capMonster"]
+                    captchaChoice = config["captcha"]
                     qtProfile = config["quickTaskProfile"]
                     qtProxies = config["quickTaskProxies"]
                     qtDelay = config["quickTaskDelay"]
@@ -399,7 +410,8 @@ class Menu:
                     logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CHECKOUT NOISE','red', attrs=["bold"]), colored(checkoutN,'cyan')))
                     logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('WEBHOOK','red', attrs=["bold"]), colored(w,'cyan')))
                     logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('2 CAPTCHA','red', attrs=["bold"]), colored(twoC,'cyan')))
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('ANTI CAPTCHA','red', attrs=["bold"]), colored(ac,'cyan')))
+                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CAPTCHA MONSTER','red', attrs=["bold"]), colored(cm,'cyan')))
+                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CAPTCHA CHOICE','red', attrs=["bold"]), colored(captchaChoice,'cyan')))
                     logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('QT SIZE','red', attrs=["bold"]), colored(qtSize,'cyan')))
                     logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('QT PROFILE','red', attrs=["bold"]), colored(qtProfile,'cyan')))
                     logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('QT PROXIES','red', attrs=["bold"]), colored(qtProxies,'cyan')))
@@ -442,12 +454,19 @@ class Menu:
                     except:
                         twoCaptcha = ""
 
-                antiCaptcha = input(f"[{get_time()}] Enter Anti Captcha API Key ==> ")
-                if antiCaptcha == "":
+                capMonster = input(f"[{get_time()}] Enter Captcha Monster API Key ==> ")
+                if capMonster == "":
                     try:
-                        antiCaptcha = config["AntiCaptcha"]
+                        capMonster = config["capMonster"]
                     except:
-                        antiCaptcha = ""
+                        capMonster = ""
+
+                capType = input(f"[{get_time()}] Enter captcha choice ('2cap' or 'monster') ==> ")
+                if capType == "":
+                    try:
+                        capType = config["captcha"]
+                    except:
+                        capType = ""
 
                 qtSize = input(f"[{get_time()}] Enter QT Size ==> ")
                 if qtSize == "":
@@ -1037,7 +1056,7 @@ class Menu:
             if CaptchasiteSelect == "4":
                 siteUrl = 'https://www.prodirectbasketball.com/'
                 siteKey = '6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g'
-                siteName = 'PRO-DIRECT'
+                siteName = 'PRODIRECT'
             if CaptchasiteSelect == "5":
                 siteUrl = 'https://www.offspring.co.uk'
                 siteKey = '6Ld-VBsUAAAAABeqZuOqiQmZ-1WAMVeTKjdq2-bJ'
@@ -1051,11 +1070,7 @@ class Menu:
 
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             amount = option = input(' Enter Amount => ')
-
-            sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            proxies = input(' Enter proxy list name (leave empty for none) => ')
-            if proxies == "":
-                proxies = None
+            proxies = 'proxies'
             
             for i in range(int(amount)):
                 threading.Thread(target=captcha.menuV2,args=(siteKey,siteUrl,proxies,'CAPTCHA',siteName)).start()
@@ -1112,7 +1127,7 @@ class Menu:
             if AccountsiteSelect == "4":
                 sitekey = 'SITE-KEY-NOT-REQUIRED'
                 for i in range(int(amount)):
-                    threading.Thread(target=ACCOUNTS.footasylum,args=(sitekey,proxies,'FOOTASYLUM',catchall,password, profile)).start()
+                    threading.Thread(target=ACCOUNTS.snipes,args=(sitekey,proxies,'SNIPES',catchall,password, profile)).start()
 
             if AccountsiteSelect == "5":
                 sitekey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'

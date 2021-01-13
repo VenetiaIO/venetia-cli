@@ -385,7 +385,7 @@ class QUEENS:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                self.session.proxies = None
                 self.delivery()
 
             self.session.headers["authorization"] = 'Bearer {}'.format(self.facilitatorAccessToken)
@@ -395,7 +395,7 @@ class QUEENS:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                self.session.proxies = None
                 self.delivery()
 
             if paypalOrder.status_code == 201 and paypalOrder.json()["status"] == "CREATED":

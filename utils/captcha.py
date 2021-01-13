@@ -6,17 +6,18 @@ import random
 import json
 import threading
 from urllib3.exceptions import HTTPError
+from utils.capMonster import capMonster
 
 def loadSettings():
     with open(f'./data/config.json') as settings:
         settings = json.loads(settings.read())
         return settings
 
-def loadProxy(proxies,taskID):
+def loadProxy(proxies,taskID,SITE):
     if proxies == "":
         return None
     elif proxies != "":
-        with open(f'./data/{proxies}.txt', 'r') as proxyIn:
+        with open(f'./{SITE.lower()}/proxies.txt', 'r') as proxyIn:
             proxyInput = proxyIn.read().splitlines()
     
         proxyList = [i for i in proxyInput]
@@ -37,36 +38,40 @@ def loadProxy(proxies,taskID):
 class captcha:
     @staticmethod
     def v2(sitekey, url, proxy, SITE,taskID):
-        logger.info(SITE,taskID,'Solving Captcha...')
-        twoCap = loadSettings()["2Captcha"]
-        captchaURL = 'https://2captcha.com/in.php?key={}&method=userrecaptcha&version=v2&action=verify&min_score=0.3&googlekey={}&pageurl={}&json=1'.format(twoCap,sitekey,url)
-        try:
-            first = requests.get(captchaURL)
-        except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-            v2(sitekey,url,proxy,SITE,taskID)
-
-        time.sleep(8)
-        if proxy == None:
-            url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
+        if loadSettings()["captcha"].lower() == "monster":
+            capMonster.v2(sitekey, url, proxy, SITE,taskID)
         else:
+            logger.info(SITE,taskID,'Solving Captcha...')
+            twoCap = loadSettings()["2Captcha"]
+            captchaURL = 'https://2captcha.com/in.php?key={}&method=userrecaptcha&version=v2&action=verify&min_score=0.3&googlekey={}&pageurl={}&json=1'.format(twoCap,sitekey,url)
             try:
-                url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
-            except:
+                first = requests.get(captchaURL)
+            except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                v2(sitekey,url,proxy,SITE,taskID)
+    
+            time.sleep(8)
+            if proxy == None:
                 url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
-        try:
-            r = requests.get(url)
-        except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-            v2(sitekey,url,proxy,SITE,taskID)
-        while r.json()["request"] == "CAPCHA_NOT_READY":
+            else:
+                try:
+                    proxy = loadProxy(proxy,taskID,SITE)
+                    url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
+                except:
+                    url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
             try:
                 r = requests.get(url)
             except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
                 v2(sitekey,url,proxy,SITE,taskID)
-            time.sleep(1)
-        return r.json()["request"]
+            while r.json()["request"] == "CAPCHA_NOT_READY":
+                try:
+                    r = requests.get(url)
+                except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                    v2(sitekey,url,proxy,SITE,taskID)
+                time.sleep(1)
+            return r.json()["request"]
 
     @staticmethod
     def Hiddenv2(sitekey, url, proxy, SITE,taskID):
@@ -82,6 +87,7 @@ class captcha:
             url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
         else:
             try:
+                proxy = loadProxy(proxy,taskID,SITE)
                 url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
             except:
                 url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
@@ -101,68 +107,76 @@ class captcha:
 
     @staticmethod
     def v3(sitekey, url, proxy, SITE,taskID):
-        logger.info(SITE,taskID,'Solving Captcha...')
-        twoCap = loadSettings()["2Captcha"]
-        captchaURL = 'https://2captcha.com/in.php?key={}&method=userrecaptcha&version=v3&action=verify&min_score=0.3&googlekey={}&pageurl={}&json=1'.format(twoCap,sitekey,url)
-        try:
-            first = requests.get(captchaURL)
-        except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-            v3(sitekey,url,proxy,SITE,taskID)
-        time.sleep(8)
-        if proxy == None:
-            url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
+        if loadSettings()["captcha"].lower() == "monster":
+            capMonster.v3(sitekey, url, proxy, SITE,taskID)
         else:
+            logger.info(SITE,taskID,'Solving Captcha...')
+            twoCap = loadSettings()["2Captcha"]
+            captchaURL = 'https://2captcha.com/in.php?key={}&method=userrecaptcha&version=v3&action=verify&min_score=0.3&googlekey={}&pageurl={}&json=1'.format(twoCap,sitekey,url)
             try:
-                url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
-            except:
+                first = requests.get(captchaURL)
+            except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                v3(sitekey,url,proxy,SITE,taskID)
+            time.sleep(8)
+            if proxy == None:
                 url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
-        try:
-            r = requests.get(url)
-        except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-            v3(sitekey,url,proxy,SITE,taskID)
-        while r.json()["request"] == "CAPCHA_NOT_READY":
+            else:
+                try:
+                    proxy = loadProxy(proxy,taskID,SITE)
+                    url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
+                except:
+                    url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
             try:
                 r = requests.get(url)
             except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
                 v3(sitekey,url,proxy,SITE,taskID)
-            time.sleep(1)
-        return r.json()["request"]
+            while r.json()["request"] == "CAPCHA_NOT_READY":
+                try:
+                    r = requests.get(url)
+                except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                    v3(sitekey,url,proxy,SITE,taskID)
+                time.sleep(1)
+            return r.json()["request"]
 
     @staticmethod
     def hcaptcha(sitekey, url, proxy, SITE,taskID):
-        logger.info(SITE,taskID,'Solving Captcha...')
-        twoCap = loadSettings()["2Captcha"]
-        captchaURL = 'https://2captcha.com/in.php?key={}&method=hcaptcha&action=verify&googlekey={}&pageurl={}&json=1'.format(twoCap,sitekey,url)
-        try:
-            first = requests.get(captchaURL)
-        except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-            hcaptcha(sitekey,url,proxy,SITE,taskID)
-        time.sleep(8)
-        if proxy == None:
-            url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
+        if loadSettings()["captcha"].lower() == "monster":
+            capMonster.hcaptcha(sitekey, url, proxy, SITE,taskID)
         else:
+            logger.info(SITE,taskID,'Solving Captcha...')
+            twoCap = loadSettings()["2Captcha"]
+            captchaURL = 'https://2captcha.com/in.php?key={}&method=hcaptcha&action=verify&googlekey={}&pageurl={}&json=1'.format(twoCap,sitekey,url)
             try:
-                url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
-            except:
+                first = requests.get(captchaURL)
+            except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                hcaptcha(sitekey,url,proxy,SITE,taskID)
+            time.sleep(8)
+            if proxy == None:
                 url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
-        try:
-            r = requests.get(url)
-        except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-            hcaptcha(sitekey,url,proxy,SITE,taskID)
-        while r.json()["request"] == "CAPCHA_NOT_READY":
+            else:
+                try:
+                    proxy = loadProxy(proxy,taskID,SITE)
+                    url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
+                except:
+                    url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
             try:
                 r = requests.get(url)
             except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
                 hcaptcha(sitekey,url,proxy,SITE,taskID)
-            logger.warning(SITE,taskID,r.json()["request"])
-            time.sleep(1)
-        return r.json()["request"]
+            while r.json()["request"] == "CAPCHA_NOT_READY":
+                try:
+                    r = requests.get(url)
+                except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                    hcaptcha(sitekey,url,proxy,SITE,taskID)
+                logger.warning(SITE,taskID,r.json()["request"])
+                time.sleep(1)
+            return r.json()["request"]
 
     @staticmethod
     def geetest(gt, challenge, apiServer, pageurl, proxy, SITE, taskID):
@@ -181,7 +195,7 @@ class captcha:
                 url = 'https://2captcha.com/res.php?key={}&action={}&id={}&json=1'.format(twoCap,'get',r.json()["request"])
             else:
                 try:
-                    proxy = loadProxy(proxy,'')
+                    proxy = loadProxy(proxy,taskID,SITE)
                     url = 'https://2captcha.com/res.php?key={}&action={}&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,'get',r.json()["request"],proxy["https"])
                 except:
                     url = 'https://2captcha.com/res.php?key={}&action={}&id={}&json=1'.format(twoCap,'get',r.json()["request"])
@@ -203,47 +217,50 @@ class captcha:
     
     @staticmethod
     def menuV2(sitekey, url, proxy, taskID, SITE):
-        logger.alert(SITE,taskID,'Solving Captcha...')
-        twoCap = loadSettings()["2Captcha"]
-        captchaURL = 'https://2captcha.com/in.php?key={}&method=userrecaptcha&version=v2&action=verify&min_score=0.3&googlekey={}&pageurl={}&json=1'.format(twoCap,sitekey,url)
-        try:
-            first = requests.get(captchaURL)
-        except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-            menuV2(sitekey,url,proxy,SITE,taskID)
-        time.sleep(8)
-        if proxy == None:
-            url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
+        if loadSettings()["captcha"].lower() == "monster":
+            capMonster.menuV2(sitekey, url, proxy, SITE,taskID)
         else:
+            logger.alert(SITE,taskID,'Solving Captcha...')
+            twoCap = loadSettings()["2Captcha"]
+            captchaURL = 'https://2captcha.com/in.php?key={}&method=userrecaptcha&version=v2&action=verify&min_score=0.3&googlekey={}&pageurl={}&json=1'.format(twoCap,sitekey,url)
             try:
-                proxy = loadProxy(proxy,taskID)
-                url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
-            except:
+                first = requests.get(captchaURL)
+            except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                menuV2(sitekey,url,proxy,SITE,taskID)
+            time.sleep(8)
+            if proxy == None:
                 url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
-        try:
-            r = requests.get(url)
-        except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-            menuV2(sitekey,url,proxy,SITE,taskID)
-        while r.json()["request"] == "CAPCHA_NOT_READY":
+            else:
+                try:
+                    proxy = loadProxy(proxy,taskID,SITE)
+                    url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
+                except:
+                    url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
             try:
                 r = requests.get(url)
             except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
                 menuV2(sitekey,url,proxy,SITE,taskID)
-            time.sleep(1)
-        if r.json()["request"] == "ERROR_CAPTCHA_UNSOLVABLE":
-            return 'failed'
-        else:
-            with open('./data/captcha/tokens.json') as config:
-                tokens = json.loads(config.read())
-                
-    
-            tokens[SITE].append({"token":r.json()["request"]})
-    
-            with open('./data/captcha/tokens.json','w') as output:
-                json.dump(tokens,output)
-    
-            logger.success(SITE,taskID,'CAPCHA_SOLVED')
-            threading.currentThread().handled = True
-            return 'complete'
+            while r.json()["request"] == "CAPCHA_NOT_READY":
+                try:
+                    r = requests.get(url)
+                except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                    menuV2(sitekey,url,proxy,SITE,taskID)
+                time.sleep(1)
+            if r.json()["request"] == "ERROR_CAPTCHA_UNSOLVABLE":
+                return 'failed'
+            else:
+                with open('./data/captcha/tokens.json') as config:
+                    tokens = json.loads(config.read())
+                    
+        
+                tokens[SITE].append({"token":r.json()["request"]})
+        
+                with open('./data/captcha/tokens.json','w') as output:
+                    json.dump(tokens,output)
+        
+                logger.success(SITE,taskID,'Captcha Solved')
+                threading.currentThread().handled = True
+                return 'complete'

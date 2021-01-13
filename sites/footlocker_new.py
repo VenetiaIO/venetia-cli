@@ -230,21 +230,34 @@ class FOOTLOCKER_NEW:
         if response.status_code == 403:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
-                challengeUrl = footlocker_snare.json()['url']
+                challengeUrl = response.json()['url']
             except:
-                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                time.sleep(10)
-                self.footlockerSession()
+                if 'initialCid' in response.text:
+                    try:
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(response.json()['initialCid'], response.json()['referer'], response.json()['hash'], response.json()['t'], response.json()['s'], response.json()['cid'])
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.footlockerSession()
+                else:
+                    try:
+                        initialCid = response.text.split("'cid':'")[1].split("',")[0]
+                        hsh = response.text.split("'hsh':'")[1].split("',")[0]
+                        t = response.text.split("'t':'")[1].split("',")[0]
+                        s = response.text.split("'s':'")[1].split("',")[0]
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, response.url, hsh, t, s)
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.footlockerSession()
+
             cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-            while(cookie['cookie'] == None):
+            if cookie['cookie'] == None:
                 del self.session.cookies["datadome"]
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-                
-
-            del self.session.cookies["datadome"]
-            self.session.cookies["datadome"] = cookie['cookie']
-            self.footlockerSession()
+                self.footlockerSession()
 
                 
 
@@ -299,19 +312,32 @@ class FOOTLOCKER_NEW:
             try:
                 challengeUrl = atcResponse.json()['url']
             except:
-                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                time.sleep(10)
-                self.addToCart()
+                if 'initialCid' in atcResponse.text:
+                    try:
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(atcResponse.json()['initialCid'], atcResponse.json()['referer'], atcResponse.json()['hash'], atcResponse.json()['t'], atcResponse.json()['s'], atcResponse.json()['cid'])
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.addToCart()
+                else:
+                    try:
+                        initialCid = atcResponse.text.split("'cid':'")[1].split("',")[0]
+                        hsh = atcResponse.text.split("'hsh':'")[1].split("',")[0]
+                        t = atcResponse.text.split("'t':'")[1].split("',")[0]
+                        s = atcResponse.text.split("'s':'")[1].split("',")[0]
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, atcResponse.url, hsh, t, s)
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.addToCart()
+
             cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-            while(cookie['cookie'] == None):
+            if cookie['cookie'] == None:
                 del self.session.cookies["datadome"]
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-                
-
-            del self.session.cookies["datadome"]
-            self.session.cookies["datadome"] = cookie['cookie']
-            self.addToCart()
+                self.addToCart()
 
 
         elif atcResponse.status_code == 200:
@@ -369,19 +395,32 @@ class FOOTLOCKER_NEW:
             try:
                 challengeUrl = emailPage.json()['url']
             except:
-                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                time.sleep(10)
-                self.setEmail()
+                if 'initialCid' in emailPage.text:
+                    try:
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(emailPage.json()['initialCid'], emailPage.json()['referer'], emailPage.json()['hash'], emailPage.json()['t'], emailPage.json()['s'], emailPage.json()['cid'])
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.setEmail()
+                else:
+                    try:
+                        initialCid = emailPage.text.split("'cid':'")[1].split("',")[0]
+                        hsh = emailPage.text.split("'hsh':'")[1].split("',")[0]
+                        t = emailPage.text.split("'t':'")[1].split("',")[0]
+                        s = emailPage.text.split("'s':'")[1].split("',")[0]
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, emailPage.url, hsh, t, s)
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.setEmail()
+
             cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-            while(cookie['cookie'] == None):
+            if cookie['cookie'] == None:
                 del self.session.cookies["datadome"]
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-                
-
-            del self.session.cookies["datadome"]
-            self.session.cookies["datadome"] = cookie['cookie']
-            self.setEmail()
+                self.setEmail()
 
         if emailPage.status_code in [200,302]:
             logger.warning(SITE,self.taskID,'Email set')
@@ -431,19 +470,32 @@ class FOOTLOCKER_NEW:
             try:
                 challengeUrl = shippingAddress.json()['url']
             except:
-                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                time.sleep(10)
-                self.shipping()
+                if 'initialCid' in shippingAddress.text:
+                    try:
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(shippingAddress.json()['initialCid'], shippingAddress.json()['referer'], shippingAddress.json()['hash'], shippingAddress.json()['t'], shippingAddress.json()['s'], shippingAddress.json()['cid'])
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.shipping()
+                else:
+                    try:
+                        initialCid = shippingAddress.text.split("'cid':'")[1].split("',")[0]
+                        hsh = shippingAddress.text.split("'hsh':'")[1].split("',")[0]
+                        t = shippingAddress.text.split("'t':'")[1].split("',")[0]
+                        s = shippingAddress.text.split("'s':'")[1].split("',")[0]
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, shippingAddress.url, hsh, t, s)
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.shipping()
+
             cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-            while(cookie['cookie'] == None):
+            if cookie['cookie'] == None:
                 del self.session.cookies["datadome"]
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-                
-
-            del self.session.cookies["datadome"]
-            self.session.cookies["datadome"] = cookie['cookie']
-            self.shipping()
+                self.shipping()
 
         data = {"setAsDefaultBilling":False,"setAsDefaultShipping":False,"firstName":profile['firstName'],"lastName":profile['lastName'],"email":profile['email'],"phone":profile['phone'],"country":{"isocode":profile['countryCode'].upper(),"name":profile['country'].title()},"id":None,"setAsBilling":False,"type":"default","line1":profile['addressOne'] + ' ' + profile['addressTwo'],"line2":profile['house'],"companyName":"","postalCode":profile['zip'],"town":profile['city'],"shippingAddress":True}
 
@@ -475,19 +527,32 @@ class FOOTLOCKER_NEW:
             try:
                 challengeUrl = billingAddress.json()['url']
             except:
-                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                time.sleep(10)
-                self.shipping()
+                if 'initialCid' in billingAddress.text:
+                    try:
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(billingAddress.json()['initialCid'], billingAddress.json()['referer'], billingAddress.json()['hash'], billingAddress.json()['t'], billingAddress.json()['s'], billingAddress.json()['cid'])
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.shipping()
+                else:
+                    try:
+                        initialCid = billingAddress.text.split("'cid':'")[1].split("',")[0]
+                        hsh = billingAddress.text.split("'hsh':'")[1].split("',")[0]
+                        t = billingAddress.text.split("'t':'")[1].split("',")[0]
+                        s = billingAddress.text.split("'s':'")[1].split("',")[0]
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, billingAddress.url, hsh, t, s)
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.shipping()
+
             cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-            while(cookie['cookie'] == None):
+            if cookie['cookie'] == None:
                 del self.session.cookies["datadome"]
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-                
-
-            del self.session.cookies["datadome"]
-            self.session.cookies["datadome"] = cookie['cookie']
-            self.shipping()
+                self.shipping()
 
 
         # print(billingAddress.status_code, shippingAddress.status_code)
@@ -537,19 +602,32 @@ class FOOTLOCKER_NEW:
             try:
                 challengeUrl = paymentMethods.json()['url']
             except:
-                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                time.sleep(10)
-                self.paypal()
+                if 'initialCid' in paymentMethods.text:
+                    try:
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(paymentMethods.json()['initialCid'], paymentMethods.json()['referer'], paymentMethods.json()['hash'], paymentMethods.json()['t'], paymentMethods.json()['s'], paymentMethods.json()['cid'])
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.paypal()
+                else:
+                    try:
+                        initialCid = paymentMethods.text.split("'cid':'")[1].split("',")[0]
+                        hsh = paymentMethods.text.split("'hsh':'")[1].split("',")[0]
+                        t = paymentMethods.text.split("'t':'")[1].split("',")[0]
+                        s = paymentMethods.text.split("'s':'")[1].split("',")[0]
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, paymentMethods.url, hsh, t, s)
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.paypal()
+
             cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-            while(cookie['cookie'] == None):
+            if cookie['cookie'] == None:
                 del self.session.cookies["datadome"]
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-                
-
-            del self.session.cookies["datadome"]
-            self.session.cookies["datadome"] = cookie['cookie']
-            self.paypal()
+                self.paypal()
         
         if paymentMethods.status_code == 200:
             self.tokenizationKey = paymentMethods.json()[1]['key']

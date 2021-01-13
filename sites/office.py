@@ -12,6 +12,7 @@ import base64
 import cloudscraper
 import string
 import consolemenu.version
+import csv
 
 from utils.logger import logger
 from utils.webhook import discord

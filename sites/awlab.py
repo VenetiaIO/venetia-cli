@@ -19,7 +19,7 @@ from utils.webhook import discord
 from utils.log import log
 from utils.adyen import ClientSideEncrypter
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, birthday, injection,storeCookies, updateConsoleTitle, scraper)
-SITE = 'AW-LAB'
+SITE = 'AWLAB'
 
 
 class AWLAB:

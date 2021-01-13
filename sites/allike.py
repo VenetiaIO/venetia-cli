@@ -440,7 +440,9 @@ class ALLIKE:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = None
                 self.paypal()
+                
             if "paypal" in startExpress.url:
                 logger.warning(SITE,self.taskID,'Successfully got paypal link')
                 updateConsoleTitle(False,True,SITE)

@@ -328,12 +328,6 @@ class ACCOUNTS:
 
         session = scraper()
         session.proxies = loadProxy(proxies,taskID,SITE)
-        session.headers = {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'x-px-authorization': '3',
-            'x-px-bypass-reason': 'The%20certificate%20for%20this%20server%20is%20invalid.%20You%20might%20be%20connecting%20to%20a%20server%20that%20is%20pretending%20to%20be%20%E2%80%9Cpx-conf.perimeterx.net%E2%80%9D%20which%20could%20put%20your%20confidential%20information%20at%20risk.',
-        }
 
         if countryCode.upper() == "DE":
             snipesRegion = 'com'
@@ -353,9 +347,15 @@ class ACCOUNTS:
             snipesRegion = 'be'
 
         try:
-            page = session.get(f'https://www.snipes.{snipesRegion}/registration?rurl=1')
+            page = session.get(f'https://www.snipes.{snipesRegion}/registration?rurl=1',headers={
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'x-px-authorization': '3',
+                'x-px-bypass-reason': 'The%20certificate%20for%20this%20server%20is%20invalid.%20You%20might%20be%20connecting%20to%20a%20server%20that%20is%20pretending%20to%20be%20%E2%80%9Cpx-conf.perimeterx.net%E2%80%9D%20which%20could%20put%20your%20confidential%20information%20at%20risk.'
+            })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             return None
+
 
         try:
             soup = BeautifulSoup(page.text,"html.parser")

@@ -29,6 +29,7 @@ class datadome:
                 's': responseUrl.split('&s=')[1],
                 'cid': datadomeCookie
             }
+            print(geoParams)
         except Exception:
             return {"cookie":None}
         try:
