@@ -61,7 +61,7 @@ class FOOTLOCKER_OLD:
             self.baseUrl2 = 'https://www.footlocker.de/INTERSHOP/web/FLE/Footlocker-Footlocker_FR-Site/en_GB/-/EUR/'
         if self.countryCode == 'de':
             self.baseUrl = 'https://www.footlocker.de'
-            self.baseUrl2 = 'https://www.footlocker.de/INTERSHOP/web/FLE/Footlocker-Footlocker_DE-Site/en_GB/-/EUR/'
+            self.baseUrl2 = 'https://www.footlocker.de/INTERSHOP/web/FLE/Footlocker-Footlocker_DE-Site/de_DE/-/EUR/'
         if self.countryCode == 'nl':
             self.baseUrl = 'https://www.footlocker.nl'
             self.baseUrl2 = 'https://www.footlocker.de/INTERSHOP/web/FLE/Footlocker-Footlocker_NL-Site/en_GB/-/EUR/'
@@ -300,14 +300,33 @@ class FOOTLOCKER_OLD:
             try:
                 challengeUrl = atcResponse.json()['url']
             except:
-                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                time.sleep(10)
-                self.addToCart()
+                if 'initialCid' in atcResponse.text:
+                    try:
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(atcResponse.json()['initialCid'], atcResponse.json()['referer'], atcResponse.json()['hash'], atcResponse.json()['t'], atcResponse.json()['s'], atcResponse.json()['cid'])
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.checkoutDispatch()
+                else:
+                    try:
+                        initialCid = atcResponse.text.split("'cid':'")[1].split("',")[0]
+                        hsh = atcResponse.text.split("'hsh':'")[1].split("',")[0]
+                        t = atcResponse.text.split("'t':'")[1].split("',")[0]
+                        s = atcResponse.text.split("'s':'")[1].split("',")[0]
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, atcResponse.url, hsh, t, s)
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.checkoutDispatch()
+
+
             cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-            while(cookie['cookie'] == None):
+            if cookie['cookie'] == None:
                 del self.session.cookies["datadome"]
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                self.addToCart()
                 
 
             del self.session.cookies["datadome"]
@@ -364,9 +383,36 @@ class FOOTLOCKER_OLD:
 
         if checkoutOverviewPage.status_code == 403:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
-            challengeUrl = checkoutOverviewPage.json()['url']
+            try:
+                challengeUrl = checkoutOverviewPage.json()['url']
+            except:
+                if 'initialCid' in checkoutOverviewPage.text:
+                    try:
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(checkoutOverviewPage.json()['initialCid'], checkoutOverviewPage.json()['referer'], checkoutOverviewPage.json()['hash'], checkoutOverviewPage.json()['t'], checkoutOverviewPage.json()['s'], checkoutOverviewPage.json()['cid'])
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.checkoutDispatch()
+                else:
+                    try:
+                        initialCid = checkoutOverviewPage.text.split("'cid':'")[1].split("',")[0]
+                        hsh = checkoutOverviewPage.text.split("'hsh':'")[1].split("',")[0]
+                        t = checkoutOverviewPage.text.split("'t':'")[1].split("',")[0]
+                        s = checkoutOverviewPage.text.split("'s':'")[1].split("',")[0]
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, checkoutOverviewPage.url, hsh, t, s)
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.checkoutDispatch()
+
             cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-            while(cookie == None): cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+            if cookie['cookie'] == None:
+                del self.session.cookies["datadome"]
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                self.checkoutDispatch()
+                
 
             del self.session.cookies["datadome"]
             self.session.cookies["datadome"] = cookie['cookie']
@@ -396,7 +442,7 @@ class FOOTLOCKER_OLD:
 
         logger.prepare(SITE,self.taskID,'Submitting shipping')
         self.deviceId = footlocker_snare(self.task['PRODUCT'].split('/en')[0])
-        form = "SynchronizerToken={}&isshippingaddress=&billing_Title=common.account.salutation.mr.text&billing_FirstName={}&billing_LastName={}&billing_CountryCode={}&billing_Address1={}&billing_Address2={}&billing_Address3={}&billing_City={}&billing_PostalCode={}&billing_PhoneHome={}&billing_BirthdayRequired=true&billing_Birthday_Day={}&billing_Birthday_Month={}&billing_Birthday_Year={}&email_Email={}&billing_ShippingAddressSameAsBilling=true&isshippingaddress=&shipping_Title=common.account.salutation.mr.text&shipping_FirstName=&shipping_LastName=&SearchTerm=&shipping_CountryCode={}&shipping_Address1=&shipping_Address2=&shipping_Address3=&shipping_City=&shipping_PostalCode=&shipping_PhoneHome=&shipping_AddressID={}&CheckoutRegisterForm_Password=&promotionCode=&PaymentServiceSelection={}&UserDeviceTypeForPaymentRedirect=Desktop&UserDeviceFingerprintForPaymentRedirect={}&ShippingMethodUUID={}&termsAndConditions=on&GDPRDataComplianceRequired=true&sendOrder=".format(
+        self.form = "SynchronizerToken={}&isshippingaddress=&billing_Title=common.account.salutation.mr.text&billing_FirstName={}&billing_LastName={}&billing_CountryCode={}&billing_Address1={}&billing_Address2={}&billing_Address3={}&billing_City={}&billing_PostalCode={}&billing_PhoneHome={}&billing_BirthdayRequired=true&billing_Birthday_Day={}&billing_Birthday_Month={}&billing_Birthday_Year={}&email_Email={}&billing_ShippingAddressSameAsBilling=true&isshippingaddress=&shipping_Title=common.account.salutation.mr.text&shipping_FirstName=&shipping_LastName=&SearchTerm=&shipping_CountryCode={}&shipping_Address1=&shipping_Address2=&shipping_Address3=&shipping_City=&shipping_PostalCode=&shipping_PhoneHome=&shipping_AddressID={}&CheckoutRegisterForm_Password=&promotionCode=&PaymentServiceSelection={}&UserDeviceTypeForPaymentRedirect=Desktop&UserDeviceFingerprintForPaymentRedirect={}&ShippingMethodUUID={}&termsAndConditions=on&GDPRDataComplianceRequired=true&sendOrder=".format(
             self.syncToken,
             profile['firstName'],
             profile['lastName'],
@@ -417,10 +463,11 @@ class FOOTLOCKER_OLD:
             self.deviceId,
             shipMethodUUID
         )
-        # Finish form 
+        self.submitCheckoutDispatch()
 
+    def submitCheckoutDispatch(self):
         try:
-            checkoutOverviewDispatch = self.session.post(f'{self.baseUrl2}ViewCheckoutOverview-Dispatch',data=form,headers={
+            checkoutOverviewDispatch = self.session.post(f'{self.baseUrl2}ViewCheckoutOverview-Dispatch',data=self.form,headers={
                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
                 "accept-language": "en-US,en;q=0.9",
                 "accept-encoding": "gzip, deflate, br",
@@ -441,29 +488,48 @@ class FOOTLOCKER_OLD:
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
-            self.checkoutDispatch()
+            self.submitCheckoutDispatch()
 
+        print(checkoutOverviewDispatch)
+        print(checkoutOverviewDispatch.url)
         if checkoutOverviewDispatch.status_code == 403:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = checkoutOverviewDispatch.json()['url']
             except:
-                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                time.sleep(10)
-                self.checkoutDispatch()
+                if 'initialCid' in checkoutOverviewDispatch.text:
+                    try:
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(checkoutOverviewDispatch.json()['initialCid'], checkoutOverviewDispatch.json()['referer'], checkoutOverviewDispatch.json()['hash'], checkoutOverviewDispatch.json()['t'], checkoutOverviewDispatch.json()['s'], checkoutOverviewDispatch.json()['cid'])
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.submitCheckoutDispatch()
+                else:
+                    try:
+                        initialCid = checkoutOverviewDispatch.text.split("'cid':'")[1].split("',")[0]
+                        hsh = checkoutOverviewDispatch.text.split("'hsh':'")[1].split("',")[0]
+                        t = checkoutOverviewDispatch.text.split("'t':'")[1].split("',")[0]
+                        s = checkoutOverviewDispatch.text.split("'s':'")[1].split("',")[0]
+                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, checkoutOverviewDispatch.url, hsh, t, s)
+                    except Exception as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                        time.sleep(10)
+                        self.submitCheckoutDispatch()
 
             cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
-            while(cookie['cookie'] == None):
+            if cookie['cookie'] == None:
                 del self.session.cookies["datadome"]
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                self.submitCheckoutDispatch()
                 
 
             del self.session.cookies["datadome"]
             self.session.cookies["datadome"] = cookie['cookie']
-            self.checkoutDispatch()
+            self.submitCheckoutDispatch()
 
-        
+
         if checkoutOverviewDispatch.status_code in [200,302] and 'OrderID' in checkoutOverviewDispatch.url:
             logger.warning(SITE,self.taskID,'Shipping submitted')
 
@@ -476,6 +542,7 @@ class FOOTLOCKER_OLD:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
             self.checkoutDispatch()
+
 
     def payment(self):
         logger.prepare(SITE,self.taskID,'Submitting payment details...')

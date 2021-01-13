@@ -356,7 +356,7 @@ class TITOLO:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                self.session.proxies = None
                 self.paypal()
 
     

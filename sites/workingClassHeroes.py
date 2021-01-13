@@ -18,7 +18,7 @@ from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle)
-SITE = 'WorkingClassHeroes'
+SITE = 'WCH'
 
 
 

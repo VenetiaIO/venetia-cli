@@ -66,6 +66,12 @@ def offspring_session(pid):
 }
 
 def scraper():
+  if loadSettings()["captcha"].lower() == "monster":
+    apiKey = loadSettings()["capMonster"]
+    provider = 'capmonster'
+  else:
+    apiKey = loadSettings()["2Captcha"]
+    provider = '2captcha'
   scraper = cloudscraper.create_scraper(
       requestPostHook=injection,
       interpreter='nodejs',
@@ -76,8 +82,8 @@ def scraper():
           #'platform': 'darwin'
       },
       captcha={
-          'provider': '2captcha',
-          'api_key': loadSettings()["2Captcha"]
+          'provider': provider,
+          'api_key': apiKey
       }
   )
   return scraper
@@ -254,17 +260,17 @@ def sendNotification(site, text):
         except:
           pass
         
-    time.sleep(1)
-    try:
-        Notification(
-          title='{} | Successful Checkout'.format(site.title()),
-          description=f'Checked out {text}',
-          icon_path='E:\\venetia-io-cli\\favicon.ico', # On Windows .ico is required, on Linux - .png
-          duration=5,                              # Duration in seconds
-          urgency=Notification.URGENCY_CRITICAL
-        ).send()
-    except:
-      pass
+    # time.sleep(1)
+    # try:
+        # Notification(
+          # title='{} | Successful Checkout'.format(site.title()),
+          # description=f'Checked out {text}',
+          # icon_path='E:\\venetia-io-cli\\favicon.ico', # On Windows .ico is required, on Linux - .png
+          # duration=5,                              # Duration in seconds
+          # urgency=Notification.URGENCY_CRITICAL
+        # ).send()
+    # except:
+      # pass
       
 
 

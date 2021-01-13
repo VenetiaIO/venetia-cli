@@ -53,15 +53,15 @@ class OFFSPRING:
         self.collect()
 
     def collect(self):
-        cookies = AKAMAI.offspring(self.session, self.taskID)
-        while cookies["_abck"] == "error":
-            cookies = AKAMAI.offspring(self.session, self.taskID)
+        # cookies = AKAMAI.offspring(self.session, self.taskID)
+        # while cookies["_abck"] == "error":
+            # cookies = AKAMAI.offspring(self.session, self.taskID)
 
 
         # print(cookies)
         # cookies['_abck']
-        cookie_obj = requests.cookies.create_cookie(domain=f'.offspring.co.uk',name='_abck',value=cookies['_abck'])
-        self.session.cookies.set_cookie(cookie_obj)
+        # cookie_obj = requests.cookies.create_cookie(domain=f'.offspring.co.uk',name='_abck',value=cookies['_abck'])
+        # self.session.cookies.set_cookie(cookie_obj)
 # 
 
         logger.prepare(SITE,self.taskID,'Getting product page...')
@@ -82,11 +82,17 @@ class OFFSPRING:
         currentVal = self.task['PRODUCT'].split('/offspring_catalog/')[1].split(',')[0]
         self.task['PRODUCT'] = self.task['PRODUCT'].replace(currentVal + ',', str(random.randint(1,99)) + ',')
 
-        if 'f5avraaaaaaaaaaaaaaaa_session_' not in retrieve.headers['set-cookie']:
+        try:
+            if 'f5avraaaaaaaaaaaaaaaa_session_' not in retrieve.headers['set-cookie']:
+                logger.error(SITE,self.taskID,'Failed to get session. Retrying...')
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task['DELAY']))
+                self.__init__(self.task, self.taskID, self.rowNumber)
+        except:
             logger.error(SITE,self.taskID,'Failed to get session. Retrying...')
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task['DELAY']))
-            self.__init__(self.task, self.taskID)
+            self.__init__(self.task, self.taskID, self.rowNumber)
         
 
         if retrieve.status_code == 200:
