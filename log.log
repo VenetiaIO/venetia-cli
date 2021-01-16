@@ -1,4 +1,2 @@
-19:17:11,343 root ERROR list index out of range
-19:17:22,854 root ERROR list index out of range
-19:20:33,274 root ERROR list index out of range
-19:24:31,185 root ERROR HTTPSConnectionPool(host='live.adyen.com', port=443): Max retries exceeded with url: /hpp/pay.shtml (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+18:50:13,757 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,22/1536514871 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+19:07:10,981 root ERROR HTTPSConnectionPool(host='www.offspring.co.uk', port=443): Max retries exceeded with url: /view/product/offspring_catalog/5,22/1536514871 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Proxy Error (The selected relay is offline or busy processing other threads)')))

@@ -334,7 +334,8 @@ def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
         storeCookies(url,session)
     
 
-
+def b64Decode(text):
+  return base64.b64decode(text)
 
 
 def randomUA():

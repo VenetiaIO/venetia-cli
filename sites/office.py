@@ -75,13 +75,25 @@ class OFFICE:
         currentVal = self.task['PRODUCT'].split('/office_catalog/')[1].split(',')[0]
         self.task['PRODUCT'] = self.task['PRODUCT'].replace(currentVal + ',', str(random.randint(1,99)) + ',')
 
-        # if 'f5avraaaaaaaaaaaaaaaa_session_' not in retrieve.headers['set-cookie']:
-            # currentVal = self.task['PRODUCT'].split('/office_catalog/')[1].split(',')[0]
-            # self.task['PRODUCT'] = self.task['PRODUCT'].replace(currentVal + ',', str(random.randint(1,99)) + ',')
-            # logger.error(SITE,self.taskID,'Failed to get session. Retrying...')
-            # self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            # time.sleep(int(self.task['DELAY']))
-            # self.__init__(self.task, self.taskID)
+        if retrieve.status_code == 503:
+            logger.info(SITE,self.taskID,'Queue....')
+            try:
+                akavpwr_VP_offspring_val = str(retrieve.headers['set-cookie']).split('akavpwr_VP_office=')[1].split(';')[0]
+                cookie_obj = requests.cookies.create_cookie(domain=f'www.office.co.uk',name='akavpau_VP_office',value=akavpwr_VP_offspring_val)
+                self.session.cookies.set_cookie(cookie_obj)
+                clearables = []
+                for cookie in self.session.cookies:
+                    if cookie.name == 'akavpwr_VP_office':
+                        continue
+                    clearables.append((cookie.domain, cookie.path, cookie.name))
+                    
+                for domain, path, name in clearables:
+                    self.session.cookies.clear(domain, path, name)
+                    
+            except Exception as e:
+                log.info(e)
+                pass
+            self.collect()
         
 
         if retrieve.status_code == 200:

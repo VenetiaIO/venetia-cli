@@ -290,6 +290,7 @@ class WCH:
                     profile=self.task["PROFILE"],
                     product=self.task["PRODUCT"],
                     proxy=self.session.proxies,
+                    account=self.task["ACCOUNT EMAIL"],
                     speed=self.end
                 )
                 while True:
@@ -690,6 +691,7 @@ class WCH:
                                     profile=self.task["PROFILE"],
                                     product=self.task["PRODUCT"],
                                     proxy=self.session.proxies,
+                                    account=self.task["ACCOUNT EMAIL"],
                                     speed=self.end
                                 )
                                 sendNotification(SITE,productData["Name"])

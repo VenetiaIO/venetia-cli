@@ -694,6 +694,7 @@ class FOOTASYLUM:
                     profile=self.task["PROFILE"],
                     product=self.task["PRODUCT"],
                     proxy=self.session.proxies,
+                    account=self.task["ACCOUNT EMAIL"],
                     speed=self.end
                 )
                 sendNotification(SITE,self.productTitle)

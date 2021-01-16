@@ -58,7 +58,7 @@ class discord:
             if paymentMethod: embed.add_embed_field(name='Payment Method', value=paymentMethod,inline=True)
             if speed: embed.add_embed_field(name='Checkout Speed', value=str(speed),inline=True)
             if profile: embed.add_embed_field(name='Task Profile', value=f'||{profile}||',inline=True)
-            if accountEmail: embed.add_embed_field(name='Account Email', value=f'||{accountEmail}||',inline=False)
+            if accountEmail and accountEmail != '': embed.add_embed_field(name='Account Email', value=f'||{accountEmail}||',inline=False)
             if tracking and order: embed.add_embed_field(name='Tracking', value=f'||[{order}]({tracking})||',inline=False)
             if url: embed.add_embed_field(name='Checkout Link', value=f'[Checkout Here]({url})',inline=False)
             if proxy: embed.add_embed_field(name='Proxy Used', value=f'||`{str(proxy)}`||',inline=False)

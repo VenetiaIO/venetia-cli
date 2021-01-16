@@ -151,7 +151,7 @@ class FOOTLOCKER_OLD:
 
         if retrieveSizes.status_code == 503:
             logger.info(SITE,self.taskID,'Queue...')
-            time.sleep(30)
+            time.sleep(10)
             self.retrieveSizes()
 
         if retrieveSizes.status_code == 404:
@@ -337,7 +337,7 @@ class FOOTLOCKER_OLD:
             try:
                 self.syncToken = atcResponse.text.split('ViewCart-Checkout?SynchronizerToken=')[1].split('\\"')[0]
                 self.productPrice = atcResponse.text.split('price:\\"')[1].split('\\"')[0]
-            except:
+            except Exception:
                 logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 self.addToCart()
@@ -441,28 +441,33 @@ class FOOTLOCKER_OLD:
             self.checkoutDispatch()
 
         logger.prepare(SITE,self.taskID,'Submitting shipping')
-        self.deviceId = footlocker_snare(self.task['PRODUCT'].split('/en')[0])
-        self.form = "SynchronizerToken={}&isshippingaddress=&billing_Title=common.account.salutation.mr.text&billing_FirstName={}&billing_LastName={}&billing_CountryCode={}&billing_Address1={}&billing_Address2={}&billing_Address3={}&billing_City={}&billing_PostalCode={}&billing_PhoneHome={}&billing_BirthdayRequired=true&billing_Birthday_Day={}&billing_Birthday_Month={}&billing_Birthday_Year={}&email_Email={}&billing_ShippingAddressSameAsBilling=true&isshippingaddress=&shipping_Title=common.account.salutation.mr.text&shipping_FirstName=&shipping_LastName=&SearchTerm=&shipping_CountryCode={}&shipping_Address1=&shipping_Address2=&shipping_Address3=&shipping_City=&shipping_PostalCode=&shipping_PhoneHome=&shipping_AddressID={}&CheckoutRegisterForm_Password=&promotionCode=&PaymentServiceSelection={}&UserDeviceTypeForPaymentRedirect=Desktop&UserDeviceFingerprintForPaymentRedirect={}&ShippingMethodUUID={}&termsAndConditions=on&GDPRDataComplianceRequired=true&sendOrder=".format(
-            self.syncToken,
-            profile['firstName'],
-            profile['lastName'],
-            profile['countryCode'],
-            profile['addressOne'],
-            profile['house'],
-            profile['addressTwo'],
-            profile['city'],
-            profile['zip'],
-            profile['phone'],
-            random.randint(1,25),#day
-            random.randint(1,12), #month
-            random.randint(1970,2000), #year
-            profile['email'],
-            profile['countryCode'],
-            shippingAddressId,
-            PaymentServiceSelection,
-            self.deviceId,
-            shipMethodUUID
-        )
+        try:
+            self.deviceId = footlocker_snare(self.task['PRODUCT'].split('/en')[0])
+            self.form = "SynchronizerToken={}&isshippingaddress=&billing_Title=common.account.salutation.mr.text&billing_FirstName={}&billing_LastName={}&billing_CountryCode={}&billing_Address1={}&billing_Address2={}&billing_Address3={}&billing_City={}&billing_PostalCode={}&billing_PhoneHome={}&billing_BirthdayRequired=true&billing_Birthday_Day={}&billing_Birthday_Month={}&billing_Birthday_Year={}&email_Email={}&billing_ShippingAddressSameAsBilling=true&isshippingaddress=&shipping_Title=common.account.salutation.mr.text&shipping_FirstName=&shipping_LastName=&SearchTerm=&shipping_CountryCode={}&shipping_Address1=&shipping_Address2=&shipping_Address3=&shipping_City=&shipping_PostalCode=&shipping_PhoneHome=&shipping_AddressID={}&CheckoutRegisterForm_Password=&promotionCode=&PaymentServiceSelection={}&UserDeviceTypeForPaymentRedirect=Desktop&UserDeviceFingerprintForPaymentRedirect={}&ShippingMethodUUID={}&termsAndConditions=on&GDPRDataComplianceRequired=true&sendOrder=".format(
+                self.syncToken,
+                profile['firstName'],
+                profile['lastName'],
+                profile['countryCode'],
+                profile['addressOne'],
+                profile['house'],
+                profile['addressTwo'],
+                profile['city'],
+                profile['zip'],
+                profile['phone'],
+                random.randint(1,25),#day
+                random.randint(1,12), #month
+                random.randint(1970,2000), #year
+                profile['email'],
+                profile['countryCode'],
+                shippingAddressId,
+                PaymentServiceSelection,
+                self.deviceId,
+                shipMethodUUID
+            )
+        except Exception:
+            logger.error(SITE,self.taskID,'Failed to construct checkout form. Retrying...')
+            self.checkoutDispatch()
+            
         self.submitCheckoutDispatch()
 
     def submitCheckoutDispatch(self):

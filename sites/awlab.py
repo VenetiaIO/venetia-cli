@@ -18,7 +18,7 @@ from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
 from utils.adyen import ClientSideEncrypter
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, birthday, injection,storeCookies, updateConsoleTitle, scraper)
+from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, birthday, injection,storeCookies, updateConsoleTitle, scraper, b64Decode)
 SITE = 'AWLAB'
 
 
@@ -279,7 +279,7 @@ class AWLAB:
                 'dwfrm_singleshipping_shippingAddress_addressFields_phonecountrycode_codes': profile["phonePrefix"],
                 'dwfrm_singleshipping_shippingAddress_addressFields_phonewithoutcode': profile["phone"],
                 'dwfrm_singleshipping_shippingAddress_addressFields_phone': '{}{}'.format(profile["phonePrefix"], profile["phone"]),
-                'dwfrm_singleshipping_shippingAddress_addressFields_isValidated': 'false',
+                'dwfrm_singleshipping_shippingAddress_addressFields_isValidated': False,
                 'dwfrm_singleshipping_shippingAddress_addressFields_firstName': profile["firstName"],
                 'dwfrm_singleshipping_shippingAddress_addressFields_lastName': profile["lastName"],
                 'dwfrm_singleshipping_shippingAddress_addressFields_title': 'Mr',
@@ -292,7 +292,7 @@ class AWLAB:
                 'dwfrm_singleshipping_shippingAddress_addressFields_city': profile["city"],
                 'dwfrm_singleshipping_shippingAddress_addressFields_states_state': self.stateID,
                 'dwfrm_singleshipping_shippingAddress_addressFields_country': profile["countryCode"],
-                'dwfrm_singleshipping_shippingAddress_useAsBillingAddress': 'true',
+                'dwfrm_singleshipping_shippingAddress_useAsBillingAddress': True,
                 'dwfrm_singleshipping_shippingAddress_shippingMethodID': 'ANY_STD',
                 'dwfrm_singleshipping_shippingAddress_save': 'Proceed to Checkout',
                 'csrf_token': self.csrf
@@ -529,7 +529,7 @@ class AWLAB:
         if str(number[0]) == "4":
             cType = 'visa'
         if str(number[0]) == "5":
-            cType = 'mastercard'
+            cType = 'mc'
 
 
         encryptedInfo = ClientSideEncrypter("10001|A58F2F0D8A4A08232DD1903F00A3F99E99BB89D5DEDF7A9612A3C0DC9FA9D8BDB2A20A233B663B0A48D47A0A1DDF164B3206985EFF19686E3EF75ADECF77BA10013B349C9F95CEBB5A66C48E3AD564410DB77A5E0798923E849E48A6274A80CBE1ACAA886FF3F91C40C6F2038D90FABC9AEE395D4872E24183E8B2ACB28025964C5EAE8058CB06288CDA80D44F69A7DFD3392F5899886094DB23F703DAD458586338BF21CF84288C22020CD2AB539A35BF1D98582BE5F79184C84BE877DB30C3C2DE81E394012511BFE9749E35C3E40D28EE3338DE7CBB1EDD253951A7B66A85E9CC920CA2A40CAD48ACD8BD1AE681997D1655E59005F1887B872A7A873EDBD1", "_0_1_18")
@@ -549,11 +549,11 @@ class AWLAB:
             'dwfrm_billing_paymentMethods_creditCard_encrypteddata': adyenEncrypted,
             'dwfrm_billing_paymentMethods_creditCard_type': cType,
             'dwfrm_adyPaydata_brandCode': '',
-            'noPaymentNeeded': 'true',
+            'noPaymentNeeded': True,
             'dwfrm_billing_paymentMethods_creditCard_selectedCardID': '',
             'dwfrm_billing_paymentMethods_selectedPaymentMethodID': 'CREDIT_CARD',
-            'dwfrm_billing_billingAddress_personalData': 'true',
-            'dwfrm_billing_billingAddress_tersmsOfSale': 'true',
+            'dwfrm_billing_billingAddress_personalData': True,
+            'dwfrm_billing_billingAddress_tersmsOfSale': True,
             'csrf_token': self.csrf
         }
         logger.prepare(SITE,self.taskID,'Submitting payment...')
@@ -583,225 +583,216 @@ class AWLAB:
             self.PaReq = soup.find('input',{'name':'PaReq'})['value'] 
             self.MD = soup.find('input',{'name':'MD'})['value'] 
 
-            Dpayload = {
+            self.Dpayload = {
                "TermUrl":self.termURL,
                "PaReq":self.PaReq,
                "MD":self.MD 
             }
+            self.threeDs()
+
+        elif payment.status_code in [200,302] and "revieworder" in payment.url:
+            logger.prepare(SITE,self.taskID,'Card declined. Retrying....')
 
             try:
-                payerAuth = self.session.post('https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication', data=Dpayload, headers={
-                    'referer':f'https://{self.awlabRegion}',
-                    'content-type': 'application/x-www-form-urlencoded',
-                    'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                discord.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod="Card",
+                    profile=self.task["PROFILE"],
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies,
+                    speed=self.end
+                )
+                while True:
+                    pass
+            except:
+                pass
+            self.card()
+
+        else:
+            logger.error(SITE,self.taskID,'Failed to get 3DS. Retrying')
+            time.sleep(int(self.task["DELAY"]))
+            self.card()
+
+
+    def threeDs(self):
+        try:
+            payerAuth = self.session.post('https://idcheck.acs.touchtechpayments.com/v1/payerAuthentication', data=self.Dpayload, headers={
+                'referer':f'https://{self.awlabRegion}',
+                'content-type': 'application/x-www-form-urlencoded',
+                'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            log.info(e)
+            logger.error(SITE,self.taskID,'Error: {}'.format(e))
+            time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            self.threeDs()
+
+        if payerAuth.status_code == 200:
+
+            transToken = payerAuth.text.split('token: "')[1].split('"')[0]
+            try:
+                payload = {"transToken":transToken}
+                poll = self.session.post('https://poll.touchtechpayments.com/poll', json=payload, headers={
+                    'authority': 'verifiedbyvisa.acs.touchtechpayments.com',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'referer': 'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+                    'accept':'*/*',
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                self.card()
+                self.threeDs()
 
-            if payerAuth.status_code == 200:
-                soup = BeautifulSoup(payerAuth.text,"html.parser")
-                transToken = str(soup.find_all("script")[0]).split('"')[1]
-                try:
-                    payload = {"transToken":transToken}
-                    poll = self.session.post('https://poll.touchtechpayments.com/poll', json=payload, headers={
+
+            if poll.json()["status"] == "blocked":
+                logger.error(SITE,self.taskID,'Card Blocked. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.threeDs()
+            if poll.json()["status"] == "pending":
+                logger.warning(SITE,self.taskID,'Polling 3DS...')
+                while poll.json()["status"] == "pending":
+                    poll = self.session.post('https://poll.touchtechpayments.com/poll',headers={
                         'authority': 'verifiedbyvisa.acs.touchtechpayments.com',
                         'accept-language': 'en-US,en;q=0.9',
                         'referer': 'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
                         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                        'accept':'*/*',
-                    })
-                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                    log.info(e)
-                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                    time.sleep(int(self.task["DELAY"]))
-                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    self.card()
-
-                # print(poll.text)
-                if 'You are being rate limited.' in poll.text:
-                    logger.error(SITE,self.taskID,'Rate limited. Sleeping...')
-                    # time.sleep(int(poll.json()['retry_after']))
-                    self.card()
-
-                if poll.json()["status"] == "blocked":
-                    logger.error(SITE,self.taskID,'Card Blocked. Retrying...')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.card()
-                if poll.json()["status"] == "pending":
-                    logger.warning(SITE,self.taskID,'Polling 3DS...')
-                    while poll.json()["status"] == "pending":
-                        poll = self.session.post('https://poll.touchtechpayments.com/poll',headers={
-                            'authority': 'verifiedbyvisa.acs.touchtechpayments.com',
-                            'accept-language': 'en-US,en;q=0.9',
-                            'referer': 'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
-                            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                            'accept':'*/*',}, json=payload)
-                
-                try:
-                    json = poll.json()
-                except:
-                    logger.error(SITE,self.taskID,'Failed to retrieve auth token for 3DS. Retrying...')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.card()
-                if poll.json()["status"] == "success":
-                    authToken = poll.json()['authToken']
-                else:
-                    logger.error(SITE,self.taskID,'Failed to retrieve auth token for 3DS. Retrying...')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.card()
-
-                authToken = poll.json()['authToken']
-                logger.alert(SITE,self.taskID,'3DS Authorised')
-        
-                data = '{"transToken":"%s","authToken":"%s"}' % (transToken, authToken)
-
-                headers = {
-                    'authority': 'macs.touchtechpayments.com',
-                    'sec-fetch-dest': 'empty',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
-                    'content-type': 'application/json',
-                    'accept': '*/*',
-                    'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
-                    'referer': 'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
-                    'sec-fetch-site': 'same-site',
-                    'sec-fetch-mode': 'cors',
-                }
-
-                try:
-                    r = self.session.post("https://macs.touchtechpayments.com/v1/confirmTransaction",headers=headers, data=data)
-                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                    log.info(e)
-                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                    time.sleep(int(self.task["DELAY"]))
-                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    self.card()
-
-                pares = r.json()['Response']
-
-                data = {"MD":self.MD, "PaRes":pares}
-                try:
-                    r = self.session.post(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Adyen-RedirectToTop?type=treedscontinue',headers={
-                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
-                        'content-type': 'application/x-www-form-urlencoded',
-                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                        'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
-                        'referer':'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
-                    }, data=data)
-                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                    log.info(e)
-                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                    time.sleep(int(self.task["DELAY"]))
-                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    self.card()
-                
-                if r.status_code in [200,302]:
-                    try:
-                        closeFrame = self.session.post(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Adyen-CloseIFrame',headers={
-                            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
-                            'content-type': 'application/x-www-form-urlencoded',
-                            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                            'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
-                            'referer':'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
-                        }, data={"dwfrm_redirecttotop_redirecttop":"Submit","MD":self.MD,"PaRes":pares,"csrf_token":self.csrf})
-                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                        log.info(e)
-                        logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                        time.sleep(int(self.task["DELAY"]))
-                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                        self.card()
-
-                    logger.prepare(SITE,self.taskID,'Confirming Order...')
-                    try:
-                        confirm = self.session.post(f'https://{self.awlabRegion}/orderconfirmed',headers={
-                            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
-                            'content-type': 'application/x-www-form-urlencoded',
-                            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                            'referer':f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Adyen-CloseIFrame',
-                        }, data={"MD":None,"PaReq":None})
-                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                        log.info(e)
-                        logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                        time.sleep(int(self.task["DELAY"]))
-                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                        self.card()
-
-                    if confirm.status_code == 200 and "orderconfirmed" in confirm.url or "riepilogoordine" in confirm.url:
-                        logger.warning(SITE,self.taskID,'Order confirmed')
-                        self.end = time.time() - self.start
-                        logger.alert(SITE,self.taskID,'Checkout complete!')
-                        updateConsoleTitle(False,True,SITE)
+                        'accept':'*/*',}, json=payload)
             
-                        try:
-                            discord.success(
-                                webhook=loadSettings()["webhook"],
-                                site=SITE,
-                                image=self.productImage,
-                                title=self.productTitle,
-                                size=self.size,
-                                price=self.productPrice,
-                                paymentMethod="Card",
-                                profile=self.task["PROFILE"],
-                                product=self.task["PRODUCT"],
-                                proxy=self.session.proxies,
-                                speed=self.end
-                            )
-                            while True:
-                                pass
-                        except:
-                            pass
-                    
-                    else:
-                        logger.error(SITE,self.taskID,'Checkout failed. Retrying...')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.card()
-
-        if payment.status_code in [200,302] and "revieworder" in payment.url:
-            logger.prepare(SITE,self.taskID,'Confirming Order...')
             try:
-                confirm = self.session.post(f'https://{self.awlabRegion}/orderconfirmed',headers={
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
-                    'content-type': 'application/x-www-form-urlencoded',
-                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                    'referer':f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Adyen-CloseIFrame',
-                }, data={"MD":None,"PaReq":None})
+                aaa = poll.json()
+            except:
+                logger.error(SITE,self.taskID,'Failed to retrieve auth token for 3DS. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.threeDs()
+            if poll.json()["status"] == "success":
+                authToken = poll.json()['authToken']
+            else:
+                logger.error(SITE,self.taskID,'Failed to retrieve auth token for 3DS. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.threeDs()
+
+            authToken = poll.json()['authToken']
+            logger.alert(SITE,self.taskID,'3DS Authorised')
+    
+            data = '{"transToken":"%s","authToken":"%s"}' % (transToken, authToken)
+
+            headers = {
+                'authority': 'macs.touchtechpayments.com',
+                'sec-fetch-dest': 'empty',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'content-type': 'application/json',
+                'accept': '*/*',
+                'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
+                'referer': 'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
+                'sec-fetch-site': 'same-site',
+                'sec-fetch-mode': 'cors',
+            }
+
+            try:
+                r = self.session.post("https://macs.touchtechpayments.com/v1/confirmTransaction",headers=headers, data=data)
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                self.card()
+                self.threeDs()
 
-            if confirm.status_code == 200 and "orderconfirmed" in confirm.url:
-                logger.warning(SITE,self.taskID,'Order confirmed')
-                self.end = time.time() - self.start
-                logger.alert(SITE,self.taskID,'Checkout complete!')
-    
+            pares = r.json()['Response']
+
+            data = {"MD":self.MD, "PaRes":pares}
+            try:
+                r = self.session.post(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Adyen-RedirectToTop?type=treedscontinue',headers={
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                    'content-type': 'application/x-www-form-urlencoded',
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
+                    'referer':'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
+                }, data=data)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                self.threeDs()
+            
+            if r.status_code in [200,302]:
                 try:
-                    discord.success(
-                        webhook=loadSettings()["webhook"],
-                        site=SITE,
-                        image=self.productImage,
-                        title=self.productTitle,
-                        size=self.size,
-                        price=self.productPrice,
-                        paymentMethod="Card",
-                        profile=self.task["PROFILE"],
-                        product=self.task["PRODUCT"],
-                        proxy=self.session.proxies,
-                        speed=self.end
-                    )
-                    while True:
-                        pass
-                except:
-                    pass
+                    closeFrame = self.session.post(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Adyen-CloseIFrame',headers={
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                        'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
+                        'referer':'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
+                    }, data={"dwfrm_redirecttotop_redirecttop":"Submit","MD":self.MD,"PaRes":pares,"csrf_token":self.csrf})
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                    time.sleep(int(self.task["DELAY"]))
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    self.threeDs()
+
+                logger.prepare(SITE,self.taskID,'Confirming Order...')
+                try:
+                    confirm = self.session.post(f'https://{self.awlabRegion}/orderconfirmed',headers={
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                        'referer':f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Adyen-CloseIFrame',
+                    }, data={"MD":None,"PaReq":None})
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                    time.sleep(int(self.task["DELAY"]))
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    self.threeDs()
+
+                if confirm.status_code == 200 and "orderconfirmed" in confirm.url or "riepilogoordine" in confirm.url:
+                    logger.warning(SITE,self.taskID,'Order confirmed')
+                    self.end = time.time() - self.start
+                    logger.alert(SITE,self.taskID,'Checkout complete!')
+                    updateConsoleTitle(False,True,SITE)
+        
+                    try:
+                        discord.success(
+                            webhook=loadSettings()["webhook"],
+                            site=SITE,
+                            url=self.task["PRODUCT"],
+                            image=self.productImage,
+                            title=self.productTitle,
+                            size=self.size,
+                            price=self.productPrice,
+                            paymentMethod="Card",
+                            profile=self.task["PROFILE"],
+                            product=self.task["PRODUCT"],
+                            proxy=self.session.proxies,
+                            speed=self.end
+                        )
+                        while True:
+                            pass
+                    except:
+                        while True:
+                            pass
+                
+                else:
+                    logger.error(SITE,self.taskID,'Checkout failed. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    self.threeDs()
+
         else:
             logger.error(SITE,self.taskID,'Failed to get 3DS. Retrying')
             time.sleep(int(self.task["DELAY"]))
-            self.card()
+            self.threeDs()
+
+
 
                 

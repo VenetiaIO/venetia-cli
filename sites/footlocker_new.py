@@ -60,45 +60,49 @@ class FOOTLOCKER_NEW:
         if self.countryCode == 'it':
             self.baseUrl = 'https://www.footlocker.it'
             self.baseUrl2 = ''
-        if self.countryCode == 'be':
+        elif self.countryCode == 'be':
             self.baseUrl = 'https://www.footlocker.be'
             self.baseUrl2 = ''
-        if self.countryCode == 'at':
+        elif self.countryCode == 'at':
             self.baseUrl = 'https://www.footlocker.at'
             self.baseUrl2 = ''
-        if self.countryCode == 'lu':
+        elif self.countryCode == 'lu':
             self.baseUrl = 'https://www.footlocker.lu'
             self.baseUrl2 = ''
-        if self.countryCode == 'cz':
+        elif self.countryCode == 'cz':
             self.baseUrl = 'https://www.footlocker.cz'
             self.baseUrl2 = ''
-        if self.countryCode == 'dk':
+        elif self.countryCode == 'dk':
             self.baseUrl = 'https://www.footlocker.dk'
             self.baseUrl2 = ''
-        if self.countryCode == 'pl':
+        elif self.countryCode == 'pl':
             self.baseUrl = 'https://www.footlocker.pl'
             self.baseUrl2 = ''
-        if self.countryCode == 'gr':
+        elif self.countryCode == 'gr':
             self.baseUrl = 'https://www.footlocker.gr'
             self.baseUrl2 = ''
-        if self.countryCode == 'pt':
+        elif self.countryCode == 'pt':
             self.baseUrl = 'https://www.footlocker.pt'
             self.baseUrl2 = ''
-        if self.countryCode == 'hu':
+        elif self.countryCode == 'hu':
             self.baseUrl = 'https://www.footlocker.hu'
             self.baseUrl2 = ''
-        if self.countryCode == 'es':
+        elif self.countryCode == 'es':
             self.baseUrl = 'https://www.footlocker.es'
             self.baseUrl2 = ''
-        if self.countryCode == 'ie':
+        elif self.countryCode == 'ie':
             self.baseUrl = 'https://www.footlocker.ie'
             self.baseUrl2 = ''
-        if self.countryCode == 'no':
+        elif self.countryCode == 'no':
             self.baseUrl = 'https://www.footlocker.no'
             self.baseUrl2 = ''
-        if self.countryCode == 'se':
+        elif self.countryCode == 'se':
             self.baseUrl = 'https://www.footlocker.se'
             self.baseUrl2 = ''
+        else:
+            logger.error(SITE,self.taskID,'Region not supported. Exiting...')
+            time.sleep(10)
+            sys.exit()
         
         threading.Thread(target=self.task_checker,daemon=True).start()
         self.collect()
@@ -114,6 +118,11 @@ class FOOTLOCKER_NEW:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
             self.collect()
+
+        if retrieve.status_code == 503:
+            logger.info(SITE,self.taskID,'Queue...')
+            time.sleep(10)
+            self.retrieveSizes()
 
         if retrieve.status_code == 403:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
