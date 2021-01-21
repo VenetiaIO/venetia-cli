@@ -745,6 +745,7 @@ class SNIPES:
 
             try:
                 response = place.json()
+                id_ = response["orderID"]
             except Exception as e:
                 logger.error(SITE,self.taskID,'Failed to place order. Retrying...')
                 log.info(e)
@@ -753,7 +754,7 @@ class SNIPES:
 
             self.end = time.time() - self.start
             updateConsoleTitle(False,True,SITE)
-            logger.alert(SITE,self.taskID,'Order Placed ({}). Check your email to plete bank transfer.'.format(response["orderID"]))
+            logger.alert(SITE,self.taskID,'Order Placed ({}). Check your email to plete bank transfer.'.format(id_))
 
 
             sendNotification(SITE,self.productTitle)
@@ -770,6 +771,7 @@ class SNIPES:
                     product=self.task["PRODUCT"],
                     proxy=self.session.proxies,
                     speed=self.end,
+                    account=self.task["ACCOUNT EMAIL"],
                     region=self.countryCode
                 )
                 while True:
@@ -906,6 +908,7 @@ class SNIPES:
                     product=self.task["PRODUCT"],
                     proxy=self.session.proxies,
                     speed=self.end,
+                    account=self.task["ACCOUNT EMAIL"],
                     region=self.countryCode
                 )
                 while True:
@@ -1000,12 +1003,14 @@ class SNIPES:
             try:
                 response = place.json()
                 cUrl = response["continueUrl"]
+                redirect = place.json()['redirectUrl']
             except Exception as e:
+                redirect = 'null'
                 log.info(e)
                 log.info(str(response))
                 time.sleep(int(self.task["DELAY"]))
                 if place.json()['cartError'] == True:
-                    logger.error(SITE,self.taskID,'Failed to place order (Cart Error) Redirect=> {}. Retrying...'.format(place.json()['redirectUrl']))
+                    logger.error(SITE,self.taskID,'Failed to place order (Cart Error) Redirect=> {}. Retrying...'.format(redirect))
                     self.query()
                 else:
                     logger.error(SITE,self.taskID,'Failed to place order. Retrying...')
@@ -1034,6 +1039,7 @@ class SNIPES:
                         product=self.task["PRODUCT"],
                         proxy=self.session.proxies,
                         speed=self.end,
+                        account=self.task["ACCOUNT EMAIL"],
                         region=self.countryCode
                     )
                     while True:

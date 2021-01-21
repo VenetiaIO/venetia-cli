@@ -694,7 +694,7 @@ class AIRNESS:
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
                 updateConsoleTitle(False,True,SITE)
 
-                url = storeCookies(self.paypalUrl,self.session, self.productTitle, self.productImage, self.productPrice)
+                url = storeCookies(self.paypalUrl,self.session, self.name, self.productImage, self.productPrice)
 
                 self.productImage = 'https:{}'.format(self.image)
                 try:

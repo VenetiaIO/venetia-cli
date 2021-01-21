@@ -30,6 +30,7 @@ class OFFSPRING:
                 csv_reader = csv.DictReader(csvFile)
                 row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
                 self.task = row[0]
+                self.task['PRODUCT'] = 'https://www.offspring.co.uk/view/product/offspring_catalog/1,21/' + self.task['PRODUCT'] 
                 try:
                     self.task['ACCOUNT EMAIL'] = originalTask['ACCOUNT EMAIL']
                     self.task['ACCOUNT PASSWORD'] = originalTask['ACCOUNT PASSWORD']
@@ -62,6 +63,10 @@ class OFFSPRING:
         # cookies['_abck']
         # cookie_obj = requests.cookies.create_cookie(domain=f'.offspring.co.uk',name='_abck',value=cookies['_abck'])
         # self.session.cookies.set_cookie(cookie_obj)
+        if 'offspring' not in self.task['PRODUCT']:
+            self.task['PRODUCT'] = 'https://www.offspring.co.uk/view/product/offspring_catalog/1,21/' + self.task['PRODUCT'] 
+
+
 # 
 
         logger.prepare(SITE,self.taskID,'Getting product page...')
@@ -78,21 +83,33 @@ class OFFSPRING:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
             self.collect()
-        
-        currentVal = self.task['PRODUCT'].split('/offspring_catalog/')[1].split(',')[0]
-        self.task['PRODUCT'] = self.task['PRODUCT'].replace(currentVal + ',', str(random.randint(1,99)) + ',')
 
-        try:
-            if 'f5avraaaaaaaaaaaaaaaa_session_' not in retrieve.headers['set-cookie']:
-                logger.error(SITE,self.taskID,'Failed to get session. Retrying...')
-                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                time.sleep(int(self.task['DELAY']))
-                self.__init__(self.task, self.taskID, self.rowNumber)
-        except:
-            logger.error(SITE,self.taskID,'Failed to get session. Retrying...')
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task['DELAY']))
-            self.__init__(self.task, self.taskID, self.rowNumber)
+
+        if retrieve.status_code == 503:
+            logger.info(SITE,self.taskID,'Queue....')
+            try:
+                akavpwr_VP_offspring_val = str(retrieve.headers['set-cookie']).split('akavpwr_VP_offspring=')[1].split(';')[0]
+                cookie_obj = requests.cookies.create_cookie(domain='www.offspring.co.uk',name='akavpau_VP_offspring',value=akavpwr_VP_offspring_val)
+                self.session.cookies.set_cookie(cookie_obj)
+                clearables = []
+                for cookie in self.session.cookies:
+                    if cookie.name == 'akavpwr_VP_offspring':
+                        continue
+                    clearables.append((cookie.domain, cookie.path, cookie.name))
+                    
+                for domain, path, name in clearables:
+                    self.session.cookies.clear(domain, path, name)
+            
+
+            except Exception as e:
+                log.info(e)
+                pass
+            self.collect()
+        
+
+        currentVal = self.task['PRODUCT'].split('/offspring_catalog/')[1].split(',')[0]
+        print(currentVal)
+        self.task['PRODUCT'] = self.task['PRODUCT'].replace(currentVal + ',', str(random.randint(1,99)) + ',')
         
 
         if retrieve.status_code == 200:
@@ -105,17 +122,13 @@ class OFFSPRING:
                 self.csrf = soup.find('input',{'name':'CSRFToken'})['value']
 
     
-                foundSizes = soup.find('ul',{'data-locale':'EU'})
+                foundSizes = soup.find('ul',{'data-locale':'UK'})
                 if foundSizes:
                     sizes = []
                     allSizes = []
                     for s in foundSizes:
                         try:
                             size = s['data-name']
-                            try:
-                                size = size.split(' EU')[0]
-                            except:
-                                pass
                             sizes.append(size)
                             allSizes.append('{}:{}'.format(size, self.pid+s['data-value']))
                         except:

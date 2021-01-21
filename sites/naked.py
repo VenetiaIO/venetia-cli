@@ -564,6 +564,7 @@ class NAKED:
                     price=self.productPrice,
                     paymentMethod='PayPal',
                     profile=self.task["PROFILE"],
+                    account=self.task["ACCOUNT EMAIL"],
                     proxy=self.session.proxies
                 )
             except:
@@ -589,6 +590,7 @@ class NAKED:
                 profile=self.task["PROFILE"],
                 product=self.task["PRODUCT"],
                 proxy=self.session.proxies,
+                account=self.task["ACCOUNT EMAIL"],
                 speed=self.end
             )
             sendNotification(SITE,self.productTitle)

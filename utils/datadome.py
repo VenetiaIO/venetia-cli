@@ -19,6 +19,10 @@ class datadome:
     @staticmethod
     def reCaptchaMethod(SITE,taskID,session,responseUrl):
         try:
+            responseUrl = responseUrl.replace('&t=bv','')
+        except:
+            pass
+        try:
             datadomeCookie = str(session.cookies).split('datadome=')[1].split(' ')[0]
             geoUrl = 'https://geo.captcha-delivery.com/captcha/'
             geoParams = {
@@ -29,7 +33,6 @@ class datadome:
                 's': responseUrl.split('&s=')[1],
                 'cid': datadomeCookie
             }
-            print(geoParams)
         except Exception:
             return {"cookie":None}
         try:
@@ -49,33 +52,24 @@ class datadome:
             logger.error(SITE,taskID,'Error: {}'.format(e))
 
         try:
-            if 'You have been blocked' in response.text:
-                logger.error(SITE,taskID,'Blocked. Rotating Proxy...')
-                # print(session.proxies)
-                time.sleep(5)
-                return {"cookie":None}
-            else:
-                try:
-                    siteKey = response.text.split("'sitekey' : '")[1].split("'")[0]
-                    capResponse = captcha.v2(siteKey,response.url,session.proxies,SITE,taskID)
-                except Exception:
-                    reCaptchaMethod(SITE,taskID,session,responseUrl)
-        except Exception:
+            siteKey = response.text.split("'sitekey' : '")[1].split("'")[0]
+            capResponse = captcha.v2(siteKey,response.url,session.proxies,SITE,taskID)
+            params = {
+                "cid": encodeURIComponent(datadomeCookie),
+                "icid": encodeURIComponent(response.text.split("'&icid=' + encodeURIComponent('")[1].split("'")[0]),
+                "ccid": None,
+                "g-recaptcha-response": capResponse,
+                "hash": encodeURIComponent(response.text.split("'&hash=' + encodeURIComponent('")[1].split("'")[0]),
+                "ua": encodeURIComponent(response.text.split("'&ua=' + encodeURIComponent('")[1].split("'")[0]),
+                "referer": encodeURIComponent('https://' + response.text.split("'&referer=' + encodeURIComponent('")[1].split("'")[0]),
+                "parent_url":encodeURIComponent('https://' + response.text.split("'&referer=' + encodeURIComponent('")[1].split("'")[0]),
+                "x-forwarded-for": encodeURIComponent(response.text.split("'&x-forwarded-for=' + encodeURIComponent('")[1].split("'")[0]),
+                "captchaChallenge": 'false',
+                "s": encodeURIComponent(response.text.split("'&s=' + encodeURIComponent('")[1].split("'")[0]),
+            }
+        except Exception as e:
+            logger.error(SITE,taskID,'Failed to get cookie. Retrying...')
             return {"cookie":None}
-
-        params = {
-            "cid": encodeURIComponent(datadomeCookie),
-            "icid": encodeURIComponent(response.text.split("'&icid=' + encodeURIComponent('")[1].split("'")[0]),
-            "ccid": None,
-            "g-recaptcha-response": capResponse,
-            "hash": encodeURIComponent(response.text.split("'&hash=' + encodeURIComponent('")[1].split("'")[0]),
-            "ua": encodeURIComponent(response.text.split("'&ua=' + encodeURIComponent('")[1].split("'")[0]),
-            "referer": encodeURIComponent('https://' + response.text.split("'&referer=' + encodeURIComponent('")[1].split("'")[0]),
-            "parent_url":encodeURIComponent('https://' + response.text.split("'&referer=' + encodeURIComponent('")[1].split("'")[0]),
-            "x-forwarded-for": encodeURIComponent(response.text.split("'&x-forwarded-for=' + encodeURIComponent('")[1].split("'")[0]),
-            "captchaChallenge": 'false',
-            "s": encodeURIComponent(response.text.split("'&s=' + encodeURIComponent('")[1].split("'")[0]),
-        }
 
         try:
             response = session.get('https://geo.captcha-delivery.com/captcha/check',params=params,headers={

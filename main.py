@@ -286,6 +286,7 @@ class Menu:
                 pass
 
             total = 0
+            a = 0
             for k in sites.keys():
                 if k.upper() == 'FOOTLOCKER_NEW':
                     pass
@@ -313,10 +314,10 @@ class Menu:
                                 row['PROXIES'] = 'proxies'
 
                                 if loadProfile(row['PROFILE'])['countryCode'].upper() in new_footlockers():
-                                    threading.Thread(target=sites.get('FOOTLOCKER_NEW'),args=(row,taskName)).start()
+                                    threading.Thread(target=sites.get('FOOTLOCKER_NEW'),args=(row,taskName, a)).start()
 
                                 if loadProfile(row['PROFILE'])['countryCode'].upper() in old_footlockers():
-                                    threading.Thread(target=sites.get('FOOTLOCKER_OLD'),args=(row,taskName)).start()
+                                    threading.Thread(target=sites.get('FOOTLOCKER_OLD'),args=(row,taskName, a)).start()
 
                 elif k.upper() not in ['FOOTLOCKER_NEW','FOOTLOCKER_OLD']:
                     accounts = open(f'./{k.lower()}/accounts.txt','r').readlines()
@@ -353,8 +354,9 @@ class Menu:
                                 row["ACCOUNT EMAIL"] = acc.split(':')[0]
                                 row["ACCOUNT PASSWORD"] = acc.split(':')[1]
                                 
-                                threading.Thread(target=sites.get(k.upper()),args=(row,taskName)).start()
+                                threading.Thread(target=sites.get(k.upper()),args=(row,taskName, a)).start()
             
+                a = a + 1
             # if total == 0:
                 # self.menu()
  
@@ -518,7 +520,7 @@ class Menu:
                         qtPassword = ""
 
 
-                config_updated = {"key":config["key"],"checkoutNoise":checkoutNoise.upper(),"webhook":webhook,"2Captcha":twoCaptcha,"AntiCaptcha":antiCaptcha,"quickTaskSize":qtSize,"quickTaskProfile":qtProfile,"quickTaskProxies":qtProxies,"quickTaskDelay":qtDelay,"quickTaskPayment":qtPayment,"quickTaskEmail":qtEmail,"quickTaskPassword":qtPassword}
+                config_updated = {"key":config["key"],"checkoutNoise":checkoutNoise.upper(),"webhook":webhook,"2Captcha":twoCaptcha,"capMonster":capMonster,"captcha":capType,"quickTaskSize":qtSize,"quickTaskProfile":qtProfile,"quickTaskProxies":qtProxies,"quickTaskDelay":qtDelay,"quickTaskPayment":qtPayment,"quickTaskEmail":qtEmail,"quickTaskPassword":qtPassword}
 
                 with open("./data/config.json","w") as updated:
                     json.dump(config_updated, updated)
