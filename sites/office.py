@@ -31,6 +31,7 @@ class OFFICE:
                 csv_reader = csv.DictReader(csvFile)
                 row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
                 self.task = row[0]
+                self.task['PRODUCT'] = 'https://www.office.co.uk/view/product/office_catalog/1,21/' + self.task['PRODUCT'] 
                 try:
                     self.task['ACCOUNT EMAIL'] = originalTask['ACCOUNT EMAIL']
                     self.task['ACCOUNT PASSWORD'] = originalTask['ACCOUNT PASSWORD']
@@ -55,6 +56,9 @@ class OFFICE:
         self.collect()
 
     def collect(self):
+
+        if 'office' not in self.task['PRODUCT']:
+            self.task['PRODUCT'] = 'https://www.office.co.uk/view/product/office_catalog/1,21/' + self.task['PRODUCT'] 
 
 
         logger.prepare(SITE,self.taskID,'Getting product page...')
@@ -106,17 +110,13 @@ class OFFICE:
                 self.csrf = soup.find('input',{'name':'CSRFToken'})['value']
 
     
-                foundSizes = soup.find('ul',{'data-locale':'EU'})
+                foundSizes = soup.find('ul',{'data-locale':'UK'})
                 if foundSizes:
                     sizes = []
                     allSizes = []
                     for s in foundSizes:
                         try:
                             size = s['data-name']
-                            try:
-                                size = size.split(' EU')[0]
-                            except:
-                                pass
                             sizes.append(size)
                             allSizes.append('{}:{}'.format(size, self.pid+s['data-value']))
                         except:

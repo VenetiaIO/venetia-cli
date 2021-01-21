@@ -635,9 +635,8 @@ class AWLAB:
             self.threeDs()
 
         if payerAuth.status_code == 200:
-
-            transToken = payerAuth.text.split('token: "')[1].split('"')[0]
             try:
+                transToken = payerAuth.text.split('token: "')[1].split('"')[0]
                 payload = {"transToken":transToken}
                 poll = self.session.post('https://poll.touchtechpayments.com/poll', json=payload, headers={
                     'authority': 'verifiedbyvisa.acs.touchtechpayments.com',
