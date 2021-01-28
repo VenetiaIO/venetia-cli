@@ -23,18 +23,26 @@ except:
 from utils.logger import logger
 from utils.captcha import captcha
 from helheim import helheim
-
+from helheim.exceptions import (
+    HelheimException,
+    HelheimSolveError,
+    HelheimRuntimeError,
+    HelheimSaaSError,
+    HelheimSaaSBalance,
+    HelheimVersion
+)
 try:
   import win32console 
 except:
   pass
 
 def injection(session, response):
-    if session.is_New_IUAM_Challenge(response) \
-    or session.is_New_Captcha_Challenge(response):
+  if session.is_New_IUAM_Challenge(response) \
+    or session.is_New_Captcha_Challenge(response) \
+    or session.is_BFM_Challenge(response):
         return helheim('2044b982-151b-4fca-974d-ebad6fd10bec', session, response)
-    else:
-        return response
+  else:
+    return response
 
 
 

@@ -122,7 +122,7 @@ class FOOTLOCKER_NEW:
         if retrieve.status_code == 503:
             logger.info(SITE,self.taskID,'Queue...')
             time.sleep(10)
-            self.retrieveSizes()
+            self.collect()
 
         if retrieve.status_code == 403:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')

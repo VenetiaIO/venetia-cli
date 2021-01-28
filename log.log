@@ -4455,3 +4455,53 @@
 00:08:18,899 root ERROR Invalid URL '1537624739': No schema supplied. Perhaps you meant http://1537624739?
 00:10:53,873 root ERROR Invalid URL '1537624739': No schema supplied. Perhaps you meant http://1537624739?
 00:11:36,414 root ERROR Invalid URL '1537624739': No schema supplied. Perhaps you meant http://1537624739?
+08:14:16,965 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /men/mens-footwear/trainers/nike-dunk-low-retro-trainer-white-black-4051631/?_=1611216831396 (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+08:15:00,112 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:15:02,683 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:15:17,700 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:15:22,114 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /men/mens-footwear/trainers/nike-dunk-low-retro-trainer-white-black-4051631/?_=1611216831396 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:15:22,120 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:15:27,592 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:15:47,617 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:15:54,864 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:15:56,507 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /men/mens-footwear/trainers/nike-dunk-low-retro-trainer-white-black-4051631/?_=1611216831396 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:15:57,868 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:16:04,758 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:16:06,503 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /men/mens-footwear/trainers/nike-dunk-low-retro-trainer-white-black-4051631/?_=1611216831396 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:16:54,607 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:17:31,947 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:17:50,656 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:17:56,177 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:17:59,754 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:18:01,413 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:18:01,873 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:18:09,648 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:18:13,444 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:18:18,397 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:18:22,900 root ERROR HTTPSConnectionPool(host='www.footasylum.com', port=443): Max retries exceeded with url: /page/login/ (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+17:17:23,834 root ERROR SaaS -> Response -> Authenticate -> required minimum version >= 0.4.9, you have 0.4.8
+17:17:23,834 root ERROR SaaS -> Response -> Authenticate -> required minimum version >= 0.4.9, you have 0.4.8
+17:17:23,835 root ERROR SaaS -> Response -> Authenticate -> required minimum version >= 0.4.9, you have 0.4.8
+17:17:23,836 root ERROR SaaS -> Response -> Authenticate -> required minimum version >= 0.4.9, you have 0.4.8
+17:17:23,955 root ERROR SaaS -> Response -> Authenticate -> required minimum version >= 0.4.9, you have 0.4.8
+17:17:24,470 root ERROR SaaS -> Response -> Authenticate -> required minimum version >= 0.4.9, you have 0.4.8
+17:17:26,889 root ERROR SaaS -> Response -> Authenticate -> required minimum version >= 0.4.9, you have 0.4.8
+17:17:27,805 root ERROR SaaS -> Response -> Authenticate -> required minimum version >= 0.4.9, you have 0.4.8
+17:17:27,806 root ERROR SaaS -> Response -> Authenticate -> required minimum version >= 0.4.9, you have 0.4.8
+17:17:27,807 root ERROR SaaS -> Response -> Authenticate -> required minimum version >= 0.4.9, you have 0.4.8
+17:17:27,807 root ERROR SaaS -> Response -> Authenticate -> required minimum version >= 0.4.9, you have 0.4.8
+17:17:27,808 root ERROR SaaS -> Response -> Authenticate -> required minimum version >= 0.4.9, you have 0.4.8
+19:49:17,740 root ERROR HTTPSConnectionPool(host='www.nakedcph.com', port=443): Max retries exceeded with url: /en/auth/submit (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+19:49:54,143 root ERROR HTTPSConnectionPool(host='www.nakedcph.com', port=443): Max retries exceeded with url: /en/auth/submit (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+19:50:30,610 root ERROR HTTPSConnectionPool(host='www.nakedcph.com', port=443): Max retries exceeded with url: /en/auth/submit (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+19:51:06,841 root ERROR HTTPSConnectionPool(host='www.nakedcph.com', port=443): Max retries exceeded with url: /en/auth/submit (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+19:51:43,154 root ERROR HTTPSConnectionPool(host='www.nakedcph.com', port=443): Max retries exceeded with url: /en/auth/submit (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+19:51:48,638 root ERROR SaaS -> Response -> Subscription has expired
+19:51:52,834 root ERROR SaaS -> Response -> Subscription has expired
+19:51:56,183 root ERROR SaaS -> Response -> Subscription has expired
+19:52:00,251 root ERROR SaaS -> Response -> Subscription has expired
+19:52:04,445 root ERROR SaaS -> Response -> Subscription has expired
+19:52:08,874 root ERROR SaaS -> Response -> Subscription has expired
+19:52:13,808 root ERROR SaaS -> Response -> Subscription has expired
+19:52:18,89 root ERROR SaaS -> Response -> Subscription has expired
+19:52:21,452 root ERROR SaaS -> Response -> Subscription has expired

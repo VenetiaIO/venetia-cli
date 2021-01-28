@@ -51,7 +51,7 @@ class NAKED:
             self.session = scraper()
         except Exception as e:
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.__init__(task,taskName)
+            self.__init__(task,taskName,rowNumber)
         
         self.captchaRequired = False
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
