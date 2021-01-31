@@ -265,6 +265,7 @@ class FOOTLOCKER_NEW:
                     self.footlockerSession()
                 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.footlockerSession()
@@ -347,6 +348,7 @@ class FOOTLOCKER_NEW:
                     self.addToCart()
                 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.addToCart()
@@ -432,6 +434,7 @@ class FOOTLOCKER_NEW:
                     self.setEmail()
                 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.setEmail()
@@ -508,6 +511,7 @@ class FOOTLOCKER_NEW:
                     self.shipping()
 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.shipping()
@@ -566,6 +570,7 @@ class FOOTLOCKER_NEW:
                     self.shipping()
 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.shipping()
@@ -642,6 +647,7 @@ class FOOTLOCKER_NEW:
                     self.paypal()
 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.paypal()

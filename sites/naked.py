@@ -24,7 +24,6 @@ from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loa
 SITE = 'NAKED'
 
 
-
 class NAKED:
     def task_checker(self):
         originalTask = self.task

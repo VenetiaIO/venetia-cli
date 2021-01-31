@@ -54,6 +54,7 @@ class FOOTLOCKER_OLD:
         self.countryCode = profile['countryCode'].lower()
 
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+    #    {'http': 'http://sKzEfp97:Mp5yUU7kT12XlDRest0TIp4Lqd52ND79ytTaUc4Bq9HIAi8U8oXmMVfxBf6Au74G6UWg1-GQyhRVEF8T@gbr.resi.blankprime.io:12615', 'https': 'https://sKzEfp97:Mp5yUU7kT12XlDRest0TIp4Lqd52ND79ytTaUc4Bq9HIAi8U8oXmMVfxBf6Au74G6UWg1-GQyhRVEF8T@gbr.resi.blankprime.io:12615'}
         self.baseSku = self.task['PRODUCT']
 
         if self.countryCode == 'fr':
@@ -327,6 +328,7 @@ class FOOTLOCKER_OLD:
 
 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.addToCart()
@@ -411,6 +413,7 @@ class FOOTLOCKER_OLD:
                     self.checkoutDispatch()
 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.checkoutDispatch()
@@ -523,6 +526,7 @@ class FOOTLOCKER_OLD:
                     self.submitCheckoutDispatch()
 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.submitCheckoutDispatch()
