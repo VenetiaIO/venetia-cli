@@ -54,7 +54,7 @@ def execute():
                 except Exception as e:
                     pass
 
-                if k.lower() in ['holypop','naked','footasylum','snipes','wch','prodirect']:
+                if k.lower() in ['holypop','naked','footasylum','snipes','wch','prodirect','ambush']:
                     try:
                         f = open('./{}/accounts.txt'.format(k.lower()))
                         f.readlines()

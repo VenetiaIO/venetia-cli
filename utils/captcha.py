@@ -40,7 +40,7 @@ class captcha:
     def v2(sitekey, url, proxy, SITE,taskID):
         try:
             if loadSettings()["captcha"].lower() == "monster":
-                capMonster.v2(sitekey, url, proxy, SITE,taskID)
+                return capMonster.v2(sitekey, url, proxy, SITE,taskID)
             else:
                 logger.info(SITE,taskID,'Solving Captcha...')
                 twoCap = loadSettings()["2Captcha"]
@@ -114,7 +114,7 @@ class captcha:
     def v3(sitekey, url, proxy, SITE,taskID):
         try:
             if loadSettings()["captcha"].lower() == "monster":
-                capMonster.v3(sitekey, url, proxy, SITE,taskID)
+                return capMonster.v3(sitekey, url, proxy, SITE,taskID)
             else:
                 logger.info(SITE,taskID,'Solving Captcha...')
                 twoCap = loadSettings()["2Captcha"]
@@ -153,7 +153,7 @@ class captcha:
     @staticmethod
     def hcaptcha(sitekey, url, proxy, SITE,taskID):
         if loadSettings()["captcha"].lower() == "monster":
-            capMonster.hcaptcha(sitekey, url, proxy, SITE,taskID)
+            return capMonster.hcaptcha(sitekey, url, proxy, SITE,taskID)
         else:
             logger.info(SITE,taskID,'Solving Captcha...')
             twoCap = loadSettings()["2Captcha"]
@@ -227,7 +227,7 @@ class captcha:
     @staticmethod
     def menuV2(sitekey, url, proxy, taskID, SITE):
         if loadSettings()["captcha"].lower() == "monster":
-            capMonster.menuV2(sitekey, url, proxy, SITE,taskID)
+            return capMonster.menuV2(sitekey, url, proxy, SITE,taskID)
         else:
             logger.alert(SITE,taskID,'Solving Captcha...')
             twoCap = loadSettings()["2Captcha"]

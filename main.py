@@ -216,7 +216,8 @@ class Menu:
                     csv_reader = csv.DictReader(csvFile)
                     i = 1
                     a = 0
-                    for row, acc in zip(csv_reader, allAccounts):
+                    zip1 = zip(csv_reader, allAccounts)
+                    for row, acc in zip1:
                         if row["PRODUCT"] != "":
                             try:
                                 try:
@@ -334,7 +335,8 @@ class Menu:
                         # total =  total + sum(1 for row in csv_reader)
         
                         i = 1
-                        for row, acc in zip(csv_reader, allAccounts):
+                        zip2 = zip(csv_reader, allAccounts)
+                        for row, acc in zip2:
                             if row["PRODUCT"] != "":
                                 try:
                                     self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format(k.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
@@ -1090,10 +1092,11 @@ class Menu:
             logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('SNIPES','cyan')))
             logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('5','red', attrs=["bold"]), colored('NAKED','cyan')))
             logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('6','red', attrs=["bold"]), colored('WCH','cyan')))
-            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('7','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
+            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('7','red', attrs=["bold"]), colored('AMBUSH','cyan')))
+            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('8','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             AccountsiteSelect = input(' Select a site => ')
-            if AccountsiteSelect == "7":
+            if AccountsiteSelect == "8":
                 self.menu()
 
             # proxies = input(f"[{get_time()}] Enter proxy list name (leave empty for none) ==> ")
@@ -1141,6 +1144,10 @@ class Menu:
                 for i in range(int(amount)):
                     threading.Thread(target=ACCOUNTS.wch,args=(sitekey,proxies,'WCH',catchall,password, profile)).start()
             
+            if AccountsiteSelect == "7":
+                sitekey = ''
+                for i in range(int(amount)):
+                    threading.Thread(target=ACCOUNTS.ambush,args=(sitekey,proxies,'AMBUSH',catchall,password, profile)).start()
 
         
             while threading.active_count() != 2:

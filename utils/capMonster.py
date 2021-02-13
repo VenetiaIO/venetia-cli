@@ -24,13 +24,17 @@ def loadProxy(proxies,taskID, SITE):
         p = p.split(':')
         try:
             proxies = {
-                'http': f'http://{p[2]}:{p[3]}@{p[0]}:{p[1]}',
-                'https': f'https://{p[2]}:{p[3]}@{p[0]}:{p[1]}'
+                "address":p[0],
+                "port":p[1],
+                "login":p[2],
+                "passw":p[3]
             }
         except:
             proxies = {
-                'http': f'http://{p[0]}:{p[1]}',
-                'https': f'https://{p[0]}:{p[1]}'
+                "address":p[0],
+                "port":p[1],
+                "login":'',
+                "passw":''
             }
         return proxies
 
@@ -40,18 +44,12 @@ class capMonster:
     def v2(sitekey, url, proxy, SITE,taskID):
         logger.info(SITE,taskID,'Solving Captcha...')
         apiKey = loadSettings()["capMonster"]
-
-        proxy_http = loadProxy(proxy, taskID, SITE)['http'].split('http://')[1].split(':')
-        if len(proxy_http) == 4:
-            address = proxy_http[2]
-            port = proxy_http[3]
-            login = proxy_http[0]
-            passw = proxy_http[1]
-        else:
-            address = proxy_http[0]
-            port = proxy_http[1]
-            login = ''
-            passw = ''
+        proxy_http = loadProxy(proxy, taskID, SITE)
+        
+        address = proxy_http["address"]
+        port = proxy_http["port"]
+        login = proxy_http["login"]
+        passw = proxy_http["passw"]
 
         
 
@@ -77,6 +75,7 @@ class capMonster:
             logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
             v2(sitekey, url, proxy, SITE,taskID)
 
+
         if r.status_code == 200 and r.json()['errorId'] == 0:
             data = {
                 "clientKey":apiKey,
@@ -96,8 +95,10 @@ class capMonster:
                     v2(sitekey, url, proxy, SITE,taskID)
                 time.sleep(1)
 
-    
             return response.json()['solution']['gRecaptchaResponse']
+        
+        else:
+            return None
 
 
     @staticmethod 

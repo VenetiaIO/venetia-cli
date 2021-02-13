@@ -137,11 +137,18 @@ class SNIPES:
                 time.sleep(int(self.task["DELAY"]))
                 self.query()
 
-            self.productTitle = data["product"]["productName"]
-            self.productPrice = data["product"]["price"]["sales"]["formatted"]
-            self.productImage = data["product"]["images"][0]["pdp"]["srcT"]
-            self.csrf = data["csrf"]["token"]
-            self.demandWareBase = data["product"]["quantities"][0]["url"].split('Product-Variation')[0]
+            try:
+                self.productTitle = data["product"]["productName"]
+                self.productPrice = data["product"]["price"]["sales"]["formatted"]
+                self.productImage = data["product"]["images"][0]["pdp"]["srcT"]
+                self.csrf = data["csrf"]["token"]
+                self.demandWareBase = data["product"]["quantities"][0]["url"].split('Product-Variation')[0]
+            except Exception as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Failed to retrieve product info. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.query()
+
             if self.snipesRegion != 'com':
                 self.atcUrl = f'https://www.snipes.{self.snipesRegion}{self.demandWareBase}Cart-AddProduct?format=ajax'
             else:

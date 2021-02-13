@@ -218,7 +218,7 @@ class ALLIKE:
             updateConsoleTitle(False,True,SITE)
             logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
 
-            url = storeCookies(startExpress.url,self.session)
+            url = storeCookies(startExpress.url,self.session,self.productTitle,self.productImage,self.productPrice)
 
             
             sendNotification(SITE,self.productTitle)

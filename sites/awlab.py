@@ -167,7 +167,6 @@ class AWLAB:
                 'origin': f'https://{self.awlabRegion}',
                 'referer': self.task["PRODUCT"],
                 'accept':'text/html, */*; q=0.01',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -183,7 +182,6 @@ class AWLAB:
                 'origin': f'https://{self.awlabRegion}',
                 'referer': self.task["PRODUCT"],
                 'accept':'text/html, */*; q=0.01',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -213,7 +211,6 @@ class AWLAB:
                 'origin': f'https://{self.awlabRegion}',
                 'referer': self.task["PRODUCT"],
                 'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -249,7 +246,6 @@ class AWLAB:
                 'origin': f'https://{self.awlabRegion}',
                 'referer':f'https://{self.awlabRegion}/shipping',
                 'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -309,7 +305,6 @@ class AWLAB:
                 'referer':f'https://{self.awlabRegion}/shipping',
                 'content-type': 'application/x-www-form-urlencoded',
                 'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -371,7 +366,6 @@ class AWLAB:
                 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 'x-requested-with': 'XMLHttpRequest',
                 'accept':'*/*',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -476,7 +470,6 @@ class AWLAB:
                 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 'x-requested-with': 'XMLHttpRequest',
                 'accept':'*/*',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -565,7 +558,6 @@ class AWLAB:
                 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 'x-requested-with': 'XMLHttpRequest',
                 'accept':'*/*',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)

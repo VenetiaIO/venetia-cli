@@ -23,18 +23,26 @@ except:
 from utils.logger import logger
 from utils.captcha import captcha
 from helheim import helheim
-
+from helheim.exceptions import (
+    HelheimException,
+    HelheimSolveError,
+    HelheimRuntimeError,
+    HelheimSaaSError,
+    HelheimSaaSBalance,
+    HelheimVersion
+)
 try:
   import win32console 
 except:
   pass
 
 def injection(session, response):
-    if session.is_New_IUAM_Challenge(response) \
-    or session.is_New_Captcha_Challenge(response):
+  if session.is_New_IUAM_Challenge(response) \
+    or session.is_New_Captcha_Challenge(response) \
+    or session.is_BFM_Challenge(response):
         return helheim('2044b982-151b-4fca-974d-ebad6fd10bec', session, response)
-    else:
-        return response
+  else:
+    return response
 
 
 
@@ -165,13 +173,11 @@ def loadProxy(proxies,taskID, SITE):
 
         try:
             proxies = {
-                'http': f'http://{p[2]}:{p[3]}@{p[0]}:{p[1]}',
-                'https': f'https://{p[2]}:{p[3]}@{p[0]}:{p[1]}'
+                'http': f'http://{p[2]}:{p[3]}@{p[0]}:{p[1]}'
             }
         except:
             proxies = {
-                'http': f'http://{p[0]}:{p[1]}',
-                'https': f'https://{p[0]}:{p[1]}'
+                'http': f'http://{p[0]}:{p[1]}'
             }
         # logger.info(SITE,taskID,'Proxy Loaded')
         return proxies

@@ -108,11 +108,15 @@ class OFFSPRING:
         
 
         currentVal = self.task['PRODUCT'].split('/offspring_catalog/')[1].split(',')[0]
-        print(currentVal)
         self.task['PRODUCT'] = self.task['PRODUCT'].replace(currentVal + ',', str(random.randint(1,99)) + ',')
         
 
         if retrieve.status_code == 200:
+            if 'Something went wrong, please try again later.' in retrieve.text:
+                logger.error(SITE,self.taskID,'IP BAN. Rotating Proxy...')
+                self.session.proxies = loadProxy(self.task['PROXIES'],self.taskID,SITE)
+                time.sleep(2)
+                self.collect()
             self.start = time.time()
             logger.warning(SITE,self.taskID,'Got product page')
             try:
@@ -225,6 +229,7 @@ class OFFSPRING:
             cartPayload['grecaptcharesponse'] = captchaResponse
 
         logger.prepare(SITE,self.taskID,'Carting Product...')
+        print(cartPayload)
         try:
             atcResponse = self.session.post('https://www.offspring.co.uk/view/basket/add',data=cartPayload,headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
@@ -249,6 +254,7 @@ class OFFSPRING:
             time.sleep(int(self.task["DELAY"]))
             self.addToCart()
         
+        print(atcResponse.text)
         try:
             data = atcResponse.json()
             statusCode = data['statusCode']

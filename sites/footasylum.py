@@ -14,6 +14,7 @@ import csv
 
 SITE = 'FOOTASYLUM'
 
+
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
@@ -154,10 +155,10 @@ class FOOTASYLUM:
 
         else:
             try:
-                status = retrieve.status_code
+                status_code = retrieve.status_code
             except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
+                status_code = 'Unknown'
+            logger.error(SITE,self.taskID,f'Failed to get product page => {status_code}. Retrying...')
             time.sleep(int(self.task["DELAY"]))
             self.collect()
             

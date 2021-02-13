@@ -99,6 +99,9 @@ class FOOTLOCKER_NEW:
         elif self.countryCode == 'se':
             self.baseUrl = 'https://www.footlocker.se'
             self.baseUrl2 = ''
+        elif self.countryCode == 'de':
+            self.baseUrl = 'https://www.footlocker.de'
+            self.baseUrl2 = ''
         else:
             logger.error(SITE,self.taskID,'Region not supported. Exiting...')
             time.sleep(10)
@@ -122,7 +125,7 @@ class FOOTLOCKER_NEW:
         if retrieve.status_code == 503:
             logger.info(SITE,self.taskID,'Queue...')
             time.sleep(10)
-            self.retrieveSizes()
+            self.collect()
 
         if retrieve.status_code == 403:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
@@ -132,11 +135,12 @@ class FOOTLOCKER_NEW:
                 logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
                 time.sleep(10)
                 self.collect()
-            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+
+            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
             if cookie['cookie'] == None:
                 del self.session.cookies["datadome"]
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
                 
 
             del self.session.cookies["datadome"]
@@ -240,6 +244,11 @@ class FOOTLOCKER_NEW:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = response.json()['url']
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                if cookie['cookie'] == None:
+                    del self.session.cookies["datadome"]
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    self.footlockerSession()
             except:
                 if 'geo.captcha-delivery' in response.text:
                     try:
@@ -254,7 +263,7 @@ class FOOTLOCKER_NEW:
                         time.sleep(10)
                         self.footlockerSession()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -265,6 +274,7 @@ class FOOTLOCKER_NEW:
                     self.footlockerSession()
                 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.footlockerSession()
@@ -322,6 +332,16 @@ class FOOTLOCKER_NEW:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = atcResponse.json()['url']
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                if cookie['cookie'] == None:
+                    del self.session.cookies["datadome"]
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    self.addToCart()
+                
+                del self.session.cookies["datadome"]
+                self.session.cookies["datadome"] = cookie['cookie']
+                self.addToCart()
+                
             except:
                 if 'geo.captcha-delivery' in atcResponse.text:
                     try:
@@ -336,7 +356,7 @@ class FOOTLOCKER_NEW:
                         time.sleep(10)
                         self.addToCart()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -347,6 +367,7 @@ class FOOTLOCKER_NEW:
                     self.addToCart()
                 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.addToCart()
@@ -354,6 +375,7 @@ class FOOTLOCKER_NEW:
 
 
         elif atcResponse.status_code == 200:
+            updateConsoleTitle(True,False,SITE)
             logger.warning(SITE,self.taskID,'Successfully carted product')
             self.setEmail()
 
@@ -407,6 +429,11 @@ class FOOTLOCKER_NEW:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = emailPage.json()['url']
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                if cookie['cookie'] == None:
+                    del self.session.cookies["datadome"]
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    self.setEmail()
             except:
                 if 'geo.captcha-delivery' in emailPage.text:
                     try:
@@ -421,7 +448,7 @@ class FOOTLOCKER_NEW:
                         time.sleep(10)
                         self.setEmail()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -432,6 +459,7 @@ class FOOTLOCKER_NEW:
                     self.setEmail()
                 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.setEmail()
@@ -483,6 +511,11 @@ class FOOTLOCKER_NEW:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = shippingAddress.json()['url']
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                if cookie['cookie'] == None:
+                    del self.session.cookies["datadome"]
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    self.shipping()
             except:
                 if 'geo.captcha-delivery' in shippingAddress.text:
                     try:
@@ -497,7 +530,7 @@ class FOOTLOCKER_NEW:
                         time.sleep(10)
                         self.shipping()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -508,6 +541,7 @@ class FOOTLOCKER_NEW:
                     self.shipping()
 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.shipping()
@@ -541,6 +575,11 @@ class FOOTLOCKER_NEW:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = billingAddress.json()['url']
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                if cookie['cookie'] == None:
+                    del self.session.cookies["datadome"]
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    self.shipping()
             except:
                 if 'geo.captcha-delivery' in billingAddress.text:
                     try:
@@ -555,7 +594,7 @@ class FOOTLOCKER_NEW:
                         time.sleep(10)
                         self.shipping()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -566,6 +605,7 @@ class FOOTLOCKER_NEW:
                     self.shipping()
 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.shipping()
@@ -617,6 +657,11 @@ class FOOTLOCKER_NEW:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = paymentMethods.json()['url']
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                if cookie['cookie'] == None:
+                    del self.session.cookies["datadome"]
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    self.paypal()
             except:
                 if 'geo.captcha-delivery' in paymentMethods.text:
                     try:
@@ -631,7 +676,7 @@ class FOOTLOCKER_NEW:
                         time.sleep(10)
                         self.paypal()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -642,6 +687,7 @@ class FOOTLOCKER_NEW:
                     self.paypal()
 
                 else:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     logger.error(SITE,self.taskID,'Blocked. Sleeping...')
                     time.sleep(10)
                     self.paypal()
