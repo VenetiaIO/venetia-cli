@@ -30,6 +30,7 @@ from sites.offspring import OFFSPRING
 from sites.office import OFFICE
 from sites.footlocker_old import FOOTLOCKER_OLD
 from sites.footlocker_new import FOOTLOCKER_NEW
+from sites.ambush import AMBUSH
 
 sites = {
     "SVD":SVD,
@@ -56,16 +57,17 @@ sites = {
     "SNIPES":SNIPES,
     #"COURIR":COURIR,
     #"SOLEBOX":SOLEBOX,
-    #"FENOM":FENOM,
+    "FENOM":FENOM,
     "OFFSPRING":OFFSPRING,
     "OFFICE":OFFICE,
     "FOOTLOCKER_OLD":FOOTLOCKER_OLD,
-    "FOOTLOCKER_NEW":FOOTLOCKER_NEW
+    "FOOTLOCKER_NEW":FOOTLOCKER_NEW,
+    "AMBUSH":AMBUSH
 }
 
-def VERSION(): return '0.5.9.5'
+def VERSION(): return '0.6.0.5'
 
-def new_footlockers(): return ['IT','BE','AT','LU','CZ','DK','PL','GR','PT','HU','ES','IE','NO','SE']
-def old_footlockers(): return ['FR','DE','NL','GB','AU','SG','MY','HK']
+def new_footlockers(): return ['IT','BE','AT','LU','CZ','DK','PL','GR','PT','HU','ES','IE','NO','SE','DE']
+def old_footlockers(): return ['FR','NL','GB','AU','SG','MY','HK']
 
 def account_sites(): return ['holypop','naked','footasylum','snipes','wch','prodirect']

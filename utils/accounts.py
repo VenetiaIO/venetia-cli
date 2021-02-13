@@ -549,6 +549,85 @@ class ACCOUNTS:
             return 1
         else:
             return None
+
+
+    @staticmethod
+    def ambush(sitekey,proxies,SITE,catchall,password,profile):
+        taskID = 'Accounts'
+        logger.warning(SITE,taskID,'Creating account...')
+
+        customer = genCustomer(catchall)
+        profile = loadProfile(profile)
+        countryCode = profile['countryCode']
+
+        session = requests.session()
+        session.proxies = loadProxy(proxies,taskID,SITE)
+
+
+
+        try:
+            response = session.get(f'https://www.ambushdesign.com/en-{countryCode.lower()}/account/login',headers={
+                'accept': 'application/json, text/plain, */*',
+                'accept-encoding': 'gzip, deflate, br',
+                'accept-language': 'en-US,en;q=0.9',
+                'referer': 'https://www.ambushdesign.com/',
+                'sec-ch-ua': '"Chromium";v="88", "Google Chrome";v="88", ";Not A Brand";v="99"',
+                'sec-ch-ua-mobile': '?0',
+                'content-type': 'application/json',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36',
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            return None
+        
+        try:
+            urlRegion = response.text.split('window.initialI18nStore = {"')[1].split('"')[0]
+            currency = response.text.split('"currency":{"code":"')[1].split('"')[0]
+        except:
+            return None
+
+
+        
+        form = {
+            "name":customer['first'] + ' ' + customer['last'],
+            "firstName": customer['first'],
+            "lastName": customer['last'],
+            "username": customer['email'],
+            "email": customer['email'],
+            "password": password
+        }
+
+        try:
+            response = session.post('https://www.ambushdesign.com/api/legacy/v1/account/register',json=form,headers={
+                'accept': 'application/json, text/plain, */*',
+                'accept-encoding': 'gzip, deflate, br',
+                'accept-language': 'en-US',
+                'referer': 'https://www.ambushdesign.com/',
+                'sec-ch-ua': '"Chromium";v="88", "Google Chrome";v="88", ";Not A Brand";v="99"',
+                'sec-ch-ua-mobile': '?0',
+                'content-type': 'application/json',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36',
+                'ff-country': countryCode.upper(),
+                'ff-currency': currency
+            })
+        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+            return None
+
+        if response.status_code in [200,302,201]:
+            logger.success(SITE,taskID,'Account Created | ' + customer["email"])
+            discord.accountMade(
+                webhook=loadSettings()["webhook"],
+                site=SITE,
+                first=customer["first"],
+                last=customer["last"],
+                email=customer["email"]
+            )
+            with open('./ambush/accounts.txt','a') as accounts:
+                accounts.write('\n{}:{}'.format(customer["email"],password))
+
+            return 1
+        else:
+            return None
+        
         
 
             

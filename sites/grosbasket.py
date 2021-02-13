@@ -65,7 +65,6 @@ class GROSBASKET:
         logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
             retrieve = self.session.get(self.task["PRODUCT"], headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
     
             })
@@ -172,7 +171,6 @@ class GROSBASKET:
                 'sec-fetch-dest': 'empty',
                 'sec-fetch-mode': 'cors',
                 'sec-fetch-site': 'same-origin',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -195,7 +193,6 @@ class GROSBASKET:
         self.sessionId = str(uuid.uuid4())
         try:
             tokenRequest = self.session.get(f'https://www.grosbasket.com/{self.region}/braintree/checkout/clientToken/',headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -216,7 +213,6 @@ class GROSBASKET:
                 'authority': 'payments.braintree-api.com',
                 'authorization': 'Bearer {}'.format(self.fingerprint),
                 'sec-fetch-dest': 'empty',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
                 'braintree-version': '2018-05-10',
                 'content-type': 'application/json',
                 'accept': '*/*',
@@ -264,7 +260,6 @@ class GROSBASKET:
 
         try:
             fireCheckout = self.session.get(f'https://www.grosbasket.com/{self.region}/firecheckout/',headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'accept': 'text/javascript, text/html, application/xml, text/xml, */*'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -347,7 +342,6 @@ class GROSBASKET:
     
             try:
                 postSaveOrder = self.session.post(f'https://www.grosbasket.com/{self.region}/firecheckout/index/saveOrder/form_key/{self.formKey}',data=payload,headers={
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                     'accept': 'text/javascript, text/html, application/xml, text/xml, */*'
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -372,7 +366,6 @@ class GROSBASKET:
         logger.info(SITE,self.taskID,'Starting [PAYPAL] checkout...')
         try:
             startExpress = self.session.get('https://www.grosbasket.com/en/paypal/express/start/',headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -391,7 +384,6 @@ class GROSBASKET:
 
             try:
                 quote = self.session.post('https://www.grosbasket.com/en/braintree/checkout/quoteTotal/',headers={
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                     'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
                 })
                 self.price = quote.json()["grandTotal"]
@@ -489,7 +481,6 @@ class GROSBASKET:
             'authority': 'payments.braintree-api.com',
             'authorization': 'Bearer {}'.format(self.fingerprint),
             'sec-fetch-dest': 'empty',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
             'braintree-version': '2018-05-10',
             'content-type': 'application/json',
             'accept': '*/*',
@@ -528,7 +519,6 @@ class GROSBASKET:
             'authority': 'centinelapi.cardinalcommerce.com',
             'sec-fetch-dest': 'empty',
             'x-cardinal-tid': '',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
             'content-type': 'application/json;charset=UTF-8',
             'accept': '*/*',
             'origin': 'https://www.grosbasket.com',
