@@ -47,7 +47,6 @@ class CHMIELNA:
         self.taskID = taskName
         self.rowNumber = rowNumber
 
-        twoCap = loadSettings()["2Captcha"]
         try:
             self.session = scraper()
         except Exception as e:
@@ -79,6 +78,7 @@ class CHMIELNA:
                 logger.error(SITE,self.taskID,f'Failed to get product page. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 self.collect()
+
 
 
             logger.warning(SITE,self.taskID,'Got product page')
@@ -151,12 +151,16 @@ class CHMIELNA:
     def addToCart(self):
         logger.prepare(SITE,self.taskID,'Carting product...')
         payload = {
-            '_token': self.token,
+            '_token':self.token,
             'size': self.size
         }
 
         try:
-            postCart = self.session.post(self.cartURL, data=payload)
+            postCart = self.session.post(self.cartURL,data=payload,headers={
+                "x-requested-with": "XMLHttpRequest",
+                "accept": "*/*",
+                "referer":self.task['PRODUCT']
+            })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -284,7 +288,11 @@ class CHMIELNA:
             }
             
             try:
-                postDelivery = self.session.post('https://chmielna20.pl/en/order/delivery', data=payload)
+                postDelivery = self.session.post('https://chmielna20.pl/en/order/delivery', data=payload,headers={
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'referer': 'https://chmielna20.pl/order/delivery'
+
+                })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -308,7 +316,10 @@ class CHMIELNA:
     def confirm(self):
         logger.prepare(SITE,self.taskID,'Submitting checkout...')
         try:
-            conf = self.session.post('https://chmielna20.pl/en/order/confirm', data={"_token":self.token})
+            conf = self.session.post('https://chmielna20.pl/en/order/confirm', data={"_token":self.token},headers={
+                "x-requested-with": "XMLHttpRequest",
+                "accept": "*/*"
+            })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))

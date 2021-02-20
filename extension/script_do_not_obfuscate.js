@@ -47,7 +47,7 @@ function init() {
       var urlstring = tabs[0].url;
       var url = new URL(urlstring);
 
-      if (urlstring.includes('venetiacli.io/api/checkout/')) {
+      if (urlstring.includes('venetiacli.io/checkout/')) {
           var cookieStr = decodeURIComponent(url.searchParams.get('cookies')).split(' ').join('+');
           var redirect = url.searchParams.get('redirect').toString();
 

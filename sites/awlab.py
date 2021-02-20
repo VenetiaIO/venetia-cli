@@ -76,29 +76,27 @@ class AWLAB:
             self.start = time.time()
             logger.warning(SITE,self.taskID,'Got product page')
             try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
                 soup = BeautifulSoup(retrieve.text, "html.parser")
-                self.productTitle = soup.find('meta',{'name':'description'})["content"]
-                self.productPrice = soup.find_all('span',{'class':'b-price__sale'})[0].text
-                self.productImage = soup.find('link',{'rel':'image_src'})["href"]
+
+                self.productPrice = str(soup.find_all('span',{'class':'b-price__sale'})[0].text)
+                self.productTitle = str(soup.find('title').text.split('-')[0])
+                self.productImage = str(soup.find('link',{'rel':'image_src'})["href"])
                 self.productId = soup.find('div',{'id':'pdpMain'})["data-product-id"]
 
-                # try:
-                    # retrieveSizes = self.session.get(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Product-Variation?pid={self.productId}&format=ajax', headers={
-                        # 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
-                        # 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                        # 'referer':self.task['PRODUCT']
-        # 
-                    # })
-                # except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                    # log.info(e)
-                    # logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                    # self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    # time.sleep(int(self.task["DELAY"]))
-                    # self.collect()
-                
-                # https://en.aw-lab.com/on/demandware.store/Sites-awlab-en-Site/en_DE/Product-Variation?pid=AW_22121RBA&format=ajax
-                # soup = BeautifulSoup(retrieveSizes.text, "html.parser")
+                if self.productId == None: self.collect()
+
+                try:
+                    retrieveSizes = self.session.get(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Product-Variation?pid={self.productId}&format=ajax', headers={
+                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                        'referer':self.task['PRODUCT']
+                    })
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    time.sleep(int(self.task["DELAY"]))
+                    self.collect()
+
                 foundSizes = soup.find('ul',{'class':'swatches b-size-selector__list b-size-selector_large b-size-selector_large-sticky'})
                 allSizes = []
                 sizes = []
