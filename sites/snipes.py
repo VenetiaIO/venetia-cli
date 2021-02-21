@@ -141,7 +141,7 @@ class SNIPES:
                 self.productTitle = data["product"]["productName"]
                 self.productPrice = data["product"]["price"]["sales"]["formatted"]
                 self.productImage = data["product"]["images"][0]["pdp"]["srcT"]
-                self.csrf = data["csrf"]["token"]
+                # self.csrf = data["csrf"]["token"]
                 self.demandWareBase = data["product"]["quantities"][0]["url"].split('Product-Variation')[0]
             except Exception as e:
                 log.info(e)
@@ -186,6 +186,23 @@ class SNIPES:
                 self.size = selected.split(":")[0]
                 self.sizePID = selected.split(":")[1]
                 logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+
+
+            try:
+                csrfReq = self.session.post('https://www.snipes.{}{}/CSRF-Generate'.format(self.snipesRegion,self.demandWareBase))
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                self.query()
+            
+            try:
+                self.csrf = csrfReq.json()['csrf']['token']
+            except Exception:
+                logger.error(SITE,self.taskID,'Failed to get CSRF Token. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.query()
             
             if self.task["ACCOUNT EMAIL"] != "" and self.task["ACCOUNT PASSWORD"] != "":
                 self.login()
@@ -485,6 +502,7 @@ class SNIPES:
             cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=current_pxvid)
             self.session.cookies.set_cookie(cookie_obj)
             self.session.cookies.set_cookie(cookie_obj2)
+            time.sleep(2)
             self.addToCart()
         
         elif cart.status_code not in [200,403]:

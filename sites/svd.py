@@ -200,14 +200,13 @@ class SVD:
         self.sessionId = str(uuid.uuid4())
 
         try:
-            section = self.session.get('https://www.sivasdescalzo.com/en/customer/section/load/?sections=cart%2Cdirectory-data%2Cmessages&force_new_section_timestamp=true&_=',headers={
+            section = self.session.get(f'https://www.sivasdescalzo.com/en/customer/section/load/?sections=cart%2Cdirectory-data%2Cmessages&force_new_section_timestamp=true&_={int(time.time())}',headers={
                 'sec-fetch-dest': 'empty',
                 'sec-fetch-mode': 'cors',
                 'sec-fetch-site': 'same-origin',
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
                 'x-requested-with': 'XMLHttpRequest',
-                'accept': 'application/json, text/javascript, */*; q=0.01'
-
+                'accept': 'application/json, text/javascript, */*; q=0.01',
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -217,12 +216,7 @@ class SVD:
             self.jwt()
 
         try:
-            html = section.json()["cart"]["extra_actions"]
-            soup = BeautifulSoup(html, "html.parser")
-            div = soup.find("div", {"class": ["paypal", "checkout", "paypal-logo",
-                                            "braintree-paypal-logobraintree-paypal-mini-cart-container"]})["data-mage-init"]
-            jsonDiv = json.loads(div)["Magento_Braintree/js/paypal/button"]
-            self.ClientToken = jsonDiv["clientToken"]
+            self.ClientToken = section.text.split("button.init('")[1].split("'")[0]
     
             result = base64.b64decode(self.ClientToken)
             self.bearerToken = json.loads(result.decode(

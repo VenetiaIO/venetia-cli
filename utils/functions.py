@@ -190,8 +190,8 @@ def randomString(length):
 
 def getUser():
     key = loadSettings()["key"]
-    headers = {"apikey":"27acc458-f01a-48f8-88b8-06583fb39056"}
-    response = requests.post('https://venetiacli.io/api/get/user/key',headers=headers,data={"key":key})
+    headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
+    response = requests.get('https://venetiacli.io/api/v1/users/' + key,headers=headers)
     if response.status_code == 200:
         return response.json()
     else:

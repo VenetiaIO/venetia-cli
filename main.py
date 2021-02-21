@@ -24,6 +24,7 @@ try:
 except:
     pass
 #utils
+from utils.waterfall import WaterfallAssign
 from utils.quicktask import QT
 from utils.captcha import captcha
 from utils.logger import logger
@@ -211,7 +212,9 @@ class Menu:
                 
                 for i in range(2000):
                     allAccounts.append(':')
+                
 
+                tasks = []
                 with open('./{}/tasks.csv'.format(key_chosen.lower()),'r') as csvFile:
                     csv_reader = csv.DictReader(csvFile)
                     i = 1
@@ -240,9 +243,16 @@ class Menu:
                             row['PROXIES'] = 'proxies'
                             row["ACCOUNT EMAIL"] = acc.split(':')[0]
                             row["ACCOUNT PASSWORD"] = acc.split(':')[1]
-
-                            threading.Thread(target=value_chosen,args=(row,taskName, a)).start()
+                            row["SITE"] = key_chosen
+                            row["TASK_NAME"] = taskName
+                            row["ROW_NUMBER"] = a
+                            if key_chosen.lower() in ['slamjam','queens','airness','holypop','grosbasket','wch','naked','prodirect','disney','fenom','footlocker','footlocker_new','footlocker_old']:
+                                threading.Thread(target=value_chosen,args=(row,taskName, a)).start()
+                            else:
+                                tasks.append(row)
                             a = a + 1
+
+                WaterfallAssign.assign(tasks)
         except Exception as e:
             print(e)
             pass
@@ -251,13 +261,11 @@ class Menu:
 
     def menu(self):
         headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
-        requests.post('https://venetiacli.io/api/last/opened',headers=headers,json={"key":self.config["key"],"date":str(datetime.datetime.now())})
         try:
             self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Main Menu', start=self.rpctime,small_image="image",small_text="@venetiaIO")
         except:
             pass
 
-     
         print('                 Welcome {}...                  '.format(self.user['discordName']))
         logger.logo(logo,VERSION())
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('01','red', attrs=["bold"]), colored('Start All Tasks','red', attrs=["bold"])))

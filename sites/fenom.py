@@ -13,7 +13,6 @@ import cloudscraper
 import string
 from urllib3.exceptions import HTTPError
 
-from tls.client import Session
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log

@@ -41,7 +41,6 @@ class AWLAB:
 
     def __init__(self,task,taskName,rowNumber):
         self.task = task
-        self.sess = requests.session()
         self.taskID = taskName
         self.rowNumber = rowNumber
 

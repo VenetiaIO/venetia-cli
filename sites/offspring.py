@@ -61,14 +61,14 @@ class OFFSPRING:
 
         # print(cookies)
         # cookies['_abck']
-        # cookie_obj = requests.cookies.create_cookie(domain=f'.offspring.co.uk',name='_abck',value=cookies['_abck'])
-        # self.session.cookies.set_cookie(cookie_obj)
+        cookie = '4F04B3A4B98DEDEDA61982F45AD8E5FA~0~YAAQhkISArUy6bt3AQAARC41wAXuaEFsb0EcY8WZSUKjWoI9QX4btVmsBn2qBmZIVCb3lKWP74rOXYgcrexc8ZzQvHkKaKCbpI757FYJE+DmWzcbIDFFJxGcZMa/NH6P6D+zKr9Xt36w/qcc9dPJY7cL/87+wcFO9I+hWzsNEkv/vd7VgKL+uqcPAwp1fxnPcLVKpNAIzsLH7x0qKxB4pZJhBVbhx3OQftm+WVqic/rcfFyxwutEc8CG2qCPFzqTR2tli/JZZhLsHbFWuRgVHj5+/LRZbBBnvi64S0kmTcFQa9RufbtkibD4PbsS1H78WToKpvB9qPZLSl5CC6aycXKXWH2aD2HNHMXIe/xBUtNzECEiUoQRStkAkAiTJzoiL7vJSCrKecZX13wcq79pc+P7jBMEUdn33XlqVDxJ8f6I+res5TDOJsJUqgKzbKt675lNAg==~-1~-1~-1'
+        cookie_obj = requests.cookies.create_cookie(domain=f'.offspring.co.uk',name='_abck',value=cookie)
+        self.session.cookies.set_cookie(cookie_obj)
         if 'offspring' not in self.task['PRODUCT']:
             self.task['PRODUCT'] = 'https://www.offspring.co.uk/view/product/offspring_catalog/1,21/' + self.task['PRODUCT'] 
 
 
 # 
-
         logger.prepare(SITE,self.taskID,'Getting product page...')
         try:
             retrieve = self.session.get(self.task["PRODUCT"],headers={
@@ -83,7 +83,6 @@ class OFFSPRING:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             time.sleep(int(self.task["DELAY"]))
             self.collect()
-
 
         if retrieve.status_code == 503:
             logger.info(SITE,self.taskID,'Queue....')
@@ -229,7 +228,6 @@ class OFFSPRING:
             cartPayload['grecaptcharesponse'] = captchaResponse
 
         logger.prepare(SITE,self.taskID,'Carting Product...')
-        print(cartPayload)
         try:
             atcResponse = self.session.post('https://www.offspring.co.uk/view/basket/add',data=cartPayload,headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
@@ -254,7 +252,6 @@ class OFFSPRING:
             time.sleep(int(self.task["DELAY"]))
             self.addToCart()
         
-        print(atcResponse.text)
         try:
             data = atcResponse.json()
             statusCode = data['statusCode']
