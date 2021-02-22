@@ -574,3 +574,301 @@
 16:01:37,715 root ERROR Expecting value: line 1 column 1 (char 0)
 16:02:21,959 root ERROR ('Connection aborted.', ConnectionAbortedError(10053, 'An established connection was aborted by the software in your host machine', None, 10053, None))
 16:02:21,959 root ERROR ('Connection aborted.', ConnectionAbortedError(10053, 'An established connection was aborted by the software in your host machine', None, 10053, None))
+10:34:18,676 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:18,676 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:18,678 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:18,701 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:21,750 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:21,750 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:21,751 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:21,777 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:24,657 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:24,848 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:24,876 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:24,879 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:36,939 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:37,91 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:37,144 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:37,248 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:39,742 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:39,864 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:40,97 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:40,164 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:42,597 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:42,665 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:43,64 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:43,120 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:45,646 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:45,658 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:46,127 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:46,149 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:48,442 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:48,463 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:48,914 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:48,945 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:51,194 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:51,305 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:51,706 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:51,762 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:54,25 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:54,165 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:54,526 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:54,563 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:56,716 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:57,137 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:57,384 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:57,619 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:59,458 root ERROR SaaS -> Response -> Authentication Issue.
+10:34:59,859 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:00,156 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:00,479 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:02,191 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:02,916 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:03,177 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:04,229 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:04,872 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:05,640 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:05,991 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:06,928 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:07,647 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:08,307 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:08,706 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:09,814 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:10,642 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:11,26 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:11,386 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:12,507 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:13,354 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:13,737 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:14,21 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:15,232 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:16,151 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:16,593 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:16,844 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:17,923 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:18,913 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:20,530 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:20,815 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:22,234 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:22,366 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:23,452 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:23,727 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:32,666 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:32,950 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:33,125 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:33,136 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:35,187 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:35,777 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:36,25 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:36,28 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:37,654 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:38,465 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:38,922 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:38,923 root ERROR SaaS -> Response -> Authentication Issue.
+10:35:40,94 root ERROR SaaS -> Response -> Authentication Issue.
+10:38:58,998 root ERROR SaaS -> Response -> Authentication Issue.
+10:38:59,100 root ERROR SaaS -> Response -> Authentication Issue.
+10:38:59,174 root ERROR SaaS -> Response -> Authentication Issue.
+10:38:59,175 root ERROR SaaS -> Response -> Authentication Issue.
+10:39:01,807 root ERROR SaaS -> Response -> Authentication Issue.
+10:39:02,50 root ERROR SaaS -> Response -> Authentication Issue.
+10:39:02,52 root ERROR SaaS -> Response -> Authentication Issue.
+10:39:02,187 root ERROR SaaS -> Response -> Authentication Issue.
+10:39:04,737 root ERROR SaaS -> Response -> Authentication Issue.
+10:39:04,961 root ERROR SaaS -> Response -> Authentication Issue.
+10:39:04,996 root ERROR SaaS -> Response -> Authentication Issue.
+10:39:05,25 root ERROR SaaS -> Response -> Authentication Issue.
+16:26:39,646 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 387
+}
+
+16:26:39,655 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 382
+}
+
+16:26:39,658 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 377
+}
+
+16:26:39,766 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 287
+}
+
+16:26:39,817 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 224
+}
+
+16:26:40,717 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 1155
+}
+
+16:26:40,720 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 1134
+}
+
+16:26:40,722 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 1145
+}
+
+16:26:40,731 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 1132
+}
+
+16:26:40,774 discord_webhook.webhook ERROR [1/1] Webhook status code 429: {
+  "global": false, 
+  "message": "You are being rate limited.", 
+  "retry_after": 1076
+}
+
+17:14:57,923 root ERROR list index out of range
+17:14:57,971 root ERROR list index out of range
+17:14:59,149 root ERROR list index out of range
+17:14:59,235 root ERROR list index out of range
+17:15:00,346 root ERROR list index out of range
+17:15:00,403 root ERROR list index out of range
+17:15:01,535 root ERROR list index out of range
+17:15:01,608 root ERROR list index out of range
+17:15:02,747 root ERROR list index out of range
+17:15:03,160 root ERROR list index out of range
+17:15:04,935 root ERROR list index out of range
+17:15:04,982 root ERROR list index out of range
+17:15:06,307 root ERROR list index out of range
+17:15:06,351 root ERROR list index out of range
+17:15:07,556 root ERROR list index out of range
+17:15:07,665 root ERROR list index out of range
+17:15:07,843 root ERROR list index out of range
+17:15:07,892 root ERROR list index out of range
+17:15:07,950 root ERROR list index out of range
+17:15:08,8 root ERROR list index out of range
+17:15:08,721 root ERROR list index out of range
+17:15:09,87 root ERROR list index out of range
+17:15:09,149 root ERROR list index out of range
+17:15:09,215 root ERROR list index out of range
+17:15:09,264 root ERROR list index out of range
+17:15:09,463 root ERROR list index out of range
+17:15:09,911 root ERROR list index out of range
+17:15:10,246 root ERROR list index out of range
+17:15:10,391 root ERROR list index out of range
+17:15:10,463 root ERROR list index out of range
+17:15:10,647 root ERROR list index out of range
+17:15:10,892 root ERROR list index out of range
+17:15:11,76 root ERROR list index out of range
+17:15:11,425 root ERROR list index out of range
+17:15:11,602 root ERROR list index out of range
+17:15:11,683 root ERROR list index out of range
+17:15:12,73 root ERROR list index out of range
+17:15:12,122 root ERROR list index out of range
+17:15:12,320 root ERROR list index out of range
+17:15:12,616 root ERROR list index out of range
+17:15:12,789 root ERROR list index out of range
+17:15:12,867 root ERROR list index out of range
+17:15:13,337 root ERROR list index out of range
+17:15:13,514 root ERROR list index out of range
+17:15:13,604 root ERROR list index out of range
+17:15:13,797 root ERROR list index out of range
+17:15:13,979 root ERROR list index out of range
+17:15:14,54 root ERROR list index out of range
+17:15:14,514 root ERROR list index out of range
+17:15:14,756 root ERROR list index out of range
+17:15:14,953 root ERROR list index out of range
+17:15:15,13 root ERROR list index out of range
+17:15:15,169 root ERROR list index out of range
+17:15:15,549 root ERROR list index out of range
+17:15:15,717 root ERROR list index out of range
+17:15:15,918 root ERROR list index out of range
+17:15:16,185 root ERROR list index out of range
+17:15:16,249 root ERROR list index out of range
+17:15:16,389 root ERROR list index out of range
+17:15:16,728 root ERROR list index out of range
+17:15:16,970 root ERROR list index out of range
+17:15:17,102 root ERROR list index out of range
+17:15:17,169 root ERROR list index out of range
+17:15:17,216 root ERROR list index out of range
+17:15:17,274 root ERROR list index out of range
+17:15:17,351 root ERROR list index out of range
+17:15:17,574 root ERROR list index out of range
+17:15:17,681 root ERROR list index out of range
+17:15:17,752 root ERROR list index out of range
+17:15:17,924 root ERROR list index out of range
+17:15:18,147 root ERROR list index out of range
+17:15:18,303 root ERROR list index out of range
+17:15:18,361 root ERROR list index out of range
+17:15:18,530 root ERROR list index out of range
+17:15:18,592 root ERROR list index out of range
+17:15:18,644 root ERROR list index out of range
+17:15:18,773 root ERROR list index out of range
+17:15:18,950 root ERROR list index out of range
+17:15:19,17 root ERROR list index out of range
+17:15:19,132 root ERROR list index out of range
+17:15:19,201 root ERROR list index out of range
+17:15:19,383 root ERROR list index out of range
+17:15:19,762 root ERROR list index out of range
+17:15:20,800 root ERROR list index out of range
+17:15:21,114 root ERROR list index out of range
+17:15:21,182 root ERROR list index out of range
+17:15:21,246 root ERROR list index out of range
+17:15:21,295 root ERROR list index out of range
+17:15:21,349 root ERROR list index out of range
+17:15:21,432 root ERROR list index out of range
+17:15:21,502 root ERROR list index out of range
+17:15:21,602 root ERROR list index out of range
+17:15:21,777 root ERROR list index out of range
+17:15:21,854 root ERROR list index out of range
+17:15:22,320 root ERROR list index out of range
+17:15:22,539 root ERROR list index out of range
+17:15:22,623 root ERROR list index out of range
+17:15:22,767 root ERROR list index out of range
+17:15:22,840 root ERROR list index out of range
+17:15:22,944 root ERROR list index out of range
+17:15:23,668 root ERROR list index out of range
+17:15:23,750 root ERROR list index out of range
+17:15:23,870 root ERROR list index out of range
+17:15:23,922 root ERROR list index out of range
+17:15:23,988 root ERROR list index out of range
+17:24:08,213 root ERROR Expecting value: line 1 column 1 (char 0)
+17:24:08,969 root ERROR Expecting value: line 1 column 1 (char 0)
+17:24:09,408 root ERROR Expecting value: line 1 column 1 (char 0)
+17:39:14,816 root ERROR Expecting value: line 1 column 1 (char 0)
+17:39:16,5 root ERROR Expecting value: line 1 column 1 (char 0)
+17:39:17,203 root ERROR Expecting value: line 1 column 1 (char 0)
+17:39:23,659 root ERROR Expecting value: line 1 column 1 (char 0)
+17:39:24,866 root ERROR Expecting value: line 1 column 1 (char 0)
+18:10:36,77 root ERROR 'continueUrl'
+18:10:36,77 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:10:39,886 root ERROR Expecting value: line 2 column 1 (char 1)
+18:10:41,426 root ERROR 'continueUrl'
+18:10:41,426 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:10:54,189 root ERROR Expecting value: line 2 column 1 (char 1)
+18:11:10,640 root ERROR 'continueUrl'
+18:11:10,640 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:11:14,471 root ERROR 'continueUrl'
+18:11:14,471 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:11:17,3 root ERROR Expecting value: line 2 column 1 (char 1)
+18:11:29,335 root ERROR Expecting value: line 2 column 1 (char 1)
+18:11:42,649 root ERROR Expecting value: line 2 column 1 (char 1)
+18:31:57,615 root ERROR ('Connection aborted.', ConnectionAbortedError(10053, 'An established connection was aborted by the software in your host machine', None, 10053, None))
+18:32:13,532 root ERROR 'NoneType' object has no attribute 'find_all'
+18:32:14,237 root ERROR 'success'
+18:32:16,35 root ERROR 'NoneType' object has no attribute 'find_all'
+18:32:16,535 root ERROR 'success'
+18:32:18,136 root ERROR 'NoneType' object has no attribute 'find_all'
+18:32:18,864 root ERROR 'success'
+18:32:20,380 root ERROR 'NoneType' object has no attribute 'find_all'

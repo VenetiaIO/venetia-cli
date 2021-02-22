@@ -515,7 +515,37 @@ class SNIPES:
 
 
 
+    # def hmac(self):
+    #     logger.prepare(SITE,self.taskID,'Getting HMAC Token...')
+    #     profile = loadProfile(self.task["PROFILE"])
+        
+    #     try:
+    #         getHMAC = self.session.post('https://www.snipes.{}{}/Page-GetHMACToken?format=ajax'.format(self.snipesRegion,self.demandWareBase),data={
+    #             'email': profile['email'],
+    #             'csrf_token': self.csrf
+    #         })
+    #     except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+    #         log.info(e)
+    #         logger.error(SITE,self.taskID,'Error: {}'.format(e))
+    #         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+    #         time.sleep(int(self.task["DELAY"]))
+    #         self.hmac()
 
+    #     if getHMAC.status_code == 200:
+    #         try:
+    #             self.hmac = getHMAC.json()['cuid']
+    #         except:
+    #             logger.error(SITE,self.taskID,'Failed to get HMAC token. Retrying')
+    #             time.sleep(int(self.task["DELAY"]))
+    #             self.hmac()
+
+    #         logger.warning(SITE,self.taskID,'Got HMAC Token')
+    #         self.shipping()
+        
+    #     else:
+    #         logger.error(SITE,self.taskID,'Failed to get HMAC token. Retrying')
+    #         time.sleep(int(self.task["DELAY"]))
+    #         self.hmac()
 
     def shipping(self):
         logger.prepare(SITE,self.taskID,'Submitting shipping...')
@@ -757,7 +787,7 @@ class SNIPES:
             'x-requested-with': 'XMLHttpRequest'
         }
         try:
-            place = self.session.post('https://www.snipes.{}{}/CheckoutServices-PlaceOrder?format=ajax'.format(self.snipesRegion,self.demandWareBase))
+            place = self.session.post('https://www.snipes.{}{}/CheckoutServices-PlaceOrder?format=ajax'.format(self.snipesRegion,self.demandWareBase),data={"format": "ajax"})
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -878,7 +908,7 @@ class SNIPES:
             'x-requested-with': 'XMLHttpRequest'
         }
         try:
-            place = self.session.post('https://www.snipes.{}{}/CheckoutServices-PlaceOrder?format=ajax'.format(self.snipesRegion,self.demandWareBase))
+            place = self.session.post('https://www.snipes.{}{}/CheckoutServices-PlaceOrder?format=ajax'.format(self.snipesRegion,self.demandWareBase),data={"format": "ajax"})
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))
@@ -1015,7 +1045,7 @@ class SNIPES:
             'x-requested-with': 'XMLHttpRequest'
         }
         try:
-            place = self.session.post('https://www.snipes.{}{}/CheckoutServices-PlaceOrder?format=ajax'.format(self.snipesRegion,self.demandWareBase))
+            place = self.session.post('https://www.snipes.{}{}/CheckoutServices-PlaceOrder?format=ajax'.format(self.snipesRegion,self.demandWareBase),data={"format": "ajax"})
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,self.taskID,'Error: {}'.format(e))

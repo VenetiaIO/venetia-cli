@@ -13,7 +13,7 @@ import sys
 
 class WaterfallAssign:
     @staticmethod
-    def assign(tasks):
+    def assign(tasks,delay):
 
         data = {}
         for t in tasks:
@@ -46,13 +46,14 @@ class WaterfallAssign:
         # print(data)
         for a in data:
             d = json.dumps(data[a])
-            threading.Thread(target=Waterfall, args=(d,) ).start()
+            threading.Thread(target=Waterfall, args=(d,delay) ).start()
 
 
 
 class Waterfall:
-    def __init__(self, data):
+    def __init__(self, data, delay):
         self.data = json.loads(data)
+        self.delay = int(delay)
         self.s = scraper()
         self.SITE = self.data['SITE']
         self.taskID = 'Waterfall'
@@ -77,6 +78,7 @@ class Waterfall:
             retrieve = self.s.get(self.data["PRODUCT"])
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             self.s.proxies = loadProxy(self.data["PROXIES"],self.taskID,self.SITE)
+            time.sleep(self.delay)
             self.allike()
 
         if retrieve.status_code == 200:
@@ -113,14 +115,18 @@ class Waterfall:
                                 }
                                 threading.Thread(target=sites.get(self.SITE.upper()),args=(row,self.data['TASK NAME'][o], self.data['ROW NUMBER'][o])).start()
                     else:
+                        time.sleep(self.delay)
                         self.allike()
 
                 else:
+                    time.sleep(self.delay)
                     self.allike()
                         
             except Exception as e:
-               self.allike()
+                time.sleep(self.delay)
+                self.allike()
         else:
+            time.sleep(self.delay)
             self.allike()
 
     def ambush(self):
@@ -129,6 +135,7 @@ class Waterfall:
             retrieve = self.s.get(self.data["PRODUCT"])
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             self.s.proxies = loadProxy(self.data["PROXIES"],self.taskID,self.SITE)
+            time.sleep(self.delay)
             self.ambush()
 
         if retrieve.status_code == 200:
@@ -164,14 +171,18 @@ class Waterfall:
                                 }
                                 threading.Thread(target=sites.get(self.SITE.upper()),args=(row,self.data['TASK NAME'][o], self.data['ROW NUMBER'][o])).start()
                     else:
+                        time.sleep(self.delay)
                         self.ambush()
                         
                 else:
+                    time.sleep(self.delay)
                     self.ambush()
 
             except Exception as e:
-               self.ambush()
+                time.sleep(self.delay)
+                self.ambush()
         else:
+            time.sleep(self.delay)
             self.ambush()
 
 
@@ -181,6 +192,7 @@ class Waterfall:
             retrieve = self.s.get(self.data["PRODUCT"])
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             self.s.proxies = loadProxy(self.data["PROXIES"],self.taskID,self.SITE)
+            time.sleep(self.delay)
             self.awLab()
 
         if retrieve.status_code == 200:
@@ -212,11 +224,14 @@ class Waterfall:
                             }
                             threading.Thread(target=sites.get(self.SITE.upper()),args=(row,self.data['TASK NAME'][o], self.data['ROW NUMBER'][o])).start()
                 else:
+                    time.sleep(self.delay)
                     self.awLab()
                         
             except Exception as e:
-               self.awLab()
+                time.sleep(self.delay)
+                self.awLab()
         else:
+            time.sleep(self.delay)
             self.awLab()
 
 
@@ -226,6 +241,7 @@ class Waterfall:
             retrieve = self.s.get(self.data["PRODUCT"])
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             self.s.proxies = loadProxy(self.data["PROXIES"],self.taskID,self.SITE)
+            time.sleep(self.delay)
             self.chmielna()
 
         if retrieve.status_code == 200:
@@ -260,11 +276,14 @@ class Waterfall:
                             }
                             threading.Thread(target=sites.get(self.SITE.upper()),args=(row,self.data['TASK NAME'][o], self.data['ROW NUMBER'][o])).start()
                 else:
+                    time.sleep(self.delay)
                     self.chmielna()
                         
             except Exception as e:
-               self.chmielna()
+                time.sleep(self.delay)
+                self.chmielna()
         else:
+            time.sleep(self.delay)
             self.chmielna()
 
     def footasylum(self):
@@ -273,6 +292,7 @@ class Waterfall:
             retrieve = self.s.get(self.data["PRODUCT"])
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             self.s.proxies = loadProxy(self.data["PROXIES"],self.taskID,self.SITE)
+            time.sleep(self.delay)
             self.footasylum()
 
         if retrieve.status_code == 200:
@@ -314,13 +334,17 @@ class Waterfall:
                                 }
                                 threading.Thread(target=sites.get(self.SITE.upper()),args=(row,self.data['TASK NAME'][o], self.data['ROW NUMBER'][o])).start()
                     else:
+                        time.sleep(self.delay)
                         self.footasylum()
                 else:
+                    time.sleep(self.delay)
                     self.footasylum()
                         
             except Exception as e:
-               self.footasylum()
+                time.sleep(self.delay)
+                self.footasylum()
         else:
+            time.sleep(self.delay)
             self.footasylum()
 
     
@@ -336,6 +360,7 @@ class Waterfall:
             retrieve = self.s.get(self.data["PRODUCT"])
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             self.s.proxies = loadProxy(self.data["PROXIES"],self.taskID,self.SITE)
+            time.sleep(self.delay)
             self.office()
 
         currentVal = self.data['PRODUCT'].split('/office_catalog/')[1].split(',')[0]
@@ -384,12 +409,15 @@ class Waterfall:
                             }
                             threading.Thread(target=sites.get(self.SITE.upper()),args=(row,self.data['TASK NAME'][o], self.data['ROW NUMBER'][o])).start()
                 else:
+                    time.sleep(self.delay)
                     self.office()
 
                         
             except Exception as e:
-               self.office()
+                time.sleep(self.delay)
+                self.office()
         else:
+            time.sleep(self.delay)
             self.office()
 
 
@@ -407,6 +435,7 @@ class Waterfall:
             retrieve = self.s.get(self.data["PRODUCT"])
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             self.s.proxies = loadProxy(self.data["PROXIES"],self.taskID,self.SITE)
+            time.sleep(self.delay)
             self.offspring()
 
         currentVal = self.data['PRODUCT'].split('/offspring_catalog/')[1].split(',')[0]
@@ -455,12 +484,15 @@ class Waterfall:
                             }
                             threading.Thread(target=sites.get(self.SITE.upper()),args=(row,self.data['TASK NAME'][o], self.data['ROW NUMBER'][o])).start()
                 else:
+                    time.sleep(self.delay)
                     self.offspring()
 
                         
             except Exception as e:
-               self.offspring()
+                time.sleep(self.delay)
+                self.offspring()
         else:
+            time.sleep(self.delay)
             self.offspring()
 
 
@@ -473,6 +505,7 @@ class Waterfall:
             retrieve = self.s.get(self.data["PRODUCT"])
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             self.s.proxies = loadProxy(self.data["PROXIES"],self.taskID,self.SITE)
+            time.sleep(self.delay)
             self.schuh()
 
 
@@ -524,12 +557,15 @@ class Waterfall:
                             }
                             threading.Thread(target=sites.get(self.SITE.upper()),args=(row,self.data['TASK NAME'][o], self.data['ROW NUMBER'][o])).start()
                 else:
+                    time.sleep(self.delay)
                     self.schuh()
 
                         
             except Exception as e:
-               self.schuh()
+                time.sleep(self.delay)
+                self.schuh()
         else:
+            time.sleep(self.delay)
             self.schuh()
 
 
@@ -589,6 +625,7 @@ class Waterfall:
             retrieve = self.s.get(queryUrl)
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             self.s.proxies = loadProxy(self.data["PROXIES"],self.taskID,self.SITE)
+            time.sleep(self.delay)
             self.snipes()
 
         if retrieve.status_code == 200:
@@ -620,12 +657,15 @@ class Waterfall:
                             }
                             threading.Thread(target=sites.get(self.SITE.upper()),args=(row,self.data['TASK NAME'][o], self.data['ROW NUMBER'][o])).start()
                 else:
+                    time.sleep(self.delay)
                     self.snipes()
 
                         
             except Exception as e:
+                time.sleep(self.delay)
                 self.snipes()
         else:
+            time.sleep(self.delay)
             self.snipes()
 
     def svd(self):
@@ -638,6 +678,7 @@ class Waterfall:
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             self.s.proxies = loadProxy(self.data["PROXIES"],self.taskID,self.SITE)
+            time.sleep(self.delay)
             self.svd()
 
         if retrieve.status_code == 200:
@@ -681,14 +722,18 @@ class Waterfall:
                                 }
                                 threading.Thread(target=sites.get(self.SITE.upper()),args=(row,self.data['TASK NAME'][o], self.data['ROW NUMBER'][o])).start()
                     else:
+                        time.sleep(self.delay)
                         self.svd()
 
                 else:
+                    time.sleep(self.delay)
                     self.svd()
                         
             except Exception as e:
-               self.svd()
+                time.sleep(self.delay)
+                self.svd()
         else:
+            time.sleep(self.delay)
             self.svd()
 
     def titolo(self):
@@ -697,6 +742,7 @@ class Waterfall:
             retrieve = self.s.get(self.data["PRODUCT"])
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             self.s.proxies = loadProxy(self.data["PROXIES"],self.taskID,self.SITE)
+            time.sleep(self.delay)
             self.titolo()
 
         if retrieve.status_code == 200:
@@ -727,13 +773,16 @@ class Waterfall:
                             }
                             threading.Thread(target=sites.get(self.SITE.upper()),args=(row,self.data['TASK NAME'][o], self.data['ROW NUMBER'][o])).start()
                 else:
+                    time.sleep(self.delay)
                     self.titolo()
 
 
                         
             except Exception as e:
-               self.titolo()
+                time.sleep(self.delay)
+                self.titolo()
         else:
+            time.sleep(self.delay)
             self.titolo()
 
 

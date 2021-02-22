@@ -332,8 +332,8 @@ def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
         encodedURL = str(encodedURL, 'utf8')
     
         urlId = createId(15)
-        r = requests.post('https://venetiacli.io/api/checkout/setCookies',headers={"apikey":"27acc458-f01a-48f8-88b8-06583fb39056"},data={"viewId":urlId,"cookies":encoded,"redirect":encodedURL, "productTitle":prodTitle, "productImage":prodImage, "productPrice":prodPrice})
-        url = 'https://venetiacli.io/api/checkout/retrieve/?id={}'.format(urlId)
+        r = requests.post('https://venetiacli.io/checkout/setCookies',headers={"apikey":"27acc458-f01a-48f8-88b8-06583fb39056"},data={"viewId":urlId,"cookies":encoded,"redirect":encodedURL, "productTitle":prodTitle, "productImage":prodImage, "productPrice":prodPrice})
+        url = 'https://venetiacli.io/checkout/retrieve/?id={}'.format(urlId)
         return url
     except Exception as e:
         print(e)

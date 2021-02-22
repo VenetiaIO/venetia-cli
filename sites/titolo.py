@@ -69,6 +69,7 @@ class TITOLO:
         if retrieve.status_code == 200:
             self.start = time.time()
             logger.warning(SITE,self.taskID,'Got product page')
+
             try:
                 split = self.task["PRODUCT"].split("titoloshop.")[1]
                 self.region = split.split('/')[0]
@@ -77,6 +78,7 @@ class TITOLO:
                 split = self.task["PRODUCT"].split("titolo.")[1]
                 self.region = split.split('/')[0]
                 self.baseSite = 'https://en.titolo.ch'
+
             try:
                 logger.prepare(SITE,self.taskID,'Getting product data...')
 
@@ -120,7 +122,6 @@ class TITOLO:
                     logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                 
         
-    
                 else:
                     if self.task["SIZE"] not in sizes:
                         logger.error(SITE,self.taskID,'Size Not Found')
@@ -143,11 +144,7 @@ class TITOLO:
 
             self.addToCart()
         else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
+            logger.error(SITE,self.taskID,f'Failed to get product page => {retrieve.status_code}. Retrying...')
             time.sleep(int(self.task["DELAY"]))
             self.collect()
 

@@ -65,7 +65,7 @@ sites = {
     "AMBUSH":AMBUSH #WATERFALL MONITOR
 }
 
-def VERSION(): return '0.6.1'
+def VERSION(): return '0.6.1.5'
 
 def new_footlockers(): return ['IT','BE','AT','LU','CZ','DK','PL','GR','PT','HU','ES','IE','NO','SE','DE']
 def old_footlockers(): return ['FR','NL','GB','AU','SG','MY','HK']

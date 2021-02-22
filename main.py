@@ -58,7 +58,7 @@ except:
 
 def get_time():
     x = datetime.datetime.now()
-    x = f'{x.strftime("%X")}.{x.strftime("%f")}'
+    x = f'{x.strftime("%Y")}-{x.strftime("%m")}-{x.strftime("%d")} {x.strftime("%X")},{x.strftime("%f")}'
     return x
 
 def taskCount():
@@ -251,8 +251,8 @@ class Menu:
                             else:
                                 tasks.append(row)
                             a = a + 1
-
-                WaterfallAssign.assign(tasks)
+                _delay_ =  input(f"[{get_time()}] Enter Waterfall monitor delay (in seconds) ==> ")
+                WaterfallAssign.assign(tasks,_delay_)
         except Exception as e:
             print(e)
             pass
