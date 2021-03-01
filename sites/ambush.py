@@ -61,93 +61,90 @@ class AMBUSH:
         self.collect()
 
     def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"], headers={
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'accept-encoding': 'gzip, deflate, br',
-                'accept-language': 'en-US,en;q=0.9',
-                'referer': 'https://www.google.com/',
-                'sec-ch-ua': '"Chromium";v="88", "Google Chrome";v="88", ";Not A Brand";v="99"',
-                'sec-ch-ua-mobile': '?0',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
             try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-                soup = BeautifulSoup(retrieve.text, "html.parser")
-                regex = r"__PRELOADED_STATE__ = {(.+)}"
-                matches = re.search(regex, retrieve.text, re.MULTILINE)
-                if matches:
-                    self.urlRegion = retrieve.text.split('window.initialI18nStore = {"')[1].split('"')[0]
-                    self.currency = retrieve.text.split('"priceCurrency":"')[1].split('"')[0]
-                    prodData = json.loads(matches.group().split('__PRELOADED_STATE__ = ')[1])
-                    self.productId = [*prodData['entities']['products'].keys()][0]
-                    self.productImage = prodData['entities']['products'][self.productId]['images'][0]['url']
-                    self.productPrice = prodData['entities']['products'][self.productId]['price']['formatted']['includingTaxes']
-                    self.productTitle = prodData['entities']['products'][self.productId]['shortDescription']
-                    availableSizes = prodData['entities']['products'][self.productId]['sizes']
+                retrieve = self.session.get(self.task["PRODUCT"], headers={
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'accept-encoding': 'gzip, deflate, br',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'referer': 'https://www.google.com/',
+                    'sec-ch-ua': '"Chromium";v="88", "Google Chrome";v="88", ";Not A Brand";v="99"',
+                    'sec-ch-ua-mobile': '?0',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36'
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
-                    allSizes = []
-                    sizes = []
-                    for s in availableSizes:
-                        allSizes.append(s)
-                        sizes.append(s["name"])
-    
-                    if len(sizes) == 0:
-                        logger.error(SITE,self.taskID,'Size Not Found')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.collect()
+            if retrieve.status_code == 200:
+                self.start = time.time()
+                logger.warning(SITE,self.taskID,'Got product page')
+                try:
+                    logger.prepare(SITE,self.taskID,'Getting product data...')
+                    soup = BeautifulSoup(retrieve.text, "html.parser")
+                    regex = r"__PRELOADED_STATE__ = {(.+)}"
+                    matches = re.search(regex, retrieve.text, re.MULTILINE)
+                    if matches:
+                        self.urlRegion = retrieve.text.split('window.initialI18nStore = {"')[1].split('"')[0]
+                        self.currency = retrieve.text.split('"priceCurrency":"')[1].split('"')[0]
+                        prodData = json.loads(matches.group().split('__PRELOADED_STATE__ = ')[1])
+                        self.productId = [*prodData['entities']['products'].keys()][0]
+                        self.productImage = prodData['entities']['products'][self.productId]['images'][0]['url']
+                        self.productPrice = prodData['entities']['products'][self.productId]['price']['formatted']['includingTaxes']
+                        self.productTitle = prodData['entities']['products'][self.productId]['shortDescription']
+                        availableSizes = prodData['entities']['products'][self.productId]['sizes']
 
-                        
-                    if self.task["SIZE"].lower() != "random":
-                        if self.task["SIZE"] not in sizes:
+                        allSizes = []
+                        sizes = []
+                        for s in availableSizes:
+                            allSizes.append(s)
+                            sizes.append(s["name"])
+        
+                        if len(sizes) == 0:
                             logger.error(SITE,self.taskID,'Size Not Found')
                             time.sleep(int(self.task["DELAY"]))
-                            self.collect()
-                        else:
-                            for size in allSizes:
-                                if size['name']== self.task["SIZE"]:
-                                    self.selectedSize = size
-                                    self.size = self.selectedSize['name']
-                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-        
-                    
-                    elif self.task["SIZE"].lower() == "random":
-                        self.selectedSize = random.choice(allSizes)
-                        self.size = self.selectedSize['name']
-                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                    
+                            continue
 
+                            
+                        if self.task["SIZE"].lower() != "random":
+                            if self.task["SIZE"] not in sizes:
+                                logger.error(SITE,self.taskID,'Size Not Found')
+                                time.sleep(int(self.task["DELAY"]))
+                                continue
+                            else:
+                                for size in allSizes:
+                                    if size['name']== self.task["SIZE"]:
+                                        self.selectedSize = size
+                                        self.size = self.selectedSize['name']
+                                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+            
                         
-            except Exception as e:
-               log.info(e)
-               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-               time.sleep(int(self.task["DELAY"]))
-               self.collect()
+                        elif self.task["SIZE"].lower() == "random":
+                            self.selectedSize = random.choice(allSizes)
+                            self.size = self.selectedSize['name']
+                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                        
 
-            if self.task['ACCOUNT EMAIL'] != "":
-                self.login()
+                            
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                if self.task['ACCOUNT EMAIL'] != "":
+                    self.login()
+                else:
+                    self.addToCart()
+
             else:
-                self.addToCart()
-
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
     def login(self):
         logger.prepare(SITE,self.taskID,'Logging in...')

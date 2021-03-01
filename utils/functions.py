@@ -173,11 +173,11 @@ def loadProxy(proxies,taskID, SITE):
 
         try:
             proxies = {
-                'http': f'http://{p[2]}:{p[3]}@{p[0]}:{p[1]}'
+                'https': f'http://{p[2]}:{p[3]}@{p[0]}:{p[1]}'
             }
         except:
             proxies = {
-                'http': f'http://{p[0]}:{p[1]}'
+                'https': f'http://{p[0]}:{p[1]}'
             }
         # logger.info(SITE,taskID,'Proxy Loaded')
         return proxies

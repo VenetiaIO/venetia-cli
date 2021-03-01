@@ -75,160 +75,158 @@ class SLAMJAM:
         self.collect()
 
     def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        if 'https' in self.task["PRODUCT"]:
-            self.url = self.task["PRODUCT"]
-        else:
-            self.url = 'https://www.slamjam.com/en_{}/{}.html'.format(self.region,self.task["PRODUCT"])
-        
-        try:
-            retrieve = self.session.get(self.url,timeout=10)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-
-        self.start = time.time()
-        regex = r"[A-Z](\d+).html"
-        matches = re.search(regex, retrieve.url)
-        if matches:
-            self.pid = matches.group().split('.html')[0]
-        else:
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.collect()
-        
-    
-        self.cookie = loadCookie('SLAMJAM')["cookie"]
-        if self.cookie == 'empty':
-            del self.session.cookies["datadome"]
-            self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
-            self.session.cookies["datadome"]  = self.cookie
-        else:
-            del self.session.cookies["datadome"]
-            self.session.cookies["datadome"]  = self.cookie
-            self.session.proxies = self.cookie["proxy"]
-
-
-        if retrieve.status_code == 200:
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
+            if 'https' in self.task["PRODUCT"]:
+                self.url = self.task["PRODUCT"]
+            else:
+                self.url = 'https://www.slamjam.com/en_{}/{}.html'.format(self.region,self.task["PRODUCT"])
             
-            self.redirectUrl = retrieve.url
-            logger.warning(SITE,self.taskID,'Got product page')
             try:
-                soup = BeautifulSoup(retrieve.text, "html.parser")
-                #self.pid = retrieve.text.split("criteoProductsArray.push('")[1].split("');")[0]
-                self.csrf = soup.find('input',{'name':'csrf_token'})['value']
-                categorys = soup.find_all("li",{"class":"breadcrumb-item"})[3]
-                aCategorys = categorys.find('a')
-                self.productCategory = aCategorys.find('span').text
-                self.queryString = f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/Product-Variation?pid={self.pid}'
-                        
-            except Exception as e:
+                retrieve = self.session.get(self.url,timeout=10)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
-                logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 time.sleep(int(self.task["DELAY"]))
-                self.collect()
+                continue
 
-            self.retrieve()
+            self.start = time.time()
+            regex = r"[A-Z](\d+).html"
+            matches = re.search(regex, retrieve.url)
+            if matches:
+                self.pid = matches.group().split('.html')[0]
+            else:
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+            
+        
+            self.cookie = loadCookie('SLAMJAM')["cookie"]
+            if self.cookie == 'empty':
+                del self.session.cookies["datadome"]
+                self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
+                self.session.cookies["datadome"]  = self.cookie
+            else:
+                del self.session.cookies["datadome"]
+                self.session.cookies["datadome"]  = self.cookie
+                self.session.proxies = self.cookie["proxy"]
 
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+
+            if retrieve.status_code == 200:
+                
+                self.redirectUrl = retrieve.url
+                logger.warning(SITE,self.taskID,'Got product page')
+                try:
+                    soup = BeautifulSoup(retrieve.text, "html.parser")
+                    #self.pid = retrieve.text.split("criteoProductsArray.push('")[1].split("');")[0]
+                    self.csrf = soup.find('input',{'name':'csrf_token'})['value']
+                    categorys = soup.find_all("li",{"class":"breadcrumb-item"})[3]
+                    aCategorys = categorys.find('a')
+                    self.productCategory = aCategorys.find('span').text
+                    self.queryString = f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/Product-Variation?pid={self.pid}'
+                            
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                self.retrieve()
+
+            else:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
 
     def retrieve(self):
-        logger.prepare(SITE,self.taskID,'Getting product info...')
-        try:
-            data = self.session.get(self.queryString,headers={
-                'referer':self.url
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-        
-        if data:
-            if 'DDUser' in data.url:
-                logger.info(SITE,self.taskID,'Challenge Found, Solving...')
-                self.cookie = loadCookie('SLAMJAM')["cookie"]
-                if self.cookie == 'empty':
-                    del self.session.cookies["datadome"]
-                    self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
-                    self.session.cookies["datadome"]  = self.cookie
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product info...')
+            try:
+                data = self.session.get(self.queryString,headers={
+                    'referer':self.url
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                continue
+            
+            if data:
+                if 'DDUser' in data.url:
+                    logger.info(SITE,self.taskID,'Challenge Found, Solving...')
+                    self.cookie = loadCookie('SLAMJAM')["cookie"]
+                    if self.cookie == 'empty':
+                        del self.session.cookies["datadome"]
+                        self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
+                        self.session.cookies["datadome"]  = self.cookie
+                    else:
+                        del self.session.cookies["datadome"]
+                        self.session.cookies["datadome"]  = self.cookie
+                        self.session.proxies = self.cookie["proxy"]
+
+                    self.retrieve()
                 else:
-                    del self.session.cookies["datadome"]
-                    self.session.cookies["datadome"]  = self.cookie
-                    self.session.proxies = self.cookie["proxy"]
+                    if data.status_code == 200:
+                        try:
+                            data = data.json()
+                        except:
+                            logger.error(SITE,self.taskID,'Failed to retrieve product info. Retrying...')
+                            time.sleep(int(self.task["DELAY"]))
+                            continue
 
-                self.retrieve()
-            else:
-                if data.status_code == 200:
-                    try:
-                        data = data.json()
-                    except:
-                        logger.error(SITE,self.taskID,'Failed to retrieve product info. Retrying...')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-
-    
-                    self.uuid = data["product"]["uuid"]
-                    self.productTitle = data["product"]["productName"]
-                    self.productPrice = data["product"]["price"]["sales"]["formatted"]
-                    self.productImage = data["product"]["images"]["hi-res"][0]["absURL"]
-    
-                    sizeData = data["product"]["variationAttributes"][1]["values"]
-    
-                    allSizes = []
-                    sizes = []
-                    for s in sizeData:
-                        # SIZE : SIZE ID : SIZE PRODUCT ID : IN STOCK (TRUE / FALSE )
-                        if s["selectable"] == True:
-                            allSizes.append('{}:{}:{}:{}'.format(s["displayValue"],s["id"],s["productID"],s["selectable"]))
-                            sizes.append(s["displayValue"])
-    
-    
-                    if len(sizes) == 0:
-                        logger.error(SITE,self.taskID,'Size Not Found')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.retrieve()
-    
-                        
-                    if self.task["SIZE"].lower() != "random":
-                        if self.task["SIZE"] not in sizes:
+        
+                        self.uuid = data["product"]["uuid"]
+                        self.productTitle = data["product"]["productName"]
+                        self.productPrice = data["product"]["price"]["sales"]["formatted"]
+                        self.productImage = data["product"]["images"]["hi-res"][0]["absURL"]
+        
+                        sizeData = data["product"]["variationAttributes"][1]["values"]
+        
+                        allSizes = []
+                        sizes = []
+                        for s in sizeData:
+                            # SIZE : SIZE ID : SIZE PRODUCT ID : IN STOCK (TRUE / FALSE )
+                            if s["selectable"] == True:
+                                allSizes.append('{}:{}:{}:{}'.format(s["displayValue"],s["id"],s["productID"],s["selectable"]))
+                                sizes.append(s["displayValue"])
+        
+        
+                        if len(sizes) == 0:
                             logger.error(SITE,self.taskID,'Size Not Found')
                             time.sleep(int(self.task["DELAY"]))
-                            self.retrieve()
-                        else:
-                            for size in allSizes:
-                                if size.split(':')[0] == self.task["SIZE"]:
-                                    self.size = size.split(':')[0]
-                                    self.sizeID = size.split(':')[1]
-                                    self.sizeProductID = size.split(":")[2]
-                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                                    self.addToCart()
+                            continue
         
-                    
-                    elif self.task["SIZE"].lower() == "random":
-                        selected = random.choice(allSizes)
-                        self.size = selected.split(':')[0]
-                        self.sizeProductID = selected.split(":")[2]
-                        self.sizeID = selected.split(':')[1]
-                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                        self.addToCart()
+                            
+                        if self.task["SIZE"].lower() != "random":
+                            if self.task["SIZE"] not in sizes:
+                                logger.error(SITE,self.taskID,'Size Not Found')
+                                time.sleep(int(self.task["DELAY"]))
+                                continue
+                            else:
+                                for size in allSizes:
+                                    if size.split(':')[0] == self.task["SIZE"]:
+                                        self.size = size.split(':')[0]
+                                        self.sizeID = size.split(':')[1]
+                                        self.sizeProductID = size.split(":")[2]
+                                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                                        self.addToCart()
+            
+                        
+                        elif self.task["SIZE"].lower() == "random":
+                            selected = random.choice(allSizes)
+                            self.size = selected.split(':')[0]
+                            self.sizeProductID = selected.split(":")[2]
+                            self.sizeID = selected.split(':')[1]
+                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                            self.addToCart()
 
-        else:
-            logger.error(SITE,self.taskID,'Failed to get product info.')
-            time.sleep(int(self.task["DELAY"]))
-            self.retrieve()
+            else:
+                logger.error(SITE,self.taskID,'Failed to get product info.')
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
 
 

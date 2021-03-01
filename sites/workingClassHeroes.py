@@ -68,112 +68,109 @@ class WCH:
         self.collect()
 
     def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"], headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
             try:
-                soup = BeautifulSoup(retrieve.text, "html.parser")
-                self.pid = soup.find('input',{'id':'currentProduct'})["value"]          
-            except Exception as e:
-               log.info(e)
-               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-               time.sleep(int(self.task["DELAY"]))
-               self.collect()
-
-            logger.prepare(SITE,self.taskID,'Getting product data...')
-            try:
-                attrbs = self.session.post('https://www.workingclassheroes.co.uk/wsCitrusStore.asmx/GetAttributes', headers={
+                retrieve = self.session.get(self.task["PRODUCT"], headers={
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
                     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-    
-                },json={"controlLocation":"/modules/controls/clAttributeControl.ascx", "ProductID":self.pid, "DetailPage":True, "dollar":0, "percentage":0})
-                logger.success(SITE,self.taskID,'Solved Cloudflare')
+
+                })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 time.sleep(int(self.task["DELAY"]))
-                self.collect()
-            
-            try:
-                data = attrbs.json()
-            except Exception as e:
-                log.info(e)
+                continue
 
-            if data:
-                logger.info(SITE,self.taskID,'Successfully Scraped data')
-
-                soup = BeautifulSoup(data["d"]["HTML"],"html.parser")
-                foundSizes = soup.find_all('div',{'class':'attRow'})
-
-                allSizes = []
-                sizes = []
-                for s in foundSizes:
-                    try:
-                        iAttributeDetailID = s.find('div',{'class':['hideme','Attattributeid']}).text
-                        iAttributeID = s.find('input',{'class':'hiddenFieldAttID'})["value"]
-                        fullSize = s.find('div',{'class':'name'}).text
-                        splitSize = fullSize.split('UK ')[1]
-                        sizes.append(splitSize)
-                        allSizes.append('{}:{}:{}:{}'.format(splitSize,fullSize,iAttributeDetailID,iAttributeID))
-                    except:
-                        pass
-
-                if len(sizes) == 0:
-                    logger.error(SITE,self.taskID,'Size Not Found')
+            if retrieve.status_code == 200:
+                self.start = time.time()
+                logger.warning(SITE,self.taskID,'Got product page')
+                try:
+                    soup = BeautifulSoup(retrieve.text, "html.parser")
+                    self.pid = soup.find('input',{'id':'currentProduct'})["value"]          
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
                     time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-                    
-                if self.task["SIZE"].lower() != "random":
-                    if self.task["SIZE"] not in sizes:
+                    continue
+
+                logger.prepare(SITE,self.taskID,'Getting product data...')
+                try:
+                    attrbs = self.session.post('https://www.workingclassheroes.co.uk/wsCitrusStore.asmx/GetAttributes', headers={
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
+                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+        
+                    },json={"controlLocation":"/modules/controls/clAttributeControl.ascx", "ProductID":self.pid, "DetailPage":True, "dollar":0, "percentage":0})
+                    logger.success(SITE,self.taskID,'Solved Cloudflare')
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+                
+                try:
+                    data = attrbs.json()
+                except Exception as e:
+                    log.info(e)
+
+                if data:
+                    logger.info(SITE,self.taskID,'Successfully Scraped data')
+
+                    soup = BeautifulSoup(data["d"]["HTML"],"html.parser")
+                    foundSizes = soup.find_all('div',{'class':'attRow'})
+
+                    allSizes = []
+                    sizes = []
+                    for s in foundSizes:
+                        try:
+                            iAttributeDetailID = s.find('div',{'class':['hideme','Attattributeid']}).text
+                            iAttributeID = s.find('input',{'class':'hiddenFieldAttID'})["value"]
+                            fullSize = s.find('div',{'class':'name'}).text
+                            splitSize = fullSize.split('UK ')[1]
+                            sizes.append(splitSize)
+                            allSizes.append('{}:{}:{}:{}'.format(splitSize,fullSize,iAttributeDetailID,iAttributeID))
+                        except:
+                            pass
+
+                    if len(sizes) == 0:
                         logger.error(SITE,self.taskID,'Size Not Found')
                         time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-                    else:
-                        for size in allSizes:
-                            if size.split(':')[0] == self.task["SIZE"]:
-                                self.size = size.split(':')[1]
-                                self.iAttributeDetailID = size.split(':')[2]
-                                self.iAttributeID = size.split(":")[3]
-                                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-    
-                
-                elif self.task["SIZE"].lower() == "random":
-                    selected = random.choice(allSizes)
-                    self.size = selected.split(':')[1]
-                    self.iAttributeDetailID = selected.split(':')[2]
-                    self.iAttributeID = selected.split(":")[3]
-                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-
-                self.addToCart()
+                        continue
+                        
+                    if self.task["SIZE"].lower() != "random":
+                        if self.task["SIZE"] not in sizes:
+                            logger.error(SITE,self.taskID,'Size Not Found')
+                            time.sleep(int(self.task["DELAY"]))
+                            continue
+                        else:
+                            for size in allSizes:
+                                if size.split(':')[0] == self.task["SIZE"]:
+                                    self.size = size.split(':')[1]
+                                    self.iAttributeDetailID = size.split(':')[2]
+                                    self.iAttributeID = size.split(":")[3]
+                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+        
                     
-            else:
-                logger.error(SITE,self.taskID,'Failed to scrape data. Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                self.collect()
+                    elif self.task["SIZE"].lower() == "random":
+                        selected = random.choice(allSizes)
+                        self.size = selected.split(':')[1]
+                        self.iAttributeDetailID = selected.split(':')[2]
+                        self.iAttributeID = selected.split(":")[3]
+                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+                    self.addToCart()
+                        
+                else:
+                    logger.error(SITE,self.taskID,'Failed to scrape data. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+            else:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
     def addToCart(self):
         logger.prepare(SITE,self.taskID,'Carting product...')

@@ -52,101 +52,101 @@ class TITOLO:
         self.collect()
 
     def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"],headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-    
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.collect()
-
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
-
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
             try:
-                split = self.task["PRODUCT"].split("titoloshop.")[1]
-                self.region = split.split('/')[0]
-                self.baseSite = 'https://en.titoloshop.com'
-            except:
-                split = self.task["PRODUCT"].split("titolo.")[1]
-                self.region = split.split('/')[0]
-                self.baseSite = 'https://en.titolo.ch'
-
-            try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-
-                soup = BeautifulSoup(retrieve.text,"html.parser")
-                self.productTitle = soup.find("img",{"id":"image"})["title"]
-                self.productImage = soup.find("img",{"id":"image"})["src"]
-                self.productPrice = soup.find("span",{"class":"price"}).text
-                self.atcUrl = soup.find("form", {"id": "product_addtocart_form"})["action"].replace(',',',,')
-                self.formKey = soup.find("input", {"name": "form_key"})["value"]
-                self.productId = soup.find("input", {"name": "product"})["value"]
-                self.attributeIdColor = soup.find_all("select", {"class": "required-entry super-attribute-select"})[0]["id"].split("attribute")[1]
-                self.attributeId = soup.find_all("select", {"class": "required-entry super-attribute-select"})[1]["id"].split("attribute")[1]
-                sizeSelect = soup.find("select",{"id":"attributesize-size_eu"})
-    
-                regex = r"{\"attributes\":(.*?)}}\)"
-                matches = re.search(regex, retrieve.text, re.MULTILINE)
-                if matches:
-                    productData = json.loads(
-                        matches.group()[:-1])["attributes"][self.attributeIdColor]
-                    self.color = productData["options"][0]["id"]
-    
-                allSizes = []
-                sizes = []
-                for s in sizeSelect:
-                    try:
-                        allSizes.append('{}:{}:{}'.format(s.text,s["value"],s["source"]))
-                        sizes.append(s.text)
-                    except:
-                        pass
-    
-                if len(sizes) == 0:
-                    logger.error(SITE,self.taskID,'Size Not Found')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-    
-                if self.task["SIZE"].lower() == "random":
-                    chosen = random.choice(allSizes)
-                    self.sizeValue = chosen.split(':')[1]
-                    self.size = chosen.split(':')[0]
-                    self.sizeAttributeId = chosen.split(':')[2]
-                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                
+                retrieve = self.session.get(self.task["PRODUCT"],headers={
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
         
-                else:
-                    if self.task["SIZE"] not in sizes:
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            if retrieve.status_code == 200:
+                self.start = time.time()
+                logger.warning(SITE,self.taskID,'Got product page')
+
+                try:
+                    split = self.task["PRODUCT"].split("titoloshop.")[1]
+                    self.region = split.split('/')[0]
+                    self.baseSite = 'https://en.titoloshop.com'
+                except:
+                    split = self.task["PRODUCT"].split("titolo.")[1]
+                    self.region = split.split('/')[0]
+                    self.baseSite = 'https://en.titolo.ch'
+
+                try:
+                    logger.prepare(SITE,self.taskID,'Getting product data...')
+
+                    soup = BeautifulSoup(retrieve.text,"html.parser")
+                    self.productTitle = soup.find("img",{"id":"image"})["title"]
+                    self.productImage = soup.find("img",{"id":"image"})["src"]
+                    self.productPrice = soup.find("span",{"class":"price"}).text
+                    self.atcUrl = soup.find("form", {"id": "product_addtocart_form"})["action"].replace(',',',,')
+                    self.formKey = soup.find("input", {"name": "form_key"})["value"]
+                    self.productId = soup.find("input", {"name": "product"})["value"]
+                    self.attributeIdColor = soup.find_all("select", {"class": "required-entry super-attribute-select"})[0]["id"].split("attribute")[1]
+                    self.attributeId = soup.find_all("select", {"class": "required-entry super-attribute-select"})[1]["id"].split("attribute")[1]
+                    sizeSelect = soup.find("select",{"id":"attributesize-size_eu"})
+        
+                    regex = r"{\"attributes\":(.*?)}}\)"
+                    matches = re.search(regex, retrieve.text, re.MULTILINE)
+                    if matches:
+                        productData = json.loads(
+                            matches.group()[:-1])["attributes"][self.attributeIdColor]
+                        self.color = productData["options"][0]["id"]
+        
+                    allSizes = []
+                    sizes = []
+                    for s in sizeSelect:
+                        try:
+                            allSizes.append('{}:{}:{}'.format(s.text,s["value"],s["source"]))
+                            sizes.append(s.text)
+                        except:
+                            pass
+        
+                    if len(sizes) == 0:
                         logger.error(SITE,self.taskID,'Size Not Found')
                         time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-                    for size in allSizes:
-                        if self.task["SIZE"] == size.split(':')[0]:
-                            self.sizeValue = chosen.split(':')[1]
-                            self.size = chosen.split(':')[0]
-                            self.sizeAttributeId = chosen.split(':')[2]
-                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                        continue
+        
+                    if self.task["SIZE"].lower() == "random":
+                        chosen = random.choice(allSizes)
+                        self.sizeValue = chosen.split(':')[1]
+                        self.size = chosen.split(':')[0]
+                        self.sizeAttributeId = chosen.split(':')[2]
+                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                    
+            
+                    else:
+                        if self.task["SIZE"] not in sizes:
+                            logger.error(SITE,self.taskID,'Size Not Found')
+                            time.sleep(int(self.task["DELAY"]))
+                            continue
+                        for size in allSizes:
+                            if self.task["SIZE"] == size.split(':')[0]:
+                                self.sizeValue = chosen.split(':')[1]
+                                self.size = chosen.split(':')[0]
+                                self.sizeAttributeId = chosen.split(':')[2]
+                                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
 
 
-            except Exception as e:
-                log.info(e)
-                logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                self.addToCart()
+            else:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
-                self.collect()
-
-            self.addToCart()
-        else:
-            logger.error(SITE,self.taskID,f'Failed to get product page => {retrieve.status_code}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+                continue
 
     def addToCart(self):
         logger.prepare(SITE,self.taskID,'Carting product...')
@@ -167,7 +167,6 @@ class TITOLO:
         }
         try:
             postCart = self.session.post(self.atcUrl,data=payload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -193,7 +192,6 @@ class TITOLO:
         logger.prepare(SITE,self.taskID,'Setting checkout method...')
         try:
             setMethod = self.session.post(f'{self.baseSite}/checkout/onepage/saveMethod/',data={"method": "guest"},headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'accept': 'text/javascript, text/html, application/xml, text/xml, */*',
                 'referer': f'{self.baseSite}/checkout/onepage/',
                 'x-requested-with': 'XMLHttpRequest',
@@ -201,7 +199,6 @@ class TITOLO:
 
             })
             setMethod = self.session.post(f'{self.baseSite}/checkout/onepage/saveMethod/',data={"method": "guest"},headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'accept': 'text/javascript, text/html, application/xml, text/xml, */*',
                 'referer': f'{self.baseSite}/checkout/onepage/',
                 'x-requested-with': 'XMLHttpRequest',
@@ -267,7 +264,6 @@ class TITOLO:
 
         try:
             postBilling = self.session.post(f'{self.baseSite}/checkout/onepage/saveBilling/',data=payload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'accept': 'text/javascript, text/html, application/xml, text/xml, */*'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -298,7 +294,6 @@ class TITOLO:
         logger.prepare(SITE,self.taskID,'Submitting shipping method...')
         try:
             setShippingMethod = self.session.post(f'{self.baseSite}/SaferpayCw/onepage/saveShippingMethod/',data={"shipping_method": self.shippingMethods[0]["value"],"form_key":self.formKey},headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'accept': 'text/javascript, text/html, application/xml, text/xml, */*'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -332,7 +327,6 @@ class TITOLO:
         logger.prepare(SITE,self.taskID,'Setting payment method...')
         try:
             setPayment = self.session.post(f'{self.baseSite}/checkout/onepage/savePayment/',data={"payment[method]": "paypal_express","form_key":self.formKey},headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'accept': 'text/javascript, text/html, application/xml, text/xml, */*'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -346,7 +340,6 @@ class TITOLO:
             logger.warning(SITE,self.taskID,'Successfully set payment method')
             try:
                 getPaypal = self.session.get(f'{self.baseSite}/paypal/express/start/',headers={
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -413,7 +406,6 @@ class TITOLO:
         logger.prepare(SITE,self.taskID,'Setting payment method...')
         try:
             savePayment = self.session.post(f'{self.baseSite}/checkout/onepage/savePayment/',data={"payment[method]": self.paymentMethod,"form_key":self.formKey},headers={
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
             'accept': 'text/javascript, text/html, application/xml, text/xml, */*'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -448,7 +440,6 @@ class TITOLO:
 
         try:
             saveOrder = self.session.post(f'{self.baseSite}/checkout/onepage/saveOrder/form_key/{self.formKey}',data=payload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
                 'accept': 'text/javascript, text/html, application/xml, text/xml, */*',
                 'content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                 'referer':f'{self.baseSite}/checkout/onepage/'
@@ -490,7 +481,6 @@ class TITOLO:
                 'sec-fetch-site': 'same-origin',
                 'sec-fetch-user': '?1',
                 'upgrade-insecure-requests': '1',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
             })
     
             cardPayload = {
@@ -502,9 +492,7 @@ class TITOLO:
                 'SubmitToNext': '',
             }
     
-            submitCard = self.session.post(getSaferPay.url,data=cardPayload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
-            })
+            submitCard = self.session.post(getSaferPay.url,data=cardPayload)
 
             
             if submitCard.status_code == 200:

@@ -62,94 +62,91 @@ class GROSBASKET:
 
 
     def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"], headers={
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-    
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-
-        split = self.task["PRODUCT"].split("grosbasket.com/")[1]
-        self.region = split.split('/')[0]
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.success(SITE,self.taskID,'Got product page')
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
             try:
-                soup = BeautifulSoup(retrieve.text, "html.parser")
-                self.productTitle = soup.find("h1", {"itemprop": "name"}).text.replace('\n','')
-                self.productImage = soup.find("img", {"class": "lazy"})["src"]
-                self.attributeId = soup.find("select", {
-                    "class": "required-entry super-attribute-select"})["id"].split("attribute")[1]
-    
-                regex = r"{\"attributes\":(.*?)}}\)"
-                regex2 = r"{\"send_url\":(.*?)}\)"
-                matches = re.search(regex, retrieve.text, re.MULTILINE)
-                matches2 = re.search(regex2, retrieve.text, re.MULTILINE)
-                if matches:
-                    productData = json.loads(
-                        matches.group()[:-1])["attributes"][self.attributeId]
-    
-                    productData2 = json.loads(matches2.group()[:-1])
-                    self.currentCategory = productData2["current_category"]
-                    self.formKey = productData2["form_key"]
-                    self.productId = productData2["product_id"]
-                    self.atcUrl = productData2["send_url"]
-    
-                    allSizes = []
-                    sizes = []
-                    for s in productData["options"]:
-                        allSizes.append('{}:{}:{}'.format(
-                            s["label"], s["products"][0], s["id"]))
-                        sizes.append(s["label"])
-    
+                retrieve = self.session.get(self.task["PRODUCT"], headers={
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+        
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
-                    if len(sizes) == 0:
-                        logger.error(SITE,self.taskID,'Size Not Found')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.collect()
+            split = self.task["PRODUCT"].split("grosbasket.com/")[1]
+            self.region = split.split('/')[0]
+            if retrieve.status_code == 200:
+                self.start = time.time()
+                logger.success(SITE,self.taskID,'Got product page')
+                try:
+                    soup = BeautifulSoup(retrieve.text, "html.parser")
+                    self.productTitle = soup.find("h1", {"itemprop": "name"}).text.replace('\n','')
+                    self.productImage = soup.find("img", {"class": "lazy"})["src"]
+                    self.attributeId = soup.find("select", {
+                        "class": "required-entry super-attribute-select"})["id"].split("attribute")[1]
+        
+                    regex = r"{\"attributes\":(.*?)}}\)"
+                    regex2 = r"{\"send_url\":(.*?)}\)"
+                    matches = re.search(regex, retrieve.text, re.MULTILINE)
+                    matches2 = re.search(regex2, retrieve.text, re.MULTILINE)
+                    if matches:
+                        productData = json.loads(
+                            matches.group()[:-1])["attributes"][self.attributeId]
+        
+                        productData2 = json.loads(matches2.group()[:-1])
+                        self.currentCategory = productData2["current_category"]
+                        self.formKey = productData2["form_key"]
+                        self.productId = productData2["product_id"]
+                        self.atcUrl = productData2["send_url"]
+        
+                        allSizes = []
+                        sizes = []
+                        for s in productData["options"]:
+                            allSizes.append('{}:{}:{}'.format(
+                                s["label"], s["products"][0], s["id"]))
+                            sizes.append(s["label"])
+        
 
-
-                    if self.task["SIZE"].lower() != "random":
-                        if self.task["SIZE"] not in sizes:
+                        if len(sizes) == 0:
                             logger.error(SITE,self.taskID,'Size Not Found')
                             time.sleep(int(self.task["DELAY"]))
-                            self.collect()
-                        else:
-                            for size in allSizes:
-                                if size.split(':')[0] == self.task["SIZE"]:
-                                    self.size = size.split(':')[0]
-                                    self.sizeID = size.split(':')[2]
-                                    self.option = size.split(":")[1]
-                                    logger.success(SITE,self.taskID,f'Found Size => {self.size}')
-    
-                    elif self.task["SIZE"].lower() == "random":
-                        selected = random.choice(allSizes)
-                        self.size = selected.split(":")[0]
-                        self.sizeID = selected.split(":")[2]
-                        self.option = selected.split(":")[1]
-                        logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+                            continue
 
-            except Exception as e:
-               log.info(e)
-               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-               time.sleep(int(self.task["DELAY"]))
-               self.collect()
 
-            self.addToCart()
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+                        if self.task["SIZE"].lower() != "random":
+                            if self.task["SIZE"] not in sizes:
+                                logger.error(SITE,self.taskID,'Size Not Found')
+                                time.sleep(int(self.task["DELAY"]))
+                                continue
+                            else:
+                                for size in allSizes:
+                                    if size.split(':')[0] == self.task["SIZE"]:
+                                        self.size = size.split(':')[0]
+                                        self.sizeID = size.split(':')[2]
+                                        self.option = size.split(":")[1]
+                                        logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+        
+                        elif self.task["SIZE"].lower() == "random":
+                            selected = random.choice(allSizes)
+                            self.size = selected.split(":")[0]
+                            self.sizeID = selected.split(":")[2]
+                            self.option = selected.split(":")[1]
+                            logger.success(SITE,self.taskID,f'Found Size => {self.size}')
+
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                self.addToCart()
+            else:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
     def addToCart(self):
         payload = {

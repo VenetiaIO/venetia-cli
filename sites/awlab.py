@@ -14,6 +14,7 @@ import string
 from urllib3.exceptions import HTTPError
 import csv
 
+from utils.captcha import captcha
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
@@ -61,93 +62,90 @@ class AWLAB:
         self.collect()
 
     def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"])
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
             try:
-                soup = BeautifulSoup(retrieve.text, "html.parser")
+                retrieve = self.session.get(self.task["PRODUCT"])
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
-                self.productPrice = str(soup.find_all('span',{'class':'b-price__sale'})[0].text)
-                self.productTitle = str(soup.find('title').text.split('-')[0])
-                self.productImage = str(soup.find('link',{'rel':'image_src'})["href"])
-                self.productId = soup.find('div',{'id':'pdpMain'})["data-product-id"]
-
-                if self.productId == None: self.collect()
-
+            if retrieve.status_code == 200:
+                self.start = time.time()
+                logger.warning(SITE,self.taskID,'Got product page')
                 try:
-                    retrieveSizes = self.session.get(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Product-Variation?pid={self.productId}&format=ajax', headers={
-                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                        'referer':self.task['PRODUCT']
-                    })
-                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                    log.info(e)
-                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
+                    soup = BeautifulSoup(retrieve.text, "html.parser")
 
-                foundSizes = soup.find('ul',{'class':'swatches b-size-selector__list b-size-selector_large b-size-selector_large-sticky'})
-                allSizes = []
-                sizes = []
-                
-                for s in foundSizes:
+                    self.productPrice = str(soup.find_all('span',{'class':'b-price__sale'})[0].text)
+                    self.productTitle = str(soup.find('title').text.split('-')[0])
+                    self.productImage = str(soup.find('link',{'rel':'image_src'})["href"])
+                    self.productId = soup.find('div',{'id':'pdpMain'})["data-product-id"]
+
+                    if self.productId == None: continue
+
                     try:
-                        s = s.find('a')
+                        retrieveSizes = self.session.get(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Product-Variation?pid={self.productId}&format=ajax', headers={
+                            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                            'referer':self.task['PRODUCT']
+                        })
+                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                        log.info(e)
+                        logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                        time.sleep(int(self.task["DELAY"]))
+                        continue
 
-                        sizes.append(s["title"])
-                        allSizes.append('{}:{}'.format(s["title"], s["data-variant-id"]))
-                    except:
-                        pass
-                
-                if len(sizes) == 0:
-                    logger.error(SITE,self.taskID,'Size Not Found')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-    
-                if self.task["SIZE"].lower() == "random":
-                    chosen = random.choice(allSizes)
-                    self.pid = chosen.split(':')[1]
-                    self.size = chosen.split(':')[0]
-                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                
-        
-                else:
-                    if self.task["SIZE"] not in sizes:
+                    foundSizes = soup.find('ul',{'class':'swatches b-size-selector__list b-size-selector_large b-size-selector_large-sticky'})
+                    allSizes = []
+                    sizes = []
+                    
+                    for s in foundSizes:
+                        try:
+                            s = s.find('a')
+
+                            sizes.append(s["title"])
+                            allSizes.append('{}:{}'.format(s["title"], s["data-variant-id"]))
+                        except:
+                            pass
+                    
+                    if len(sizes) == 0:
                         logger.error(SITE,self.taskID,'Size Not Found')
                         time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-                    for size in allSizes:
-                        if self.task["SIZE"] == size.split(':')[0]:
-                            self.pid = size.split(':')[1]
-                            self.size = size.split(':')[0]
-                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                        
-            except Exception as e:
-               log.info(e)
-               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-               time.sleep(int(self.task["DELAY"]))
-               self.collect()
+                        continue
+        
+                    if self.task["SIZE"].lower() == "random":
+                        chosen = random.choice(allSizes)
+                        self.pid = chosen.split(':')[1]
+                        self.size = chosen.split(':')[0]
+                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                    
+            
+                    else:
+                        if self.task["SIZE"] not in sizes:
+                            logger.error(SITE,self.taskID,'Size Not Found')
+                            time.sleep(int(self.task["DELAY"]))
+                            continue
+                        for size in allSizes:
+                            if self.task["SIZE"] == size.split(':')[0]:
+                                self.pid = size.split(':')[1]
+                                self.size = size.split(':')[0]
+                                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                            
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
 
-            self.addToCart()
+                self.addToCart()
 
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+            else:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
     def addToCart(self):
         logger.prepare(SITE,self.taskID,'Carting product...')
@@ -159,7 +157,7 @@ class AWLAB:
         }
 
         try:
-            postCart = self.session.post(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Cart-AddProduct?format=ajax', data=payload, headers={
+            postCart = self.session.post(f'https://{self.awlabRegion}/on/demandware.store/Sites-awlab-en-Site/en_{self.dwRegion}/Cart-AddProduct?format=ajax',data=payload, headers={
                 'accept-language': 'en-US,en;q=0.9',
                 'origin': f'https://{self.awlabRegion}',
                 'referer': self.task["PRODUCT"],
@@ -192,6 +190,11 @@ class AWLAB:
             logger.warning(SITE,self.taskID,'Successfully carted')
             updateConsoleTitle(True,False,SITE)
             self.method()
+        if postCart.status_code == 429 or submitCart.status_code == 429:
+            logger.error(SITE,self.taskID,'Rate Limited. Retrying...')
+            time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+            self.addToCart()
         else:
             logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
             if self.task["SIZE"].lower() == "random":
@@ -310,6 +313,7 @@ class AWLAB:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.method()
 
+        print(shipping.status_code)
         if shipping.status_code == 200:
             logger.warning(SITE,self.taskID,'Successfully submitted shipping')
             if self.task["PAYMENT"].lower() == "paypal":
@@ -408,23 +412,8 @@ class AWLAB:
                     logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
         
         else:
-            try:
-                discord.failed(
-                    webhook=loadSettings()["webhook"],
-                    site=SITE,
-                    url=self.task["PRODUCT"],
-                    image=self.productImage,
-                    title=self.productTitle,
-                    size=self.size,
-                    price=self.productPrice,
-                    paymentMethod='PayPal',
-                    profile=self.task["PROFILE"],
-                    proxy=self.session.proxies
-                )
-            except:
-                pass
             logger.error(SITE,self.taskID,'Failed to get PayPal checkout link. Retrying...')
-            self.paypal()
+            self.method()
 
 
     def cad(self):
@@ -434,6 +423,8 @@ class AWLAB:
             logger.error(SITE,self.taskID,'Profile Not Found.')
             time.sleep(10)
             sys.exit()
+
+        # token = captcha.v2()
     
         payload = {
             'dwfrm_billing_save': 'true',
@@ -489,7 +480,7 @@ class AWLAB:
                     title=self.productTitle,
                     size=self.size,
                     price=self.productPrice,
-                    paymentMethod="Card",
+                    paymentMethod="CAD",
                     profile=self.task["PROFILE"],
                     product=self.task["PRODUCT"],
                     proxy=self.session.proxies,
@@ -647,6 +638,20 @@ class AWLAB:
                 time.sleep(int(self.task["DELAY"]))
                 self.threeDs()
             if poll.json()["status"] == "pending":
+                discord.threeDS(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    image=self.productImage,
+                    title=self.productTitle,
+                    size=self.size,
+                    price=self.productPrice,
+                    paymentMethod="Card",
+                    profile=self.task["PROFILE"],
+                    product=self.task["PRODUCT"],
+                    proxy=self.session.proxies
+                )
+                while True:
+                    pass
                 logger.warning(SITE,self.taskID,'Polling 3DS...')
                 while poll.json()["status"] == "pending":
                     poll = self.session.post('https://poll.touchtechpayments.com/poll',headers={

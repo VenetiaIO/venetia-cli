@@ -44,6 +44,8 @@ class FOOTLOCKER_OLD:
         self.taskID = taskName
         self.rowNumber = rowNumber
 
+        self.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36'
+
         twoCap = loadSettings()["2Captcha"]
         # self.session = scraper()
         profile = loadProfile(self.task["PROFILE"])
@@ -127,153 +129,167 @@ class FOOTLOCKER_OLD:
 
 
     def retrieveSizes(self):
-        logger.prepare(SITE,self.taskID,'Getting product data...')
-        self.start = time.time()
-        self.relayCat = 'Relay42_Category'  #soup.find('input',{'value':'Product Pages'})['name']
-        self.productImage = f'https://images.footlocker.com/is/image/FLEU/{self.baseSku}_01?wid=763&hei=538&fmt=png-alpha'
-        try:
-            retrieveSizes = self.session.get(f'{self.baseUrl2}ViewProduct-ProductVariationSelect?BaseSKU={self.baseSku}&InventoryServerity=ProductDetail',headers={
-                "accept": "application/json, text/javascript, */*; q=0.01",
-                "accept-language": "en-US,en;q=0.9",
-                "sec-ch-ua": "\"Google Chrome\";v=\"87\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"87\"",
-                "sec-ch-ua-mobile": "?0",
-                "sec-fetch-dest": "empty",
-                "sec-fetch-mode": "cors",
-                "sec-fetch-site": "same-origin",
-                "x-requested-with": "XMLHttpRequest",
-                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.retrieveSizes()
-
-        if retrieveSizes.status_code == 503:
-            logger.info(SITE,self.taskID,'Queue...')
-            time.sleep(10)
-            self.retrieveSizes()
-
-        if retrieveSizes.status_code == 404:
-            logger.error(SITE,self.taskid,'Sold Out. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.retrieveSizes()
-
-        if retrieveSizes.status_code == 403:
-            logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product data...')
+            self.start = time.time()
+            self.relayCat = 'Relay42_Category'  #soup.find('input',{'value':'Product Pages'})['name']
+            self.productImage = f'https://images.footlocker.com/is/image/FLEU/{self.baseSku}_01?wid=763&hei=538&fmt=png-alpha'
             try:
-                challengeUrl = retrieveSizes.json()['url']
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
-                if cookie['cookie'] == None:
-                    del self.session.cookies["datadome"]
-                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    self.addToCart()
-                    
-
-                del self.session.cookies["datadome"]
-                self.session.cookies["datadome"] = cookie['cookie']
-                self.retrieveSizes()
-            except:
-                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                time.sleep(10)
-                self.retrieveSizes()
-                
-            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
-            if cookie['cookie'] == None:
-                del self.session.cookies["datadome"]
+                retrieveSizes = self.session.get(f'{self.baseUrl2}ViewProduct-ProductVariationSelect?BaseSKU={self.baseSku}&InventoryServerity=ProductDetail',headers={
+                    "accept": "application/json, text/javascript, */*; q=0.01",
+                    "accept-language": "en-US,en;q=0.9",
+                    "sec-ch-ua": "\"Google Chrome\";v=\"87\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"87\"",
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-fetch-dest": "empty",
+                    "sec-fetch-mode": "cors",
+                    "sec-fetch-site": "same-origin",
+                    "x-requested-with": "XMLHttpRequest",
+                    "user-agent":self.userAgent
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
-                
-
-            del self.session.cookies["datadome"]
-            self.session.cookies["datadome"] = cookie['cookie']
-            self.retrieveSizes()
-
-
-        try:
-            data = retrieveSizes.json()
-        except Exception as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Failed to get product data. Retrying...')
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.retrieveSizes()
-        
-        if retrieveSizes.status_code == 200:
-            if 'sold out' in retrieveSizes.text.lower():
-                logger.error(SITE,self.taskID,'Sold Out. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
-                self.retrieveSizes()
+                continue
+
+            if retrieveSizes.status_code == 503:
+                logger.info(SITE,self.taskID,'Queue...')
+                time.sleep(10)
+                continue
+
+            if retrieveSizes.status_code == 404:
+                logger.error(SITE,self.taskid,'Sold Out. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
+
+            if retrieveSizes.status_code == 403:
+                logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
+                try:
+                    challengeUrl = retrieveSizes.json()['url']
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
+                    if cookie['cookie'] == None:
+                        del self.session.cookies["datadome"]
+                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                        self.addToCart()
+                        
+
+                    del self.session.cookies["datadome"]
+                    # self.session.cookies["datadome"] = cookie['cookie']
+                    # {'cookie': 'datadome=Vl-4b3HtFCXbkP9cWvkpQv_nwoOyh_b9krDmblhhUahpS60rTVgntFEW9oCGC9lUoAxPDhukeZNisv.dr-KpbLMjCMxPafd~M4ex2j_ICh; Max-Age=31536000; Domain=.footlocker.co.uk; Path=/; Secure; SameSite=Lax'}
+                    cookie_obj = requests.cookies.create_cookie(domain=self.baseUrl.split('www')[1],name='datadome',value=cookie['cookie'])
+                    self.session.cookies.set_cookie(cookie_obj)
+
+                    self.retrieveSizes()
+
+                except:
+                    if 'geo.captcha-delivery' in retrieveSizes.text:
+                        try:
+                            initialCid = retrieveSizes.text.split("'cid':'")[1].split("',")[0]
+                            hsh = retrieveSizes.text.split("'hsh':'")[1].split("',")[0]
+                            t = retrieveSizes.text.split("'t':'")[1].split("',")[0]
+                            s = retrieveSizes.text.split("'s':'")[1].split("',")[0]
+                            challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, retrieveSizes.url, hsh, t, s)
+                        except Exception as e:
+                            log.info(e)
+                            logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                            time.sleep(10)
+                            self.addToCart()
+
+                        cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
+                        if cookie['cookie'] == None:
+                            del self.session.cookies["datadome"]
+                            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                            self.retrieveSizes()
+                        
+        
+                    del self.session.cookies["datadome"]
+                    self.session.cookies["datadome"] = cookie['cookie']
+                    self.retrieveSizes()
 
             try:
-                htmlContent = data['content'].replace('\n','').replace("\\", "")
+                data = retrieveSizes.json()
             except Exception as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Failed to get product data. Retrying...')
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 time.sleep(int(self.task["DELAY"]))
-                self.retrieveSizes()
+                continue
             
-            try:
-                soup = BeautifulSoup(htmlContent,"html.parser")
-                eu_sizes = soup.find_all('section',{'class':'fl-accordion-tab--content'})[0].find_all('button')
-            except:
-                logger.error(SITE,self.taskID,'Sizes Not Found')
-                time.sleep(int(self.task["DELAY"]))
-                self.retrieveSizes()
+            if retrieveSizes.status_code == 200:
+                if 'sold out' in retrieveSizes.text.lower():
+                    logger.error(SITE,self.taskID,'Sold Out. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
 
-            
-
-            allSizes = []
-            sizes = []
-
-            for s in eu_sizes:
                 try:
-                    if 'not-available' in s['class']:
-                        pass
-                    else:
-                        size = s.find('span').text
-                        sizeSku = s['data-product-size-select-item']
-                        allSizes.append('{}:{}'.format(size,sizeSku))
-                        sizes.append(size)
+                    htmlContent = data['content'].replace('\n','').replace("\\", "")
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to get product data. Retrying...')
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+                
+                try:
+                    soup = BeautifulSoup(htmlContent,"html.parser")
+                    eu_sizes = soup.find_all('section',{'class':'fl-accordion-tab--content'})[0].find_all('button')
                 except:
-                    pass
-
-            self.tabgroup = self.baseSku + allSizes[0].split(':')[1]
-
-
-            if len(sizes) == 0:
-                logger.error(SITE,self.taskID,'Sizes Not Found')
-                time.sleep(int(self.task["DELAY"]))
-                self.collect()
+                    logger.error(SITE,self.taskID,'Sizes Not Found')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
 
                 
-            if self.task["SIZE"].lower() != "random":
-                if self.task["SIZE"] not in sizes:
-                    logger.error(SITE,self.taskID,'Size Not Found')
+
+                allSizes = []
+                sizes = []
+
+                for s in eu_sizes:
+                    try:
+                        if 'not-available' in s['class']:
+                            pass
+                        else:
+                            size = s.find('span').text
+                            sizeSku = s['data-product-size-select-item']
+                            allSizes.append('{}:{}'.format(size,sizeSku))
+                            sizes.append(size)
+                    except:
+                        pass
+
+                self.tabgroup = self.baseSku + allSizes[0].split(':')[1]
+
+
+                if len(sizes) == 0:
+                    logger.error(SITE,self.taskID,'Sizes Not Found')
                     time.sleep(int(self.task["DELAY"]))
                     self.collect()
-                else:
-                    for size in allSizes:
-                        if size.split(':')[0] == self.task["SIZE"]:
-                            self.size = size.split(':')[0]
-                            self.sizeSku = size.split(":")[1]
-                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
-            
-            elif self.task["SIZE"].lower() == "random":
-                selected = random.choice(allSizes)
-                self.size = selected.split(":")[0]
-                self.sizeSku = selected.split(":")[1]
-                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                    
+                if self.task["SIZE"].lower() != "random":
+                    if self.task["SIZE"] not in sizes:
+                        logger.error(SITE,self.taskID,'Size Not Found')
+                        time.sleep(int(self.task["DELAY"]))
+                        self.collect()
+                    else:
+                        for size in allSizes:
+                            if size.split(':')[0] == self.task["SIZE"]:
+                                self.size = size.split(':')[0]
+                                self.sizeSku = size.split(":")[1]
+                                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
-            self.addToCart()
+                
+                elif self.task["SIZE"].lower() == "random":
+                    selected = random.choice(allSizes)
+                    self.size = selected.split(":")[0]
+                    self.sizeSku = selected.split(":")[1]
+                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
-        else:
-            logger.error(SITE,self.taskID,'Failed to get product data. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.retrieveSizes()
+                self.addToCart()
+
+            else:
+                logger.error(SITE,self.taskID,'Failed to get product data. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
     
                 
             
@@ -298,7 +314,7 @@ class FOOTLOCKER_OLD:
                 "sec-fetch-mode": "cors",
                 "sec-fetch-site": "same-origin",
                 "x-requested-with": "XMLHttpRequest",
-                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "user-agent":self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -312,7 +328,7 @@ class FOOTLOCKER_OLD:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = atcResponse.json()['url']
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                 if cookie['cookie'] == None:
                     del self.session.cookies["datadome"]
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -341,7 +357,7 @@ class FOOTLOCKER_OLD:
                         time.sleep(10)
                         self.addToCart()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -401,7 +417,7 @@ class FOOTLOCKER_OLD:
                 "sec-fetch-site": "same-origin",
                 "sec-fetch-user": "?1",
                 "upgrade-insecure-requests": "1",
-                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "user-agent":self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -414,7 +430,7 @@ class FOOTLOCKER_OLD:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = checkoutOverviewPage.json()['url']
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                 if cookie['cookie'] == None:
                     del self.session.cookies["datadome"]
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -438,7 +454,7 @@ class FOOTLOCKER_OLD:
                         time.sleep(10)
                         self.checkoutDispatch()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -524,7 +540,7 @@ class FOOTLOCKER_OLD:
                 "sec-fetch-user": "?1",
                 "upgrade-insecure-requests": "1",
                 "referer":self.referer,
-                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "user-agent":self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -537,7 +553,7 @@ class FOOTLOCKER_OLD:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = checkoutOverviewDispatch.json()['url']
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                 if cookie['cookie'] == None:
                     del self.session.cookies["datadome"]
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -556,7 +572,7 @@ class FOOTLOCKER_OLD:
                         time.sleep(10)
                         self.submitCheckoutDispatch()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -662,7 +678,7 @@ class FOOTLOCKER_OLD:
                 "sec-fetch-mode": "navigate",
                 "sec-fetch-site": "cross-site",
                 "upgrade-insecure-requests": "1",
-                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "user-agent":self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -789,7 +805,7 @@ class FOOTLOCKER_OLD:
                 "sec-fetch-mode": "navigate",
                 "sec-fetch-site": "cross-site",
                 "upgrade-insecure-requests": "1",
-                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "user-agent":self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -967,7 +983,7 @@ class FOOTLOCKER_OLD:
                 "sec-fetch-mode": "navigate",
                 "sec-fetch-site": "cross-site",
                 "upgrade-insecure-requests": "1",
-                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "user-agent":self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -983,7 +999,7 @@ class FOOTLOCKER_OLD:
                 payerAuth = self.session.get(completeCard.url, headers={
                     'Referer':'https://live.adyen.com/hpp/pay.shtml',
                     'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+                    'User-Agent': self.userAgent,
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
@@ -1013,7 +1029,7 @@ class FOOTLOCKER_OLD:
                     'referer':'https://live.adyen.com/',
                     'content-type': 'application/x-www-form-urlencoded',
                     'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+                    'user-agent': self.userAgent,
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
@@ -1033,7 +1049,7 @@ class FOOTLOCKER_OLD:
                         'authority': 'verifiedbyvisa.acs.touchtechpayments.com',
                         'accept-language': 'en-US,en;q=0.9',
                         'referer': 'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
-                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+                        'user-agent': self.userAgent,
                         'accept':'*/*',
                     })
                 except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -1053,13 +1069,25 @@ class FOOTLOCKER_OLD:
                     time.sleep(int(self.task["DELAY"]))
                     self.cardPayment()
                 if poll.json()["status"] == "pending":
+                    discord.threeDS(
+                        webhook=loadSettings()["webhook"],
+                        site=SITE,
+                        image=self.productImage,
+                        title=self.productTitle,
+                        size=self.size,
+                        price=self.productPrice,
+                        paymentMethod="Card",
+                        profile=self.task["PROFILE"],
+                        product=self.task["PRODUCT"],
+                        proxy=self.session.proxies
+                    )   
                     logger.warning(SITE,self.taskID,'Polling 3DS...')
                     while poll.json()["status"] == "pending":
                         poll = self.session.post('https://poll.touchtechpayments.com/poll',headers={
                             'authority': 'verifiedbyvisa.acs.touchtechpayments.com',
                             'accept-language': 'en-US,en;q=0.9',
                             'referer': 'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
-                            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
+                            'user-agent': self.userAgent,
                             'accept':'*/*',}, json=payload)
                 
                 try:

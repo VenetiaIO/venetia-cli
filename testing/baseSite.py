@@ -12,6 +12,7 @@ import base64
 import cloudscraper
 import string
 from urllib3.exceptions import HTTPError
+import csv
 
 from utils.logger import logger
 from utils.webhook import discord
@@ -21,10 +22,27 @@ SITE = 'SITE'
 
 
 class SITE:
-    def __init__(self, task,taskName):
+    def task_checker(self):
+        originalTask = self.task
+        while True:
+            with open('./{}/tasks.csv'.format(SITE.lower()),'r') as csvFile:
+                csv_reader = csv.DictReader(csvFile)
+                row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
+                self.task = row[0]
+                try:
+                    self.task['ACCOUNT EMAIL'] = originalTask['ACCOUNT EMAIL']
+                    self.task['ACCOUNT PASSWORD'] = originalTask['ACCOUNT PASSWORD']
+                except:
+                    pass
+                self.task['PROXIES'] = 'proxies'
+                csvFile.close()
+            time.sleep(2)
+
+    def __init__(self, task,taskName, rowNumber):
         self.task = task
         self.session = requests.session()
         self.taskID = taskName
+        self.rowNumber = rowNumber
 
         twoCap = loadSettings()["2Captcha"]
         # self.session = scraper()

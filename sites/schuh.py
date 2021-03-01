@@ -57,91 +57,88 @@ class SCHUH:
         self.collect()
 
     def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"])
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.collect()
-
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
             try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-                soup = BeautifulSoup(retrieve.text,"html.parser")
-                self.productImage = soup.find('img',{'class':'noScriptImage'})['src']
-                sizeSelect = soup.find('select',{'id':'sizes'})
-                self.locale = soup.find('span',{'id':'cultureCI-val'}).text
-                self.hidPrice = soup.find('input',{'id':'hidPrice'})['value']
-                self.productTitle = soup.find('title').text.split('|')[0]
-                self.productPrice = soup.find('span',{'id':'price'}).text
+                retrieve = self.session.get(self.task["PRODUCT"])
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
 
-                all_sizes = []
-                sizes = []
-    
-                for s in sizeSelect:
-                    try:
-                        size = s["data-dispsize"]
+            if retrieve.status_code == 200:
+                self.start = time.time()
+                logger.warning(SITE,self.taskID,'Got product page')
+                try:
+                    logger.prepare(SITE,self.taskID,'Getting product data...')
+                    soup = BeautifulSoup(retrieve.text,"html.parser")
+                    self.productImage = soup.find('img',{'class':'noScriptImage'})['src']
+                    sizeSelect = soup.find('select',{'id':'sizes'})
+                    self.locale = soup.find('span',{'id':'cultureCI-val'}).text
+                    self.hidPrice = soup.find('input',{'id':'hidPrice'})['value']
+                    self.productTitle = soup.find('title').text.split('|')[0]
+                    self.productPrice = soup.find('span',{'id':'price'}).text
+
+                    all_sizes = []
+                    sizes = []
+        
+                    for s in sizeSelect:
                         try:
-                            size = size.split(' ')[1]
+                            size = s["data-dispsize"]
+                            try:
+                                size = size.split(' ')[1]
+                            except:
+                                pass
+                            
+                            sizeValue = s["value"]
+                            iCode = s["data-icode"]
+                            junior = s["data-isjunior"]
+                            all_sizes.append(f'{size}:{sizeValue}:{iCode}:{junior}')
+                            sizes.append(size)
                         except:
                             pass
-                        
-                        sizeValue = s["value"]
-                        iCode = s["data-icode"]
-                        junior = s["data-isjunior"]
-                        all_sizes.append(f'{size}:{sizeValue}:{iCode}:{junior}')
-                        sizes.append(size)
-                    except:
-                        pass
-                
-                if len(sizes) == 0:
-                    logger.error(SITE,self.taskID,'Size Not Found')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-    
-                if self.task["SIZE"].lower() == "random":
-                    chosen = random.choice(all_sizes)
-                    self.sizeValue = chosen.split(':')[1]
-                    self.size = chosen.split(':')[0]
-                    self.icode = chosen.split(':')[2]
-                    self.isJunior = chosen.split(':')[3]
-                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                    self.addToCart()
                     
-                else:
-                    if self.task["SIZE"] not in sizes:
+                    if len(sizes) == 0:
                         logger.error(SITE,self.taskID,'Size Not Found')
                         time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-                    for size in all_sizes:
-                        if self.task["SIZE"] == size.split(':')[0]:
-                            self.size = size.split(':')[0]
-                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                            self.sizeValue = size.split(':')[1]
-                            self.icode = size.split(':')[2]
-                            self.isJunior = size.split(':')[3]
-                            self.addToCart()
-            except Exception as e:
-                log.info(e)
-                logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                self.collect()
+                        continue
+        
+                    if self.task["SIZE"].lower() == "random":
+                        chosen = random.choice(all_sizes)
+                        self.sizeValue = chosen.split(':')[1]
+                        self.size = chosen.split(':')[0]
+                        self.icode = chosen.split(':')[2]
+                        self.isJunior = chosen.split(':')[3]
+                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                        self.addToCart()
+                        
+                    else:
+                        if self.task["SIZE"] not in sizes:
+                            logger.error(SITE,self.taskID,'Size Not Found')
+                            time.sleep(int(self.task["DELAY"]))
+                            continue
+                        for size in all_sizes:
+                            if self.task["SIZE"] == size.split(':')[0]:
+                                self.size = size.split(':')[0]
+                                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                                self.sizeValue = size.split(':')[1]
+                                self.icode = size.split(':')[2]
+                                self.isJunior = size.split(':')[3]
+                                self.addToCart()
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
 
-            
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.collect()
+                
+            else:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
 
     def addToCart(self):
         logger.prepare(SITE,self.taskID,'Carting products...')
@@ -396,11 +393,11 @@ class SCHUH:
                 self.paypalPayment()
             if 'paypal' in getPayal.url:
                 logger.warning(SITE,self.taskID,'Payment submitted')
-
+                updateConsoleTitle(False,True,SITE)
                 self.end = time.time() - self.start
                 logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
                 url = storeCookies(getPayal.url,self.session, self.productTitle, self.productImage, self.productPrice)
-    
+
 
                 try:
                     discord.success(

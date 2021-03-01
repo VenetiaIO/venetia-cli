@@ -14,6 +14,7 @@ import string
 from urllib3.exceptions import HTTPError
 import csv
 
+from utils.captcha import captcha
 from utils.logger import logger
 from utils.webhook import discord
 from utils.log import log
@@ -58,94 +59,95 @@ class ALLIKE:
         self.collect()
 
     def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"])
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
             try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-                soup = BeautifulSoup(retrieve.text, "html.parser")
-                self.productTitle = soup.find("title").text
-                self.productImage = soup.find("img", {"id": "image-0"})["src"]
-                self.atcUrl = soup.find("form", {"id": "product_addtocart_form"})[
-                    "action"].replace("checkout/cart", "oxajax/cart")
-                self.formKey = soup.find("input", {"name": "form_key"})["value"]
-                self.productId = soup.find("input", {"name": "product"})["value"]
-                self.productPrice = soup.find("span",{"class":"price"}).text
-                self.attributeId = soup.find("select", {
-                                            "class": "required-entry super-attribute-select no-display swatch-select"})["id"].split("attribute")[1]
-    
-                regex = r"{\"attributes\":(.*?)}}\)"
-                matches = re.search(regex, retrieve.text, re.MULTILINE)
-                if matches:
-                    productData = json.loads(
-                        matches.group()[:-1])["attributes"][self.attributeId]
-    
-                    allSizes = []
-                    sizes = []
-                    for s in productData["options"]:
-                        allSizes.append('{}:{}:{}'.format(s["label"],s["products"][0],s["id"]))
-                        sizes.append(s["label"])
-    
-                    if len(sizes) == 0:
-                        logger.error(SITE,self.taskID,'Size Not Found')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.collect()
+                retrieve = self.session.get(self.task["PRODUCT"])
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
-                        
-                    if self.task["SIZE"].lower() != "random":
-                        if self.task["SIZE"] not in sizes:
+            if retrieve.status_code == 200:
+                self.start = time.time()
+                logger.warning(SITE,self.taskID,'Got product page')
+                try:
+                    logger.prepare(SITE,self.taskID,'Getting product data...')
+                    soup = BeautifulSoup(retrieve.text, "html.parser")
+                    self.productTitle = soup.find("title").text
+                    self.productImage = soup.find("img", {"id": "image-0"})["src"]
+                    self.atcUrl = soup.find("form", {"id": "product_addtocart_form"})[
+                        "action"].replace("checkout/cart", "oxajax/cart")
+                    self.formKey = soup.find("input", {"name": "form_key"})["value"]
+                    self.productId = soup.find("input", {"name": "product"})["value"]
+                    self.productPrice = soup.find("span",{"class":"price"}).text
+                    self.attributeId = soup.find("select", {
+                                                "class": "required-entry super-attribute-select no-display swatch-select"})["id"].split("attribute")[1]
+        
+                    regex = r"{\"attributes\":(.*?)}}\)"
+                    matches = re.search(regex, retrieve.text, re.MULTILINE)
+                    if matches:
+                        productData = json.loads(
+                            matches.group()[:-1])["attributes"][self.attributeId]
+        
+                        allSizes = []
+                        sizes = []
+                        for s in productData["options"]:
+                            allSizes.append('{}:{}:{}'.format(s["label"],s["products"][0],s["id"]))
+                            sizes.append(s["label"])
+        
+                        if len(sizes) == 0:
                             logger.error(SITE,self.taskID,'Size Not Found')
                             time.sleep(int(self.task["DELAY"]))
-                            self.collect()
-                        else:
-                            for size in allSizes:
-                                if size.split(':')[0] == self.task["SIZE"]:
-                                    self.size = size.split(':')[0]
-                                    self.sizeID = size.split(':')[2]
-                                    self.option = size.split(":")[1]
-                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-        
-                    
-                    elif self.task["SIZE"].lower() == "random":
-                        selected = random.choice(allSizes)
-                        self.size = selected.split(":")[0]
-                        self.sizeID = selected.split(":")[2]
-                        self.option = selected.split(":")[1]
-                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                            continue
 
-                
-                else:
-                    logger.error(SITE,self.taskID,'Size Not Found')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-
+                            
+                        if self.task["SIZE"].lower() != "random":
+                            if self.task["SIZE"] not in sizes:
+                                logger.error(SITE,self.taskID,'Size Not Found')
+                                time.sleep(int(self.task["DELAY"]))
+                                continue
+                            else:
+                                for size in allSizes:
+                                    if size.split(':')[0] == self.task["SIZE"]:
+                                        self.size = size.split(':')[0]
+                                        self.sizeID = size.split(':')[2]
+                                        self.option = size.split(":")[1]
+                                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+            
                         
-            except Exception as e:
-               log.info(e)
-               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-               time.sleep(int(self.task["DELAY"]))
-               self.collect()
+                        elif self.task["SIZE"].lower() == "random":
+                            selected = random.choice(allSizes)
+                            self.size = selected.split(":")[0]
+                            self.sizeID = selected.split(":")[2]
+                            self.option = selected.split(":")[1]
+                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
-            self.addToCart()
+                    
+                    else:
+                        logger.error(SITE,self.taskID,'Size Not Found')
+                        time.sleep(int(self.task["DELAY"]))
+                        continue
 
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+                            
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+                
+                
+                self.addToCart()
+                break
+
+            else:
+                
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
+
 
     def addToCart(self):
         logger.prepare(SITE,self.taskID,'Carting product...')
@@ -291,6 +293,7 @@ class ALLIKE:
             self.method()
 
     def billing(self):
+        siteKey = '6LfMDQEaAAAAAK2OeOZtpVHc4gTPjAdZ8kHcXHCR'
         logger.prepare(SITE,self.taskID,'Submitting billing...')
         profile = loadProfile(self.task["PROFILE"])
         if profile == None:
@@ -298,6 +301,8 @@ class ALLIKE:
             time.sleep(10)
             sys.exit()
         countryCode = profile["countryCode"]
+
+        capToken = captcha.Hiddenv2(siteKey,'https://www.allikestore.com',self.session.proxies,SITE,self.taskID)
 
         day = random.randint(1,29)
         month = random.randint(1,12)
@@ -324,7 +329,8 @@ class ALLIKE:
             'billing[confirm_password]': '',
             'billing[save_in_address_book]': '1',
             'billing[use_for_shipping]': '1',
-            'form_key': self.formKey
+            'form_key': self.formKey,
+            'g-recaptcha-response':capToken
         }
 
         try:
@@ -348,13 +354,19 @@ class ALLIKE:
 
         if postBilling.status_code == 200:
             if postBilling.text:
-                shippingOptions = json.loads(postBilling.text)
-                shippingHtml = shippingOptions["update_section"]["html"]
-                soup = BeautifulSoup(shippingHtml,"html.parser")
-                self.shippingMethods = soup.find_all('input',{'class':'radio'})
-                #self.shippingMethod = shippingMethods[0]["value"]
-                logger.warning(SITE,self.taskID,'Successfully set shipping')
-                self.shippingMethod()
+                try:
+                    shippingOptions = json.loads(postBilling.text)
+                    shippingHtml = shippingOptions["update_section"]["html"]
+                    soup = BeautifulSoup(shippingHtml,"html.parser")
+                    self.shippingMethods = soup.find_all('input',{'class':'radio'})
+                    #self.shippingMethod = shippingMethods[0]["value"]
+                    logger.warning(SITE,self.taskID,'Successfully set shipping')
+                    self.shippingMethod()
+                except Exception:
+                    logger.error(SITE,self.taskID,'Failed to set shipping. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    self.billing()
+
             else:
                 logger.error(SITE,self.taskID,'Failed to set shipping. Retrying...')
                 time.sleep(int(self.task["DELAY"]))

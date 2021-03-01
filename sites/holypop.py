@@ -58,72 +58,70 @@ class HOLYPOP:
             self.login()
 
     def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"])
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.collect()
-        if retrieve:
-            if retrieve.status_code == 200:
-                logger.warning(SITE,self.taskID,'Got product page')
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-                self.start = time.time()
-                regex = r"preloadedStock =(.+)"
-                matches = re.search(regex, retrieve.text, re.MULTILINE)
-                if matches:
-                    matches = matches.group().split('preloadedStock = ')[1]
-                    productData = json.loads(matches[:-1])
-    
-                    allSizes = []
-                    sizes = []
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
+            try:
+                retrieve = self.session.get(self.task["PRODUCT"])
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            if retrieve:
+                if retrieve.status_code == 200:
+                    logger.warning(SITE,self.taskID,'Got product page')
+                    logger.prepare(SITE,self.taskID,'Getting product data...')
+                    self.start = time.time()
+                    regex = r"preloadedStock =(.+)"
+                    matches = re.search(regex, retrieve.text, re.MULTILINE)
+                    if matches:
+                        matches = matches.group().split('preloadedStock = ')[1]
+                        productData = json.loads(matches[:-1])
         
-                    for s in productData:
-                        size = s["variant"].split(' US')[0]
-                        id = s["id"]
-                        allSizes.append('{}:{}'.format(size,id))
-                        sizes.append(size)
-        
-                    if len(sizes) == 0:
-                        logger.error(SITE,self.taskID,'Size Not Found')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-        
-                    if self.task["SIZE"].lower() != "random":
-                        if self.task["SIZE"] not in sizes:
+                        allSizes = []
+                        sizes = []
+            
+                        for s in productData:
+                            size = s["variant"].split(' US')[0]
+                            id = s["id"]
+                            allSizes.append('{}:{}'.format(size,id))
+                            sizes.append(size)
+            
+                        if len(sizes) == 0:
                             logger.error(SITE,self.taskID,'Size Not Found')
                             time.sleep(int(self.task["DELAY"]))
-                            self.collect()
-                        else:
-                            for size in allSizes:
-                                if size.split(':')[0] == self.task["SIZE"]:
-                                    self.size = size.split(':')[0]
-                                    self.itemId = size.split(':')[1]
-                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                                    self.login()
-        
-                    
-                    elif self.task["SIZE"].lower() == "random":
-                        selected = random.choice(allSizes)
-                        self.size = selected.split(":")[0]
-                        self.itemId = selected.split(":")[1]
-                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                        self.login()
-                else:
-                    logger.error(SITE,self.taskID,'Failed to scrape page. Retrying....')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+                            continue
+            
+                        if self.task["SIZE"].lower() != "random":
+                            if self.task["SIZE"] not in sizes:
+                                logger.error(SITE,self.taskID,'Size Not Found')
+                                time.sleep(int(self.task["DELAY"]))
+                                continue
+                            else:
+                                for size in allSizes:
+                                    if size.split(':')[0] == self.task["SIZE"]:
+                                        self.size = size.split(':')[0]
+                                        self.itemId = size.split(':')[1]
+                                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                                        self.login()
+            
+                        
+                        elif self.task["SIZE"].lower() == "random":
+                            selected = random.choice(allSizes)
+                            self.size = selected.split(":")[0]
+                            self.itemId = selected.split(":")[1]
+                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                            self.login()
+                    else:
+                        logger.error(SITE,self.taskID,'Failed to scrape page. Retrying....')
+                        time.sleep(int(self.task["DELAY"]))
+                        continue
+            else:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
 
     def login(self):

@@ -61,92 +61,89 @@ class CHMIELNA:
         self.collect()
 
     def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"])
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-
-
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            if retrieve.text == "":
-                logger.error(SITE,self.taskID,f'Failed to get product page. Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                self.collect()
-
-
-
-            logger.warning(SITE,self.taskID,'Got product page')
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
             try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-                soup = BeautifulSoup(retrieve.text, "html.parser")
-                self.cartURL = soup.find('form',{'name':'product__add'})["action"]
-                self.token = soup.find('input',{'name':'_token'})["value"]
-                img = soup.find('div',{'class':'item zoom'})
-                self.productImage = img.find('img')["src"]
-                self.productTitle = soup.find('title').text.split('|')[0]
-                self.productPrice = soup.find('span',{'class':'product__price_shop'}).text
-    
-                foundSizes = soup.find('div',{'class':'selector'})
-                foundSizes = foundSizes.find('ul')
-                foundSizes = foundSizes.find_all('li')
-                if foundSizes:
+                retrieve = self.session.get(self.task["PRODUCT"])
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
-                    sizes = []
-                    for s in foundSizes:
-                        soup = BeautifulSoup(str(s),"html.parser")
-                        sizes.append(soup.find('li')["data-sizeus"])
-    
-                    if len(sizes) == 0:
-                        logger.error(SITE,self.taskID,'Size Not Found')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-    
-                        
-                    if self.task["SIZE"].lower() != "random":
-                        if self.task["SIZE"] not in sizes:
+
+            if retrieve.status_code == 200:
+                self.start = time.time()
+                if retrieve.text == "":
+                    logger.error(SITE,self.taskID,f'Failed to get product page. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+
+
+                logger.warning(SITE,self.taskID,'Got product page')
+                try:
+                    logger.prepare(SITE,self.taskID,'Getting product data...')
+                    soup = BeautifulSoup(retrieve.text, "html.parser")
+                    self.cartURL = soup.find('form',{'name':'product__add'})["action"]
+                    self.token = soup.find('input',{'name':'_token'})["value"]
+                    img = soup.find('div',{'class':'item zoom'})
+                    self.productImage = img.find('img')["src"]
+                    self.productTitle = soup.find('title').text.split('|')[0]
+                    self.productPrice = soup.find('span',{'class':'product__price_shop'}).text
+        
+                    foundSizes = soup.find('div',{'class':'selector'})
+                    foundSizes = foundSizes.find('ul')
+                    foundSizes = foundSizes.find_all('li')
+                    if foundSizes:
+
+                        sizes = []
+                        for s in foundSizes:
+                            soup = BeautifulSoup(str(s),"html.parser")
+                            sizes.append(soup.find('li')["data-sizeus"])
+        
+                        if len(sizes) == 0:
                             logger.error(SITE,self.taskID,'Size Not Found')
                             time.sleep(int(self.task["DELAY"]))
-                            self.collect()
-                        else:
-                            for size in sizes:
-                                if size == self.task["SIZE"]:
-                                    self.size = size
-                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                            continue
         
-                    
-                    elif self.task["SIZE"].lower() == "random":
-                        self.size = random.choice(sizes)
-                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                
-                else:
-                    logger.error(SITE,self.taskID,'Size Not Found')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-    
-    
                             
-            except Exception as e:
-               log.info(e)
-               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-               time.sleep(int(self.task["DELAY"]))
-               self.collect()
+                        if self.task["SIZE"].lower() != "random":
+                            if self.task["SIZE"] not in sizes:
+                                logger.error(SITE,self.taskID,'Size Not Found')
+                                time.sleep(int(self.task["DELAY"]))
+                                continue
+                            else:
+                                for size in sizes:
+                                    if size == self.task["SIZE"]:
+                                        self.size = size
+                                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+            
+                        
+                        elif self.task["SIZE"].lower() == "random":
+                            self.size = random.choice(sizes)
+                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                    
+                    else:
+                        logger.error(SITE,self.taskID,'Size Not Found')
+                        time.sleep(int(self.task["DELAY"]))
+                        continue
+        
+        
+                                
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
 
-            self.addToCart()
+                self.addToCart()
 
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+            else:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
     def addToCart(self):
         logger.prepare(SITE,self.taskID,'Carting product...')

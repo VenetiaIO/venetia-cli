@@ -61,106 +61,103 @@ class FOOTASYLUM:
         # cookie_obj = requests.cookies.create_cookie(domain=f'.footasylum.com',name='_abck',value='9A0F5ABED3E05EF1B97621C1ABAC3F5E~0~YAAQHux7XD3GlrN2AQAADLMrxAU8KDJmNhLbKclnSr0RN/MEGcoNjpeW/dfPghn9xJ2w2wFOcvXCwdobJri75aA5WPVmWIvM0jri8yOTorxoKqbWQpO17+QUdzcVvJ9QX+Qjcm3A9+2yggb8ByWzNXQZw3+3CbH02Yw6NzeEbNZuyQgr1xT9DKEHhSijkxtDZUDe+LwEvwC1oiifHBMLBcrS3/IiWEvHvI4uigRWcpx1S7TgvGDGrPeLTpyItINZBLzJLO9y9DfK8oHI50VpwKRWW7/S5FODIdRVhqqD/SRrCdfQfW8Poo7a44B0nURyRP8ErilLkJsfaJm6Md/TVbIsD15G7h8oXwI=~-1~-1~-1')
         # self.session.cookies.set_cookie(cookie_obj)
 
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"],headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-    
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.collect()
-
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
-            logger.prepare(SITE,self.taskID,'Getting product data...')
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
             try:
-                soup = BeautifulSoup(retrieve.text,"html.parser")
-                pf_id = soup.find("input",{"name":"pf_id"})["value"]
-            except Exception as e:
+                retrieve = self.session.get(self.task["PRODUCT"],headers={
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 time.sleep(int(self.task["DELAY"]))
-                self.collect()
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
 
-            regex = r"variants = {(.+)}"
-            matches = re.search(regex, retrieve.text, re.MULTILINE)
-            if matches:
-                productData = json.loads(matches.group().split('variants = ')[1].replace("'",'"'))
-                pids = []
-                sizes = []
-                allSizes = []
-                for s in productData:
-                    pids.append(s)
-
-                for s in pids:
-                    p = productData[s]
-                    if p["stock_status"] == "in stock":
-                        if p["pf_id"] == pf_id:
-                            size = p["option2"]
-                            sku = p["sku"]
-                            colour = p["option1"]
-                            price = p["price"]
-                            img = 'https://www.footasylum.com/images/products/medium/' + p["mob_swatch"]
-                            name = p["name"]
-    
-                            sizes.append(size)
-                            allSizes.append('{}#{}#{}#{}#{}#{}'.format(size,sku,colour,price,img,name))
-                    else:
-                        pass
-                
-                if len(sizes) == 0:
-                    logger.error(SITE,self.taskID,'Size Not Found')
+            if retrieve.status_code == 200:
+                self.start = time.time()
+                logger.warning(SITE,self.taskID,'Got product page')
+                logger.prepare(SITE,self.taskID,'Getting product data...')
+                try:
+                    soup = BeautifulSoup(retrieve.text,"html.parser")
+                    pf_id = soup.find("input",{"name":"pf_id"})["value"]
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
                     time.sleep(int(self.task["DELAY"]))
-                    self.collect()
+                    continue
 
+                regex = r"variants = {(.+)}"
+                matches = re.search(regex, retrieve.text, re.MULTILINE)
+                if matches:
+                    productData = json.loads(matches.group().split('variants = ')[1].replace("'",'"'))
+                    pids = []
+                    sizes = []
+                    allSizes = []
+                    for s in productData:
+                        pids.append(s)
 
-                if self.task["SIZE"].lower() != "random":
-                    if self.task["SIZE"] not in sizes:
+                    for s in pids:
+                        p = productData[s]
+                        if p["stock_status"] == "in stock":
+                            if p["pf_id"] == pf_id:
+                                size = p["option2"]
+                                sku = p["sku"]
+                                colour = p["option1"]
+                                price = p["price"]
+                                img = 'https://www.footasylum.com/images/products/medium/' + p["mob_swatch"]
+                                name = p["name"]
+        
+                                sizes.append(size)
+                                allSizes.append('{}#{}#{}#{}#{}#{}'.format(size,sku,colour,price,img,name))
+                        else:
+                            pass
+                    
+                    if len(sizes) == 0:
                         logger.error(SITE,self.taskID,'Size Not Found')
                         time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-                    else:
-                        for size in allSizes:
-                            if size.split('#')[0] == self.task["SIZE"]:
-                                self.size = size.split('#')[0]
-                                self.sizeSku = size.split('#')[1]
-                                self.sizeColour = size.split("#")[2]
-                                self.productPrice = size.split("#")[3]
-                                self.productImage = size.split("#")[4]
-                                self.productTitle = size.split("#")[5]
-                                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                                self.login()
-        
-                    
-                elif self.task["SIZE"].lower() == "random":
-                    selected = random.choice(allSizes)
-                    self.size = selected.split('#')[0]
-                    self.sizeSku = selected.split('#')[1]
-                    self.sizeColour = selected.split("#")[2]
-                    self.productPrice = selected.split("#")[3]
-                    self.productImage = selected.split("#")[4]
-                    self.productTitle = selected.split("#")[5]
-                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                    self.login()
-            else:
-                logger.error(SITE,self.taskID,'Sizes Not Found')
-                time.sleep(int(self.task["DELAY"]))
-                self.collect()
+                        continue
 
-        else:
-            try:
-                status_code = retrieve.status_code
-            except:
-                status_code = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status_code}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+
+                    if self.task["SIZE"].lower() != "random":
+                        if self.task["SIZE"] not in sizes:
+                            logger.error(SITE,self.taskID,'Size Not Found')
+                            time.sleep(int(self.task["DELAY"]))
+                            continue
+                        else:
+                            for size in allSizes:
+                                if size.split('#')[0] == self.task["SIZE"]:
+                                    self.size = size.split('#')[0]
+                                    self.sizeSku = size.split('#')[1]
+                                    self.sizeColour = size.split("#")[2]
+                                    self.productPrice = size.split("#")[3]
+                                    self.productImage = size.split("#")[4]
+                                    self.productTitle = size.split("#")[5]
+                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                                    self.login()
+            
+                        
+                    elif self.task["SIZE"].lower() == "random":
+                        selected = random.choice(allSizes)
+                        self.size = selected.split('#')[0]
+                        self.sizeSku = selected.split('#')[1]
+                        self.sizeColour = selected.split("#")[2]
+                        self.productPrice = selected.split("#")[3]
+                        self.productImage = selected.split("#")[4]
+                        self.productTitle = selected.split("#")[5]
+                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                        self.login()
+                else:
+                    logger.error(SITE,self.taskID,'Sizes Not Found')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+            else:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
             
     def login(self):
         logger.prepare(SITE,self.taskID,'Logging In...')
@@ -223,8 +220,7 @@ class FOOTASYLUM:
                 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'accept-encoding': 'gzip, deflate, br',
                 'accept-language': 'en-US,en;q=0.9',
-                'content-type': 'application/x-www-form-urlencoded',
-                'x-xss-protection':'0'
+                'content-type': 'application/x-www-form-urlencoded'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -242,6 +238,7 @@ class FOOTASYLUM:
         else:
             logger.error(SITE,self.taskID,'Failed to login. Retrying...')
             time.sleep(int(self.task["DELAY"]))
+            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.login()
 
 
@@ -318,9 +315,10 @@ class FOOTASYLUM:
                     "apiKey":"lGJjE ccd0SiBdu3I6yByRp3/yY8uVIRFa9afLx 2YSrSwkWDfxq0YKUsh96/tP84CZO4phvoR 0y9wtm9Dh5w==",
                     "checkout_client":"secure"
                 }
-                paymentGateway = self.session.get('https://paymentgateway.checkout.footasylum.net/basket',params=p,headers={
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
-                    'accept': 'application/json',
+                paymentGateway = self.session.get('https://api.gateway.footasylum.net/basket',params=p,headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
+                    'Accept': 'application/json',
+                    'Referer': 'https://secure.footasylum.com/',
                     'authority': 'paymentgateway.checkout.footasylum.net',
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -459,7 +457,7 @@ class FOOTASYLUM:
             payload = {"basketId":self.pasparBasketId,"type":"shipping","shippingTotal":self.shippingTotal,"shippingCode":self.shippingMethodCode,"shippingCarrier":self.shippingMethodName}
             logger.prepare(SITE,self.taskID,'Submitting shipping method...')
             try:
-                method = self.session.put('https://paymentgateway.checkout.footasylum.net/basket/shipping',params=params,json=payload,headers={
+                method = self.session.put('https://api.gateway.footasylum.net/basket/shipping',params=params,json=payload,headers={
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                     'accept': 'application/json',
                     'authority': 'paymentgateway.checkout.footasylum.net',
@@ -518,7 +516,7 @@ class FOOTASYLUM:
                 logger.prepare(SITE,self.taskID,'Updating customer data...')
 
                 try:
-                    customer = self.session.put('https://paymentgateway.checkout.footasylum.net/customer',params=params,json=payload,headers={
+                    customer = self.session.put('https://api.gateway.footasylum.net/customer',params=params,json=payload,headers={
                         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                         'accept': 'application/json',
                         'authority': 'paymentgateway.checkout.footasylum.net',
@@ -578,7 +576,7 @@ class FOOTASYLUM:
         logger.prepare(SITE,self.taskID,'Creating checkout...')
 
         try:
-            basketCheck = self.session.post('https://paymentgateway.checkout.footasylum.net/basket/check',params=params,json=payload,headers={
+            basketCheck = self.session.post('https://api.gateway.footasylum.net/basket/check',params=params,json=payload,headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': 'application/json',
                 'authority': 'paymentgateway.checkout.footasylum.net',
@@ -617,7 +615,7 @@ class FOOTASYLUM:
     def paymentToken(self):
         logger.prepare(SITE,self.taskID,'Getting payment token...')
         try:
-            pt = self.session.post('https://paymentgateway.checkout.footasylum.net/paypal/payment-token',data={"basketId":self.pasparBasketId},headers={
+            pt = self.session.post('https://api.gateway.footasylum.net/paypal/payment-token',data={"basketId":self.pasparBasketId},headers={
                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
                 'accept': 'application/json',
                 'authority': 'paymentgateway.checkout.footasylum.net',

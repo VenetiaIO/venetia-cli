@@ -269,6 +269,7 @@ class capMonster:
                 except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                     logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
                     menuV2(sitekey, url, proxy, SITE,taskID)
+                    
                 time.sleep(1)
 
             with open('./data/captcha/tokens.json') as config:

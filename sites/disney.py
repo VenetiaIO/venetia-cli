@@ -103,87 +103,84 @@ class DISNEY:
 
     def collect(self):
 
-        if self.region == 'fr':
-            self.disneyRegion = 'fr'
-        if self.region == 'de':
-            self.disneyRegion = 'de'
-        if self.region == 'it':
-            self.disneyRegion = 'it'
-        if self.region == 'es':
-            self.disneyRegion = 'es'
-        if self.region == 'us':
-            self.disneyRegion = 'com'
-        else:
-            self.disneyRegion = 'co.uk'
-        
+        while True:
+            if self.region == 'fr':
+                self.disneyRegion = 'fr'
+            if self.region == 'de':
+                self.disneyRegion = 'de'
+            if self.region == 'it':
+                self.disneyRegion = 'it'
+            if self.region == 'es':
+                self.disneyRegion = 'es'
+            if self.region == 'us':
+                self.disneyRegion = 'com'
+            else:
+                self.disneyRegion = 'co.uk'
+            
 
-        if "|" in self.task["PRODUCT"]:
-            self.product = findProduct("https://www.shopdisney.{}/search?srule=Newest&q={}".format(self.disneyRegion,"+".join(self.task["PRODUCT"].split('|'))),self.session,self.taskID,SITE,self.task,self.disneyRegion)
-            while self.product == None:
-                logger.error(SITE,self.taskID,'Failed to find product. Retrying...')
+            if "|" in self.task["PRODUCT"]:
+                self.product = findProduct("https://www.shopdisney.{}/search?srule=Newest&q={}".format(self.disneyRegion,"+".join(self.task["PRODUCT"].split('|'))),self.session,self.taskID,SITE,self.task,self.disneyRegion)
+                while self.product == None:
+                    logger.error(SITE,self.taskID,'Failed to find product. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+                logger.warning(SITE,self.taskID,'Successfully found product => {}'.format(self.product[0]))
+                self.product = self.product[1]
+            elif "shopdisney" in self.task["PRODUCT"]:
+                self.product = self.task["PRODUCT"]
+            else:
+                self.product = "https://www.shopdisney.{}/{}.html".format(self.disneyRegion,self.task["PRODUCT"])
+
+            logger.prepare(SITE,self.taskID,'Getting product page...')
+            try:
+                retrieve = self.session.get(self.product, headers={
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 time.sleep(int(self.task["DELAY"]))
-                self.collect()
-            logger.warning(SITE,self.taskID,'Successfully found product => {}'.format(self.product[0]))
-            self.product = self.product[1]
-        elif "shopdisney" in self.task["PRODUCT"]:
-            self.product = self.task["PRODUCT"]
-        else:
-            self.product = "https://www.shopdisney.{}/{}.html".format(self.disneyRegion,self.task["PRODUCT"])
+                continue
 
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.product, headers={
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+            if retrieve.status_code == 200:
+                self.start = time.time()
+                logger.warning(SITE,self.taskID,'Got product page')
+                regex = r"fe.data.urls.cartShow(.+);"
+                matches = re.search(regex, retrieve.text, re.MULTILINE)
+                if matches:
 
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
-            regex = r"fe.data.urls.cartShow(.+);"
-            matches = re.search(regex, retrieve.text, re.MULTILINE)
-            if matches:
+                    self.bag = str(matches.group()).split('= "/')[1].split('"')[0]
+                try:
+                    logger.prepare(SITE,self.taskID,'Getting product data...')
+                    soup = BeautifulSoup(retrieve.text, "html.parser")
+                    self.productTitle = soup.find("title").text.strip(" ").replace("\n","").split(' - ')[0]
+                    self.productImage = soup.find("meta", {"property": "og:image"})["content"]
+                    self.productPrice = soup.find("meta", {"itemprop": "price"}).text.replace('\n','')
+                    self.csrf = soup.find("input",{"name":"csrf_token"})["value"]
+                    self.pid = soup.find("input",{"name":"pid"})["value"]
+                    self.cartURL = soup.find("form",{"class":"js-pdp-form"})["action"]
+                    self.siteBase = "https://www.shopdisney.{}".format(self.disneyRegion)
+                    self.demandwareBase = self.cartURL.split('Cart-AddProduct')[0]
 
-                self.bag = str(matches.group()).split('= "/')[1].split('"')[0]
-            try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-                soup = BeautifulSoup(retrieve.text, "html.parser")
-                self.productTitle = soup.find("title").text.strip(" ").replace("\n","").split(' - ')[0]
-                self.productImage = soup.find("meta", {"property": "og:image"})["content"]
-                self.productPrice = soup.find("meta", {"itemprop": "price"}).text.replace('\n','')
-                self.csrf = soup.find("input",{"name":"csrf_token"})["value"]
-                self.pid = soup.find("input",{"name":"pid"})["value"]
-                self.cartURL = soup.find("form",{"class":"js-pdp-form"})["action"]
-                self.siteBase = "https://www.shopdisney.{}".format(self.disneyRegion)
-                self.demandwareBase = self.cartURL.split('Cart-AddProduct')[0]
+                    self.size = "One Size"
 
-                self.size = "One Size"
+                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
-                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                            
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
 
-                        
-            except Exception as e:
-               log.info(e)
-               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-               time.sleep(int(self.task["DELAY"]))
-               self.collect()
+                self.addToCart()
 
-            self.addToCart()
-
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+            else:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
     
     def addToCart(self):

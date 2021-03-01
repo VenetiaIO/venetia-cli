@@ -57,6 +57,8 @@ class FOOTLOCKER_NEW:
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
         self.baseSku = self.task['PRODUCT']
 
+        self.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36'
+
         if self.countryCode == 'it':
             self.baseUrl = 'https://www.footlocker.it'
             self.baseUrl2 = ''
@@ -111,111 +113,108 @@ class FOOTLOCKER_NEW:
         self.collect()
 
     def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        url = '{}/en/product/{}/{}.html'.format(self.baseUrl, self.task['PRODUCT'], self.task['PRODUCT'])
-        try:
-            retrieve = self.session.get(url)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-
-        if retrieve.status_code == 503:
-            logger.info(SITE,self.taskID,'Queue...')
-            time.sleep(10)
-            self.collect()
-
-        if retrieve.status_code == 403:
-            logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
+            url = '{}/en/product/{}/{}.html'.format(self.baseUrl, self.task['PRODUCT'], self.task['PRODUCT'])
             try:
-                challengeUrl = retrieve.json()['url']
-            except:
-                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                time.sleep(10)
-                self.collect()
-
-            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
-            if cookie['cookie'] == None:
-                del self.session.cookies["datadome"]
+                retrieve = self.session.get(url)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
-                
-
-            del self.session.cookies["datadome"]
-            self.session.cookies["datadome"] = cookie['cookie']
-            self.collect()
-
-
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
-            try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-                url = retrieve.text.split('"@id":"')[1].split('"')[0]
-                regex = r"window.footlocker.STATE_FROM_SERVER = {(.+)}"
-                matches = re.search(regex, retrieve.text, re.MULTILINE)
-                productData = json.loads(matches.group().split('window.footlocker.STATE_FROM_SERVER = ')[1])
-                eu_sizes = productData['details']['sizes'][url.split(self.baseUrl)[1]]
-                self.productPrice = productData['details']['data'][url.split(self.baseUrl)[1]][0]['price']['formattedValue']
-                self.productTitle = productData['details']['product'][url.split(self.baseUrl)[1]]['name']
-                self.productImage = f'https://images.footlocker.com/is/image/FLEU/{self.baseSku}_01?wid=763&hei=538&fmt=png-alpha'
-            except Exception as e:
-               log.info(e)
-               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-               time.sleep(int(self.task["DELAY"]))
-               self.collect()
-
-            allSizes = []
-            sizes = []
-
-        
-            for s in eu_sizes:
-                try:
-                    sizes.append(s['name'])
-                    allSizes.append('{}:{}'.format(s['name'], s['code']))
-                except:
-                    pass
-
-
-            if len(sizes) == 0:
-                logger.error(SITE,self.taskID,'Sizes Not Found')
                 time.sleep(int(self.task["DELAY"]))
-                self.collect()
+                continue
 
-                
-            if self.task["SIZE"].lower() != "random":
-                if self.task["SIZE"] not in sizes:
-                    logger.error(SITE,self.taskID,'Size Not Found')
+            if retrieve.status_code == 503:
+                logger.info(SITE,self.taskID,'Queue...')
+                time.sleep(10)
+                continue
+
+            if retrieve.status_code == 403:
+                logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
+                try:
+                    challengeUrl = retrieve.json()['url']
+                except:
+                    logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                    time.sleep(10)
+                    continue
+
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
+                if cookie['cookie'] == None:
+                    del self.session.cookies["datadome"]
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
+                    
+
+                del self.session.cookies["datadome"]
+                self.session.cookies["datadome"] = cookie['cookie']
+                continue
+
+
+            if retrieve.status_code == 200:
+                self.start = time.time()
+                logger.warning(SITE,self.taskID,'Got product page')
+                try:
+                    logger.prepare(SITE,self.taskID,'Getting product data...')
+                    url = retrieve.text.split('"@id":"')[1].split('"')[0]
+                    regex = r"window.footlocker.STATE_FROM_SERVER = {(.+)}"
+                    matches = re.search(regex, retrieve.text, re.MULTILINE)
+                    productData = json.loads(matches.group().split('window.footlocker.STATE_FROM_SERVER = ')[1])
+                    eu_sizes = productData['details']['sizes'][url.split(self.baseUrl)[1]]
+                    self.productPrice = productData['details']['data'][url.split(self.baseUrl)[1]][0]['price']['formattedValue']
+                    self.productTitle = productData['details']['product'][url.split(self.baseUrl)[1]]['name']
+                    self.productImage = f'https://images.footlocker.com/is/image/FLEU/{self.baseSku}_01?wid=763&hei=538&fmt=png-alpha'
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
                     time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-                else:
-                    for size in allSizes:
-                        if size.split(':')[0] == self.task["SIZE"]:
-                            self.size = size.split(':')[0]
-                            self.sizeSku = size.split(":")[1]
-                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                    continue
+
+                allSizes = []
+                sizes = []
 
             
-            elif self.task["SIZE"].lower() == "random":
-                selected = random.choice(allSizes)
-                self.size = selected.split(":")[0]
-                self.sizeSku = selected.split(":")[1]
-                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                for s in eu_sizes:
+                    try:
+                        sizes.append(s['name'])
+                        allSizes.append('{}:{}'.format(s['name'], s['code']))
+                    except:
+                        pass
 
 
-            self.footlockerSession()
+                if len(sizes) == 0:
+                    logger.error(SITE,self.taskID,'Sizes Not Found')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                    
+                if self.task["SIZE"].lower() != "random":
+                    if self.task["SIZE"] not in sizes:
+                        logger.error(SITE,self.taskID,'Size Not Found')
+                        time.sleep(int(self.task["DELAY"]))
+                        continue
+                    else:
+                        for size in allSizes:
+                            if size.split(':')[0] == self.task["SIZE"]:
+                                self.size = size.split(':')[0]
+                                self.sizeSku = size.split(":")[1]
+                                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+
+                
+                elif self.task["SIZE"].lower() == "random":
+                    selected = random.choice(allSizes)
+                    self.size = selected.split(":")[0]
+                    self.sizeSku = selected.split(":")[1]
+                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
 
 
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+                self.footlockerSession()
+
+
+            else:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
     def footlockerSession(self):
         logger.prepare(SITE,self.taskID,'Getting session')
@@ -231,7 +230,7 @@ class FOOTLOCKER_NEW:
                 "sec-fetch-site": "same-origin",
                 "x-api-lang": "en-GB",
                 # "x-fl-request-id": "45a40be0-4f57-11eb-87a1-a1e3b40a67ba"
-                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "user-agent":self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -244,7 +243,7 @@ class FOOTLOCKER_NEW:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = response.json()['url']
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                 if cookie['cookie'] == None:
                     del self.session.cookies["datadome"]
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -263,7 +262,7 @@ class FOOTLOCKER_NEW:
                         time.sleep(10)
                         self.footlockerSession()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -318,7 +317,7 @@ class FOOTLOCKER_NEW:
                 "x-csrf-token": self.csrf,
                 "x-fl-productid": self.sizeSku,
                 # "x-fl-request-id": "45a40be0-4f57-11eb-87a1-a1e3b40a67ba"
-                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "user-agent":self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -332,7 +331,7 @@ class FOOTLOCKER_NEW:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = atcResponse.json()['url']
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                 if cookie['cookie'] == None:
                     del self.session.cookies["datadome"]
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -356,7 +355,7 @@ class FOOTLOCKER_NEW:
                         time.sleep(10)
                         self.addToCart()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -416,7 +415,7 @@ class FOOTLOCKER_NEW:
                 "x-csrf-token": self.csrf,
                 # "x-fl-productid": self.sizeSku,
                 # "x-fl-request-id": "45a40be0-4f57-11eb-87a1-a1e3b40a67ba"
-                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "user-agent":self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -429,7 +428,7 @@ class FOOTLOCKER_NEW:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = emailPage.json()['url']
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                 if cookie['cookie'] == None:
                     del self.session.cookies["datadome"]
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -448,7 +447,7 @@ class FOOTLOCKER_NEW:
                         time.sleep(10)
                         self.setEmail()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -498,7 +497,7 @@ class FOOTLOCKER_NEW:
                 "x-csrf-token": self.csrf,
                 # "x-fl-productid": self.sizeSku,
                 # "x-fl-request-id": "45a40be0-4f57-11eb-87a1-a1e3b40a67ba"
-                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "user-agent":self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -511,7 +510,7 @@ class FOOTLOCKER_NEW:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = shippingAddress.json()['url']
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                 if cookie['cookie'] == None:
                     del self.session.cookies["datadome"]
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -530,7 +529,7 @@ class FOOTLOCKER_NEW:
                         time.sleep(10)
                         self.shipping()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -562,7 +561,7 @@ class FOOTLOCKER_NEW:
                 "x-csrf-token": self.csrf,
                 # "x-fl-productid": self.sizeSku,
                 # "x-fl-request-id": "45a40be0-4f57-11eb-87a1-a1e3b40a67ba"
-                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "user-agent":self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -575,7 +574,7 @@ class FOOTLOCKER_NEW:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = billingAddress.json()['url']
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                 if cookie['cookie'] == None:
                     del self.session.cookies["datadome"]
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -594,7 +593,7 @@ class FOOTLOCKER_NEW:
                         time.sleep(10)
                         self.shipping()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -644,7 +643,7 @@ class FOOTLOCKER_NEW:
                 "x-csrf-token": self.csrf,
                 # "x-fl-productid": self.sizeSku,
                 # "x-fl-request-id": "45a40be0-4f57-11eb-87a1-a1e3b40a67ba"
-                "user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "user-agent":self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -657,7 +656,7 @@ class FOOTLOCKER_NEW:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = paymentMethods.json()['url']
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                 if cookie['cookie'] == None:
                     del self.session.cookies["datadome"]
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -676,7 +675,7 @@ class FOOTLOCKER_NEW:
                         time.sleep(10)
                         self.paypal()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl)
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
                     if cookie['cookie'] == None:
                         del self.session.cookies["datadome"]
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
@@ -740,7 +739,7 @@ class FOOTLOCKER_NEW:
                 # "x-fl-productid": self.sizeSku,
                 # "x-fl-request-id": "45a40be0-4f57-11eb-87a1-a1e3b40a67ba"
                 'Referer':self.baseUrl,
-                "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36"
+                "User-Agent":self.userAgent
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)

@@ -57,120 +57,117 @@ class OFFICE:
 
     def collect(self):
 
-        if 'office' not in self.task['PRODUCT']:
-            self.task['PRODUCT'] = 'https://www.office.co.uk/view/product/office_catalog/1,21/' + self.task['PRODUCT'] 
+        while True:
+            if 'office' not in self.task['PRODUCT']:
+                self.task['PRODUCT'] = 'https://www.office.co.uk/view/product/office_catalog/1,21/' + self.task['PRODUCT'] 
 
 
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"],headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'accept-encoding': 'gzip, deflate, br',
-                'accept-languag': 'en-US,en;q=0.9'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-        
-        currentVal = self.task['PRODUCT'].split('/office_catalog/')[1].split(',')[0]
-        self.task['PRODUCT'] = self.task['PRODUCT'].replace(currentVal + ',', str(random.randint(1,99)) + ',')
-
-        if retrieve.status_code == 503:
-            logger.info(SITE,self.taskID,'Queue....')
+            logger.prepare(SITE,self.taskID,'Getting product page...')
             try:
-                akavpwr_VP_offspring_val = str(retrieve.headers['set-cookie']).split('akavpwr_VP_office=')[1].split(';')[0]
-                cookie_obj = requests.cookies.create_cookie(domain=f'www.office.co.uk',name='akavpau_VP_office',value=akavpwr_VP_offspring_val)
-                self.session.cookies.set_cookie(cookie_obj)
-                clearables = []
-                for cookie in self.session.cookies:
-                    if cookie.name == 'akavpwr_VP_office':
-                        continue
-                    clearables.append((cookie.domain, cookie.path, cookie.name))
-                    
-                for domain, path, name in clearables:
-                    self.session.cookies.clear(domain, path, name)
-                    
-            except Exception as e:
+                retrieve = self.session.get(self.task["PRODUCT"],headers={
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36',
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'accept-encoding': 'gzip, deflate, br',
+                    'accept-languag': 'en-US,en;q=0.9'
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
-                pass
-            self.collect()
-        
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                continue
+            
+            currentVal = self.task['PRODUCT'].split('/office_catalog/')[1].split(',')[0]
+            self.task['PRODUCT'] = self.task['PRODUCT'].replace(currentVal + ',', str(random.randint(1,99)) + ',')
 
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
-            try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-                soup = BeautifulSoup(retrieve.text, "html.parser")
-                self.pid = soup.find('input',{'id':'productCodeId'})['value']
-                self.csrf = soup.find('input',{'name':'CSRFToken'})['value']
-
-    
-                foundSizes = soup.find('ul',{'data-locale':'UK'})
-                if foundSizes:
-                    sizes = []
-                    allSizes = []
-                    for s in foundSizes:
-                        try:
-                            size = s['data-name']
-                            sizes.append(size)
-                            allSizes.append('{}:{}'.format(size, self.pid+s['data-value']))
-                        except:
-                            pass
-    
-                    if len(sizes) == 0:
-                        logger.error(SITE,self.taskID,'Size Not Found')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-    
+            if retrieve.status_code == 503:
+                logger.info(SITE,self.taskID,'Queue....')
+                try:
+                    akavpwr_VP_offspring_val = str(retrieve.headers['set-cookie']).split('akavpwr_VP_office=')[1].split(';')[0]
+                    cookie_obj = requests.cookies.create_cookie(domain=f'www.office.co.uk',name='akavpau_VP_office',value=akavpwr_VP_offspring_val)
+                    self.session.cookies.set_cookie(cookie_obj)
+                    clearables = []
+                    for cookie in self.session.cookies:
+                        if cookie.name == 'akavpwr_VP_office':
+                            continue
+                        clearables.append((cookie.domain, cookie.path, cookie.name))
                         
-                    if self.task["SIZE"].lower() != "random":
-                        if self.task["SIZE"] not in sizes:
+                    for domain, path, name in clearables:
+                        self.session.cookies.clear(domain, path, name)
+                        
+                except Exception as e:
+                    log.info(e)
+                    pass
+                continue
+            
+
+            if retrieve.status_code == 200:
+                self.start = time.time()
+                logger.warning(SITE,self.taskID,'Got product page')
+                try:
+                    logger.prepare(SITE,self.taskID,'Getting product data...')
+                    soup = BeautifulSoup(retrieve.text, "html.parser")
+                    self.pid = soup.find('input',{'id':'productCodeId'})['value']
+                    self.csrf = soup.find('input',{'name':'CSRFToken'})['value']
+
+        
+                    foundSizes = soup.find('ul',{'data-locale':'UK'})
+                    if foundSizes:
+                        sizes = []
+                        allSizes = []
+                        for s in foundSizes:
+                            try:
+                                size = s['data-name']
+                                sizes.append(size)
+                                allSizes.append('{}:{}'.format(size, self.pid+s['data-value']))
+                            except:
+                                pass
+        
+                        if len(sizes) == 0:
                             logger.error(SITE,self.taskID,'Size Not Found')
                             time.sleep(int(self.task["DELAY"]))
-                            self.collect()
-                        else:
-                            for size in allSizes:
-                                if size.split(':')[0] == self.task["SIZE"]:
-                                    self.size = size.split(':')[0]
-                                    self.sizeId = size.split(':')[1]
-                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                            continue
         
+                            
+                        if self.task["SIZE"].lower() != "random":
+                            if self.task["SIZE"] not in sizes:
+                                logger.error(SITE,self.taskID,'Size Not Found')
+                                time.sleep(int(self.task["DELAY"]))
+                                continue
+                            else:
+                                for size in allSizes:
+                                    if size.split(':')[0] == self.task["SIZE"]:
+                                        self.size = size.split(':')[0]
+                                        self.sizeId = size.split(':')[1]
+                                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+            
+                        
+                        elif self.task["SIZE"].lower() == "random":
+                            chosen = random.choice(allSizes)
+                            self.size = chosen.split(':')[0]
+                            self.sizeId = chosen.split(':')[1]
+                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                     
-                    elif self.task["SIZE"].lower() == "random":
-                        chosen = random.choice(allSizes)
-                        self.size = chosen.split(':')[0]
-                        self.sizeId = chosen.split(':')[1]
-                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                
-                else:
-                    logger.error(SITE,self.taskID,'Size Not Found')
+                    else:
+                        logger.error(SITE,self.taskID,'Size Not Found')
+                        time.sleep(int(self.task["DELAY"]))
+                        continue
+            
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
                     time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-        
-            except Exception as e:
-               log.info(e)
-               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-               time.sleep(int(self.task["DELAY"]))
-               self.collect()
+                    continue
 
 
-            self.addToCart()
+                self.addToCart()
 
 
-        elif retrieve.status_code != 200:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.collect()
+            elif retrieve.status_code != 200:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
 
     def addToCart(self):
         logger.prepare(SITE,self.taskID,'Checking Captcha...')

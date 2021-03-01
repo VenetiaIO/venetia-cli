@@ -116,146 +116,147 @@ class SNIPES:
 
 
     def query(self):
-        logger.prepare(SITE,self.taskID,'Getting product info...')
-        try:
-            retrieve = self.session.get(self.queryUrl)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.query()
-
-        
-        
-        if retrieve.status_code == 200:
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product info...')
             try:
-                data = retrieve.json()
-            except Exception as e:
-                log.info(e)
-                logger.error(SITE,self.taskID,'Failed to retrieve product info. Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                self.query()
-
-            try:
-                self.productTitle = data["product"]["productName"]
-                self.productPrice = data["product"]["price"]["sales"]["formatted"]
-                self.productImage = data["product"]["images"][0]["pdp"]["srcT"]
-                # self.csrf = data["csrf"]["token"]
-                self.demandWareBase = data["product"]["quantities"][0]["url"].split('Product-Variation')[0]
-            except Exception as e:
-                log.info(e)
-                logger.error(SITE,self.taskID,'Failed to retrieve product info. Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                self.query()
-
-            if self.snipesRegion != 'com':
-                self.atcUrl = f'https://www.snipes.{self.snipesRegion}{self.demandWareBase}Cart-AddProduct?format=ajax'
-            else:
-                self.atcUrl = f'https://www.snipes.{self.snipesRegion}/add-product?format=ajax'
-            allSizes = []
-            sizes = []
-            for s in data["product"]["variationAttributes"][0]["values"]:
-                sizes.append(s["value"])
-                sizePid = s["variantId"]
-                if sizePid in ['None', None]:
-                    sizePid = s['pid']
-                allSizes.append('{}:{}'.format(s["value"],sizePid))
-
-            if len(sizes) == 0:
-                logger.error(SITE,self.taskID,'Sizes Not Found')
-                time.sleep(int(self.task["DELAY"]))
-                self.collect()
-
-                
-            if self.task["SIZE"].lower() != "random":
-                if self.task["SIZE"] not in sizes:
-                    logger.error(SITE,self.taskID,'Size Not Found')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-                else:
-                    for size in allSizes:
-                        if size.split(':')[0] == self.task["SIZE"]:
-                            self.size = size.split(':')[0]
-                            self.sizePID = size.split(":")[1]
-                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-
-            
-            elif self.task["SIZE"].lower() == "random":
-                selected = random.choice(allSizes)
-                self.size = selected.split(":")[0]
-                self.sizePID = selected.split(":")[1]
-                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-
-
-            try:
-                csrfReq = self.session.post('https://www.snipes.{}{}/CSRF-Generate'.format(self.snipesRegion,self.demandWareBase))
+                retrieve = self.session.get(self.queryUrl)
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 logger.error(SITE,self.taskID,'Error: {}'.format(e))
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 time.sleep(int(self.task["DELAY"]))
-                self.query()
-            
-            try:
-                self.csrf = csrfReq.json()['csrf']['token']
-            except Exception:
-                logger.error(SITE,self.taskID,'Failed to get CSRF Token. Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                self.query()
-            
-            if self.task["ACCOUNT EMAIL"] != "" and self.task["ACCOUNT PASSWORD"] != "":
-                self.login()
-            else:
-                self.addToCart()
+                continue
 
-        if retrieve.status_code == 403:
-            if 'px-captcha' in retrieve.text:
-                uuid = retrieve.text.split("window._pxVid = '")[1].split("';")
-                vid = retrieve.text.split("window._pxUuid = '")[1].split("';")
-                blockedUrl = f'https://www.snipes.{self.snipesRegion}/blocked&uuid={uuid}&vid={vid}'
-                # Captcha required
-                logger.error(SITE,self.taskID,'PX Captcha Found. Solving...')
-                time.sleep(int(self.task["DELAY"]))
+            
+            
+            if retrieve.status_code == 200:
+                try:
+                    data = retrieve.json()
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to retrieve product info. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
 
-                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
-                while cookies["px3"] == "error":
+                try:
+                    self.productTitle = data["product"]["productName"]
+                    self.productPrice = data["product"]["price"]["sales"]["formatted"]
+                    self.productImage = data["product"]["images"][0]["pdp"]["srcT"]
+                    # self.csrf = data["csrf"]["token"]
+                    self.demandWareBase = data["product"]["quantities"][0]["url"].split('Product-Variation')[0]
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to retrieve product info. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                if self.snipesRegion != 'com':
+                    self.atcUrl = f'https://www.snipes.{self.snipesRegion}{self.demandWareBase}Cart-AddProduct?format=ajax'
+                else:
+                    self.atcUrl = f'https://www.snipes.{self.snipesRegion}/add-product?format=ajax'
+                allSizes = []
+                sizes = []
+                for s in data["product"]["variationAttributes"][0]["values"]:
+                    sizes.append(s["value"])
+                    sizePid = s["variantId"]
+                    if sizePid in ['None', None]:
+                        sizePid = s['pid']
+                    allSizes.append('{}:{}'.format(s["value"],sizePid))
+
+                if len(sizes) == 0:
+                    logger.error(SITE,self.taskID,'Sizes Not Found')
+                    time.sleep(int(self.task["DELAY"]))
+                    self.collect()
+
+                    
+                if self.task["SIZE"].lower() != "random":
+                    if self.task["SIZE"] not in sizes:
+                        logger.error(SITE,self.taskID,'Size Not Found')
+                        time.sleep(int(self.task["DELAY"]))
+                        self.collect()
+                    else:
+                        for size in allSizes:
+                            if size.split(':')[0] == self.task["SIZE"]:
+                                self.size = size.split(':')[0]
+                                self.sizePID = size.split(":")[1]
+                                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+
+                
+                elif self.task["SIZE"].lower() == "random":
+                    selected = random.choice(allSizes)
+                    self.size = selected.split(":")[0]
+                    self.sizePID = selected.split(":")[1]
+                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+
+
+                try:
+                    csrfReq = self.session.post('https://www.snipes.{}{}/CSRF-Generate'.format(self.snipesRegion,self.demandWareBase))
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+                
+                try:
+                    self.csrf = csrfReq.json()['csrf']['token']
+                except Exception:
+                    logger.error(SITE,self.taskID,'Failed to get CSRF Token. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+                
+                if self.task["ACCOUNT EMAIL"] != "" and self.task["ACCOUNT PASSWORD"] != "":
+                    self.login()
+                else:
+                    self.addToCart()
+
+            if retrieve.status_code == 403:
+                if 'px-captcha' in retrieve.text:
+                    uuid = retrieve.text.split("window._pxVid = '")[1].split("';")
+                    vid = retrieve.text.split("window._pxUuid = '")[1].split("';")
+                    blockedUrl = f'https://www.snipes.{self.snipesRegion}/blocked&uuid={uuid}&vid={vid}'
+                    # Captcha required
+                    logger.error(SITE,self.taskID,'PX Captcha Found. Solving...')
+                    time.sleep(int(self.task["DELAY"]))
+
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
-    
-                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
-                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
-                self.session.cookies.set_cookie(cookie_obj)
-                self.session.cookies.set_cookie(cookie_obj2)
+                    while cookies["px3"] == "error":
+                        cookies = PX.captchaSolve(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID, SITE, blockedUrl, self.cs, self.sid)
+        
+                    cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                    cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                    self.session.cookies.set_cookie(cookie_obj)
+                    self.session.cookies.set_cookie(cookie_obj2)
 
-                self.query()
-            else:
-                logger.error(SITE,self.taskID,'Forbidden. Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-                while cookies["px3"] == "error":
+                    continue
+                else:
+                    logger.error(SITE,self.taskID,'Forbidden. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
-    
-                self.cs = cookies['cs']
-                self.sid = cookies['sid']
-                cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
-                cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
-                self.session.cookies.set_cookie(cookie_obj)
-                self.session.cookies.set_cookie(cookie_obj2)
-                self.query()
+                    while cookies["px3"] == "error":
+                        cookies = PX.snipes(self.session, f'https://www.snipes.{self.snipesRegion}', self.taskID)
+        
+                    self.cs = cookies['cs']
+                    self.sid = cookies['sid']
+                    cookie_obj = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_px3',value=cookies['px3'])
+                    cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
+                    self.session.cookies.set_cookie(cookie_obj)
+                    self.session.cookies.set_cookie(cookie_obj2)
+                    continue
 
-        if retrieve.status_code == 429:
-            logger.error(SITE,self.taskID,'Rate Limit (Sleeping). Retrying...')
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.UA = randomUA()
-            time.sleep(10)
-            self.query()
-    
-        elif retrieve.status_code not in [200,403]:
-            logger.error(SITE,self.taskID,'Failed to retrieve product info. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.query()
+            if retrieve.status_code == 429:
+                logger.error(SITE,self.taskID,'Rate Limit (Sleeping). Retrying...')
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                self.UA = randomUA()
+                time.sleep(10)
+                continue
+        
+            elif retrieve.status_code not in [200,403]:
+                logger.error(SITE,self.taskID,'Failed to retrieve product info. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
             
 
@@ -1057,19 +1058,16 @@ class SNIPES:
         if place.status_code in [200,302]:
             try:
                 response = place.json()
-                cUrl = response["continueUrl"]
-                redirect = place.json()['redirectUrl']
+                cUrl = str(response["continueUrl"])
+                redirect = str(place.json()['redirectUrl'])
             except Exception as e:
-                redirect = 'null'
                 log.info(e)
                 log.info(str(response))
                 time.sleep(int(self.task["DELAY"]))
                 if place.json()['cartError'] == True:
                     logger.error(SITE,self.taskID,'Failed to place order (Cart Error) Redirect=> {}. Retrying...'.format(redirect))
                     self.query()
-                else:
-                    logger.error(SITE,self.taskID,'Failed to place order. Retrying...')
-                    self.addToCart()
+
             
             if "paypal" in cUrl:
                 logger.warning(SITE,self.taskID,'Order placed')

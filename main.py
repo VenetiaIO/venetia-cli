@@ -246,15 +246,17 @@ class Menu:
                             row["SITE"] = key_chosen
                             row["TASK_NAME"] = taskName
                             row["ROW_NUMBER"] = a
-                            if key_chosen.lower() in ['slamjam','queens','airness','holypop','grosbasket','wch','naked','prodirect','disney','fenom','footlocker','footlocker_new','footlocker_old']:
+                            if key_chosen.lower() in ['slamjam','queens','airness','holypop','grosbasket','wch','naked','prodirect','disney','fenom','footlocker','footlocker_new','footlocker_old','jd','size','footpatrol']:
                                 threading.Thread(target=value_chosen,args=(row,taskName, a)).start()
                             else:
                                 tasks.append(row)
                             a = a + 1
-                _delay_ =  input(f"[{get_time()}] Enter Waterfall monitor delay (in seconds) ==> ")
-                WaterfallAssign.assign(tasks,_delay_)
+                            
+                if key_chosen.lower() not in ['slamjam','queens','airness','holypop','grosbasket','wch','naked','prodirect','disney','fenom','footlocker','footlocker_new','footlocker_old','jd','size','footpatrol']:
+                    _delay_ =  input(f"[{get_time()}] Enter Waterfall monitor delay (in seconds) ==> ")
+                    WaterfallAssign.assign(tasks,_delay_)
+            
         except Exception as e:
-            print(e)
             pass
 
    
@@ -281,14 +283,14 @@ class Menu:
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('11','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
         #sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
         sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-        option = ''
+        menu_option_choice = ''
         try:
-            option = int(input(' Pick an option => '))
+            menu_option_choice = int(input(' Pick an option => '))
         except Exception:
             logger.error('VENETIA','Menu','Please enter a number')
             self.menu()
         
-        if option == 1:
+        if menu_option_choice == 1:
             try:
                 win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),"Running Tasks","0","0"))
             except:
@@ -329,15 +331,19 @@ class Menu:
                                     threading.Thread(target=sites.get('FOOTLOCKER_OLD'),args=(row,taskName, a)).start()
 
                 elif k.upper() not in ['FOOTLOCKER_NEW','FOOTLOCKER_OLD']:
-                    accounts = open(f'./{k.lower()}/accounts.txt','r').readlines()
                     allAccounts = []
-                    for a in accounts:
-                        if a.strip() != '':
-                            allAccounts.append(a)
+                    try:
+                        accounts = open(f'./{k.lower()}/accounts.txt','r').readlines()
+                        for a in accounts:
+                            if a.strip() != '':
+                                allAccounts.append(a)
+                    except:
+                        pass
                     
                     for i in range(2000):
                         allAccounts.append(':')
 
+                    tasks = []
                     with open(f'./{k.lower()}/tasks.csv','r') as csvFile:
                         csv_reader = csv.DictReader(csvFile)
                         # total =  total + sum(1 for row in csv_reader)
@@ -363,14 +369,24 @@ class Menu:
                                 row['PROXIES'] = 'proxies'
                                 row["ACCOUNT EMAIL"] = acc.split(':')[0]
                                 row["ACCOUNT PASSWORD"] = acc.split(':')[1]
+                                row["SITE"] = k
+                                row["TASK_NAME"] = taskName
+                                row["ROW_NUMBER"] = a
                                 
-                                threading.Thread(target=sites.get(k.upper()),args=(row,taskName, a)).start()
+                                if k.lower() in ['slamjam','queens','airness','holypop','grosbasket','wch','naked','prodirect','disney','fenom','footlocker','footlocker_new','footlocker_old']:
+                                    threading.Thread(target=sites.get(k.upper()),args=(row,taskName, a)).start()
+                                else:
+                                    tasks.append(row)
+                                
+                                a = a + 1
+
+                    _delay_ =  input(f"[{get_time()}] Enter Waterfall monitor delay (in seconds) ==> ")
+                    WaterfallAssign.assign(tasks,_delay_)
             
-                a = a + 1
             # if total == 0:
                 # self.menu()
  
-        elif option == 2:
+        elif menu_option_choice == 2:
             number = 1
             availableSites = {}
             for row in sorted(sites):
@@ -401,7 +417,7 @@ class Menu:
                 self.menu()
             self.siteSelectFunc(availableSites, siteSelection)
 
-        elif option == 3:
+        elif menu_option_choice == 3:
             try:
                 with open('./data/config.json') as config:
                     config = json.loads(config.read())
@@ -432,15 +448,15 @@ class Menu:
                     logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('QT ACCOUNT EMAIL','red', attrs=["bold"]), colored(qtEmail,'cyan')))
                     logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('QT ACCOUNT PASSWORD','red', attrs=["bold"]), colored(qtPassword,'cyan')))
                     sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-                    option = input(' [ENTER] TO RETURN TO Menu ')
+                    input(' [ENTER] TO RETURN TO Menu ')
                     self.menu()
             except Exception as e:
                 logger.error('VENETIA','Menu','Error reading config [{}]. Please edit...'.format(e))
                 sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-                option = input(' [ENTER] TO RETURN TO Menu ')
+                input(' [ENTER] TO RETURN TO Menu ')
                 self.menu()
 
-        elif option == 4:
+        elif menu_option_choice == 4:
             with open('./data/config.json') as config:
                 config = json.loads(config.read())
                 print(colored(f"[{get_time()}] Configure Config Below (Leave blank to leave unchanged) ", "red",attrs=['bold']))
@@ -536,10 +552,10 @@ class Menu:
                     json.dump(config_updated, updated)
 
                 sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-                option = input(' [ENTER] TO RETURN TO Menu ')
+                input(' [ENTER] TO RETURN TO Menu ')
                 self.menu()
 
-        elif option == 5:
+        elif menu_option_choice == 5:
             try:
                 self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Creating Profiles...', start=self.rpctime,small_image="image",small_text="@venetiaIO")
             except:
@@ -730,14 +746,14 @@ class Menu:
             else:
                 p['countryCode'] = countryC
 
-            zip =  input(f"[{get_time()}] Zipcode/Postcode ==> ")
-            if zip == "":
+            zip_ =  input(f"[{get_time()}] Zipcode/Postcode ==> ")
+            if zip_ == "":
                 try:
-                    zip = p['zip']
+                    zip_ = p['zip']
                 except:
-                    zip = ""
+                    zip_ = ""
             else:
-                p['zip'] = zip
+                p['zip'] = zip_
 
             cn =  input(f"[{get_time()}] Card Number ==> ")
             if cn == "":
@@ -783,10 +799,10 @@ class Menu:
             logger.menu('VENETIA','Menu','PROFILE CREATED - {}'.format(colored(profileName,'green',attrs=["bold"])))
 
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            option = input(' [ENTER] TO RETURN TO Menu ')
+            input(' [ENTER] TO RETURN TO Menu ')
             self.menu()
 
-        elif option == 6:
+        elif menu_option_choice == 6:
             with open(f'./data/profiles/profiles.json','r') as profileRead:
                 profiles = json.loads(profileRead.read())
 
@@ -973,14 +989,14 @@ class Menu:
                             else:
                                 p['countryCode'] = countryC
 
-                            zip =  input(f"[{get_time()}] Zipcode/Postcode ==> ")
-                            if zip == "":
+                            _zip_ =  input(f"[{get_time()}] Zipcode/Postcode ==> ")
+                            if _zip_ == "":
                                 try:
-                                    zip = p['zip']
+                                    _zip_ = p['zip']
                                 except:
-                                    zip = ""
+                                    _zip_ = ""
                             else:
-                                p['zip'] = zip
+                                p['zip'] = _zip_
 
                             cn =  input(f"[{get_time()}] Card Number ==> ")
                             if cn == "":
@@ -1027,15 +1043,15 @@ class Menu:
                     logger.menu('VENETIA','Menu','PROFILE Updated - {}'.format(colored(profileName,'green',attrs=["bold"])))
         
                     sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-                    option = input(' [ENTER] TO RETURN TO Menu ')
+                    input(' [ENTER] TO RETURN TO Menu ')
                     self.menu()
                 else:
                     self.menu()
 
             
 
-        elif option == 7:
-            print('[{}] Would you like to clear current captcha tokens ?   Y | N'.format(colored(get_time(),'red',attrs=['bold'])))
+        elif menu_option_choice == 7:
+            logger.menu('VENETIA','Captcha','Would you like to clear current captcha tokens ?   Y | N')
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             cleartokenQuestion = input(' Pick an option => ')
             if cleartokenQuestion.lower() == 'y':
@@ -1044,13 +1060,13 @@ class Menu:
                 pass
 
 
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('TITOLO','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('NAKED','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('PRO-DIRECT','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('5','red', attrs=["bold"]), colored('OFFSPRING','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('6','red', attrs=["bold"]), colored('OFFICE','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('7','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
+            logger.menu('VENETIA','Captcha','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('TITOLO','cyan')))
+            logger.menu('VENETIA','Captcha','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
+            logger.menu('VENETIA','Captcha','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('NAKED','cyan')))
+            logger.menu('VENETIA','Captcha','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('PRO-DIRECT','cyan')))
+            logger.menu('VENETIA','Captcha','[{}] => {}'.format(colored('5','red', attrs=["bold"]), colored('OFFSPRING','cyan')))
+            logger.menu('VENETIA','Captcha','[{}] => {}'.format(colored('6','red', attrs=["bold"]), colored('OFFICE','cyan')))
+            logger.menu('VENETIA','Captcha','[{}] => {}'.format(colored('7','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
             CaptchasiteSelect = input(' Select a site => ')
             if CaptchasiteSelect == "1":
@@ -1081,10 +1097,10 @@ class Menu:
                 self.menu()
 
             sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            amount = option = input(' Enter Amount => ')
+            amount_cap = option = input(' Enter Amount => ')
             proxies = 'proxies'
             
-            for i in range(int(amount)):
+            for i in range(int(amount_cap)):
                 threading.Thread(target=captcha.menuV2,args=(siteKey,siteUrl,proxies,'CAPTCHA',siteName)).start()
 
             while threading.active_count() != 2:
@@ -1093,7 +1109,7 @@ class Menu:
             if threading.active_count() == 2:
                 self.menu()
 
-        if option == 8:
+        if menu_option_choice == 8:
             logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
             logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('PRO-DIRECT','cyan')))
             logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('FOOTASYLUM','cyan')))
@@ -1112,7 +1128,7 @@ class Menu:
                 # proxies = None
             proxies = 'proxies'
 
-            amount = input(f"[{get_time()}] Enter amount ==> ")
+            amount_acc = input(f"[{get_time()}] Enter amount ==> ")
 
             catchall = input(f"[{get_time()}] Enter catchall (with @) ==> ")
 
@@ -1124,37 +1140,37 @@ class Menu:
             # completed = []
             if AccountsiteSelect == "1":
                 sitekey = '6Lc8GBUUAAAAAKMfe1S46jE08TvVKNSnMYnuj6HN'
-                for i in range(int(amount)):
+                for i in range(int(amount_acc)):
                     threading.Thread(target=ACCOUNTS.holypop,args=(sitekey,proxies,'HOLYPOP',catchall,password, profile)).start()
 
             if AccountsiteSelect == "2":
                 sitekey = '6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g'
-                for i in range(int(amount)):
+                for i in range(int(amount_acc)):
                     threading.Thread(target=ACCOUNTS.proDirect,args=(sitekey,proxies,'PRO-DIRECT',catchall,password, profile)).start()
 
             if AccountsiteSelect == "3":
                 sitekey = 'SITE-KEY-NOT-REQUIRED'
-                for i in range(int(amount)):
+                for i in range(int(amount_acc)):
                     threading.Thread(target=ACCOUNTS.footasylum,args=(sitekey,proxies,'FOOTASYLUM',catchall,password, profile)).start()
 
             if AccountsiteSelect == "4":
                 sitekey = 'SITE-KEY-NOT-REQUIRED'
-                for i in range(int(amount)):
+                for i in range(int(amount_acc)):
                     threading.Thread(target=ACCOUNTS.snipes,args=(sitekey,proxies,'SNIPES',catchall,password, profile)).start()
 
             if AccountsiteSelect == "5":
                 sitekey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
-                for i in range(int(amount)):
+                for i in range(int(amount_acc)):
                     threading.Thread(target=ACCOUNTS.naked,args=(sitekey,proxies,'NAKED',catchall,password, profile)).start()
 
             if AccountsiteSelect == "6":
                 sitekey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
-                for i in range(int(amount)):
+                for i in range(int(amount_acc)):
                     threading.Thread(target=ACCOUNTS.wch,args=(sitekey,proxies,'WCH',catchall,password, profile)).start()
             
             if AccountsiteSelect == "7":
                 sitekey = ''
-                for i in range(int(amount)):
+                for i in range(int(amount_acc)):
                     threading.Thread(target=ACCOUNTS.ambush,args=(sitekey,proxies,'AMBUSH',catchall,password, profile)).start()
 
         
@@ -1164,7 +1180,7 @@ class Menu:
             if threading.active_count() == 2:
                 self.menu()
         
-        elif option == 9:
+        elif menu_option_choice == 9:
             # self.menu()
             
             logger.menu('VENETIA','Cookies','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('COURIR','cyan')))
@@ -1209,7 +1225,7 @@ class Menu:
                 self.menu()
 
 
-        elif option == 10:
+        elif menu_option_choice == 10:
             checkoutData = loadCheckouts()
             logger.other_yellow('Total Checkouts: ', checkoutData['total'])
             logger.other_yellow('Recent Checkouts...', '')
@@ -1263,12 +1279,12 @@ class Menu:
             
 
 
-        elif option == 11:
+        elif menu_option_choice == 11:
             logger.menu('VENETIA','Menu','{}'.format(colored('Goodbye...','yellow', attrs=["bold"])))
             time.sleep(3)
             os._exit(0)
         
-        elif option > 11:
+        elif menu_option_choice > 11:
             logger.menu('VENETIA','Menu','{}'.format(colored('Invalid menu choice. Try again','yellow', attrs=["bold"])))
             time.sleep(3)
             self.menu()

@@ -79,104 +79,101 @@ class QUEENS:
         self.collect()
 
     def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        if 'https' in self.task["PRODUCT"]:
-            link = self.task["PRODUCT"]
-            mode = 'link'
-        else:
-            if '|' in self.task["PRODUCT"]:
-                mode = 'kws'
-                kws = self.task["PRODUCT"].split('|')
-                link = f'https://www.queens.{self.region}/new-arrivals/#n=100'
-        try:
-            retrieve = self.session.get(link)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.collect()
-            
-
-        if retrieve.status_code == 200 and retrieve.url != f'https://www.queens.{self.region}/':
-            self.start = time.time()
-            if mode == 'kws':
-                logger.info(SITE,self.taskID, 'Searching for product')
-                kwProduct = findProduct(retrieve.text, kws, SITE, self.taskID, self.region)
-                while kwProduct == None:
-                    time.sleep(int(self.task["DELAY"]))
-                    kwProduct = findProduct(retrieve.text, kws, SITE, self.taskID, self.region)
-
-                self.task["PRODUCT"] = kwProduct
-            logger.warning(SITE,self.taskID,'Got product page')
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
+            if 'https' in self.task["PRODUCT"]:
+                link = self.task["PRODUCT"]
+                mode = 'link'
+            else:
+                if '|' in self.task["PRODUCT"]:
+                    mode = 'kws'
+                    kws = self.task["PRODUCT"].split('|')
+                    link = f'https://www.queens.{self.region}/new-arrivals/#n=100'
             try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-                soup = BeautifulSoup(retrieve.text,"html.parser")
-                self.item_id = soup.find("i",{"class":"icon-star"})["data-id"]
-                self.csrf = soup.find("input",{"name":"_csrf"})["value"]
-                self.productImage = soup.find("a",{"class":"rsImg"})["href"]
-                self.productTitle = soup.find("a",{"class":"rsImg"})["alt"]
-                SizeSelect = soup.find("select",{"id":"variant"})
-                all_sizes = []
-                sizes = []
-    
-                if SizeSelect == None:
-                    logger.error(SITE,self.taskID,'No sizes available. Retrying...')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-    
-                try:
-                    for s in SizeSelect:
-                        size = s.text.split('(')[1]
-                        size = size.replace(')','')
-                        size = size.split('eur ')[1]
-                        sizeValue = s["value"]
-                        all_sizes.append(f'{size}:{sizeValue}')
-                        sizes.append(size)
-                except Exception as e:
-                    log.info(e)
-                    logger.error(SITE,self.taskID,'Size Not Found')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-    
-                if self.task["SIZE"].lower() == "random":
-                    chosen = random.choice(all_sizes)
-                    self.sizeValue = chosen.split(':')[1]
-                    self.size = chosen.split(':')[0]
-                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                retrieve = self.session.get(link)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
                 
-    
-                else:
-                    if self.task["SIZE"] not in sizes:
+
+            if retrieve.status_code == 200 and retrieve.url != f'https://www.queens.{self.region}/':
+                self.start = time.time()
+                if mode == 'kws':
+                    logger.info(SITE,self.taskID, 'Searching for product')
+                    kwProduct = findProduct(retrieve.text, kws, SITE, self.taskID, self.region)
+                    while kwProduct == None:
+                        time.sleep(int(self.task["DELAY"]))
+                        kwProduct = findProduct(retrieve.text, kws, SITE, self.taskID, self.region)
+
+                    self.task["PRODUCT"] = kwProduct
+                logger.warning(SITE,self.taskID,'Got product page')
+                try:
+                    logger.prepare(SITE,self.taskID,'Getting product data...')
+                    soup = BeautifulSoup(retrieve.text,"html.parser")
+                    self.item_id = soup.find("i",{"class":"icon-star"})["data-id"]
+                    self.csrf = soup.find("input",{"name":"_csrf"})["value"]
+                    self.productImage = soup.find("a",{"class":"rsImg"})["href"]
+                    self.productTitle = soup.find("a",{"class":"rsImg"})["alt"]
+                    SizeSelect = soup.find("select",{"id":"variant"})
+                    all_sizes = []
+                    sizes = []
+        
+                    if SizeSelect == None:
+                        logger.error(SITE,self.taskID,'No sizes available. Retrying...')
+                        time.sleep(int(self.task["DELAY"]))
+                        continue
+        
+                    try:
+                        for s in SizeSelect:
+                            size = s.text.split('(')[1]
+                            size = size.replace(')','')
+                            size = size.split('eur ')[1]
+                            sizeValue = s["value"]
+                            all_sizes.append(f'{size}:{sizeValue}')
+                            sizes.append(size)
+                    except Exception as e:
+                        log.info(e)
                         logger.error(SITE,self.taskID,'Size Not Found')
                         time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-                    for size in all_sizes:
-                        if self.task["SIZE"] == size.split(':')[0]:
-                            self.size = size.split(':')[0]
-                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                            self.sizeValue = size.split(':')[1]
+                        continue
+        
+                    if self.task["SIZE"].lower() == "random":
+                        chosen = random.choice(all_sizes)
+                        self.sizeValue = chosen.split(':')[1]
+                        self.size = chosen.split(':')[0]
+                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                    
+        
+                    else:
+                        if self.task["SIZE"] not in sizes:
+                            logger.error(SITE,self.taskID,'Size Not Found')
+                            time.sleep(int(self.task["DELAY"]))
+                            continue
+                        for size in all_sizes:
+                            if self.task["SIZE"] == size.split(':')[0]:
+                                self.size = size.split(':')[0]
+                                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                                self.sizeValue = size.split(':')[1]
 
-            except Exception as e:
-                log.info(e)
-                logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                self.addToCart()
+
+            if retrieve.url == f'https://www.queens.{self.region}/':
+                logger.warning(SITE,self.taskID,'Product Page does not exist. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
-                self.collect()
-
-            self.addToCart()
-
-        if retrieve.url == f'https://www.queens.{self.region}/':
-            logger.warning(SITE,self.taskID,'Product Page does not exist. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
+                continue
+            else:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
 
     def addToCart(self):

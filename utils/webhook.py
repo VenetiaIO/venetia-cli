@@ -157,6 +157,77 @@ class discord:
             pass
 
     @staticmethod
+    def threeDS(**kwargs):
+        webhook = kwargs.get('webhook')
+        SITE = kwargs.get('site')
+        url = kwargs.get('url')
+        image = kwargs.get('image')
+        productTitle = kwargs.get('title')
+        productSize = kwargs.get('size')
+        productPrice = kwargs.get('price')
+        paymentMethod = kwargs.get('paymentMethod')
+        profile = kwargs.get('profile')
+        accountEmail = kwargs.get('account')
+        tracking = kwargs.get('tracking')
+        order = kwargs.get('order')
+        product = kwargs.get('product')
+        speed = kwargs.get('speed')
+        proxy = kwargs.get('proxy')
+        region = kwargs.get('region')
+        if proxy:
+            try:
+                proxy = proxy["https"]
+            except:
+                proxy = proxy["http"]
+
+
+        logger.secondary(SITE,'Task Link',url)
+
+        user = getUser()
+        try:                
+            webhook = DiscordWebhook(webhook)
+            embed = DiscordEmbed(title=':rocket: Confirm 3DS Payment :rocket:', description='', color=0xf0e24d)
+            embed.set_footer(text='VenetiaIO CLI | {}'.format(CONFIG.VERSION()))
+            embed.set_timestamp()    
+            if image:
+                try:
+                    embed.set_thumbnail(url=image)
+                except Exception as e:
+                    log.info(e)
+
+            if SITE and region: embed.add_embed_field(name='Site', value='{}  :flag_{}:'.format(SITE.title(), region.lower()) ,inline=False)
+            else: embed.add_embed_field(name='Site', value=SITE.title(),inline=False)
+
+            if productTitle: embed.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
+            if productSize: embed.add_embed_field(name='Size', value=str(productSize),inline=True)
+            if productPrice: embed.add_embed_field(name='Product Price', value=str(productPrice),inline=True)
+            if paymentMethod: embed.add_embed_field(name='Payment Method', value=paymentMethod,inline=True)
+            if speed: embed.add_embed_field(name='Checkout Speed', value=str(speed),inline=True)
+            if profile: embed.add_embed_field(name='Task Profile', value=f'||{profile}||',inline=True)
+            if accountEmail and accountEmail != '': embed.add_embed_field(name='Account Email', value=f'||{accountEmail}||',inline=False)
+            if tracking and order: embed.add_embed_field(name='Tracking', value=f'||[{order}]({tracking})||',inline=False)
+            # if url: embed.add_embed_field(name='Checkout Link', value=f'[Checkout Here]({url})',inline=False)
+            if proxy: embed.add_embed_field(name='Proxy Used', value=f'||`{str(proxy)}`||',inline=False)
+            webhook.add_embed(embed)
+            webhook.execute()
+
+            myclient = pymongo.MongoClient(mongoConnect)
+            mydb = myclient["mydb"]
+            collection = mydb["collection"]
+
+            user = getUser()["discordName"]
+            data = { "image":image, "site":SITE, "url":product, "product":productTitle, "size":productSize, "price":productPrice, "user":user }
+            updateCheckouts(productTitle,SITE,productSize,productPrice,image,product,url)
+            x = collection.insert_one(data)
+            
+        except Exception as e:
+            print(e)
+            log.info(e)
+            pass
+
+
+
+    @staticmethod
     def accountMade(**kwargs):
         webhook = kwargs.get('webhook')
         SITE = kwargs.get('site')

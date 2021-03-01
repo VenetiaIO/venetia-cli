@@ -62,150 +62,148 @@ class NAKED:
         
 
     def login(self):
-        logger.prepare(SITE,self.taskID,'Logging In...')
+        while True:
+            logger.prepare(SITE,self.taskID,'Logging In...')
 
-        try:
-            loginPage = self.session.get('https://www.nakedcph.com/en/auth/submit',headers={
-                'Accept': '*/*',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Accept-Language': 'en-US,en;q=0.9,it;q=0.8',
-                'Referer': 'https://www.nakedcph.com/en/auth/view',
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.login()
+            try:
+                loginPage = self.session.get('https://www.nakedcph.com/en/auth/submit',headers={
+                    'Accept': '*/*',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Accept-Language': 'en-US,en;q=0.9,it;q=0.8',
+                    'Referer': 'https://www.nakedcph.com/en/auth/view',
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
 
-        soup = BeautifulSoup(loginPage.text, "html.parser")
-        self.antiCsrf = self.session.cookies["AntiCsrfToken"]
+            soup = BeautifulSoup(loginPage.text, "html.parser")
+            self.antiCsrf = self.session.cookies["AntiCsrfToken"]
 
-        captchaResponse = loadToken(SITE)
-        if captchaResponse == "empty":
-            captchaResponse = captcha.v2('6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo',self.task["PRODUCT"],self.session.proxies,SITE,self.taskID)
+            captchaResponse = loadToken(SITE)
+            if captchaResponse == "empty":
+                captchaResponse = captcha.v2('6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo',self.task["PRODUCT"],self.session.proxies,SITE,self.taskID)
 
-        
-        payload = {
-            '_AntiCsrfToken': self.antiCsrf,
-            'email': self.task["ACCOUNT EMAIL"],
-            'password': self.task["ACCOUNT PASSWORD"],
-            'g-recaptcha-response':captchaResponse,
-            'action':'login'
-        }
-
-
-        try:
-            login = self.session.post('https://www.nakedcph.com/en/auth/submit', data=payload,headers={
-                'Accept': '*/*',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Accept-Language': 'en-US,en;q=0.9,it;q=0.8',
-                'Referer': 'https://www.nakedcph.com/en/auth/view',
-                'X-Requested-With': 'XMLHttpRequest'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.login()
-
-        # self.session.debugRequest(login)
+            
+            payload = {
+                '_AntiCsrfToken': self.antiCsrf,
+                'email': self.task["ACCOUNT EMAIL"],
+                'password': self.task["ACCOUNT PASSWORD"],
+                'g-recaptcha-response':captchaResponse,
+                'action':'login'
+            }
 
 
-        if login.status_code == 200 and login.json()["Response"]["Success"] == True:
-            logger.warning(SITE,self.taskID,'Successfully logged in')
-            self.collect()
-        else:
-            logger.error(SITE,self.taskID,'Failed to login. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.login()
+            try:
+                login = self.session.post('https://www.nakedcph.com/en/auth/submit', data=payload,headers={
+                    'Accept': '*/*',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Accept-Language': 'en-US,en;q=0.9,it;q=0.8',
+                    'Referer': 'https://www.nakedcph.com/en/auth/view',
+                    'X-Requested-With': 'XMLHttpRequest'
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            # self.session.debugRequest(login)
+
+
+            if login.status_code == 200 and login.json()["Response"]["Success"] == True:
+                logger.warning(SITE,self.taskID,'Successfully logged in')
+                self.collect()
+            else:
+                logger.error(SITE,self.taskID,'Failed to login. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
     def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"])
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
+        while True:
+            logger.prepare(SITE,self.taskID,'Getting product page...')
             try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-                soup = BeautifulSoup(retrieve.text, "html.parser")
-                self.antiCsrf = self.session.cookies["AntiCsrfToken"]
-                self.productTitle = soup.find('title').text
-                self.productPrice = soup.find('meta',{'property':'og:price'})["content"]
-                self.productImage = 'https://www.nakedcph.com/' + soup.find_all('img',{'class':'lazyload'})[0]['data-href']
-    
-                foundSizes = soup.find('select',{'id':'product-form-select'})
-                if foundSizes:
-                    sizes = []
-                    allSizes = []
-                    for s in foundSizes:
-                        try:
-                            if s["value"] == "-1":
+                retrieve = self.session.get(self.task["PRODUCT"])
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                continue
+
+            if retrieve.status_code == 200:
+                self.start = time.time()
+                logger.warning(SITE,self.taskID,'Got product page')
+                try:
+                    logger.prepare(SITE,self.taskID,'Getting product data...')
+                    soup = BeautifulSoup(retrieve.text, "html.parser")
+                    self.antiCsrf = self.session.cookies["AntiCsrfToken"]
+                    self.productTitle = soup.find('title').text
+                    self.productPrice = soup.find('meta',{'property':'og:price'})["content"]
+                    self.productImage = 'https://www.nakedcph.com/' + soup.find_all('img',{'class':'lazyload'})[0]['data-href']
+        
+                    foundSizes = soup.find('select',{'id':'product-form-select'})
+                    if foundSizes:
+                        sizes = []
+                        allSizes = []
+                        for s in foundSizes:
+                            try:
+                                if s["value"] == "-1":
+                                    pass
+                                else:
+                                    sizes.append(s.text.strip())
+                                    allSizes.append('{}:{}'.format(s.text.strip(),s["value"]))
+                            except:
                                 pass
-                            else:
-                                sizes.append(s.text.strip())
-                                allSizes.append('{}:{}'.format(s.text.strip(),s["value"]))
-                        except:
-                            pass
-    
-                    if len(sizes) == 0:
-                        logger.error(SITE,self.taskID,'Size Not Found')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-    
-                        
-                    if self.task["SIZE"].lower() != "random":
-                        if self.task["SIZE"] not in sizes:
+        
+                        if len(sizes) == 0:
                             logger.error(SITE,self.taskID,'Size Not Found')
                             time.sleep(int(self.task["DELAY"]))
-                            self.collect()
-                        else:
-                            for size in allSizes:
-                                if size.split(':')[0] == self.task["SIZE"]:
-                                    self.size = size.split(':')[0]
-                                    self.sizeId = size.split(':')[1]
-                                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+                            continue
         
+                            
+                        if self.task["SIZE"].lower() != "random":
+                            if self.task["SIZE"] not in sizes:
+                                logger.error(SITE,self.taskID,'Size Not Found')
+                                time.sleep(int(self.task["DELAY"]))
+                                continue
+                            else:
+                                for size in allSizes:
+                                    if size.split(':')[0] == self.task["SIZE"]:
+                                        self.size = size.split(':')[0]
+                                        self.sizeId = size.split(':')[1]
+                                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
+            
+                        
+                        elif self.task["SIZE"].lower() == "random":
+                            chosen = random.choice(allSizes)
+                            self.size = chosen.split(':')[0]
+                            self.sizeId = chosen.split(':')[1]
+                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
                     
-                    elif self.task["SIZE"].lower() == "random":
-                        chosen = random.choice(allSizes)
-                        self.size = chosen.split(':')[0]
-                        self.sizeId = chosen.split(':')[1]
-                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                
-                else:
-                    logger.error(SITE,self.taskID,'Size Not Found')
+                    else:
+                        logger.error(SITE,self.taskID,'Size Not Found')
+                        time.sleep(int(self.task["DELAY"]))
+                        continue
+            
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
                     time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-        
-            except Exception as e:
-               log.info(e)
-               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-               time.sleep(int(self.task["DELAY"]))
-               self.collect()
+                    continue
 
 
-            self.addToCart()
+                self.addToCart()
 
 
-        elif retrieve.status_code != 200:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.collect()
+            elif retrieve.status_code != 200:
+                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
 
 
 
