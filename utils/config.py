@@ -32,7 +32,7 @@ from sites.footlocker_old import FOOTLOCKER_OLD
 from sites.footlocker_new import FOOTLOCKER_NEW
 from sites.ambush import AMBUSH
 
-from sites.mesh.jd import JD
+# from sites.mesh.jd import JD
 
 sites = {
     "SVD":SVD, #WATERFALL MONITOR
