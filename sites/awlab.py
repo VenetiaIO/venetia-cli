@@ -36,7 +36,7 @@ class AWLAB:
                     self.task['ACCOUNT PASSWORD'] = originalTask['ACCOUNT PASSWORD']
                 except:
                     pass
-                self.task['PROXIES'] = 'proxies'
+                # self.task['PROXIES'] = 'proxies'
                 csvFile.close()
             time.sleep(2)
 
@@ -53,6 +53,7 @@ class AWLAB:
             logger.error(SITE,self.taskID,'Profile Not Found.')
             time.sleep(10)
             sys.exit()
+
         self.dwRegion = profile["countryCode"].upper()
 
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)

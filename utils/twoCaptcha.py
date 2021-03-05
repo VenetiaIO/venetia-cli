@@ -17,7 +17,7 @@ def loadProxy(proxies,taskID,SITE):
     if proxies == "":
         return None
     elif proxies != "":
-        with open(f'./{SITE.lower()}/proxies.txt', 'r') as proxyIn:
+        with open(f'./proxies/{proxies}.txt', 'r') as proxyIn:
             proxyInput = proxyIn.read().splitlines()
     
         proxyList = [i for i in proxyInput]
@@ -25,11 +25,11 @@ def loadProxy(proxies,taskID,SITE):
         p = p.split(':')
         try:
             proxies = {
-                'http': f'http://{p[2]}:{p[3]}@{p[0]}:{p[1]}',
+                'https': f'http://{p[2]}:{p[3]}@{p[0]}:{p[1]}',
             }
         except:
             proxies = {
-                'http': f'http://{p[0]}:{p[1]}',
+                'https': f'http://{p[0]}:{p[1]}',
             }
         return proxies
 
@@ -52,7 +52,7 @@ class TwoCaptcha:
             else:
                 try:
                     proxy = loadProxy(proxy,taskID,SITE)
-                    url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["http"])
+                    url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
                 except:
                     url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
             try:
@@ -88,7 +88,7 @@ class TwoCaptcha:
         else:
             try:
                 proxy = loadProxy(proxy,taskID,SITE)
-                url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["http"])
+                url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
             except:
                 url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
         try:
@@ -122,7 +122,7 @@ class TwoCaptcha:
             else:
                 try:
                     proxy = loadProxy(proxy,taskID,SITE)
-                    url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["http"])
+                    url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
                 except:
                     url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
             try:
@@ -158,7 +158,7 @@ class TwoCaptcha:
         else:
             try:
                 proxy = loadProxy(proxy,taskID,SITE)
-                url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["http"])
+                url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
             except:
                 url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
         try:
@@ -194,7 +194,7 @@ class TwoCaptcha:
             else:
                 try:
                     proxy = loadProxy(proxy,taskID,SITE)
-                    url = 'https://2captcha.com/res.php?key={}&action={}&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,'get',r.json()["request"],proxy["http"])
+                    url = 'https://2captcha.com/res.php?key={}&action={}&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,'get',r.json()["request"],proxy["https"])
                 except:
                     url = 'https://2captcha.com/res.php?key={}&action={}&id={}&json=1'.format(twoCap,'get',r.json()["request"])
             try:
@@ -230,7 +230,7 @@ class TwoCaptcha:
         else:
             try:
                 proxy = loadProxy(proxy,taskID,SITE)
-                url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["http"])
+                url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1&proxy={}&proxytype=HTTPS'.format(twoCap,first.json()["request"],proxy["https"])
             except:
                 url = 'https://2captcha.com/res.php?key={}&action=get&taskinfo=1&id={}&json=1'.format(twoCap,first.json()["request"])
         

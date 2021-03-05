@@ -20,7 +20,7 @@ class WaterfallAssign:
             data[t['PRODUCT']] = {
                 "SITE":t['SITE'],
                 "PRODUCT":t['PRODUCT'],
-                "PROXIES":'proxies',
+                "PROXIES":[],
                 "TASK NAME":[],
                 "ROW NUMBER":[],
                 "PROFILES":[],
@@ -34,6 +34,7 @@ class WaterfallAssign:
         for t in tasks:
             p = t['PRODUCT']
             data[p]['PROFILES'].append(t['PROFILE'])
+            data[p]['PROXIES'].append(t['PROXIES'])
             data[p]['TASK NAME'].append(t['TASK_NAME'])
             data[p]['ROW NUMBER'].append(t['ROW_NUMBER'])
             data[p]['SIZES'].append(t['SIZE'])
@@ -112,7 +113,7 @@ class Waterfall:
                                         "SIZE":self.data['SIZES'][o],
                                         "DELAY":self.data['DELAYS'][o],
                                         "PAYMENT":self.data['PAYMENTS'][o],
-                                        "PROXIES":'proxies',
+                                        "PROXIES":self.data['PROXIES'][o],
                                         "ACCOUNT EMAIL":self.data['ACCOUNT EMAILS'][o],
                                         "ACCOUNT PASSWORD":self.data['ACCOUNT PASSWORDS'][o],
                                     }
@@ -170,7 +171,7 @@ class Waterfall:
                                         "SIZE":self.data['SIZES'][o],
                                         "DELAY":self.data['DELAYS'][o],
                                         "PAYMENT":self.data['PAYMENTS'][o],
-                                        "PROXIES":'proxies',
+                                        "PROXIES":self.data['PROXIES'][o],
                                         "ACCOUNT EMAIL":self.data['ACCOUNT EMAILS'][o],
                                         "ACCOUNT PASSWORD":self.data['ACCOUNT PASSWORDS'][o],
                                     }
@@ -225,7 +226,7 @@ class Waterfall:
                                     "SIZE":self.data['SIZES'][o],
                                     "DELAY":self.data['DELAYS'][o],
                                     "PAYMENT":self.data['PAYMENTS'][o],
-                                    "PROXIES":'proxies',
+                                    "PROXIES":self.data['PROXIES'][o],
                                     "ACCOUNT EMAIL":self.data['ACCOUNT EMAILS'][o],
                                     "ACCOUNT PASSWORD":self.data['ACCOUNT PASSWORDS'][o],
                                 }
@@ -282,7 +283,7 @@ class Waterfall:
                                     "SIZE":self.data['SIZES'][o],
                                     "DELAY":self.data['DELAYS'][o],
                                     "PAYMENT":self.data['PAYMENTS'][o],
-                                    "PROXIES":'proxies',
+                                    "PROXIES":self.data['PROXIES'][o],
                                     "ACCOUNT EMAIL":self.data['ACCOUNT EMAILS'][o],
                                     "ACCOUNT PASSWORD":self.data['ACCOUNT PASSWORDS'][o],
                                 }
@@ -342,7 +343,7 @@ class Waterfall:
                                         "SIZE":self.data['SIZES'][o],
                                         "DELAY":self.data['DELAYS'][o],
                                         "PAYMENT":self.data['PAYMENTS'][o],
-                                        "PROXIES":'proxies',
+                                        "PROXIES":self.data['PROXIES'][o],
                                         "ACCOUNT EMAIL":self.data['ACCOUNT EMAILS'][o],
                                         "ACCOUNT PASSWORD":self.data['ACCOUNT PASSWORDS'][o],
                                     }
@@ -390,7 +391,7 @@ class Waterfall:
                         "SIZE":self.data['SIZES'][o],
                         "DELAY":self.data['DELAYS'][o],
                         "PAYMENT":self.data['PAYMENTS'][o],
-                        "PROXIES":'proxies',
+                        "PROXIES":self.data['PROXIES'][o],
                         "ACCOUNT EMAIL":self.data['ACCOUNT EMAILS'][o],
                         "ACCOUNT PASSWORD":self.data['ACCOUNT PASSWORDS'][o],
                     }
@@ -419,7 +420,7 @@ class Waterfall:
                                     "SIZE":self.data['SIZES'][o],
                                     "DELAY":self.data['DELAYS'][o],
                                     "PAYMENT":self.data['PAYMENTS'][o],
-                                    "PROXIES":'proxies',
+                                    "PROXIES":self.data['PROXIES'][o],
                                     "ACCOUNT EMAIL":self.data['ACCOUNT EMAILS'][o],
                                     "ACCOUNT PASSWORD":self.data['ACCOUNT PASSWORDS'][o],
                                 }
@@ -467,7 +468,7 @@ class Waterfall:
                         "SIZE":self.data['SIZES'][o],
                         "DELAY":self.data['DELAYS'][o],
                         "PAYMENT":self.data['PAYMENTS'][o],
-                        "PROXIES":'proxies',
+                        "PROXIES":self.data['PROXIES'][o],
                         "ACCOUNT EMAIL":self.data['ACCOUNT EMAILS'][o],
                         "ACCOUNT PASSWORD":self.data['ACCOUNT PASSWORDS'][o],
                     }
@@ -496,7 +497,7 @@ class Waterfall:
                                     "SIZE":self.data['SIZES'][o],
                                     "DELAY":self.data['DELAYS'][o],
                                     "PAYMENT":self.data['PAYMENTS'][o],
-                                    "PROXIES":'proxies',
+                                    "PROXIES":self.data['PROXIES'][o],
                                     "ACCOUNT EMAIL":self.data['ACCOUNT EMAILS'][o],
                                     "ACCOUNT PASSWORD":self.data['ACCOUNT PASSWORDS'][o],
                                 }
@@ -553,7 +554,7 @@ class Waterfall:
                                     "SIZE":self.data['SIZES'][o],
                                     "DELAY":self.data['DELAYS'][o],
                                     "PAYMENT":self.data['PAYMENTS'][o],
-                                    "PROXIES":'proxies',
+                                    "PROXIES":self.data['PROXIES'][o],
                                     "ACCOUNT EMAIL":self.data['ACCOUNT EMAILS'][o],
                                     "ACCOUNT PASSWORD":self.data['ACCOUNT PASSWORDS'][o],
                                 }
@@ -655,7 +656,7 @@ class Waterfall:
                                     "SIZE":self.data['SIZES'][o],
                                     "DELAY":self.data['DELAYS'][o],
                                     "PAYMENT":self.data['PAYMENTS'][o],
-                                    "PROXIES":'proxies',
+                                    "PROXIES":self.data['PROXIES'][o],
                                     "ACCOUNT EMAIL":self.data['ACCOUNT EMAILS'][o],
                                     "ACCOUNT PASSWORD":self.data['ACCOUNT PASSWORDS'][o],
                                 }
@@ -737,7 +738,7 @@ class Waterfall:
                                         "SIZE":self.data['SIZES'][o],
                                         "DELAY":self.data['DELAYS'][o],
                                         "PAYMENT":self.data['PAYMENTS'][o],
-                                        "PROXIES":'proxies',
+                                        "PROXIES":self.data['PROXIES'][o],
                                         "ACCOUNT EMAIL":self.data['ACCOUNT EMAILS'][o],
                                         "ACCOUNT PASSWORD":self.data['ACCOUNT PASSWORDS'][o],
                                     }
@@ -796,7 +797,7 @@ class Waterfall:
                                     "SIZE":self.data['SIZES'][o],
                                     "DELAY":self.data['DELAYS'][o],
                                     "PAYMENT":self.data['PAYMENTS'][o],
-                                    "PROXIES":'proxies',
+                                    "PROXIES":self.data['PROXIES'][o],
                                     "ACCOUNT EMAIL":self.data['ACCOUNT EMAILS'][o],
                                     "ACCOUNT PASSWORD":self.data['ACCOUNT PASSWORDS'][o],
                                 }

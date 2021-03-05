@@ -35,7 +35,6 @@ class FOOTLOCKER_OLD:
                     self.task['ACCOUNT PASSWORD'] = originalTask['ACCOUNT PASSWORD']
                 except:
                     pass
-                self.task['PROXIES'] = 'proxies'
                 csvFile.close()
             time.sleep(2)
     def __init__(self,task,taskName,rowNumber):
@@ -43,6 +42,7 @@ class FOOTLOCKER_OLD:
         self.session = requests.session()
         self.taskID = taskName
         self.rowNumber = rowNumber
+        self.blocked = False
 
         self.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36'
 
@@ -134,6 +134,7 @@ class FOOTLOCKER_OLD:
             self.start = time.time()
             self.relayCat = 'Relay42_Category'  #soup.find('input',{'value':'Product Pages'})['name']
             self.productImage = f'https://images.footlocker.com/is/image/FLEU/{self.baseSku}_01?wid=763&hei=538&fmt=png-alpha'
+            # self.session.get(self.baseUrl)
             try:
                 retrieveSizes = self.session.get(f'{self.baseUrl2}ViewProduct-ProductVariationSelect?BaseSKU={self.baseSku}&InventoryServerity=ProductDetail',headers={
                     "accept": "application/json, text/javascript, */*; q=0.01",
@@ -167,45 +168,20 @@ class FOOTLOCKER_OLD:
                 logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
                 try:
                     challengeUrl = retrieveSizes.json()['url']
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
-                    if cookie['cookie'] == None:
-                        del self.session.cookies["datadome"]
-                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                        self.addToCart()
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
+                    while cookie['cookie'] == None:
+                        cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
                         
-
                     del self.session.cookies["datadome"]
-                    # self.session.cookies["datadome"] = cookie['cookie']
-                    # {'cookie': 'datadome=Vl-4b3HtFCXbkP9cWvkpQv_nwoOyh_b9krDmblhhUahpS60rTVgntFEW9oCGC9lUoAxPDhukeZNisv.dr-KpbLMjCMxPafd~M4ex2j_ICh; Max-Age=31536000; Domain=.footlocker.co.uk; Path=/; Secure; SameSite=Lax'}
                     cookie_obj = requests.cookies.create_cookie(domain=self.baseUrl.split('www')[1],name='datadome',value=cookie['cookie'])
                     self.session.cookies.set_cookie(cookie_obj)
+                    continue
 
-                    self.retrieveSizes()
-
-                except:
-                    if 'geo.captcha-delivery' in retrieveSizes.text:
-                        try:
-                            initialCid = retrieveSizes.text.split("'cid':'")[1].split("',")[0]
-                            hsh = retrieveSizes.text.split("'hsh':'")[1].split("',")[0]
-                            t = retrieveSizes.text.split("'t':'")[1].split("',")[0]
-                            s = retrieveSizes.text.split("'s':'")[1].split("',")[0]
-                            challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, retrieveSizes.url, hsh, t, s)
-                        except Exception as e:
-                            log.info(e)
-                            logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                            time.sleep(10)
-                            self.addToCart()
-
-                        cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
-                        if cookie['cookie'] == None:
-                            del self.session.cookies["datadome"]
-                            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                            self.retrieveSizes()
-                        
-        
-                    del self.session.cookies["datadome"]
-                    self.session.cookies["datadome"] = cookie['cookie']
-                    self.retrieveSizes()
+                except Exception as e:
+                    print()
+                    logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
 
             try:
                 data = retrieveSizes.json()
@@ -295,6 +271,8 @@ class FOOTLOCKER_OLD:
             
 
     def addToCart(self):
+        itteration = 0
+        print(self.session.proxies)
         logger.prepare(SITE,self.taskID,'Carting product...')
         params = {
             'Ajax': True,
@@ -328,52 +306,26 @@ class FOOTLOCKER_OLD:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = atcResponse.json()['url']
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
-                if cookie['cookie'] == None:
-                    del self.session.cookies["datadome"]
-                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    self.addToCart()
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
+                while cookie['cookie'] == None:
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
                     
-
                 del self.session.cookies["datadome"]
-                # self.session.cookies["datadome"] = cookie['cookie']
-                # {'cookie': 'datadome=Vl-4b3HtFCXbkP9cWvkpQv_nwoOyh_b9krDmblhhUahpS60rTVgntFEW9oCGC9lUoAxPDhukeZNisv.dr-KpbLMjCMxPafd~M4ex2j_ICh; Max-Age=31536000; Domain=.footlocker.co.uk; Path=/; Secure; SameSite=Lax'}
                 cookie_obj = requests.cookies.create_cookie(domain=self.baseUrl.split('www')[1],name='datadome',value=cookie['cookie'])
                 self.session.cookies.set_cookie(cookie_obj)
+                
+                if itteration > 0:
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
 
+                itteration = itteration + 1
                 self.addToCart()
 
-            except:
-                if 'geo.captcha-delivery' in atcResponse.text:
-                    try:
-                        initialCid = atcResponse.text.split("'cid':'")[1].split("',")[0]
-                        hsh = atcResponse.text.split("'hsh':'")[1].split("',")[0]
-                        t = atcResponse.text.split("'t':'")[1].split("',")[0]
-                        s = atcResponse.text.split("'s':'")[1].split("',")[0]
-                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, atcResponse.url, hsh, t, s)
-                    except Exception as e:
-                        log.info(e)
-                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                        time.sleep(10)
-                        self.addToCart()
 
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
-                    if cookie['cookie'] == None:
-                        del self.session.cookies["datadome"]
-                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                        self.addToCart()
-                        
-        
-                    del self.session.cookies["datadome"]
-                    self.session.cookies["datadome"] = cookie['cookie']
-                    self.retrieveSizes()
-
-
-                else:
-                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    logger.error(SITE,self.taskID,'Blocked. Sleeping...')
-                    time.sleep(10)
-                    self.addToCart()
+            except Exception as e:
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                time.sleep(int(self.task["DELAY"]))
+                self.addToCart()
 
 
         elif atcResponse.status_code == 200:
@@ -430,46 +382,19 @@ class FOOTLOCKER_OLD:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = checkoutOverviewPage.json()['url']
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
-                if cookie['cookie'] == None:
-                    del self.session.cookies["datadome"]
-                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    self.checkoutDispatch()
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
+                while cookie['cookie'] == None:
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
                     
-    
                 del self.session.cookies["datadome"]
-                self.session.cookies["datadome"] = cookie['cookie']
+                cookie_obj = requests.cookies.create_cookie(domain=self.baseUrl.split('www')[1],name='datadome',value=cookie['cookie'])
+                self.session.cookies.set_cookie(cookie_obj)
                 self.checkoutDispatch()
+
             except:
-                if 'geo.captcha-delivery' in checkoutOverviewPage.text:
-                    try:
-                        initialCid = checkoutOverviewPage.text.split("'cid':'")[1].split("',")[0]
-                        hsh = checkoutOverviewPage.text.split("'hsh':'")[1].split("',")[0]
-                        t = checkoutOverviewPage.text.split("'t':'")[1].split("',")[0]
-                        s = checkoutOverviewPage.text.split("'s':'")[1].split("',")[0]
-                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, checkoutOverviewPage.url, hsh, t, s)
-                    except Exception as e:
-                        log.info(e)
-                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                        time.sleep(10)
-                        self.checkoutDispatch()
-
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
-                    if cookie['cookie'] == None:
-                        del self.session.cookies["datadome"]
-                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                        self.checkoutDispatch()
-                        
-        
-                    del self.session.cookies["datadome"]
-                    self.session.cookies["datadome"] = cookie['cookie']
-                    self.checkoutDispatch()
-
-                else:
-                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    logger.error(SITE,self.taskID,'Blocked. Sleeping...')
-                    time.sleep(10)
-                    self.checkoutDispatch()
+                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                time.sleep(int(self.task["DELAY"]))
+                self.checkoutDispatch()
 
 
         if checkoutOverviewPage.status_code in [200,302]:
@@ -553,41 +478,19 @@ class FOOTLOCKER_OLD:
             logger.error(SITE,self.taskID,'Blocked by DataDome (Solving Challenge...)')
             try:
                 challengeUrl = checkoutOverviewDispatch.json()['url']
-                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
-                if cookie['cookie'] == None:
-                    del self.session.cookies["datadome"]
-                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    self.submitCheckoutDispatch()
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
+                while cookie['cookie'] == None:
+                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
+                    
+                del self.session.cookies["datadome"]
+                cookie_obj = requests.cookies.create_cookie(domain=self.baseUrl.split('www')[1],name='datadome',value=cookie['cookie'])
+                self.session.cookies.set_cookie(cookie_obj)
+                self.submitCheckoutDispatch()
+
             except:
-                if 'geo.captcha-delivery' in checkoutOverviewDispatch.text:
-                    try:
-                        initialCid = checkoutOverviewDispatch.text.split("'cid':'")[1].split("',")[0]
-                        hsh = checkoutOverviewDispatch.text.split("'hsh':'")[1].split("',")[0]
-                        t = checkoutOverviewDispatch.text.split("'t':'")[1].split("',")[0]
-                        s = checkoutOverviewDispatch.text.split("'s':'")[1].split("',")[0]
-                        challengeUrl = '?initialCid={}&referer={}&hash={}&t={}&s={}&cid{}'.format(initialCid, checkoutOverviewDispatch.url, hsh, t, s)
-                    except Exception as e:
-                        log.info(e)
-                        logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
-                        time.sleep(10)
-                        self.submitCheckoutDispatch()
-
-                    cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent)
-                    if cookie['cookie'] == None:
-                        del self.session.cookies["datadome"]
-                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                        self.submitCheckoutDispatch()
-                        
-        
-                    del self.session.cookies["datadome"]
-                    self.session.cookies["datadome"] = cookie['cookie']
-                    self.submitCheckoutDispatch()
-
-                else:
-                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    logger.error(SITE,self.taskID,'Blocked. Sleeping...')
-                    time.sleep(10)
-                    self.submitCheckoutDispatch()
+                logger.error(SITE,self.taskID,'Failed to get challenge url. Sleeping...')
+                time.sleep(int(self.task["DELAY"]))
+                self.checkoutDispatch()
 
 
 

@@ -1,15 +1,4 @@
-09:38:51,920 root ERROR Expecting value: line 1 column 1 (char 0)
-09:38:52,980 root ERROR Expecting value: line 1 column 1 (char 0)
-09:38:54,38 root ERROR Expecting value: line 1 column 1 (char 0)
-09:38:55,97 root ERROR Expecting value: line 1 column 1 (char 0)
-09:38:56,187 root ERROR Expecting value: line 1 column 1 (char 0)
-09:38:57,249 root ERROR Expecting value: line 1 column 1 (char 0)
-09:39:59,125 root ERROR Expecting value: line 1 column 1 (char 0)
-09:40:00,327 root ERROR Expecting value: line 1 column 1 (char 0)
-09:40:01,397 root ERROR Expecting value: line 1 column 1 (char 0)
-09:40:02,496 root ERROR Expecting value: line 1 column 1 (char 0)
-09:40:03,593 root ERROR Expecting value: line 1 column 1 (char 0)
-09:40:22,280 root ERROR Expecting value: line 1 column 1 (char 0)
-09:40:23,561 root ERROR Expecting value: line 1 column 1 (char 0)
-09:40:24,707 root ERROR Expecting value: line 1 column 1 (char 0)
-20:37:00,534 root ERROR list index out of range
+18:09:44,261 root ERROR 'success'
+18:09:45,828 root ERROR 'NoneType' object has no attribute 'find_all'
+18:09:46,389 root ERROR 'success'
+18:09:47,974 root ERROR 'NoneType' object has no attribute 'find_all'

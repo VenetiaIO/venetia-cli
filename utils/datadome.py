@@ -15,11 +15,10 @@ from helheim import helheim
 from utils.log import log
 from utils.functions import (encodeURIComponent,decodeURIComponent,loadSettings,loadProxy,injection)
 
-api_base = 'https://datadome.invincible.services/api/v1/datadome/'
-headers = {"apiKey":"f441379a-8a72-4e41-8332-7749cc69b00f"}
+
 class datadome:
     @staticmethod
-    def reCaptchaMethod(SITE,taskID,session,responseUrl, siteUrl, UA):
+    def reCaptchaMethod(SITE,taskID,session,responseUrl, siteUrl, UA, proxies):
         try:
             responseUrl = responseUrl.replace('&t=bv','')
         except:
@@ -71,7 +70,7 @@ class datadome:
 
         try:
             siteKey = response.text.split("'sitekey' : '")[1].split("'")[0]
-            capResponse = captcha.v2(siteKey,siteUrl,session.proxies,SITE,taskID)
+            capResponse = captcha.v2(siteKey,siteUrl,proxies,SITE,taskID)
         except Exception as e:
             log.info(e)
             logger.error(SITE,taskID,'Failed to solve captcha. Retrying...')
@@ -81,13 +80,13 @@ class datadome:
             params = {
                 "cid": encodeURIComponent(datadomeCookie),
                 "icid": encodeURIComponent(response.text.split("'&icid=' + encodeURIComponent('")[1].split("'")[0]),
-                "ccid": 'null',
+                "ccid": 'null', #null
                 "g-recaptcha-response": capResponse,
                 "hash": response.text.split("'&hash=' + encodeURIComponent('")[1].split("'")[0],
                 "ua": encodeURIComponent(UA),
                 "referer": encodeURIComponent('https://' + response.text.split("'&referer=' + encodeURIComponent('")[1].split("'")[0]),
                 "parent_url":encodeURIComponent('https://' + response.text.split("'&referer=' + encodeURIComponent('")[1].split("'")[0]),
-                "x-forwarded-for": '',
+                "x-forwarded-for": encodeURIComponent(response.text.split("'&x-forwarded-for=' + encodeURIComponent('")[1].split("'")[0]),
                 "captchaChallenge": capChallenge(datadomeCookie,10,UA,"en-US",["en-US", "en"]), #false
                 "s": response.text.split("'&s=' + encodeURIComponent('")[1].split("'")[0],
             }
@@ -96,25 +95,24 @@ class datadome:
             logger.error(SITE,taskID,'Failed to get cookie. Retrying...')
             return {"cookie":None}
 
-        print(params)
         try:
             response = session.get('https://geo.captcha-delivery.com/captcha/check',params=params,headers={
                 "accept": "*/*",
+                "accept-encoding": "gzip, deflate, br",
                 "accept-language": "en-US,en;q=0.9",
-                "sec-ch-ua": "\"Google Chrome\";v=\"87\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"87\"",
+                "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "Referer":response.url,
+                "sec-ch-ua": "\"Chromium\";v=\"88\", \"Google Chrome\";v=\"88\", \";Not A Brand\";v=\"99\"",
                 "sec-ch-ua-mobile": "?0",
-                "sec-fetch-dest": "iframe",
-                "sec-fetch-mode": "navigate",
-                "sec-fetch-site": "cross-site",
-                "upgrade-insecure-requests": "1",
-                "User-Agent": UA
-
+                "sec-fetch-dest": "empty",
+                "sec-fetch-mode": "cors",
+                "sec-fetch-site": "same-origin",
+                "User-Agent":UA
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,taskID,'Error: {}'.format(e))
         
-  
         if response.status_code == 200:
             try:
                 cookie = response.json()['cookie'].split('datadome=')[1].split(';')[0]
@@ -131,8 +129,6 @@ class datadome:
                     
     
     
-
-
 
 
 

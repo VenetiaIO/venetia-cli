@@ -16,7 +16,7 @@ def loadProxy(proxies,taskID, SITE):
     if proxies == "":
         return None
     elif proxies != "":
-        with open(f'./{SITE.lower()}/proxies.txt', 'r') as proxyIn:
+        with open(f'./proxies/{proxies}.txt', 'r') as proxyIn:
             proxyInput = proxyIn.read().splitlines()
     
         proxyList = [i for i in proxyInput]
@@ -44,6 +44,7 @@ class capMonster:
     def v2(sitekey, url, proxy, SITE,taskID):
         logger.info(SITE,taskID,'Solving Captcha...')
         apiKey = loadSettings()["capMonster"]
+
         proxy_http = loadProxy(proxy, taskID, SITE)
         
         address = proxy_http["address"]
@@ -151,7 +152,7 @@ class capMonster:
     @staticmethod 
     def hcaptcha(sitekey, url, proxy, SITE,taskID):
         logger.info(SITE,taskID,'Solving Captcha...')
-        apiKey = loadSettings()["capMonster"]
+        apiKey = loadSettings()["capMonster"]   
 
         proxy_http = loadProxy(proxy, taskID, SITE)['http'].split('http://')[1].split(':')
         if len(proxy_http) == 4:
@@ -216,7 +217,7 @@ class capMonster:
         logger.info(SITE,taskID,'Solving Captcha...')
         apiKey = loadSettings()["capMonster"]
 
-        proxy_http = loadProxy(proxy, taskID, SITE)['http'].split('http://')[1].split(':')
+        proxy_http = loadProxy(proxy, taskID, SITE)['https'].split('http://')[1].split(':')
         if len(proxy_http) == 4:
             address = proxy_http[2]
             port = proxy_http[3]

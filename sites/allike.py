@@ -36,7 +36,6 @@ class ALLIKE:
                     self.task['ACCOUNT PASSWORD'] = originalTask['ACCOUNT PASSWORD']
                 except:
                     pass
-                self.task['PROXIES'] = 'proxies'
                 csvFile.close()
             time.sleep(2)
 

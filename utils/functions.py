@@ -155,7 +155,7 @@ def loadProxy(proxies,taskID, SITE):
         return None
     elif proxies != "":
         try:
-            with open(f'./{SITE.lower()}/{proxies}.txt', 'r') as proxyIn:
+            with open(f'./proxies/{proxies}.txt', 'r') as proxyIn:
                 try:
                     proxyInput = proxyIn.read().splitlines()
                 except:
@@ -321,7 +321,6 @@ def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
                         # {"name": c.name, "value": c.value, "domain": c.domain, "path": c.path})
                         
             except Exception as e:
-                print(e)
                 pass
     try:
         encoded = base64.b64encode(bytes(str(cookieString), 'utf-8'))
@@ -336,7 +335,6 @@ def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
         url = 'https://venetiacli.io/checkout/retrieve/?id={}'.format(urlId)
         return url
     except Exception as e:
-        print(e)
         storeCookies(url,session)
     
 

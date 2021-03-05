@@ -2,6 +2,7 @@ mkdir venetia-build
 cp -r utils venetia-build/utils
 cp -r sites venetia-build/sites
 cp -r helheim venetia-build/helheim
+cp -r tls venetia-build/tls
 cp -r main.py venetia-build/main.py
 cp -r favicon.ico venetia-build/favicon.ico
 

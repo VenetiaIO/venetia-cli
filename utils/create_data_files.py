@@ -9,6 +9,12 @@ def execute():
     except:
         pass
 
+    try:
+        os.mkdir('proxies')
+    except:
+        pass
+
+
     #check site folders
     try:
         for k in CONFIG.sites.keys():
@@ -25,14 +31,14 @@ def execute():
                 except IOError as e:
                     print("Creating tasks.csv for {}".format('footlocker'))
                     with open('./{}/tasks.csv'.format('footlocker'),'w') as tasks:
-                        tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT')
+                        tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,PROXIES')
 
-                try:
-                    f = open('./{}/proxies.txt'.format('footlocker'))
-                    f.readlines()
-                except IOError as e:
-                    print("Creating proxies.txt for {}".format('footlocker'))
-                    open('./{}/proxies.txt'.format('footlocker'),'w')
+                # try:
+                #     f = open('./{}/proxies.txt'.format('footlocker'))
+                #     f.readlines()
+                # except IOError as e:
+                #     print("Creating proxies.txt for {}".format('footlocker'))
+                #     open('./{}/proxies.txt'.format('footlocker'),'w')
 
                 # try:
                     # f = open('./footlocker/tasks.csv')
@@ -68,14 +74,14 @@ def execute():
                 except IOError as e:
                     print("Creating tasks.csv for {}".format(k.lower()))
                     with open('./{}/tasks.csv'.format(k.lower()),'w') as tasks:
-                        tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT')
+                        tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,PROXIES')
 
-                try:
-                    f = open('./{}/proxies.txt'.format(k.lower()))
-                    f.readlines()
-                except IOError as e:
-                    print("Creating proxies.txt for {}".format(k.lower()))
-                    open('./{}/proxies.txt'.format(k.lower()),'w')
+                # try:
+                #     f = open('./{}/proxies.txt'.format(k.lower()))
+                #     f.readlines()
+                # except IOError as e:
+                #     print("Creating proxies.txt for {}".format(k.lower()))
+                #     open('./{}/proxies.txt'.format(k.lower()),'w')
 
     
 

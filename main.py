@@ -17,6 +17,7 @@ import inquirer
 import webbrowser
 import names
 import random
+from copy import copy
 
 
 try:
@@ -36,6 +37,7 @@ from utils.updates import Updater
 from utils.functions import (loadCheckouts, getUser, loadProfile)
 from utils.config import *
 import utils.create_data_files as dataFiles
+from utils.cartClear import cartClear
 init(autoreset=True)
 
 def secho(text, file=None, nl=None, err=None, color=None, **styles):
@@ -70,6 +72,13 @@ def taskCount():
     
     return total
 
+def taskCountSpecific(site):
+    total = 0
+    with open(f'./{site.lower()}/tasks.csv','r') as csvFile:
+            csv_reader = csv.DictReader(csvFile)
+            total = total + len(list(csv_reader))
+    
+    return total
 
 def clearTokens():
     data = {}
@@ -197,7 +206,8 @@ class Menu:
                             if len(str(i)) == 4:
                                 taskName = f'Task {i}'
                             i = i + 1
-                            row['PROXIES'] = 'proxies'
+                            # row['PROXIES'] = 'proxies'
+
                             threading.Thread(target=value_chosen,args=(row,taskName,a)).start()
                             a = a + 1
             else:
@@ -206,20 +216,27 @@ class Menu:
                     accounts = open(f'./{key_chosen.lower()}/accounts.txt','r').readlines()
                     for a in accounts:
                         if a.strip() != '':
+                            a = a.replace('\n','')
                             allAccounts.append(a)
                 except:
                     pass
                 
-                for i in range(2000):
-                    allAccounts.append(':')
-                
+
+                allAccCopy = copy(allAccounts)
+                if len(allAccCopy) == 0:
+                    for i in range(2000):
+                        allAccCopy.append(':')
+
+                random.shuffle(allAccCopy)
+                n = taskCountSpecific(key_chosen) 
+            
 
                 tasks = []
                 with open('./{}/tasks.csv'.format(key_chosen.lower()),'r') as csvFile:
                     csv_reader = csv.DictReader(csvFile)
                     i = 1
                     a = 0
-                    zip1 = zip(csv_reader, allAccounts)
+                    zip1 = zip(csv_reader, allAccCopy[:n])
                     for row, acc in zip1:
                         if row["PRODUCT"] != "":
                             try:
@@ -280,7 +297,7 @@ class Menu:
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('08','red', attrs=["bold"]), colored('Account Gen','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('09','red', attrs=["bold"]), colored('Cookie Gen','red', attrs=["bold"])))
         logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('10','red', attrs=["bold"]), colored('View Checkouts','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('11','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
+        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('99','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
         #sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
         sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
         menu_option_choice = ''
@@ -322,7 +339,7 @@ class Menu:
                                 if len(str(i)) == 4:
                                     taskName = f'Task {i}'
                                 i = i + 1
-                                row['PROXIES'] = 'proxies'
+                                # row['PROXIES'] = 'proxies'
 
                                 if loadProfile(row['PROFILE'])['countryCode'].upper() in new_footlockers():
                                     threading.Thread(target=sites.get('FOOTLOCKER_NEW'),args=(row,taskName, a)).start()
@@ -336,12 +353,18 @@ class Menu:
                         accounts = open(f'./{k.lower()}/accounts.txt','r').readlines()
                         for a in accounts:
                             if a.strip() != '':
+                                a = a.replace('\n','')
                                 allAccounts.append(a)
                     except:
                         pass
                     
-                    for i in range(2000):
-                        allAccounts.append(':')
+                    allAccCopy = copy(allAccounts)
+                    if len(allAccCopy) == 0:
+                        for i in range(2000):
+                            allAccCopy.append(':')
+
+                    random.shuffle(allAccCopy)
+                    n2 = taskCountSpecific(k) 
 
                     tasks = []
                     with open(f'./{k.lower()}/tasks.csv','r') as csvFile:
@@ -349,7 +372,7 @@ class Menu:
                         # total =  total + sum(1 for row in csv_reader)
         
                         i = 1
-                        zip2 = zip(csv_reader, allAccounts)
+                        zip2 = zip(csv_reader, allAccCopy[:n2])
                         for row, acc in zip2:
                             if row["PRODUCT"] != "":
                                 try:
@@ -366,7 +389,7 @@ class Menu:
                                 if len(str(i)) == 4:
                                     taskName = f'Task {i}'
                                 i = i + 1
-                                row['PROXIES'] = 'proxies'
+                                # row['PROXIES'] = 'proxies'
                                 row["ACCOUNT EMAIL"] = acc.split(':')[0]
                                 row["ACCOUNT PASSWORD"] = acc.split(':')[1]
                                 row["SITE"] = k
@@ -1279,7 +1302,7 @@ class Menu:
             
 
 
-        elif menu_option_choice == 11:
+        elif menu_option_choice == 99:
             logger.menu('VENETIA','Menu','{}'.format(colored('Goodbye...','yellow', attrs=["bold"])))
             time.sleep(3)
             os._exit(0)

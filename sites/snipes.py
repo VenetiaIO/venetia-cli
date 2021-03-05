@@ -35,7 +35,6 @@ class SNIPES:
                     self.task['ACCOUNT PASSWORD'] = originalTask['ACCOUNT PASSWORD']
                 except:
                     pass
-                self.task['PROXIES'] = 'proxies'
                 csvFile.close()
             time.sleep(2)
 
@@ -1059,14 +1058,12 @@ class SNIPES:
             try:
                 response = place.json()
                 cUrl = str(response["continueUrl"])
-                redirect = str(place.json()['redirectUrl'])
             except Exception as e:
                 log.info(e)
                 log.info(str(response))
                 time.sleep(int(self.task["DELAY"]))
-                if place.json()['cartError'] == True:
-                    logger.error(SITE,self.taskID,'Failed to place order (Cart Error) Redirect=> {}. Retrying...'.format(redirect))
-                    self.query()
+                logger.error(SITE,self.taskID,'Failed to place order (Cart Error) Redirect=> {}. Retrying...'.format('null'))
+                self.placeOrder_pp()
 
             
             if "paypal" in cUrl:
