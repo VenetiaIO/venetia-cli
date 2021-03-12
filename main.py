@@ -59,8 +59,7 @@ except:
 
 
 def get_time():
-    x = datetime.datetime.now()
-    x = f'{x.strftime("%Y")}-{x.strftime("%m")}-{x.strftime("%d")} {x.strftime("%X")},{x.strftime("%f")}'
+    x = datetime.datetime.now().strftime('%Y.%m.%d | %H:%M:%S.%f')
     return x
 
 def taskCount():

@@ -44,7 +44,28 @@ def injection(session, response):
   else:
     return response
 
-
+def scraper():
+  if loadSettings()["captcha"].lower() == "monster":
+    apiKey = loadSettings()["capMonster"]
+    provider = 'capmonster'
+  else:
+    apiKey = loadSettings()["2Captcha"]
+    provider = '2captcha'
+  scraper = cloudscraper.create_scraper(
+      requestPostHook=injection,
+      interpreter='nodejs',
+      browser={
+          'browser': 'chrome',
+          'mobile': False,
+          'platform': 'windows'
+          #'platform': 'darwin'
+      },
+      captcha={
+          'provider': provider,
+          'api_key': apiKey
+      }
+  )
+  return scraper
 
 def footlocker_snare(url):
   try:
@@ -73,28 +94,7 @@ def offspring_session(pid):
     "quantity": 1,
 }
 
-def scraper():
-  if loadSettings()["captcha"].lower() == "monster":
-    apiKey = loadSettings()["capMonster"]
-    provider = 'capmonster'
-  else:
-    apiKey = loadSettings()["2Captcha"]
-    provider = '2captcha'
-  scraper = cloudscraper.create_scraper(
-      requestPostHook=injection,
-      interpreter='nodejs',
-      browser={
-          'browser': 'chrome',
-          'mobile': False,
-          'platform': 'windows'
-          #'platform': 'darwin'
-      },
-      captcha={
-          'provider': provider,
-          'api_key': apiKey
-      }
-  )
-  return scraper
+
 
 def loadSettings():
     with open(f'./data/config.json') as settings:
@@ -173,7 +173,7 @@ def loadProxy(proxies,taskID, SITE):
 
         try:
             proxies = {
-                'https': f'http://{p[2]}:{p[3]}@{p[0]}:{p[1]}'
+                'https': f'http://{p[2]}:{p[3]}@{p[0]}:{p[1]}',
             }
         except:
             proxies = {

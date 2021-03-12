@@ -247,7 +247,6 @@ class Waterfall:
     def chmielna(self):
         while True:
             logger.info(self.SITE,self.taskID,'Monitoring...')
-            print(self.s.proxies)
             try:
                 retrieve = self.s.get(self.data["PRODUCT"])
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -775,7 +774,7 @@ class Waterfall:
             if retrieve.status_code == 200:
                 try:
                     soup = BeautifulSoup(retrieve.text,"html.parser")
-                    sizeSelect = soup.find("select",{"id":"attributesize-size_eu"})
+                    sizeSelect = soup.find("div",{"id":"tab-size_eu"})
                     if sizeSelect == None or len(sizeSelect) == 0:
                         time.sleep(self.delay)
                         continue
@@ -783,7 +782,7 @@ class Waterfall:
 
                     for s in sizeSelect:
                         try:
-                            sizes.append(s.text)
+                            sizes.append(s['option-label'])
                         except:
                             pass
                     
@@ -809,6 +808,7 @@ class Waterfall:
 
                             
                 except Exception as e:
+                    print(e)
                     time.sleep(self.delay)
                     continue
             else:

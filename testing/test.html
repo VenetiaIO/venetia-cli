@@ -1,0 +1,18 @@
+<dl class="sp-methods">↵ <dt>Versandart</dt>↵ <dd>↵ <ul>↵ <li>↵ <input name="shipping_method" type="radio"
+                    value="premiumrate_UPS_Express_Saver_(excl._Customs_and_Duties)"
+                    id="s_method_premiumrate_UPS_Express_Saver_(excl._Customs_and_Duties)" checked="checked"
+                    class="radio" />↵↵
+                <script
+                    type="text/javascript">↵                            //<![CDATA[↵                                lastPrice = 23.74;↵                            //]]>↵                        </script>
+                ↵ ↵ <label for="s_method_premiumrate_UPS_Express_Saver_(excl._Customs_and_Duties)">UPS Express Saver
+                    (excl. Customs and Duties) <span class="price">19,95 €</span> </label>↵
+            </li>↵ </ul>↵ </dd>↵ <dt>UPS Access Point</dt>↵ <dd>↵ <ul>↵ <li>↵ <input name="shipping_method" type="radio"
+                    value="upsap_2" id="s_method_upsap_2" class="radio" />↵↵ ↵ <label for="s_method_upsap_2">UPS Express
+                    Saver (excl. Customs and Duties) <span class="price">19,95 €</span> </label>↵ </li>↵ </ul>↵ </dd>↵
+    <dt>Abholung Ladengeschäft</dt>↵ <dd>↵ <ul>↵ <li>↵ <input name="shipping_method" type="radio"
+                    value="instorepickupplus_instorepickupplus" id="s_method_instorepickupplus_instorepickupplus"
+                    class="radio" />↵↵ ↵ <label for="s_method_instorepickupplus_instorepickupplus">Hamburg-Altona <span
+                        class="price">0,00 €</span> </label>↵ <div class="additional">Du wirst umgehend per e-Mail
+                    informiert sobald Deine Bestellung abholbereit ist</div>↵ </li>↵ </ul>↵ </dd>↵ </dl>↵
+<script
+    type="text/javascript">↵//<![CDATA[↵            var shippingCodePrice = {'premiumrate_UPS_Express_Saver_(excl._Customs_and_Duties)':23.74,'upsap_2':23.74,'instorepickupplus_instorepickupplus':0};↵    ↵    $$('input[type="radio"][name="shipping_method"]').each(function(el){↵        Event.observe(el, 'click', function(){↵            if (el.checked == true) {↵                var getShippingCode = el.getValue();↵                                    var newPrice = shippingCodePrice[getShippingCode];↵                    if (!lastPrice) {↵                        lastPrice = newPrice;↵                        quoteBaseGrandTotal += newPrice;↵                    }↵                    if (newPrice != lastPrice) {↵                        quoteBaseGrandTotal += (newPrice-lastPrice);↵                        lastPrice = newPrice;↵                    }↵                                checkQuoteBaseGrandTotal = quoteBaseGrandTotal;↵                return false;↵            }↵       });↵    });↵//]]>↵</script>

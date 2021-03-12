@@ -293,7 +293,7 @@ class ALLIKE:
 
     def billing(self):
         siteKey = '6LfMDQEaAAAAAK2OeOZtpVHc4gTPjAdZ8kHcXHCR'
-        logger.prepare(SITE,self.taskID,'Submitting billing...')
+        logger.prepare(SITE,self.taskID,'Submitting shipping...')
         profile = loadProfile(self.task["PROFILE"])
         if profile == None:
             logger.error(SITE,self.taskID,'Profile Not Found.')
@@ -301,8 +301,7 @@ class ALLIKE:
             sys.exit()
         countryCode = profile["countryCode"]
 
-        capToken = captcha.Hiddenv2(siteKey,'https://www.allikestore.com',self.session.proxies,SITE,self.taskID)
-
+        capToken = captcha.v3(siteKey,'https://www.allikestore.com',self.session.proxies,SITE,self.taskID)
         day = random.randint(1,29)
         month = random.randint(1,12)
         year = random.randint(1970,2000)
@@ -351,13 +350,14 @@ class ALLIKE:
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.billing()
 
+
         if postBilling.status_code == 200:
             if postBilling.text:
                 try:
                     shippingOptions = json.loads(postBilling.text)
                     shippingHtml = shippingOptions["update_section"]["html"]
                     soup = BeautifulSoup(shippingHtml,"html.parser")
-                    self.shippingMethods = soup.find_all('input',{'class':'radio'})
+                    self.shippingMethods = soup.find_all('input',{'name':'shipping_method'})
                     #self.shippingMethod = shippingMethods[0]["value"]
                     logger.warning(SITE,self.taskID,'Successfully set shipping')
                     self.shippingMethod()
@@ -379,7 +379,9 @@ class ALLIKE:
     def shippingMethod(self):
         logger.prepare(SITE,self.taskID,'Submitting shipping method...')
         try:
-            postShippingMethod = self.session.post('https://www.allikestore.com/default/checkout/onepage/saveShippingMethod/', data={"shipping_method": self.shippingMethods[0]["value"], "form_key": self.formKey}, headers={
+            postShippingMethod = self.session.post('https://www.allikestore.com/default/checkout/onepage/saveShippingMethod/', data={
+                "shipping_method": self.shippingMethods[0]["value"], "form_key": self.formKey
+            }, headers={
                 'authority': 'www.allikestore.com',
                 'accept-language': 'en-US,en;q=0.9',
                 'origin': 'https://www.allikestore.com',
@@ -387,7 +389,8 @@ class ALLIKE:
                 'sec-fetch-dest': 'empty',
                 'sec-fetch-mode': 'cors',
                 'sec-fetch-site': 'same-origin',
-                'x-requested-with': 'XMLHttpRequest'
+                'x-requested-with': 'XMLHttpRequest',
+                'accept':'text/javascript, text/html, application/xml, text/xml, */*'
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
@@ -395,7 +398,7 @@ class ALLIKE:
             time.sleep(int(self.task["DELAY"]))
             self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.shippingMethod()
-
+            
         if postShippingMethod.status_code == 200:
             logger.warning(SITE,self.taskID,'Successfully set shipping method')
             if self.task["PAYMENT"] == "paypal":

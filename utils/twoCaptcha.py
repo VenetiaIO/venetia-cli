@@ -96,12 +96,14 @@ class TwoCaptcha:
         except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             Hiddenv2(sitekey,url,proxy,SITE,taskID)
         while r.json()["request"] == "CAPCHA_NOT_READY":
+            # ERROR_CAPTCHA_UNSOLVABLE | CAPCHA_NOT_READY |
             try:
                 r = requests.get(url)
             except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
                 Hiddenv2(sitekey,url,proxy,SITE,taskID)
             time.sleep(1)
+
         return r.json()["request"]
 
 
