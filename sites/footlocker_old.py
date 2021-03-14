@@ -272,7 +272,6 @@ class FOOTLOCKER_OLD:
 
     def addToCart(self):
         itteration = 0
-        print(self.session.proxies)
         logger.prepare(SITE,self.taskID,'Carting product...')
         params = {
             'Ajax': True,

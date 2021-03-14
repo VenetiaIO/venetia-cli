@@ -133,7 +133,7 @@ class discord:
         try:
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title='⛔ Checkout Failed ⛔', description='', color=0xeb3c2f)
-            embed.set_footer(text='VenetiaIO CLI | {}'.format(CONFIG.VERSION()))
+            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()))
             embed.set_timestamp()
 
             if image: embed.set_thumbnail(url=image)
@@ -187,7 +187,7 @@ class discord:
         try:                
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title=':rocket: Confirm 3DS Payment :rocket:', description='', color=0xf0e24d)
-            embed.set_footer(text='VenetiaIO CLI | {}'.format(CONFIG.VERSION()))
+            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()))
             embed.set_timestamp()    
             if image:
                 try:
@@ -238,7 +238,7 @@ class discord:
         try:
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title=f'{SITE} | Account Created', description='', color=0x1e68e7)
-            embed.set_footer(text='VenetiaIO CLI | {}'.format(CONFIG.VERSION()))
+            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()))
             embed.set_timestamp()
     
             if first: embed.add_embed_field(name='First Name', value=first,inline=False)

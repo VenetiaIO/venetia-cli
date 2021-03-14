@@ -1,0 +1,46 @@
+<head>
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <title>VenetiaCLI | Profiles</title>
+</head>
+<body class="bg-gray-300">
+    <h1 class="text-gray-800 text-4xl font-medium text-center p-12">Profiles</h1>
+<div class="container m-10 bg-gray-400 rounded-md shadow-xl mx-auto">
+
+    <div class="grid grid-cols-3 auto-rows-max gap-4" id="grid">
+
+
+    </div>
+    
+</div>
+</body>
+
+<script>
+
+    function loadProfiles() {
+        var grid = document.getElementById('grid')
+        var profiles = "{{ profiles }}".replaceAll('&#39;','"')
+        profiles = JSON.parse(profiles).profiles
+        
+        var colours = [
+            'bg-red-500','bg-yellow-500','bg-green-500','bg-blue-500','bg-indigo-500',
+            'bg-purple-500','bg-pink-500',
+
+            'bg-red-300','bg-yellow-300',
+            'bg-green-300','bg-blue-300','bg-indigo-300','bg-purple-300','bg-pink-300'
+        ]
+        for(var i = 0; i < profiles.length; i++) {
+            element = `
+            <div class="w-full h-full">
+
+                <div class="${colours[Math.floor(Math.random() * colours.length)]} h-64 m-4 text-center rounded-md">
+                    <h1 class="text-white text-2xl font-medium select-none">${profiles[i]['profileName']}</h1>
+                </div>
+
+            </div>
+            `
+            grid.innerHTML += element
+        }
+
+    }
+    loadProfiles()
+</script>
