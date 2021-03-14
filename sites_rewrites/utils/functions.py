@@ -45,13 +45,15 @@ def injection(session, response):
   else:
     return response
 
-def scraper():
-  if loadSettings()["captcha"].lower() == "monster":
-    apiKey = loadSettings()["capMonster"]
+async def scraper():
+  settings = await loadSettings()
+  if settings["captcha"].lower() == "monster":
+    apiKey = settings["capMonster"]
     provider = 'capmonster'
   else:
-    apiKey = loadSettings()["2Captcha"]
+    apiKey = settings["2Captcha"]
     provider = '2captcha'
+    
   scraper = cloudscraper.create_scraper(
       requestPostHook=injection,
       interpreter='nodejs',
@@ -150,38 +152,41 @@ async def loadProxy(proxies,taskID, SITE):
     if proxies == "":
         return None
     elif proxies != "":
-        try:
-            with open(f'./proxies/{proxies}.txt', 'r') as proxyIn:
-                try:
-                    proxyInput = proxyIn.read().splitlines()
-                except:
-                    return None
-        except:
-            return None
-    
-        if len(proxyInput) == 0:
-            return None
-        
+      if '.txt' in proxies: pass
+      else: proxies = proxies + '.txt'
 
-        proxyList = [i for i in proxyInput]
-        p = random.choice(proxyList)
-        splitted = p.split(':')
-
-        if len(splitted) == 2:
-            proxy = {
-              'http://':'http://{}'.format(splitted),
-              'https://':'http://{}'.format(splitted)
-            }
-            return proxy
-        
-        elif len(splitted) == 4:
-            proxy = {
-              'http://':'http://{}:{}@{}:{}'.format(splitted[2], splitted[3], splitted[0], splitted[1]),
-              'https://':'http://{}:{}@{}:{}'.format(splitted[2], splitted[3], splitted[0], splitted[1])
-            }
-            return proxy
-        else:
+      try:
+          with open(f'./proxies/{proxies}', 'r') as proxyIn:
+              try:
+                  proxyInput = proxyIn.read().splitlines()
+              except:
+                  return None
+      except:
           return None
+  
+      if len(proxyInput) == 0:
+          return None
+      
+
+      proxyList = [i for i in proxyInput]
+      p = random.choice(proxyList)
+      splitted = p.split(':')
+
+      if len(splitted) == 2:
+          proxy = {
+            'http://':'http://{}'.format(splitted),
+            'https://':'http://{}'.format(splitted)
+          }
+          return proxy
+      
+      elif len(splitted) == 4:
+          proxy = {
+            'http://':'http://{}:{}@{}:{}'.format(splitted[2], splitted[3], splitted[0], splitted[1]),
+            'https://':'http://{}:{}@{}:{}'.format(splitted[2], splitted[3], splitted[0], splitted[1])
+          }
+          return proxy
+      else:
+        return None
 
 
 async def createId(length):
@@ -352,6 +357,10 @@ async def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
 def b64Decode(text):
   return base64.b64decode(text)
 
+def b64Encode(text):
+  encoded = base64.b64encode(bytes(str(text), 'utf-8'))
+  encoded = str(encoded, 'utf8')
+  return encoded
 
 def randomUA():
     return random.choice(userAgents)["ua"]

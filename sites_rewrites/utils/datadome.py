@@ -8,7 +8,7 @@ import threading
 import cloudscraper
 import urllib
 import js2py
-import asyncio
+# import asyncio
 
 from utils.logger import logger
 from utils.captcha import captcha
@@ -25,7 +25,7 @@ from utils.functions import (
 
 class datadome:
     @staticmethod
-    async def reCaptchaMethod(SITE,taskID,session,responseUrl, siteUrl, UA, proxies, proxy):
+    def reCaptchaMethod(SITE,taskID,session,responseUrl, siteUrl, UA, proxies, proxy):
         try:
             responseUrl = responseUrl.replace('&t=bv','')
         except:
@@ -52,7 +52,7 @@ class datadome:
                 't':'fe'
             }
         except Exception as e:
-            await log.info(e)
+            log.info(e)
             return {"cookie":None}
 
         
@@ -70,8 +70,8 @@ class datadome:
 
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            await log.info(e)
-            await logger.error(SITE,taskID,'Error: {}'.format(e))
+            log.info(e)
+            logger.error(SITE,taskID,'Error: {}'.format(e))
 
         # with open('datadome.html','w') as dd:
         #     dd.write(response.text)
@@ -79,10 +79,10 @@ class datadome:
 
         try:
             siteKey = response.text.split("'sitekey' : '")[1].split("'")[0]
-            capResponse = await captcha.v2(siteKey,siteUrl,proxies,SITE,taskID)
+            capResponse = captcha.v2(siteKey,siteUrl,proxies,SITE,taskID)
         except Exception as e:
-            await log.info(e)
-            await logger.error(SITE,taskID,'Failed to solve captcha. Retrying...')
+            log.info(e)
+            logger.error(SITE,taskID,'Failed to solve captcha. Retrying...')
             return {"cookie":None}
         
         try:
@@ -96,12 +96,12 @@ class datadome:
                 "referer": response.text.split("'&referer=' + encodeURIComponent('")[1].split("'")[0],
                 "parent_url":response.text.split("'&referer=' + encodeURIComponent('")[1].split("'")[0],
                 "x-forwarded-for": encodeURIComponent(response.text.split("'&x-forwarded-for=' + encodeURIComponent('")[1].split("'")[0]),
-                "captchaChallenge": await capChallenge(datadomeCookie,10,UA,"en-US",["en-US", "en"]), #false
+                "captchaChallenge": capChallenge(datadomeCookie,10,UA,"en-US",["en-US", "en"]), #false
                 "s": response.text.split("'&s=' + encodeURIComponent('")[1].split("'")[0],
             }
         except Exception as e:
-            await log.info(e)
-            await logger.error(SITE,taskID,'Failed to get cookie. Retrying...')
+            log.info(e)
+            logger.error(SITE,taskID,'Failed to get cookie. Retrying...')
             return {"cookie":None}
 
         try:
@@ -119,22 +119,22 @@ class datadome:
                 "User-Agent":UA
             })
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            await log.info(e)
-            await logger.error(SITE,taskID,'Error: {}'.format(e))
+            log.info(e)
+            logger.error(SITE,taskID,'Error: {}'.format(e))
             return {"cookie":None}
         
         if response.status_code == 200:
             try:
                 cookie = response.json()['cookie'].split('datadome=')[1].split(';')[0]
             except:
-                await logger.error(SITE,taskID,'Failed to get cookie. Retrying...')
+                logger.error(SITE,taskID,'Failed to get cookie. Retrying...')
                 return {"cookie":None}
             
-            await logger.success(SITE,taskID,'Retrieved cookie')
+            logger.success(SITE,taskID,'Retrieved cookie')
             return {"cookie":cookie}
         
         else:
-            await logger.error(SITE,taskID,f'Failed to get cookie [{str(response.status_code)}]. Retrying...')
+            logger.error(SITE,taskID,f'Failed to get cookie [{str(response.status_code)}]. Retrying...')
             return {"cookie":None}
                     
     
@@ -142,7 +142,7 @@ class datadome:
 
 
 
-async def capChallenge(cookie,a,userAgent,language,languages):
+def capChallenge(cookie,a,userAgent,language,languages):
     func = '''
     function solveChallenge(r,t,userAgent,language,languages){
         var seed = null,

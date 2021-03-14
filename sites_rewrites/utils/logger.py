@@ -4,17 +4,15 @@ from colorama import Fore, Back, Style, init
 import datetime
 import sys
 import threading
-import asyncio
 
 init(autoreset=True)
 
-# lock = threading.Lock()
-LOCK = asyncio.Lock()
+lock = threading.Lock()
 
 
-async def get_task(SITE,taskID,color):
-    x = datetime.datetime.now()
-    x = f'{x.strftime("%Y")}-{x.strftime("%m")}-{x.strftime("%d")} {x.strftime("%X")},{x.strftime("%f")}'
+
+def get_task(SITE,taskID,color):
+    x = datetime.datetime.now().strftime('%Y.%m.%d | %H:%M:%S.%f')
     #thread = threading.currentThread().getName()
     # status = '[{}{}{}{}{:<12}{}'.format(Fore.CYAN + Style.BRIGHT + x, Fore.WHITE + '][ ', Fore.YELLOW + taskID, Fore.WHITE + ' ][ ',Fore.WHITE + SITE.title(), Fore.WHITE + ' ]')
     status = '[{}{}{}{}{:<10}{}'.format(Fore.CYAN + Style.BRIGHT + x, Fore.WHITE + ']' + color + '[ ', color + taskID, ' ][ ', SITE.title(), ' ]')
@@ -25,102 +23,156 @@ async def get_task(SITE,taskID,color):
 
 class logger:
     @staticmethod
-    async def success(site,taskID,message):
+    def success(site,taskID,message):
         try:
-            async with LOCK:
+            lock.acquire()
+            try:
                 #print('{} {}'.format(get_task(site,taskID), colored(f'{message}\n', 'green',attrs=["bold"])))
-                print('{} {}'.format(await get_task(site,taskID,Fore.GREEN), Fore.GREEN + message))
-
+                print('{} {}'.format(get_task(site,taskID,Fore.GREEN), Fore.GREEN + message))
+                # sys.stdout.flush()
+            finally:
+                lock.release()
         except Exception as e:
+            print(e)
             pass
 
     @staticmethod
-    async def error(site,taskID,message):
+    def error(site,taskID,message):
         try:
-            async with LOCK:
+            lock.acquire()
+            try:
                 #print('{} {}'.format(get_task(site,taskID), colored(f'{message}\n', 'red',attrs=["bold"])))
-                print('{} {}'.format(await get_task(site,taskID,Fore.RED), Fore.RED + message))
+                print('{} {}'.format(get_task(site,taskID,Fore.RED), Fore.RED + message))
+                # sys.stdout.flush()
+            finally:
+                lock.release()
         except Exception as e:
+            print(e)
             pass
 
     @staticmethod
-    async def warning(site,taskID,message):
+    def warning(site,taskID,message):
         try:
-            async with LOCK:
+            lock.acquire()
+            try:
                 #print('{} {}'.format(get_task(site,taskID), colored(f'{message}\n', 'yellow')))
-                print('{} {}'.format(await get_task(site,taskID,Fore.YELLOW+ Style.DIM), Fore.YELLOW + Style.DIM + message))
+                print('{} {}'.format(get_task(site,taskID,Fore.YELLOW+ Style.DIM), Fore.YELLOW + Style.DIM + message))
+                # sys.stdout.flush()
+            finally:
+                lock.release()
         except Exception as e:
+            print(e)
             pass
 
     @staticmethod
-    async def info(site,taskID,message):
+    def info(site,taskID,message):
         try:
-            async with LOCK:
+            lock.acquire()
+            try:
                 #print('{} {}'.format(get_task(site,taskID), colored(f'{message}\n', 'blue',attrs=["bold"])))
-                print('{} {}'.format(await get_task(site,taskID,Fore.BLUE+ Style.BRIGHT), Fore.BLUE + Style.BRIGHT +message))
+                print('{} {}'.format(get_task(site,taskID,Fore.BLUE+ Style.BRIGHT), Fore.BLUE + Style.BRIGHT +message))
+                # sys.stdout.flush()
+            finally:
+                lock.release()
         except Exception as e:
+            print(e)
             pass
 
     @staticmethod
-    async def alert(site,taskID,message):
+    def alert(site,taskID,message):
         try:
-            async with LOCK:
+            lock.acquire()
+            try:
                 #print('{} {}'.format(get_task(site,taskID), colored(f'{message}\n', 'cyan',attrs=["bold"])))
-                print('{} {}'.format(await get_task(site,taskID,Fore.CYAN+ Style.BRIGHT), Fore.CYAN + Style.BRIGHT + message))
+                print('{} {}'.format(get_task(site,taskID,Fore.CYAN+ Style.BRIGHT), Fore.CYAN + Style.BRIGHT + message))
+                # sys.stdout.flush()
+            finally:
+                lock.release()
         except Exception as e:
+            print(e)
             pass
 
     @staticmethod
-    async def secondary(site,taskID,message):
+    def secondary(site,taskID,message):
         try:
-            async with LOCK:
+            lock.acquire()
+            try:
                 #print('{} {}'.format(get_task(site,taskID), colored(f'{message}\n', 'magenta',attrs=["bold"])))
-                print('{} {}'.format(await get_task(site,taskID,Fore.MAGENTA), Fore.MAGENTA + message))
+                print('{} {}'.format(get_task(site,taskID,Fore.MAGENTA), Fore.MAGENTA + message))
+                # sys.stdout.flush()
+            finally:
+                lock.release()
         except Exception as e:
+            print(e)
             pass
 
     @staticmethod
-    async def prepare(site,taskID,message):
+    def prepare(site,taskID,message):
         try:
-            async with LOCK:
+            lock.acquire()
+            try:
                 #print('{} {}'.format(get_task(site,taskID), colored(f'{message}\n', 'magenta',attrs=["bold"])))
-                print('{} {}'.format(await get_task(site,taskID,Fore.WHITE+ Style.BRIGHT), Fore.WHITE + Style.BRIGHT + message))
+                print('{} {}'.format(get_task(site,taskID,Fore.WHITE+ Style.BRIGHT), Fore.WHITE + Style.BRIGHT + message))
+                # sys.stdout.flush()
+            finally:
+                lock.release()
         except Exception as e:
+            print(e)
             pass
 
 
     @staticmethod
-    async def menu(site,taskID,message):
-        async with LOCK:
+    def menu(site,taskID,message):
+        lock.acquire()
+        try:
             #print('{} {}'.format(get_task(site,taskID), f'{message}\n'))
-            return '{} {}'.format(await get_task(site.title(),taskID,Fore.WHITE), message)
-    
-    @staticmethod
-    async def menu2(site,taskID,message):
-        async with LOCK:
-            #print('{} {}'.format(get_task(site,taskID), f'{message}\n'))
-            print('{} {}'.format(await get_task(site,taskID,Fore.WHITE), message))
+            return '{} {}'.format(get_task(site.title(),taskID,Fore.WHITE), message)
+            # sys.stdout.flush()
+        finally:
+            lock.release()
 
     @staticmethod
-    async def other_grey(message):
-        async with LOCK:
+    def menu2(site,taskID,message):
+        lock.acquire()
+        try:
+            #print('{} {}'.format(get_task(site,taskID), f'{message}\n'))
+            print('{} {}'.format(get_task(site.title(),taskID,Fore.WHITE), message))
+            # sys.stdout.flush()
+        finally:
+            lock.release()
+
+    @staticmethod
+    def other_grey(message):
+        lock.acquire()
+        try:
             #print('{} {}'.format(get_task(site,taskID), f'{message}\n'))
             print(Fore.WHITE + Style.DIM + message)
+            # sys.stdout.flush()
+        finally:
+            lock.release()
 
     @staticmethod
-    async def other_green(message):
-        async with LOCK:
+    def other_green(message):
+        lock.acquire()
+        try:
             #print('{} {}'.format(get_task(site,taskID), f'{message}\n'))
             print(Fore.GREEN + Style.NORMAL + message)
+            # sys.stdout.flush()
+        finally:
+            lock.release()
 
     @staticmethod
-    async def other_yellow(message, other):
-        async with LOCK:
+    def other_yellow(message, other):
+        lock.acquire()
+        try:
             #print('{} {}'.format(get_task(site,taskID), f'{message}\n'))
             print('{}{} \n'.format(Fore.YELLOW + Style.DIM + message, Fore.GREEN + Style.DIM + str(other)),Fore.GREEN + Style.DIM)
+            # sys.stdout.flush()
+        finally:
+            lock.release()
+
 
     @staticmethod
-    async def logo(text,VERSION):
-        async with LOCK:
-            print(Fore.CYAN + Style.BRIGHT + text + Fore.RED + Style.BRIGHT + 'v' + VERSION)
+    def logo(text,VERSION):
+        print(Fore.CYAN + Style.BRIGHT + text + Fore.RED + Style.BRIGHT + 'v' + VERSION)
     

@@ -9,7 +9,7 @@ logging.basicConfig(filename='log.log',
 
 class log:
     @staticmethod
-    async def info(msg):
+    def info(msg):
         logging.error(msg)
 
 

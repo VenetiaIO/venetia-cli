@@ -63,7 +63,6 @@ class FOOTLOCKER_OLD():
 
         self.countryCode = profile['countryCode'].lower()
 
-        self.proxies = None
         self.baseSku = self.task['PRODUCT']
 
         if self.countryCode == 'it':

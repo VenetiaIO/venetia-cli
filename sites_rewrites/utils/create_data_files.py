@@ -143,32 +143,46 @@ def execute():
 
 
     #check datadome.json
-    try:
-        f = open('./data/cookies/datadome.json')
-        f.readlines()
-    except IOError:
-        print('Creating datadome.json')
-        datadomeFile = {}
-        for k in CONFIG.sites.keys():
-            datadomeFile[k.upper()] = []
+    # try:
+    #     f = open('./data/cookies/datadome.json')
+    #     f.readlines()
+    # except IOError:
+    #     print('Creating datadome.json')
+    #     datadomeFile = {}
+    #     for k in CONFIG.sites.keys():
+    #         datadomeFile[k.upper()] = []
 
-        try:
-            os.mkdir('data/cookies')
-        except:
-            pass
-        with open('./data/cookies/datadome.json','w') as dd:
-            json.dump(datadomeFile, dd)
+    #     try:
+    #         os.mkdir('data/cookies')
+    #     except:
+    #         pass
+    #     with open('./data/cookies/datadome.json','w') as dd:
+    #         json.dump(datadomeFile, dd)
 
 
     #check tokens.json
     try:
-        f = open('./data/captcha/tokens.json')
-        f.readlines()
+        with open('./data/captcha/tokens.json', 'r') as f:
+            jsontokens = json.loads(f.read())
+            current = []
+            required = []
+            for k in jsontokens:
+                current.append(k.upper())
+            for k in CONFIG.captcha_configs:
+                if CONFIG.captcha_configs[k]['hasCaptcha']:
+                    required.append(k.upper())
+            
+            if current != required:
+                raise IOError
+            else:
+                pass
+
     except IOError:
-        print('Creating tokens.json')
+        print('Creating/Updating tokens.json')
         tokensFile = {}
-        for k in CONFIG.sites.keys():
-            tokensFile[k.upper()] = []
+        for k in CONFIG.captcha_configs:
+            if CONFIG.captcha_configs[k]['hasCaptcha']:
+                tokensFile[k.upper()] = []
             
         try:
             os.mkdir('data/captcha')

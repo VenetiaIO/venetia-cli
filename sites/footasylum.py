@@ -556,7 +556,7 @@ class FOOTASYLUM:
     def basketCheck(self):
         captchaResponse = captcha.v3('6LfENJwUAAAAANpLoBFfQG7BbAR4iQd-FvXSUzO8','https://secure.footasylum.com',self.session.proxies,SITE,self.taskID)
         if captchaResponse == "empty":
-            captchaResponse = captcha.v2('6Ldpi-gUAAAAANpo2mKVvIR6u8nUGrInKKik8MME',self.task["PRODUCT"],self.proxies,SITE,self.taskID)
+            captchaResponse = captcha.v3('6LfENJwUAAAAANpLoBFfQG7BbAR4iQd-FvXSUzO8',self.task["PRODUCT"],self.proxies,SITE,self.taskID)
         payload = {
             "checkoutSessionId":self.checkoutSessionId,
             "websaleId":self.basketId,

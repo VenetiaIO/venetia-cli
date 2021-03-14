@@ -1,7 +1,7 @@
 #sites
 # from sites.svd import SVD
 # from sites.queens import QUEENS
-# from sites.allike import ALLIKE
+from sites.allike import ALLIKE
 # from sites.titolo import TITOLO
 # from sites.grosbasket import GROSBASKET
 # from sites.airness import AIRNESS
@@ -41,7 +41,7 @@ sites = {
     # "AIRNESS":AIRNESS,
     # "FOOTASYLUM":FOOTASYLUM, #WATERFALL MONITOR
     # "HOLYPOP":HOLYPOP,
-    # "ALLIKE":ALLIKE, #WATERFALL MONITOR
+    "ALLIKE":ALLIKE, #WATERFALL MONITOR
     # "GROSBASKET":GROSBASKET,
     # "SCHUH":SCHUH, #WATERFALL MONITOR
     # "SLAMJAM":SLAMJAM,
@@ -76,4 +76,152 @@ def old_footlockers(): return ['FR','NL','GB','AU','SG','MY','HK']
 def account_sites(): return ['holypop','naked','footasylum','snipes','wch','prodirect']
 
 
-def waterfall_sites(): return ['allike','ambush','awlab','chmielna20','footasylum','office','offspring','schuh','snipes','svd','titolo']
+def waterfall_sites(): return [
+                                'allike',
+                                'ambush',
+                                'awlab',
+                                'chmielna20',
+                                'footasylum',
+                                'office',
+                                'offspring',
+                                'schuh',
+                                'snipes',
+                                'svd',
+                                'titolo'
+                            ]
+
+
+captcha_configs = {
+    "SVD":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "QUEENS":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "TITOLO":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "AIRNESS":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "FOOTASYLUM":{
+        "hasCaptcha":True,
+        "siteKey":"6LfENJwUAAAAANpLoBFfQG7BbAR4iQd-FvXSUzO8",
+        "type":"V3",
+        "url":"https://www.footasylum.com/"
+    },
+    "HOLYPOP":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "ALLIKE":{
+        "hasCaptcha":True,
+        "siteKey":"6LfMDQEaAAAAAK2OeOZtpVHc4gTPjAdZ8kHcXHCR",
+        "type":"V3",
+        "url":"https://www.allikestore.com/"
+    },
+    "GROSBASKET":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "SCHUH":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "SLAMJAM":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "AWLAB":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "CHMIELNA20":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "WCH":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "NAKED":{
+        "hasCaptcha":True,
+        "siteKey":"6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo",
+        "type":"V2",
+        "url":"https://www.nakedcph.com/"
+    },
+    "PRODIRECT":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "DISNEY":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "SNIPES":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "OFFSPRING":{
+        "hasCaptcha":True,
+        "siteKey":"6Ld-VBsUAAAAABeqZuOqiQmZ-1WAMVeTKjdq2-bJ",
+        "type":"V2",
+        "url":"https://www.offspring.co.uk/"
+    },
+    "OFFICE":{
+        "hasCaptcha":True,
+        "siteKey":"6Ld-VBsUAAAAABeqZuOqiQmZ-1WAMVeTKjdq2-bJ",
+        "type":"V2",
+        "url":"https://www.office.co.uk/"
+    },
+    "FOOTLOCKER_OLD":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "FOOTLOCKER_NEW":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "AMBUSH":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    }
+}

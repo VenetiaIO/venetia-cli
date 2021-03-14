@@ -21,7 +21,7 @@ import webbrowser
 import names
 import random
 from copy import copy
-import asyncio
+# import asyncio
 
 init(autoreset=True)
 
@@ -56,33 +56,33 @@ from utils.auth import auth
 from utils.datadome import datadome
 from utils.ascii import logo
 from utils.updates import Updater
-from utils.functions import (loadCheckouts, getUser, loadProfile, decodeURIComponent)
+from utils.functions import (loadCheckouts, getUser, loadProfile, decodeURIComponent,b64Encode)
 from utils.webhook import Webhook
 from utils.config import *
 import utils.create_data_files as dataFiles
 from utils.cartClear import cartClear
 
-async def checkUpdate():
-    status = await Updater.checkForUpdate(VERSION())
+def checkUpdate():
+    status = Updater.checkForUpdate(VERSION())
     if status["error"] == False:
         if status["latest"] == True:
-            await logger.menu('VENETIA','Menu','{}'.format(colored(f'You are on the latest version! {VERSION()}','green', attrs=["bold"])))
+            logger.menu('VENETIA','Menu','{}'.format(colored(f'You are on the latest version! {VERSION()}','green', attrs=["bold"])))
             return True
         if status["latest"] == False:
-            await logger.menu('VENETIA','Menu','{}'.format(colored(f'Updating...','magenta', attrs=["bold"])))
-            download = await Updater.downloadLatest(status["version"])
+            logger.menu('VENETIA','Menu','{}'.format(colored(f'Updating...','magenta', attrs=["bold"])))
+            download = Updater.downloadLatest(status["version"])
             if download == "complete":
-                await logger.menu('VENETIA','Menu','{}'.format(colored(f'Update complete. Please delete the old file named "venetiaCLI_old.exe" and open the new one name "venetiaCLI.exe"','cyan', attrs=["bold"])))
-                await asyncio.sleep(5)
+                logger.menu('VENETIA','Menu','{}'.format(colored(f'Update complete. Please delete the old file named "venetiaCLI_old.exe" and open the new one name "venetiaCLI.exe"','cyan', attrs=["bold"])))
+                time.sleep(5)
                 sys.exit()
             else:
-                await logger.menu('VENETIA','Menu','{}'.format(colored('Failed to download latest version. Please try again later.','red', attrs=["bold"])))
+                logger.menu('VENETIA','Menu','{}'.format(colored('Failed to download latest version. Please try again later.','red', attrs=["bold"])))
     if status["error"] == True:
-        await logger.menu('VENETIA','Menu','{}'.format(colored('Failed to check version. Retrying...','red', attrs=["bold"])))
-        await asyncio.sleep(10)
-        await checkUpdate()
+        logger.menu('VENETIA','Menu','{}'.format(colored('Failed to check version. Retrying...','red', attrs=["bold"])))
+        time.sleep(10)
+        checkUpdate()
 
-async def taskCount():
+def taskCount():
     total = 0
     for k in sites.keys():
         with open(f'./{k.lower()}/tasks.csv','r') as csvFile:
@@ -91,7 +91,7 @@ async def taskCount():
     
     return total
 
-async def taskCountSpecific(site):
+def taskCountSpecific(site):
     total = 0
     with open(f'./{site.lower()}/tasks.csv','r') as csvFile:
             csv_reader = csv.DictReader(csvFile)
@@ -99,24 +99,24 @@ async def taskCountSpecific(site):
     
     return total
 
-async def get_time():
+def get_time():
     x = datetime.datetime.now().strftime('%Y.%m.%d | %H:%M:%S.%f')
     return x
 
-async def checkTasks(site):
+def checkTasks(site):
     tasks = []
     with open(f'./{site.lower()}/tasks.csv','r') as csvFile:
         csv_reader = csv.DictReader(csvFile)
         for r in csv_reader:
             if len(r['PRODUCT']) > 1:
                 tasks.append(1)
-        
+    
     if len(tasks) > 0:
         return True
     elif len(tasks) == 0:
         return False
     
-async def checkFootlockerTasks():
+def checkFootlockerTasks():
     old_ftl = []
     new_ftl = []
     with open(f'./footlocker/tasks.csv','r') as csvFile:
@@ -124,7 +124,7 @@ async def checkFootlockerTasks():
         for r in csv_reader:
             if len(r['PRODUCT']) > 1:
                 try:
-                    prof = await loadProfile(r['PROFILE'])
+                    prof = loadProfile(r['PROFILE'])
                     cc = prof['countryCode'].upper()
                 except Exception:
                     return {
@@ -155,79 +155,81 @@ async def checkFootlockerTasks():
 
 class Menu():
     def __init__(self):
+        self.port = start_server()
         pass
     
-    async def base(self):
-        await checkUpdate()
+    def base(self):
+       checkUpdate()
 
         threading.Thread(target=QT,daemon=True).start()
+        
 
-        self.user = await getUser()
+        self.user = getUser()
         
         try:
             client_id = 726839544124670093
-            self.RPC = await Presence(client_id)
-            await self.RPC.connect()
+            self.RPC = Presence(client_id)
+            self.RPC.connect()
             self.rpctime = int(time.time())
         except:
             pass
 
-        await asyncio.sleep(1)
+        time.sleep(1)
 
         with open('./data/config.json') as config:
             self.config = json.loads(config.read())
             self.key = self.config["key"]
         
         while True:
-            self.option_main_menu_choice = int(await self.menu())
+            self.option_main_menu_choice = int(self.menu())
             if self.option_main_menu_choice == 1:
-                await self.startAllTasks()
+                self.startAllTasks()
                 # Start All Tasks
 
             elif self.option_main_menu_choice == 2:
-                await self.startSpecificTasks()
+                self.startSpecificTasks()
                 # Start Specific Tasks
 
             elif self.option_main_menu_choice == 3:
-                await self.edit_view_config()
+                webbrowser.open_new(f'http://127.0.0.1:{self.port}/configuration')
                 # View / Edit Config
 
 
             elif self.option_main_menu_choice == 4:
-                await self.view_edit_create_profiles()
+                webbrowser.open_new(f'http://127.0.0.1:{self.port}/profiles')
                 # Create Profile
 
             elif self.option_main_menu_choice == 5:
-                pass
+                webbrowser.open_new(f'http://127.0.0.1:{self.port}/captcha')
                 # Generate Captchas
 
             elif self.option_main_menu_choice == 6:
                 pass
                 # Account Generator
 
-            elif self.option_main_menu_choice == 7:
-                pass
-                # Cookie Generator
+            # elif self.option_main_menu_choice == 7:
+            #     pass
+            #     # Cookie Generator
 
-            elif self.option_main_menu_choice == 8:
+            elif self.option_main_menu_choice == 7:
                 pass
                 # View Checkouts
 
             elif self.option_main_menu_choice == 00:
-                await logger.menu2('VENETIA','Menu','{}'.format(colored('Goodbye...','yellow', attrs=["bold"])))
-                await asyncio.sleep(3)
+                print(colored('Goodbye...','yellow', attrs=["bold"]))
+                time.sleep(3)
                 break
                 os._exit(0)
             
             else:
-                await logger.menu2('VENETIA','Menu','{}'.format(colored('Invalid menu choice...','yellow', attrs=["bold"])))
-                await asyncio.sleep(3)
-                os._exit(0)
+                colored('Invalid Menu Choice','yellow', attrs=["bold"])
+                time.sleep(1)
+                continue
 
 
-    async def menu(self):
+    def menu(self):
         print('                 Welcome {}...                  '.format(self.user['discordName']))
-        await logger.logo(logo,VERSION())
+        logger.logo(logo,VERSION())
         # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('01','red', attrs=["bold"]), colored('Start All Tasks','red', attrs=["bold"])))
         # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('02','red', attrs=["bold"]), colored('Start Specific Tasks','red', attrs=["bold"])))
         # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('03','red', attrs=["bold"]), colored('View Config','red', attrs=["bold"])))
@@ -247,11 +249,11 @@ class Menu():
         menu_options.append( colored('[ 04 ] View|Create Profiles','red', attrs=["bold"]))
         menu_options.append( colored('[ 05 ] Generate Captchas','red', attrs=["bold"]))
         menu_options.append( colored('[ 06 ] Account Gen','red', attrs=["bold"]))
-        menu_options.append( colored('[ 07 ] Cookie Gen','red', attrs=["bold"]))
-        menu_options.append( colored('[ 08 ] View Checkouts','red', attrs=["bold"]))
+        # menu_options.append( colored('[ 07 ] Cookie Gen','red', attrs=["bold"]))
+        menu_options.append( colored('[ 07 ] View Checkouts','red', attrs=["bold"]))
         menu_options.append( colored('[ 00 ] Exit','red', attrs=["bold"]))
 
-        async def menu_selector():
+        def menu_selector():
             questions = [
                 inquirer.List(
                     "menu_choices",
@@ -263,15 +265,15 @@ class Menu():
             choi = answers['menu_choices'].split('[ ')[1].split(' ]')[0]
             return choi
 
-        return await menu_selector()   
+        return menu_selector()   
 
-    async def startAllTasks(self):         
+    def startAllTasks(self):         
         try:
             win32console.SetConsoleTitle("[Version {}] VenetiaCLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),"Running Tasks","0","0"))
         except:
             pass
 
-        async def menu_selector_waterfall():
+        def menu_selector_waterfall():
             questions = [
                 inquirer.List(
                     "waterfall_choices",
@@ -312,18 +314,22 @@ class Menu():
                             i = i + 1
                             # row['PROXIES'] = 'proxies'
 
-                            prof = await loadProfile(row['PROFILE'])
+                            prof = loadProfile(row['PROFILE'])
                             if prof['countryCode'].upper() in new_footlockers():
-                                new_task = asyncio.create_task( sites.get('FOOTLOCKER_NEW')(row, taskName, a).tasks())
+                                # new_task = asyncio.create_task( sites.get('FOOTLOCKER_NEW')(row, taskName, a).tasks())
+                                
+                                new_task = threading.Thread(target=sites.get('FOOTLOCKER_NEW'),args=(row,taskName, a))
                                 main_tasks.append(new_task)
-                                # threading.Thread(target=sites.get('FOOTLOCKER_NEW'),args=(row,taskName, a)).start()
 
                             if prof['countryCode'].upper() in old_footlockers():
-                                new_task = asyncio.create_task( sites.get('FOOTLOCKER_OLD')(row, taskName, a).tasks())
+                                # new_task = asyncio.create_task( sites.get('FOOTLOCKER_OLD')(row, taskName, a).tasks())
+                                # main_tasks.append(new_task)
+                                new_task = threading.Thread(target=sites.get('FOOTLOCKER_OLD'),args=(row,taskName, a))
                                 main_tasks.append(new_task)
-                                # threading.Thread(target=sites.get('FOOTLOCKER_OLD'),args=(row,taskName, a)).start()
+                                
 
-                await asyncio.gather(*main_tasks)
+                for t in main_tasks:
+                    t.start()
                 return
 
             elif k.upper() not in ['FOOTLOCKER_NEW','FOOTLOCKER_OLD']:
@@ -379,24 +385,27 @@ class Menu():
                                 # threading.Thread(target=sites.get(k.upper()),args=(row,taskName, a)).start()
                                 waterfall_tasks.append(row)
                             
-                            new_task = asyncio.create_task( k.upper(row, taskName, a).tasks())
+                            # new_task = asyncio.create_task( k.upper(row, taskName, a).tasks())
+                            new_task = threading.Thread(target=sites.get(k.upper()),args=(row,taskName, a))
                             main_tasks.append(new_task)
                                 
                             
                             a = a + 1
 
                 if len(waterfall_tasks) > 0:
-                    if await menu_selector_waterfall() == 'yes':   
+                    if menu_selector_waterfall() == 'yes':   
                         _delay_ =  input(f"[{get_time()}] Enter Waterfall monitor delay (in seconds) ==> ")
                         WaterfallAssign.assign(waterfall_tasks,_delay_)
                     else:
-                        await asyncio.gather(*main_tasks)
+                        for t in main_tasks:
+                            t.start()
                             
                 else:
-                    await asyncio.gather(*main_tasks)
+                    for t in main_tasks:
+                            t.start()
     
-    async def siteSelectFunc(self, availableSites, siteSelection):
-        async def menu_selector_waterfall():
+    def siteSelectFunc(self, availableSites, siteSelection):
+        def menu_selector_waterfall():
             questions = [
                 inquirer.List(
                     "waterfall_choices",
@@ -440,12 +449,15 @@ class Menu():
                             i = i + 1
                             # row['PROXIES'] = 'proxies'
 
-                            new_task = asyncio.create_task( value_chosen(row, taskName, a).tasks())
+                            # new_task = asyncio.create_task( value_chosen(row, taskName, a).tasks())
+                            new_task = threading.Thread(target=value_chosen,args=(row,taskName,a))
                             all_specific_tasks.append(new_task)
-                            # threading.Thread(target=value_chosen,args=(row,taskName,a)).start()
+                            
                             a = a + 1
 
-                await asyncio.gather(*all_specific_tasks)
+                # await asyncio.gather(*all_specific_tasks)
+                for t in all_specific_tasks:
+                    t.start()
 
             else:
 
@@ -466,7 +478,7 @@ class Menu():
                         allAccCopy.append(':')
 
                 random.shuffle(allAccCopy)
-                n = await taskCountSpecific(key_chosen) 
+                n = taskCountSpecific(key_chosen) 
             
 
                 tasks = []
@@ -504,40 +516,44 @@ class Menu():
                             if key_chosen.lower() in waterfall_sites():
                                 waterfall__tasks.append(row)
                             
-                            new_task = asyncio.create_task( value_chosen(row, taskName, a).tasks())
+                            # new_task = asyncio.create_task( value_chosen(row, taskName, a).tasks())
+                            new_task = threading.Thread(target=value_chosen,args=(row,taskName,a))
                             all_specific_tasks.append(new_task)
                             a = a + 1
                             
                 if len(waterfall__tasks) > 0:
-                    if await menu_selector_waterfall() == 'yes':   
+                    if menu_selector_waterfall() == 'yes':   
                         _delay_ =  input(f"[{get_time()}] Enter Waterfall monitor delay (in seconds) ==> ")
                         WaterfallAssign.assign(waterfall__tasks,_delay_)
                     else:
-                        await asyncio.gather(*all_specific_tasks)
+                        for t in all_specific_tasks:
+                            t.start()
                             
                 else:
-                    await asyncio.gather(*all_specific_tasks)
+                    for t in all_specific_tasks:
+                        t.start()
             
         except Exception as e:
             pass
 
 
-    async def startSpecificTasks(self):
+    def startSpecificTasks(self):
         number = 1
         availableSites = {}
         all_available_sites = []
+
         for row in sorted(sites):
             if row.upper() == 'FOOTLOCKER_NEW':
                 pass
             elif row.upper() == 'FOOTLOCKER_OLD':
-                check = await checkFootlockerTasks()
+                check = checkFootlockerTasks()
                 if check['status'] == True:
                     if len(check['old_ftl']) > 0:
                         availableSites['Footlocker EU'] = sites['FOOTLOCKER_OLD']
                     if len(check['new_ftl']) > 0:
                         availableSites['Footlocker EU'] = sites['FOOTLOCKER_NEW']
 
-            elif await checkTasks(row) and row.upper() not in ['FOOTLOCKER_NEW','FOOTLOCKER_OLD']:
+            elif checkTasks(row) and row.upper() not in ['FOOTLOCKER_NEW','FOOTLOCKER_OLD']:
                 availableSites[row] = sites[row]
 
         for s in availableSites:
@@ -546,7 +562,7 @@ class Menu():
             number = number + 1
         all_available_sites.append( colored(f'[ 00 ] Return to menu','red', attrs=["bold"]))
 
-        async def site_selector_specific():
+        def site_selector_specific():
             questions = [
                 inquirer.List(
                     "specific_site_choices",
@@ -558,110 +574,289 @@ class Menu():
             choi = int(answers['specific_site_choices'].split('[ ')[1].split(' ]')[0])
             return choi
 
-        siteSelection = await site_selector_specific()
+        siteSelection = site_selector_specific()
         if siteSelection == 00:
             return
         else:
-            await self.siteSelectFunc(availableSites, siteSelection)
+            self.siteSelectFunc(availableSites, siteSelection)
 
 
 
-    async def edit_view_config(self):
-        
-        def flask_app_edit_config():
-            edit_config_app = Flask(__name__)
 
-            edit_config_app_port = random.randint(1024,65535)
-            webbrowser.open_new(f'http://127.0.0.1:{edit_config_app_port}')
 
-            @edit_config_app.route('/')
-            def edit_config_route():
+def start_server():
+
+
+    def server(port):
+        main_flask_server = Flask(__name__)
+
+        # Captcha
+        @main_flask_server.route('/captcha')
+        def captcha_main_route():
+            sites = []
+            with open('./data/captcha/tokens.json') as cap_data:
+                cap_data = json.loads(cap_data.read())
+
+                for k in cap_data:
+                    sites.append(k)
+            
+                return render_template('captcha.html',captchas=json.dumps(cap_data), sites=sites)
+
+
+        @main_flask_server.route('/start_generating', methods=['POST'])
+        def captcha_gen_route():
+            site = request.form['site'].upper()
+            amount = request.form['amount']
+            proxies = request.form['proxies']
+
+
+            for a in range(int(amount)):
+                siteKey = captcha_configs[site]['siteKey']
+                siteUrl = captcha_configs[site]['url']
+
+                if captcha_configs[site]['type'].lower() == 'v2':
+                    threading.Thread(target=captcha.menuV2,args=(siteKey,siteUrl,proxies,'CAPTCHA',site)).start()
+
+                elif captcha_configs[site]['type'].lower() == 'v3':
+                    threading.Thread(target=captcha.menuV3,args=(siteKey,siteUrl,proxies,'CAPTCHA',site)).start()
+            
+            return redirect('/captcha')
+
+        @main_flask_server.route('/captchas/reset', methods=['GET'])
+        def captcha_reset_route():
+
+            
+            data = {}
+            for k in captcha_configs:
+                if captcha_configs[k]['hasCaptcha'] == True:
+                    data[k.upper()] = []
+
+            with open('./data/captcha/tokens.json','w') as tokenFile:
+                json.dump(data,tokenFile)
+
+
+            
+            return redirect('/captcha')
+
+        # profiles
+        @main_flask_server.route('/profiles')
+        def edit_profile_route():
+            with open('./data/profiles/profiles.json') as profiles_data:
+                profiles_ = json.loads(profiles_data.read())
+                return render_template('profiles.html',profiles=json.dumps(profiles_))
+
+        @main_flask_server.route('/new/profile', methods=['POST'])
+        def edit_profile_route_post_create():
+
+            with open(f'./data/profiles/profiles.json','r') as profileRead:
+                profiles = json.loads(profileRead.read())
+            
+            p = {
+                "profileName":request.form['profile_name'],
+                "firstName":request.form['first_name'],
+                "lastName":request.form['last_name'],
+                "email":request.form['email_address'],
+                "phonePrefix":request.form['phone_prefix'],
+                "phone": request.form['phone'],
+                "house":request.form['house'],
+                "addressOne":request.form['street_address'],
+                "addressTwo":request.form['street_address_2'],
+                "city":request.form['city'],
+                "region":request.form['state'],
+                "country":request.form['country'].split(':')[0],
+                "countryCode":request.form['country'].split(':')[1],
+                "zip":request.form['postal_code'],
+                "card":{
+                    "cardNumber":request.form['card_number'],
+                    "cardMonth":request.form['card_month'],
+                    "cardYear":request.form['card_year'],
+                    "cardCVV":request.form['card_cvv']
+                }
+            }
+            profiles["profiles"].append(p)
+            with open(f'./data/profiles/profiles.json','w') as profileDump:
+                json.dump(profiles, profileDump)
+
+            return redirect('/profiles')
+
+        @main_flask_server.route('/delete/profile', methods=['POST'])
+        def edit_profile_route_delete():
+            if request.method == "POST":
+                arg_profile = str(decodeURIComponent(request.args.get('profile')))
+                new_profiles = {
+                    "profiles":[]
+                }
+                with open(f'./data/profiles/profiles.json','r') as profileRead:
+                    profiles = json.loads(profileRead.read())
+                    for p in profiles['profiles']:
+                        if p['profileName'] == arg_profile:
+                            pass
+                        else:
+                            new_profiles['profiles'].append(p)
+                
+                with open(f'./data/profiles/profiles.json','w') as profileDump:
+                    json.dump(new_profiles, profileDump)
+                
+                return redirect('/profiles')
+
+        @main_flask_server.route('/update/profile', methods=['POST'])
+        def edit_profile_route_post_update():
+
+            with open(f'./data/profiles/profiles.json','r') as profileRead:
+                profiles = json.loads(profileRead.read())
+
+            new_profile_data = {
+                "profileName":request.form['profile_name'],
+                "firstName":request.form['first_name'],
+                "lastName":request.form['last_name'],
+                "email":request.form['email_address'],
+                "phonePrefix":request.form['phone_prefix'],
+                "phone": request.form['phone'],
+                "house":request.form['house'],
+                "addressOne":request.form['street_address'],
+                "addressTwo":request.form['street_address_2'],
+                "city":request.form['city'],
+                "region":request.form['state'],
+                "country":request.form['country'].split(':')[0],
+                "countryCode":request.form['country'].split(':')[1],
+                "zip":request.form['postal_code'],
+                "card":{
+                    "cardNumber":request.form['card_number'],
+                    "cardMonth":request.form['card_month'],
+                    "cardYear":request.form['card_year'],
+                    "cardCVV":request.form['card_cvv']
+                }
+            }
+
+            new_profiles = {
+                "profiles":[]
+            }
+            for p in profiles['profiles']:
+                if str(p['profileName']) == str(new_profile_data['profileName']):
+                    new_profiles['profiles'].append(new_profile_data)
+                else:
+                    new_profiles['profiles'].append(p)
+
+            with open(f'./data/profiles/profiles.json','w') as profileDump:
+                json.dump(new_profiles, profileDump)
+
+
+            return redirect('/profiles')
+
+
+        @main_flask_server.route('/import_profiles', methods=['POST'])
+        def import_profiles_route():
+            file = json.loads(request.files['file'].read().decode('Utf-8'))
+            
+
+            if request.form['keep_existing_profiles'] == 'true':
+                # add to existing profiles
+                with open(f'./data/profiles/profiles.json','r') as profileRead:
+                    profiles = json.loads(profileRead.read())
+
+                for p in file['profiles']:
+                    profiles['profiles'].append(p)
+
+                with open(f'./data/profiles/profiles.json','w') as profileDump:
+                    json.dump(profiles, profileDump)
+
+            else:
+                # replace existing files
+                with open(f'./data/profiles/profiles.json','w') as profileDump:
+                    json.dump(file, profileDump)
+
+            return redirect('/profiles')
+
+
+
+        # config
+        @main_flask_server.route('/configuration', methods=['GET'])
+        def edit_config_route():
+            with open('./data/config.json') as config:
+                config = json.loads(config.read())
+                return render_template('config.html',config=config)
+
+
+        @main_flask_server.route('/update/config', methods=['POST'])
+        def edit_config_route_post():
+            if request.method == 'POST':
                 with open('./data/config.json') as config:
                     config = json.loads(config.read())
-                    return render_template('config.html',config=config)
 
-    
-            @edit_config_app.route('/update/config', methods=['POST'])
-            def edit_config_route_post():
-                if request.method == 'POST':
-                    with open('./data/config.json') as config:
-                        config = json.loads(config.read())
+                    config_updated = {
+                        "key":config["key"],
+                        "checkoutNoise":request.form['checkout_noise'],
+                        "webhook":request.form['webhook'],
+                        "2Captcha":request.form['2cap'],
+                        "capMonster":request.form['cap_mon'],
+                        "captcha":request.form['cap_choice'],
+                        "quickTaskSize":request.form['qt_size'],
+                        "quickTaskProfile":request.form['qt_profile'],
+                        "quickTaskProxies":request.form['qt_proxies'],
+                        "quickTaskDelay":request.form['qt_delay'],
+                        "quickTaskPayment":request.form['qt_payment'],
+                        "quickTaskEmail":request.form['qt_account_email'],
+                        "quickTaskPassword":request.form['qt_account_password']
+                    }
 
-                        config_updated = {
-                            "key":config["key"],
-                            "checkoutNoise":request.form['checkout_noise'],
-                            "webhook":request.form['webhook'],
-                            "2Captcha":request.form['2cap'],
-                            "capMonster":request.form['cap_mon'],
-                            "captcha":request.form['cap_choice'],
-                            "quickTaskSize":request.form['qt_size'],
-                            "quickTaskProfile":request.form['qt_profile'],
-                            "quickTaskProxies":request.form['qt_proxies'],
-                            "quickTaskDelay":request.form['qt_delay'],
-                            "quickTaskPayment":request.form['qt_payment'],
-                            "quickTaskEmail":request.form['qt_account_email'],
-                            "quickTaskPassword":request.form['qt_account_password']
-                        }
+                    with open("./data/config.json","w") as updated:
+                        json.dump(config_updated, updated)
 
-                        with open("./data/config.json","w") as updated:
-                            json.dump(config_updated, updated)
-                
-                # with open('./data/config.json') as config:
-                #     config = json.loads(config.read())
-                #     return render_template('config.html',config=config)
-                return redirect('/')
+            return redirect('/configuration')
             
-            @edit_config_app.route('/config/webhook/test', methods=['GET'])
-            def edit_config_route_webhook_test():
+        @main_flask_server.route('/config/webhook/test', methods=['POST'])
+        def edit_config_route_webhook_test():
+            if request.method == "POST":
                 Webhook.test(webhook=decodeURIComponent(request.args.get('webhook')))
-                
-                return redirect('/')
-                        
+                return redirect('/configuration')
 
-            edit_config_app.run(port=edit_config_app_port)
-
-
-            
         
-        t = threading.Thread(target=flask_app_edit_config,daemon=True).start()
-
-        input('[ENTER] to return to menu...')
-        threading.currentThread().handled = True
-        await self.menu()
-
-
-    async def view_edit_create_profiles(self):
-
-        def flask_app_profiles():
-            profiles_config_app = Flask(__name__)
-
-            profiles_config_app_port = random.randint(1024,65535)
-            webbrowser.open_new(f'http://127.0.0.1:{profiles_config_app_port}')
-
-            @profiles_config_app.route('/')
-            def edit_config_route():
-                with open('./data/profiles/profiles.json') as profiles_data:
-                    profiles_ = json.loads(profiles_data.read())
-                    return render_template('profiles.html',profiles=profiles_)
-
+        main_flask_server.run(port=port)
     
-                        
+    port = random.randint(1024,65535)
+    t = threading.Thread(target=server,daemon=True, args=(port,)).start()
+    return port
 
-            profiles_config_app.run(port=profiles_config_app_port)
-
-
-            
-        
-        t = threading.Thread(target=flask_app_profiles,daemon=True).start()
-
-        input('[ENTER] to return to menu...')
-        threading.currentThread().handled = True
-        await self.menu()
-
-
-async def main():
-    asyncio.run(Menu())
 
 
 if __name__ == "__main__":
-    asyncio.run(Menu().base())
+    dataFiles.execute()
+
+    with open('./data/config.json') as config:
+        config = json.loads(config.read())
+        if config["key"] == "":
+            key = input("Enter Your License Key ==> ")
+            config["key"] = key
+            with open("./data/config.json","w") as updated:
+                json.dump(config, updated)
+
+            auth = auth.auth(config["key"], uuid.getnode())
+            if auth["STATUS"] == 1:
+                k = config['key']
+                print(colored(f'[ {k} ] Key Authorised','green', attrs=["bold"]))
+                Menu().base()
+
+            if auth["STATUS"] == 0:
+                print(colored('Failed to auth key. Closing...','red', attrs=["bold"]))
+                config["key"] = ""
+                with open("./data/config.json","w") as updated:
+                    json.dump(config, updated)
+
+                time.sleep(3)
+                os._exit(0)
+
+        else:
+            auth = auth.auth(config["key"], uuid.getnode())
+            if auth["STATUS"] == 1:
+                k = config['key']
+                print(colored(f'[ {k} ] Key Authorised','green', attrs=["bold"]))
+                Menu().base()
+                # asyncio.run(Menu().base())
+
+            if auth["STATUS"] == 0:
+                print(colored('Failed to auth key. Closing...','red', attrs=["bold"]))
+                config["key"] = ""
+                with open("./data/config.json","w") as updated:
+                    json.dump(config, updated)
+                time.sleep(3)
+                os._exit(0)
