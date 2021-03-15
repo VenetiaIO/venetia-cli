@@ -45,9 +45,9 @@ def injection(session, response):
   else:
     return response
 
-async def scraper():
-  settings = await loadSettings()
-  if settings["captcha"].lower() == "monster":
+def scraper():
+  settings = loadSettings()
+  if settings["captcha"].strip().lower() == "monster":
     apiKey = settings["capMonster"]
     provider = 'capmonster'
   else:
@@ -57,6 +57,7 @@ async def scraper():
   scraper = cloudscraper.create_scraper(
       requestPostHook=injection,
       interpreter='nodejs',
+      # session=session,
       browser={
           'browser': 'chrome',
           'mobile': False,
@@ -70,7 +71,7 @@ async def scraper():
   )
   return scraper
 
-async def footlocker_snare(url):
+def footlocker_snare(url):
   try:
       response = requests.get(f'https://venetiacli.io/snare?url={url}',headers={
           "apiKey": "27acc458-f01a-48f8-88b8-06583fb39056",
@@ -101,7 +102,7 @@ def offspring_session(pid):
 
 
 
-async def loadProfile(profile):
+def loadProfile(profile):
     profileFound = []
     with open(f'./data/profiles/profiles.json') as data:
         profiles = json.loads(data.read())
@@ -148,7 +149,7 @@ def updateCheckouts(product, site, size, price, image, monitor_input, checkout_u
   except:
     pass
 
-async def loadProxy(proxies,taskID, SITE):
+def loadProxy(proxies,taskID, SITE):
     if proxies == "":
         return None
     elif proxies != "":
@@ -189,20 +190,20 @@ async def loadProxy(proxies,taskID, SITE):
         return None
 
 
-async def createId(length):
+def createId(length):
     return ''.join(random.choice(string.digits) for i in range(length))
 
 def randomString(length):
     return ''.join(random.choice(string.ascii_lowercase) for i in range(length))
 
-async def loadSettings():
+def loadSettings():
   with open(f'./data/config.json') as settings:
     settings = json.loads(settings.read())
     return settings
 
 
-async def getUser():
-  settings = await loadSettings()
+def getUser():
+  settings = loadSettings()
 
   key = settings["key"]
   headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
@@ -213,7 +214,7 @@ async def getUser():
       return None
 
 
-async def updateConsoleTitle(carted,checkedOut, SITE):
+def updateConsoleTitle(carted,checkedOut, SITE):
     if carted == True:
         try:
           title = win32console.GetConsoleTitle()
@@ -270,9 +271,9 @@ def loadToken(SITE):
         return 'empty'
 
 
-async def sendNotification(site, text):
+def sendNotification(site, text):
     try:
-        settings = await loadSettings()
+        settings = loadSettings()
         noise = settings["checkoutNoise"]
     except:
         noise = ""
@@ -321,7 +322,7 @@ def birthday():
     }
 
 
-async def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
+def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
     cookieList = []
     cookieString = ''
     for c in session.cookies:
@@ -346,12 +347,12 @@ async def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
             bytes(str(checkoutURL), 'utf-8'))
         encodedURL = str(encodedURL, 'utf8')
     
-        urlId = await createId(15)
-        r = await requests.post('https://venetiacli.io/checkout/setCookies',headers={"apikey":"27acc458-f01a-48f8-88b8-06583fb39056"},data={"viewId":urlId,"cookies":encoded,"redirect":encodedURL, "productTitle":prodTitle, "productImage":prodImage, "productPrice":prodPrice})
+        urlId = createId(15)
+        r = requests.post('https://venetiacli.io/checkout/setCookies',headers={"apikey":"27acc458-f01a-48f8-88b8-06583fb39056"},data={"viewId":urlId,"cookies":encoded,"redirect":encodedURL, "productTitle":prodTitle, "productImage":prodImage, "productPrice":prodPrice})
         url = 'https://venetiacli.io/checkout/retrieve/?id={}'.format(urlId)
         return url
     except Exception as e:
-      await storeCookies(url,session)
+      storeCookies(url,session)
     
 
 def b64Decode(text):

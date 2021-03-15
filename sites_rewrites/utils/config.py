@@ -5,7 +5,7 @@ from sites.allike import ALLIKE
 # from sites.titolo import TITOLO
 # from sites.grosbasket import GROSBASKET
 # from sites.airness import AIRNESS
-# from sites.footasylum import FOOTASYLUM
+from sites.footasylum import FOOTASYLUM
 # from sites.holypop import HOLYPOP
 # from sites.schuh import SCHUH
 # from sites.starcow import STARCOW
@@ -28,7 +28,7 @@ from sites.allike import ALLIKE
 # from sites.fenom import FENOM
 # from sites.offspring import OFFSPRING
 # from sites.office import OFFICE
-from sites.footlocker_old import FOOTLOCKER_OLD
+# from sites.footlocker_old import FOOTLOCKER_OLD
 # from sites.footlocker_new import FOOTLOCKER_NEW
 # from sites.ambush import AMBUSH
 
@@ -39,7 +39,7 @@ sites = {
     # "QUEENS":QUEENS,
     # "TITOLO":TITOLO, #WATERFALL MONITOR
     # "AIRNESS":AIRNESS,
-    # "FOOTASYLUM":FOOTASYLUM, #WATERFALL MONITOR
+    "FOOTASYLUM":FOOTASYLUM, #WATERFALL MONITOR
     # "HOLYPOP":HOLYPOP,
     "ALLIKE":ALLIKE, #WATERFALL MONITOR
     # "GROSBASKET":GROSBASKET,
@@ -62,7 +62,7 @@ sites = {
     # "FENOM":FENOM,
     # "OFFSPRING":OFFSPRING, #WATERFALL MONITOR
     # "OFFICE":OFFICE, #WATERFALL MONITOR
-    "FOOTLOCKER_OLD":FOOTLOCKER_OLD,
+    # "FOOTLOCKER_OLD":FOOTLOCKER_OLD,
     # "FOOTLOCKER_NEW":FOOTLOCKER_NEW,
     # "AMBUSH":AMBUSH, #WATERFALL MONITOR,
     # "JD":JD
@@ -91,6 +91,8 @@ def waterfall_sites(): return [
                             ]
 
 
+# types
+# V2, V3,
 captcha_configs = {
     "SVD":{
         "hasCaptcha":False,

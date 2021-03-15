@@ -5,7 +5,7 @@ import sys
 
 class Updater:
     @staticmethod
-    async def checkForUpdate(currentVersion):
+    def checkForUpdate(currentVersion):
         response = requests.get('https://venetiacli.io/venetia-cli-latest')
         if response.status_code == 200:
             if currentVersion == response.json()["version"]:
@@ -16,7 +16,7 @@ class Updater:
             return {"latest":False, "error":True}
 
     @staticmethod
-    async def downloadLatest(VERSION):
+    def downloadLatest(VERSION):
         #print(os.path.realpath(__file__))
         for file in os.listdir(os.getcwd()):
             if 'venetia' in file.lower():

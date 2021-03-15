@@ -159,7 +159,7 @@ class Menu():
         pass
     
     def base(self):
-       checkUpdate()
+        checkUpdate()
 
         threading.Thread(target=QT,daemon=True).start()
         
@@ -184,10 +184,12 @@ class Menu():
             self.option_main_menu_choice = int(self.menu())
             if self.option_main_menu_choice == 1:
                 self.startAllTasks()
+                break
                 # Start All Tasks
 
             elif self.option_main_menu_choice == 2:
                 self.startSpecificTasks()
+                break
                 # Start Specific Tasks
 
             elif self.option_main_menu_choice == 3:
@@ -402,7 +404,7 @@ class Menu():
                             
                 else:
                     for t in main_tasks:
-                            t.start()
+                        t.start()
     
     def siteSelectFunc(self, availableSites, siteSelection):
         def menu_selector_waterfall():
