@@ -509,7 +509,6 @@ class Menu():
                             if len(str(i)) == 4:
                                 taskName = f'Task {i}'
                             i = i + 1
-                            row['PROXIES'] = 'proxies'
                             row["ACCOUNT EMAIL"] = acc.split(':')[0]
                             row["ACCOUNT PASSWORD"] = acc.split(':')[1]
                             row["SITE"] = key_chosen

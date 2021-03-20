@@ -101,6 +101,7 @@ class SNIPES:
         cookie_obj2 = requests.cookies.create_cookie(domain=f'www.snipes.{self.snipesRegion}',name='_pxvid',value=cookies['vid'])
         self.session.cookies.set_cookie(cookie_obj)
         self.session.cookies.set_cookie(cookie_obj2)
+        
         self.session.headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -571,6 +572,7 @@ class SNIPES:
             self.methodId = 'home-delivery'
         else:
             self.methodId = 'home-delivery_{}'.format(profile['countryCode'].lower())
+            
         payload = {
             'originalShipmentUUID': self.shipmentUUID,
             'shipmentUUID': self.shipmentUUID,

@@ -84,6 +84,7 @@ class TITOLO:
                     self.productTitle = soup.find("meta",{"property":"og:image:alt"})["content"]
                     self.productImage = soup.find("meta",{"property":"og:image"})["content"]
                     self.productPrice = soup.find("span",{"class":"price"}).text
+                    
                     self.atcUrl = soup.find("form", {"id": "product_addtocart_form"})["action"].replace(',',',,')
                     self.formKey = soup.find("input", {"name": "form_key"})["value"]
                     self.productId = soup.find("input", {"name": "product_id"})["value"]
@@ -617,7 +618,7 @@ class TITOLO:
 
         payload = {
             "orderId": self.orderId,
-            "formValues":[{"key":"pmethod","value":"VIS"}]
+            "formValues":[{"key":"pmethod","value":val}]
         }
 
         try:

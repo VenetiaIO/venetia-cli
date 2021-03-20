@@ -156,6 +156,7 @@ def loadProxy(proxies,taskID, SITE):
       if '.txt' in proxies: pass
       else: proxies = proxies + '.txt'
 
+
       try:
           with open(f'./proxies/{proxies}', 'r') as proxyIn:
               try:
@@ -175,15 +176,15 @@ def loadProxy(proxies,taskID, SITE):
 
       if len(splitted) == 2:
           proxy = {
-            'http://':'http://{}'.format(splitted),
-            'https://':'http://{}'.format(splitted)
+            'http':'http://{}'.format(splitted),
+            'https':'http://{}'.format(splitted)
           }
           return proxy
       
       elif len(splitted) == 4:
           proxy = {
-            'http://':'http://{}:{}@{}:{}'.format(splitted[2], splitted[3], splitted[0], splitted[1]),
-            'https://':'http://{}:{}@{}:{}'.format(splitted[2], splitted[3], splitted[0], splitted[1])
+            'http':'http://{}:{}@{}:{}'.format(splitted[2], splitted[3], splitted[0], splitted[1]),
+            'https':'http://{}:{}@{}:{}'.format(splitted[2], splitted[3], splitted[0], splitted[1])
           }
           return proxy
       else:

@@ -14,13 +14,27 @@ import string
 from urllib3.exceptions import HTTPError
 import csv
 import tls as client
+from requests_toolbelt import MultipartEncoder
 
 from utils.captcha import captcha
 from utils.logger import logger
 from utils.webhook import Webhook
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, scraper)
-from utils.config import *
+from utils.functions import (
+    loadSettings,
+    loadProfile,
+    loadProxy,
+    createId,
+    loadCookie,
+    loadToken,
+    sendNotification,
+    injection,
+    storeCookies,
+    updateConsoleTitle,
+    scraper,
+    footlocker_snare
+)
+import utils.config as config
 
 SITE = 'ALLIKE'
 class ALLIKE:
@@ -61,6 +75,9 @@ class ALLIKE:
         self.taskID = taskName
         self.rowNumber = rowNumber
 
+        if self.rowNumber != 'qt': 
+            threading.Thread(target=self.task_checker,daemon=True).start()
+
         try:
             # self.session = client.Session(browser=client.Fingerprint.CHROME_83)
             self.session = scraper()
@@ -82,6 +99,8 @@ class ALLIKE:
             "proxy":"n/a",
             "product_url":self.task['PRODUCT']
         }
+
+        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
 
         self.profile = loadProfile(self.task["PROFILE"])
         if self.profile == None:
@@ -119,7 +138,7 @@ class ALLIKE:
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            if response.status == 200:
+            if response.status_code == 200:
                 self.start = time.time()
 
                 self.warning("Retrieved Product")
@@ -168,7 +187,6 @@ class ALLIKE:
                                         self.sizeID = size.split(':')[2]
                                         
                                         self.warning(f"Found Size => {self.size}")
-                                        return
             
                         else:
                             selected = random.choice(allSizes)
@@ -177,7 +195,6 @@ class ALLIKE:
                             self.sizeID = selected.split(":")[2]
                             
                             self.warning(f"Found Size => {self.size}")
-                            return
 
                         
 
@@ -188,9 +205,11 @@ class ALLIKE:
                     self.error("Failed to parse product data (maybe OOS)")
                     time.sleep(int(self.task['DELAY']))
                     continue
+
+                return
                     
             else:
-                self.error(f"Failed to get product [{str(response.status)}]. Retrying...")
+                self.error(f"Failed to get product [{str(response.status_code)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
     
@@ -198,25 +217,33 @@ class ALLIKE:
         while True:
             self.prepare("Adding to cart...")
             
+            boundary = ''.join(random.choices(string.ascii_uppercase + string.digits + string.ascii_lowercase, k=16))
             payload = {
-                'isAjax': 1,
+                'isAjax':'1',
                 'form_key': self.formKey,
                 'product': self.productId,
                 'related_product': '',
                 f'super_attribute[{self.attributeId}]': self.sizeID,
-                'return_url': ''
+                'product_id': '',
+                'email_notification': '',
+                'parent_id': self.productId
+
             }
+            payload_encoded = MultipartEncoder(payload, boundary=f'----WebKitFormBoundary{boundary}')
+            
 
             try:
-                response = self.session.post(self.atcUrl, data=payload, headers={
+                response = self.session.post(self.atcUrl, data=payload_encoded.to_string(), headers={
                     'authority': 'www.allikestore.com',
                     'accept-language': 'en-US,en;q=0.9',
+                    'content-type': f'multipart/form-data; boundary=----WebKitFormBoundary{boundary}',
                     'origin': 'https://www.allikestore.com',
                     'referer': self.task["PRODUCT"],
                     'sec-fetch-dest': 'empty',
                     'sec-fetch-mode': 'cors',
                     'sec-fetch-site': 'same-origin',
-                    'x-requested-with': 'XMLHttpRequest'
+                    'x-requested-with': 'XMLHttpRequest',
+                    'accept':'text/javascript, application/javascript, application/ecmascript, application/x-ecmascript, */*; q=0.01'
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
@@ -225,23 +252,24 @@ class ALLIKE:
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 continue
 
+
             try:
                 splitText = response.text.split('({')[1].split('})')[0]
                 data = json.loads('{' + splitText + '}')
-                status = data["status"]
+                status_code = data["status"]
             except Exception as e:
                 log.info(e)
-                self.error("Failed to cart. Retrying...")
+                self.error("Failed to cart [failed to parse response]. Retrying...")
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            if response.status == 200 and status == "SUCCESS":
+            if response.status_code == 200 and status_code == "SUCCESS":
                 self.success("Added to cart!")
                 updateConsoleTitle(True,False,SITE)
                 return
             
             else:
-                self.error(f"Failed to cart [{str(response.status)}]. Retrying...")
+                self.error(f"Failed to cart [{str(response.status_code)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
     
@@ -254,7 +282,11 @@ class ALLIKE:
                     'authority': 'www.allikestore.com',
                     'referer': 'https://www.allikestore.com/default/checkout/onepage/',
                     'x-requested-with': 'XMLHttpRequest',
-                    'accept':'text/javascript, text/html, application/xml, text/xml, */*'
+                    'x-prototype-version': '1.7',
+                    'accept':'text/javascript, text/html, application/xml, text/xml, */*',
+                    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'accept-encoding': 'gzip, deflate, br',
+                    'accept-language': 'en-US,en;q=0.9'
                 })
 
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -264,68 +296,84 @@ class ALLIKE:
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 continue
 
-            if response.status == 200:
+            if response.status_code == 200:
                 self.warning("Set checkout method")
                 return
             else:
-                self.error(f"Failed to set checkout method [{str(response.status)}]. Retrying...")
+                self.error(f"Failed to set checkout method [{str(response.status_code)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
 
     def shipping(self):
         while True:
             self.prepare("Submitting shipping...")
-
-            if captcha_configs[SITE]['siteKey'].lower() == 'v3':
-                capToken = captcha.v3(captcha_configs[SITE]['siteKey'],captcha_configs[SITE]['url'],self.session.proxies,SITE,self.taskID)
-            elif captcha_configs[SITE]['siteKey'].lower() == 'v2':
-                capToken = captcha.v2(captcha_configs[SITE]['siteKey'],captcha_configs[SITE]['url'],self.session.proxies,SITE,self.taskID)
+            
+            if config.captcha_configs[SITE]['type'].lower() == 'v3':
+                capToken = captcha.v3(config.captcha_configs[SITE]['siteKey'],config.captcha_configs[SITE]['url'],self.session.proxies,SITE,self.taskID)
+            elif config.captcha_configs[SITE]['type'].lower() == 'v2':
+                capToken = captcha.v2(config.captcha_configs[SITE]['siteKey'],config.captcha_configs[SITE]['url'],self.session.proxies,SITE,self.taskID)
 
             try:
                 day = random.randint(1,29)
                 month = random.randint(1,12)
                 year = random.randint(1970,2000)
-                payload = {
-                    'billing[address_id]': '',
-                    'billing[firstname]': self.profile["firstName"],
-                    'billing[lastname]': self.profile["lastName"],
-                    'billing[company]': '',
-                    'billing[email]': self.profile["email"],
-                    'billing[street][]': self.profile["house"] + " " + self.profile["addressOne"],
-                    'billing[city]': self.profile["city"],
-                    'billing[region_id]': '',
-                    'billing[region]': self.profile["region"],
-                    'billing[postcode]': self.profile["zip"],
-                    'billing[country_id]': self.profile["countryCode"],
-                    'billing[telephone]': self.profile["phone"],
-                    'billing[fax]': '',
-                    'billing[month]': month,
-                    'billing[day]': day,
-                    'billing[year]': year,
-                    'billing[dob]': '{}/{}/{}'.format(month,day,year),
-                    'billing[customer_password]': '',
-                    'billing[confirm_password]': '',
-                    'billing[save_in_address_book]': '1',
-                    'billing[use_for_shipping]': '1',
-                    'form_key': self.formKey,
-                    'g-recaptcha-response':capToken
-                }
-            except:
-                self.error("Failed to construct shipping form. Retrying...")
+
+                fname = self.profile["firstName"]
+                lname = self.profile["lastName"]
+                email = self.profile["email"]
+                street1 = self.profile["house"] + " " + self.profile["addressOne"]
+                street2 = self.profile["addressTwo"]
+                city = self.profile["city"]
+                region = self.profile["region"]
+                zip_ = self.profile["zip"]
+                cc = self.profile["countryCode"]
+                phone = self.profile["phone"]
+                payload = (
+                    'billing[address_id]='
+                    f'&billing[firstname]={fname}'
+                    f'&billing[lastname]={lname}'
+                    f'&billing[company]='
+                    f'&billing[email]={email}'
+                    f'&billing[street][]={street1}'
+                    f'&billing[street][]={street2}'
+                    f'&billing[city]={city}'
+                    f'&billing[region_id]='
+                    f'&billing[region]={region}'
+                    f'&billing[postcode]={zip_}'
+                    f'&billing[country_id]={cc}'
+                    f'&billing[telephone]={phone}'
+                    f'&billing[fax]='
+                    f'&billing[month]={month}'
+                    f'&billing[day]={day}'
+                    f'&billing[year]={year}'
+                    f'&billing[dob]={day}.{month}.{year}'
+                    '&billing[customer_password]='
+                    '&billing[confirm_password]='
+                    '&billing[save_in_address_book]=1'
+                    f'&g-recaptcha-response={capToken}'
+                    '&billing[use_for_shipping]=1'
+                    f'&form_key={self.formKey}'
+                    
+                )
+            except Exception as e:
+                self.error(f"Failed to construct shipping form ({e}). Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
                 
             try:
                 response = self.session.post('https://www.allikestore.com/default/checkout/onepage/saveBilling/', data=payload, headers={
                     'authority': 'www.allikestore.com',
-                    'accept-language': 'en-US,en;q=0.9',
                     'origin': 'https://www.allikestore.com',
                     'referer': 'https://www.allikestore.com/default/checkout/onepage/',
                     'sec-fetch-dest': 'empty',
                     'sec-fetch-mode': 'cors',
                     'sec-fetch-site': 'same-origin',
                     'x-requested-with': 'XMLHttpRequest',
-                    'accept': 'text/javascript, text/html, application/xml, text/xml, */*'
+                    'x-prototype-version': '1.7',
+                    'accept': 'text/javascript, text/html, application/xml, text/xml, */*',
+                    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    # 'accept-encoding': 'gzip, deflate, br',
+                    'accept-language': 'en-US,en;q=0.9'
                 })
 
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -335,21 +383,24 @@ class ALLIKE:
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 continue
 
-            if response.status == 200:
+        
+            if response.status_code == 200:
                 try:
                     shippingOptions = json.loads(response.text)
                     shippingHtml = shippingOptions["update_section"]["html"]
                     soup = BeautifulSoup(shippingHtml,"html.parser")
                     self.shippingMethods = soup.find_all('input',{'name':'shipping_method'})
-
-                    self.warning("Successfully set shipping")
-                    return
-                except Exception:
-                    self.error(f"Failed to set shipping. Retrying...")
+                except Exception as e:
+                    log.info(e)
+                    self.error(f"Failed to set shipping [failed to parse response]. Retrying...")
                     time.sleep(int(self.task["DELAY"]))
                     continue
+
+                self.warning("Successfully set shipping")
+                return
+
             else:
-                self.error(f"Failed to set shipping [{str(response.status)}]. Retrying...")
+                self.error(f"Failed to set shipping [{str(response.status_code)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
 
@@ -379,7 +430,7 @@ class ALLIKE:
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 continue
 
-            if response.status == 200:
+            if response.status_code == 200:
                 self.warning("Set shipping method")
 
 
@@ -392,13 +443,13 @@ class ALLIKE:
                         self.aid = paymentConfig["gateway"]["4"]["aid"]
                         self.portalid = paymentConfig["gateway"]["4"]["portalid"]
                     except Exception:
-                        self.error("Failed to parse response")
+                        self.error("Failed to set shipping method [failed to parse response]")
                         time.sleep(int(self.task['DELAY']))
                         continue
     
                 return
             else:
-                self.error(f"Failed to set shipping method [{str(response.status)}]. Retrying...")
+                self.error(f"Failed to set shipping method [{str(response.status_code)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
     
@@ -427,7 +478,7 @@ class ALLIKE:
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 continue
 
-            if response.status == 200:
+            if response.status_code == 200:
                 
                 try:
                     response2 = self.session.get('https://www.allikestore.com/default/paypal/express/start/', headers={
@@ -447,7 +498,7 @@ class ALLIKE:
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     continue
 
-                if response2.status in [200,302] and "paypal" in response2.url:
+                if response2.status_code in [200,302] and "paypal" in response2.url:
                     self.end = time.time() - self.start
                     self.webhookData['speed'] = self.end
 
@@ -463,13 +514,13 @@ class ALLIKE:
                     return
                 
                 else:
-                    self.error(f"Failed to get paypal checkout [{str(response.status)}]. Retrying...")
+                    self.error(f"Failed to get paypal checkout [{str(response.status_code)}]. Retrying...")
                     time.sleep(int(self.task['DELAY']))
                     continue
 
                 
             else:
-                self.error(f"Failed to get paypal checkout [{str(response.status)}]. Retrying...")
+                self.error(f"Failed to get paypal checkout [{str(response.status_code)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
 
@@ -518,7 +569,7 @@ class ALLIKE:
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 continue
             
-            if response.status == 200:
+            if response.status_code == 200:
                 try:
                     split = response.text.split('PayoneGlobals.callback(')[1]
                     secure = json.loads(split.split(');')[0])
@@ -558,7 +609,7 @@ class ALLIKE:
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                     continue
 
-                if response2.status == 200:
+                if response2.status_code == 200:
                     try:
                         savePayload = {
                             'payment[method]': 'payone_creditcard',
@@ -597,17 +648,17 @@ class ALLIKE:
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                         continue
                     
-                    if response3.status == 200:
+                    if response3.status_code == 200:
                         try:
                             response3_data = json.loads(response3.text)
-                            status = response3_data["success"]
+                            status_code = response3_data["success"]
                             redirect = response["redirect"]
                         except:
                             self.error("Failed to complete card checkout. Retrying...")
                             time.sleep(int(self.task["DELAY"]))
                             continue
 
-                        if status == True:
+                        if status_code == True:
                             self.end = time.time() - self.start
                             self.webhookData['speed'] = self.end
 
@@ -641,7 +692,9 @@ class ALLIKE:
         while True:
             
             self.webhookData['proxy'] = self.session.proxies
-            sendNotification(SITE,self.productTitle)
+
+            sendNotification(SITE,self.webhookData['product'])
+
             try:
                 Webhook.success(
                     webhook=loadSettings()["webhook"],
@@ -650,7 +703,7 @@ class ALLIKE:
                     image=self.webhookData['image'],
                     title=self.webhookData['product'],
                     size=self.size,
-                    price=self.productPrice,
+                    price=self.webhookData['price'],
                     paymentMethod=self.task['PAYMENT'].strip().title(),
                     product=self.webhookData['product_url'],
                     profile=self.task["PROFILE"],

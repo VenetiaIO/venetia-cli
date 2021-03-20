@@ -6,19 +6,16 @@ import random
 import json
 import threading
 from urllib3.exceptions import HTTPError
-import asyncio
+# import asyncio
 
-async def loadSettings():
+def loadSettings():
     with open(f'./data/config.json') as settings:
         settings = json.loads(settings.read())
         return settings
 
-def loadSettings2():
-    with open(f'./data/config.json') as settings:
-        settings = json.loads(settings.read())
-        return settings
 
-async def loadProxy(proxies,taskID, SITE):
+
+def loadProxy(proxies,taskID, SITE):
     if proxies == "":
         return None
     elif proxies != "":
@@ -44,41 +41,16 @@ async def loadProxy(proxies,taskID, SITE):
             }
         return proxies
 
-def loadProxy2(proxies,taskID, SITE):
-    if proxies == "":
-        return None
-    elif proxies != "":
-        with open(f'./proxies/{proxies}.txt', 'r') as proxyIn:
-            proxyInput = proxyIn.read().splitlines()
-    
-        proxyList = [i for i in proxyInput]
-        p = random.choice(proxyList)
-        p = p.split(':')
-        try:
-            proxies = {
-                "address":p[0],
-                "port":p[1],
-                "login":p[2],
-                "passw":p[3]
-            }
-        except:
-            proxies = {
-                "address":p[0],
-                "port":p[1],
-                "login":'',
-                "passw":''
-            }
-        return proxies
 
 
 class capMonster:
     @staticmethod 
-    async def v2(sitekey, url, proxy, SITE,taskID):
-        await logger.info(SITE,taskID,'Solving Captcha...')
-        settings = await loadSettings()
+    def v2(sitekey, url, proxy, SITE,taskID):
+        logger.info(SITE,taskID,'Solving Captcha...')
+        settings = loadSettings()
         apiKey = settings["capMonster"]
 
-        proxy_http = await loadProxy(proxy, taskID, SITE)
+        proxy_http = loadProxy(proxy, taskID, SITE)
         
         address = proxy_http["address"]
         port = proxy_http["port"]
@@ -106,8 +78,8 @@ class capMonster:
         try:
             r = requests.post('https://api.capmonster.cloud/createTask', json=task)
         except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            await logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-            await v2(sitekey, url, proxy, SITE,taskID)
+            logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+            v2(sitekey, url, proxy, SITE,taskID)
 
 
         if r.status_code == 200 and r.json()['errorId'] == 0:
@@ -118,16 +90,16 @@ class capMonster:
             try:
                 response = requests.post('https://api.capmonster.cloud/getTaskResult', json=data)
             except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                await logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-                await v2(sitekey, url, proxy, SITE,taskID)
+                logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                v2(sitekey, url, proxy, SITE,taskID)
 
             while response.json()["status"] != 'ready':
                 try:
                     response = requests.post('https://api.capmonster.cloud/getTaskResult', json=data)
                 except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                    await logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-                    await v2(sitekey, url, proxy, SITE,taskID)
-                await asyncio.sleep(1)
+                    logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                    v2(sitekey, url, proxy, SITE,taskID)
+                time.sleep(1)
 
             return response.json()['solution']['gRecaptchaResponse']
         
@@ -136,9 +108,9 @@ class capMonster:
 
 
     @staticmethod 
-    async def v3(sitekey, url, proxy, SITE,taskID):
-        await logger.info(SITE,taskID,'Solving Captcha...')
-        settings = await loadSettings()
+    def v3(sitekey, url, proxy, SITE,taskID):
+        logger.info(SITE,taskID,'Solving Captcha...')
+        settings = loadSettings()
         apiKey = settings["capMonster"]
    
 
@@ -157,8 +129,8 @@ class capMonster:
         try:
             r = requests.post('https://api.capmonster.cloud/createTask', json=task)
         except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            await logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-            await v3(sitekey, url, proxy, SITE,taskID)
+            logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+            v3(sitekey, url, proxy, SITE,taskID)
 
         if r.status_code == 200 and r.json()['errorId'] == 0:
             data = {
@@ -168,28 +140,28 @@ class capMonster:
             try:
                 response = requests.post('https://api.capmonster.cloud/getTaskResult', json=data)
             except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                await logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-                await v3(sitekey, url, proxy, SITE,taskID)
+                logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                v3(sitekey, url, proxy, SITE,taskID)
 
             while response.json()["status"] != 'ready':
                 try:
                     response = requests.post('https://api.capmonster.cloud/getTaskResult', json=data)
                 except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                    await logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-                    await v3(sitekey, url, proxy, SITE,taskID)
-                await asyncio.sleep(1)
+                    logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                    v3(sitekey, url, proxy, SITE,taskID)
+                time.sleep(1)
 
     
             return response.json()['solution']['gRecaptchaResponse']
     
 
     @staticmethod 
-    async def hcaptcha(sitekey, url, proxy, SITE,taskID):
-        await logger.info(SITE,taskID,'Solving Captcha...')
-        settings = await loadSettings()
+    def hcaptcha(sitekey, url, proxy, SITE,taskID):
+        logger.info(SITE,taskID,'Solving Captcha...')
+        settings = loadSettings()
         apiKey = settings["capMonster"]   
 
-        proxy_http = await loadProxy(proxy, taskID, SITE)['http'].split('http://')[1].split(':')
+        proxy_http = loadProxy(proxy, taskID, SITE)['http'].split('http://')[1].split(':')
         if len(proxy_http) == 4:
             address = proxy_http[2]
             port = proxy_http[3]
@@ -220,8 +192,8 @@ class capMonster:
         try:
             r = requests.post('https://api.capmonster.cloud/createTask', json=task)
         except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            await logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-            await hcaptcha(sitekey, url, proxy, SITE,taskID)
+            logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+            hcaptcha(sitekey, url, proxy, SITE,taskID)
 
         if r.status_code == 200 and r.json()['errorId'] == 0:
             data = {
@@ -231,16 +203,16 @@ class capMonster:
             try:
                 response = requests.post('https://api.capmonster.cloud/getTaskResult', json=data)
             except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                await logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-                await hcaptcha(sitekey, url, proxy, SITE,taskID)
+                logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                hcaptcha(sitekey, url, proxy, SITE,taskID)
 
             while response.json()["status"] != 'ready':
                 try:
                     response = requests.post('https://api.capmonster.cloud/getTaskResult', json=data)
                 except(Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                    await logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
-                    await hcaptcha(sitekey, url, proxy, SITE,taskID)
-                await asyncio.sleep(1)
+                    logger.error(SITE,taskID,'Failed to get captcha. Retrying...')
+                    hcaptcha(sitekey, url, proxy, SITE,taskID)
+                time.sleep(1)
 
     
             return response.json()['solution']['gRecaptchaResponse']
@@ -249,11 +221,11 @@ class capMonster:
 
     @staticmethod 
     def menuV2(sitekey, url, proxy, taskID, SITE):
-        # await logger.info(SITE,taskID,'Solving Captcha...')
-        settings = loadSettings2()
+        # logger.info(SITE,taskID,'Solving Captcha...')
+        settings = loadSettings()
         apiKey = settings["capMonster"]
 
-        proxy_http = loadProxy2(proxy, taskID, SITE)['https'].split('http://')[1].split(':')
+        proxy_http = loadProxy(proxy, taskID, SITE)['https'].split('http://')[1].split(':')
         if len(proxy_http) == 4:
             address = proxy_http[2]
             port = proxy_http[3]
@@ -315,17 +287,17 @@ class capMonster:
             with open('./data/captcha/tokens.json','w') as output:
                 json.dump(tokens,output)
     
-            # await logger.success(SITE,taskID,'Captcha Solved')
+            # logger.success(SITE,taskID,'Captcha Solved')
             # threading.currentThread().handled = True
             return 'complete'
 
 
     @staticmethod 
     def menuV3(sitekey, url, proxy, taskID, SITE):
-        settings = loadSettings2()
+        settings = loadSettings()
         apiKey = settings["capMonster"]
 
-        # proxy_http = await loadProxy(proxy, taskID, SITE)['https'].split('http://')[1].split(':')
+        # proxy_http = loadProxy(proxy, taskID, SITE)['https'].split('http://')[1].split(':')
         # if len(proxy_http) == 4:
         #     address = proxy_http[2]
         #     port = proxy_http[3]
@@ -386,7 +358,7 @@ class capMonster:
             with open('./data/captcha/tokens.json','w') as output:
                 json.dump(tokens,output)
     
-            # await logger.success(SITE,taskID,'Captcha Solved')
+            # logger.success(SITE,taskID,'Captcha Solved')
             # threading.currentThread().handled = True
             return 'complete'
             

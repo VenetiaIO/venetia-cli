@@ -1,8 +1,8 @@
 #sites
-# from sites.svd import SVD
+from sites.svd import SVD
 # from sites.queens import QUEENS
 from sites.allike import ALLIKE
-# from sites.titolo import TITOLO
+from sites.titolo import TITOLO
 # from sites.grosbasket import GROSBASKET
 # from sites.airness import AIRNESS
 from sites.footasylum import FOOTASYLUM
@@ -23,21 +23,21 @@ from sites.footasylum import FOOTASYLUM
 # from sites.prodirect import PRODIRECT
 # from sites.disney import DISNEY
 # from sites.cornerstreet import CORNERSTREET
-# from sites.snipes import SNIPES
+from sites.snipes import SNIPES
 # from sites.solebox import SOLEBOX
 # from sites.fenom import FENOM
 # from sites.offspring import OFFSPRING
 # from sites.office import OFFICE
-# from sites.footlocker_old import FOOTLOCKER_OLD
-# from sites.footlocker_new import FOOTLOCKER_NEW
+from sites.footlocker_old import FOOTLOCKER_OLD
+from sites.footlocker_new import FOOTLOCKER_NEW
 # from sites.ambush import AMBUSH
 
 # from sites.mesh.jd import JD
 
 sites = {
-    # "SVD":SVD, #WATERFALL MONITOR
+    "SVD":SVD, #WATERFALL MONITOR
     # "QUEENS":QUEENS,
-    # "TITOLO":TITOLO, #WATERFALL MONITOR
+    "TITOLO":TITOLO, #WATERFALL MONITOR
     # "AIRNESS":AIRNESS,
     "FOOTASYLUM":FOOTASYLUM, #WATERFALL MONITOR
     # "HOLYPOP":HOLYPOP,
@@ -56,14 +56,14 @@ sites = {
     # "DISNEY":DISNEY,
     #"CORNERSTREET":CORNERSTREET,
     #"BSTN":BSTN,
-    # "SNIPES":SNIPES, #WATERFALL MONITOR
+    "SNIPES":SNIPES, #WATERFALL MONITOR
     #"COURIR":COURIR,
     #"SOLEBOX":SOLEBOX,
     # "FENOM":FENOM,
     # "OFFSPRING":OFFSPRING, #WATERFALL MONITOR
     # "OFFICE":OFFICE, #WATERFALL MONITOR
-    # "FOOTLOCKER_OLD":FOOTLOCKER_OLD,
-    # "FOOTLOCKER_NEW":FOOTLOCKER_NEW,
+    "FOOTLOCKER_OLD":FOOTLOCKER_OLD,
+    "FOOTLOCKER_NEW":FOOTLOCKER_NEW,
     # "AMBUSH":AMBUSH, #WATERFALL MONITOR,
     # "JD":JD
 }

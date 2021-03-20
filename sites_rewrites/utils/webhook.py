@@ -27,6 +27,7 @@ class Webhook:
         speed = kwargs.get('speed')
         proxy = kwargs.get('proxy')
         region = kwargs.get('region')
+
         if proxy:
             try:
                 proxy = proxy["https"]

@@ -189,3 +189,76 @@
 23:18:16,449 root ERROR HTTPSConnectionPool(host='www.titoloshop.com', port=443): Max retries exceeded with url: /eu_en/air-jordan-1-zoomair-cmft-psg-db3610-105 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Bad Gateway')))
 23:18:16,985 root ERROR HTTPSConnectionPool(host='www.titoloshop.com', port=443): Max retries exceeded with url: /eu_en/air-jordan-1-zoomair-cmft-psg-db3610-105 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Bad Gateway')))
 23:18:23,916 root ERROR HTTPSConnectionPool(host='www.titoloshop.com', port=443): Max retries exceeded with url: /eu_en/checkout/cart/add/uenc/aHR0cHM6Ly93d3cudGl0b2xvc2hvcC5jb20vZXVfZW4vYWlyLWpvcmRhbi0xLXpvb21haXItY21mdC1wc2ctZGIzNjEwLTEwNQ%2C%2C/product/7304/ (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Bad Gateway')))
+18:07:28,576 root ERROR 'NoneType' object has no attribute 'find_all'
+18:07:28,722 root ERROR 'NoneType' object has no attribute 'find_all'
+18:07:28,731 root ERROR 'NoneType' object has no attribute 'find_all'
+18:07:28,734 root ERROR 'NoneType' object has no attribute 'find_all'
+18:07:28,751 root ERROR 'NoneType' object has no attribute 'find_all'
+18:07:28,785 root ERROR 'NoneType' object has no attribute 'find_all'
+18:07:28,800 root ERROR 'NoneType' object has no attribute 'find_all'
+18:07:28,815 root ERROR 'NoneType' object has no attribute 'find_all'
+18:07:28,830 root ERROR 'NoneType' object has no attribute 'find_all'
+18:07:28,847 root ERROR 'NoneType' object has no attribute 'find_all'
+18:07:31,401 root ERROR 'continueUrl'
+18:07:31,401 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:07:32,634 root ERROR 'continueUrl'
+18:07:32,634 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:07:44,934 root ERROR 'continueUrl'
+18:07:44,934 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:07:46,304 root ERROR 'continueUrl'
+18:07:46,304 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:07:49,548 root ERROR 'continueUrl'
+18:07:49,548 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:07:50,972 root ERROR 'continueUrl'
+18:07:50,972 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:07:52,340 root ERROR 'continueUrl'
+18:07:52,340 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:08:04,526 root ERROR 'continueUrl'
+18:08:04,526 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:08:05,495 root ERROR 'continueUrl'
+18:08:05,495 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:08:05,935 root ERROR 'continueUrl'
+18:08:05,935 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:08:07,912 root ERROR 'continueUrl'
+18:08:07,912 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:08:41,58 root ERROR 'continueUrl'
+18:08:41,58 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:08:42,412 root ERROR 'continueUrl'
+18:08:42,412 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:08:53,349 root ERROR 'continueUrl'
+18:08:53,349 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:08:56,235 root ERROR 'continueUrl'
+18:08:56,235 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:08:57,882 root ERROR 'continueUrl'
+18:08:57,882 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:08:59,259 root ERROR 'continueUrl'
+18:08:59,260 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:09:01,923 root ERROR 'continueUrl'
+18:09:01,923 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:09:03,591 root ERROR 'continueUrl'
+18:09:03,591 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:09:11,774 root ERROR 'continueUrl'
+18:09:11,775 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:09:13,413 root ERROR 'continueUrl'
+18:09:13,413 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:09:15,884 root ERROR 'continueUrl'
+18:09:15,884 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:09:16,20 root ERROR 'continueUrl'
+18:09:16,20 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:09:17,360 root ERROR 'continueUrl'
+18:09:17,360 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:09:17,787 root ERROR 'continueUrl'
+18:09:17,787 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:09:31,135 root ERROR 'continueUrl'
+18:09:31,135 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:09:32,864 root ERROR 'continueUrl'
+18:09:32,865 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:09:42,722 root ERROR 'continueUrl'
+18:09:42,722 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:09:44,165 root ERROR 'continueUrl'
+18:09:44,166 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:09:59,858 root ERROR 'continueUrl'
+18:09:59,858 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:10:01,324 root ERROR 'continueUrl'
+18:10:01,324 root ERROR {'action': 'CheckoutServices-PlaceOrder', 'queryString': 'format=ajax', 'locale': 'de_DE', 'error': True, 'cartError': True, 'fieldErrors': [], 'serverErrors': [], 'redirectUrl': '/cart'}
+18:10:03,564 root ERROR HTTPSConnectionPool(host='www.snipes.com', port=443): Max retries exceeded with url: /add-product?format=ajax (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
