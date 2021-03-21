@@ -1,15 +1,8 @@
-{
-  "paypalAccounts": [
-    {
-      "type": "PayPalAccount",
-      "nonce": "45088cfc-184e-1997-6ac0-29444c804223",
-      "description": "PayPal",
-      "consumed": False,
-      "details": {
-        "payerInfo": { "shippingAddress": {} },
-        "correlationId": "EC-2DH99103W5132302R",
-        "billingAddress": None,
-        "shippingAddress": {}
+{'paypalAccounts': [
+    {'type': 'PayPalAccount', 'nonce': '82240fbd-5dd0-1e89-7868-1702cad2712c', 'description': 'PayPal', 'consumed': False, 'details': {'payerInfo': {'email': 'charliebottomley15@gmail.com', 'firstName': 'Andrew', 'lastName': 'Bottomley', 'payerId': 'FYBMK64P8W4KS', 'shippingAddress': {'recipientName': 'Charlie Bottomley', 'line1': '12 Pilmore Mews', 'city': 'Darlington', 'state': 'Durham', 'postalCode': 'DL2 2BQ', 'countryCode': 'GB'
+          }, 'phone': '07796233905', 'countryCode': 'GB'
+        }, 'correlationId': 'EC-34963189DW5850923', 'billingAddress': None, 'shippingAddress': {'recipientName': 'Charlie Bottomley', 'line1': '12 Pilmore Mews', 'city': 'Darlington', 'state': 'Durham', 'postalCode': 'DL2 2BQ', 'countryCode': 'GB'
+        }
       }
     }
   ]

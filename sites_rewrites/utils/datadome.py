@@ -8,11 +8,11 @@ import threading
 import cloudscraper
 import urllib
 import js2py
+import sys
 # import asyncio
 
 from utils.logger import logger
 from utils.captcha import captcha
-from helheim import helheim
 from utils.log import log
 from utils.functions import (
     encodeURIComponent,

@@ -125,6 +125,11 @@ class SVD:
         else:
             self.card()
 
+            if len(self.transToken) > 70:
+                self.nonThreeDS()
+            else:
+                self.ThreeDS()
+
         self.sendToDiscord()
 
     def monitor(self):
@@ -604,15 +609,15 @@ class SVD:
                     "amount": self.price,
                     "currencyIsoCode": "EUR",
                     "line1": self.profile["house"] + " " + self.profile["addressOne"],
-                    "line2":self.profile["addressTwo"],
+                    # "line2":self.profile["addressTwo"],
                     "city": self.profile["city"],
                     "state": self.profile["region"],
                     "postalCode": self.profile["zip"],
                     "countryCode": self.profile["countryCode"],
                     "phone": self.profile["phone"],
                     "recipientName": "{} {}".format(self.profile["firstName"], self.profile["lastName"]),
-                    "braintreeLibraryVersion": "braintree/web/3.48.0",
-                    "_meta": {"merchantAppId": "www.sivasdescalzo.com", "platform": "web", "sdkVersion": "3.48.0", "source": "client", "integration": "custom", "integrationType": "custom", "sessionId": sessionId},
+                    "braintreeLibraryVersion": "braintree/web/3.67.0",
+                    "_meta": {"merchantAppId": "www.sivasdescalzo.com", "platform": "web", "sdkVersion": "3.67.0", "source": "client", "integration": "custom", "integrationType": "custom", "sessionId": sessionId},
                     "authorizationFingerprint": self.bearerToken
                 }
             except Exception as e:
@@ -680,7 +685,7 @@ class SVD:
                             "_meta": {
                                 "merchantAppId": "www.sivasdescalzo.com",
                                 "platform": "web",
-                                "sdkVersion": "3.48.0",
+                                "sdkVersion": "3.67.0",
                                 "source": "client",
                                 "integration": "custom",
                                 "integrationType": "custom",
@@ -695,21 +700,20 @@ class SVD:
                             "Referer": "https://www.sivasdescalzo.com/en/checkout/",
                         }, json=data)
 
-                        # r.json()['paypalAccounts'][0]['details']['payerInfo']['email']
-                        
-                        print(r1.json())
-                        payerId = r1.json()['paypalAccounts'][0]['details']['payerInfo']['payerId']
-                        data["payerId"] = payerId
+
+                        payerId = str(r1.json()['paypalAccounts'][0]['details']['payerInfo']['payerId'])
+                        data["paypalAccount"]["payerId"] = payerId
 
                         r2 = self.session.post("https://api.braintreegateway.com/merchants/7rgb8j8vb5f4hdwg/client_api/v1/payment_methods/paypal_accounts",headers={
                             "Host": "api.braintreegateway.com",
                             "Origin": "https://www.sivasdescalzo.com",
                             "Referer": "https://www.sivasdescalzo.com/en/checkout/",
                         }, json=data)
+
                         nonce = r2.json()['paypalAccounts'][0]['nonce']
                     except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                         log.info(e)
-                        self.error(f"error: {str(e)}")
+                        # self.error(f"error: {str(e)}")
                         time.sleep(int(self.task["DELAY"]))
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                         continue
@@ -768,9 +772,7 @@ class SVD:
                     continue
                 
                 self.alert("Completed payal checkout")
-                while True:
-                    pass
-
+                self.sendToDiscord()
 
                 
             else:
@@ -782,7 +784,664 @@ class SVD:
     def card(self):
         while True:
             self.prepare("Completing card checkout...")
+            
+            choice = "0123456789abcdefghijklmnopqrstuvwxyz"
+            self.referenceId = "0_" + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + "-" + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + "-" + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(
+                choice) - 1)] + "-" + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + "-" + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)] + choice[random.randint(0, len(choice) - 1)]
+            
+            headers = {
+                'authority': 'payments.braintree-api.com',
+                'authorization': 'Bearer {}'.format(self.bearerToken),
+                'sec-fetch-dest': 'empty',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'braintree-version': '2018-05-10',
+                'content-type': 'application/json',
+                'accept': '*/*',
+                'origin': 'https://assets.braintreegateway.com',
+                'sec-fetch-site': 'cross-site',
+                'sec-fetch-mode': 'cors',
+                'referer': 'https://assets.braintreegateway.com/web/3.67.0/html/hosted-fields-frame.min.html',
+                'accept-language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7,fr;q=0.6',
+            }
+            data = {
+                "clientSdkMetadata": {
+                    "source": "client",
+                    "integration": "custom",
+                    "sessionId": self.sessionId
+                },
+                "query": "mutation TokenizeCreditCard($input: TokenizeCreditCardInput!) {   tokenizeCreditCard(input: $input) {     token     creditCard {       bin       brandCode       last4       binData {         prepaid         healthcare         debit         durbinRegulated         commercial         payroll         issuingBank         countryOfIssuance         productId       }     }   } }",
+                "variables": {
+                    "input": {
+                        "creditCard": {
+                            "number": self.profile["card"]["cardNumber"],
+                            "expirationMonth": self.profile["card"]["cardMonth"],
+                            "expirationYear": self.profile["card"]["cardYear"],
+                            "cvv": self.profile["card"]["cardCVV"]
+                        },
+                        "options": {"validate": False}}
+                },
+                "operationName": "TokenizeCreditCard"
+            }
+
+            try:
+                r = self.session.post('https://payments.braintree-api.com/graphql',headers=headers, json=data)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+            
+            try:
+                ccToken = r.json()['data']['tokenizeCreditCard']['token']
+            except:
+                self.error("Failed to complete checkout [failed to parse response]")
+                continue
+
+            cardinalHeaders = {
+                'authority': 'centinelapi.cardinalcommerce.com',
+                'sec-fetch-dest': 'empty',
+                'x-cardinal-tid': 'Tid-ae964bae-f800-41fe-9048-5b9cb5431588',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'content-type': 'application/json;charset=UTF-8',
+                'accept': '*/*',
+                'origin': 'https://www.sivasdescalzo.com',
+                'sec-fetch-site': 'cross-site',
+                'sec-fetch-mode': 'cors',
+                'referer': 'https://www.sivasdescalzo.com/en/checkout/',
+                'accept-language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7,fr;q=0.6',
+            }
+            data = {
+                "BrowserPayload": {
+                    "Order": {
+                        "OrderDetails": {},
+                        "Consumer": {
+                            "BillingAddress": {},
+                            "ShippingAddress": {},
+                            "Account": {}
+                        },
+                        "Cart": [],
+                        "Token": {},
+                        "Authorization": {},
+                        "Options": {},
+                        "CCAExtension": {}
+                    },
+                    "SupportsAlternativePayments": {
+                        "cca": True,
+                        "hostedFields": False,
+                        "applepay": False,
+                        "discoverwallet": False,
+                        "wallet": False,
+                        "paypal": False,
+                        "visacheckout": False
+                    }
+                },
+                "Client": {
+                    "Agent": "SongbirdJS",
+                    "Version": "1.30.2"
+                },
+                "ConsumerSessionId": self.referenceId,
+                "ServerJWT": self.config["cardinalAuthenticationJWT"]
+            }
+            try:
+                r = self.session.post('https://centinelapi.cardinalcommerce.com/V1/Order/JWT/Init',
+                                    headers=cardinalHeaders, json=data)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            try:
+                self.CardinalJWT = r.json()['CardinalJWT'].split(".")[1]
+                payload = str(base64.b64decode(str(self.CardinalJWT.replace('-', '+').replace('_', '/') + "==")))
+                self.consumerId = payload.split('ConsumerSessionId":"')[1].split('"')[0]
+            except:
+                self.error("Failed to complete checkout [failed to parse response]")
+                continue
+
+            headers = {
+                'Connection': 'keep-alive',
+                'Sec-Fetch-Dest': 'empty',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'Content-Type': 'application/json',
+                'Accept': '*/*',
+                'Origin': 'https://www.sivasdescalzo.com',
+                'Sec-Fetch-Site': 'cross-site',
+                'Sec-Fetch-Mode': 'cors',
+            }
+            data = {
+                "amount": self.price,
+                "additionalInfo": {
+                    "shippingGivenName": self.profile["firstName"],
+                    "shippingSurname": self.profile["lastName"],
+                    "shippingPhone": self.profile["phone"],
+                    "billingLine1": self.profile["house"] + " " + self.profile["addressOne"],
+                    "billingCity": self.profile["city"],
+                    "billingState": self.regionID,
+                    "billingPostalCode": self.profile["zip"],
+                    "billingCountryCode": self.profile["countryCode"],
+                    "billingPhoneNumber": self.profile["phone"],
+                    "billingGivenName": self.profile["firstName"],
+                    "billingSurname": self.profile["lastName"],
+                    "shippingLine1": self.profile["house"] + " " + self.profile["addressOne"],
+                    "shippingCity": self.profile["city"],
+                    "shippingState": self.regionID,
+                    "shippingPostalCode": self.profile["zip"],
+                    "shippingCountryCode": self.profile["countryCode"]
+                },
+                "dfReferenceId": self.consumerId,
+                "clientMetadata": {
+                    "sdkVersion": "web/3.48.0",
+                    "requestedThreeDSecureVersion": "2",
+                    "cardinalDeviceDataCollectionTimeElapsed": 12
+                },
+                "authorizationFingerprint": self.bearerToken,
+                "braintreeLibraryVersion": "braintree/web/3.48.0",
+                "_meta": {
+                    "merchantAppId": "www.sivasdescalzo.com",
+                    "platform": "web",
+                    "sdkVersion": "3.48.0",
+                    "source": "client",
+                    "integration": "custom",
+                    "integrationType": "custom",
+                    "sessionId": self.sessionId
+                }
+            }
+
+            try:
+                r = self.session.post('https://api.braintreegateway.com/merchants/7rgb8j8vb5f4hdwg/client_api/v1/payment_methods/{}/three_d_secure/lookup'.format(ccToken), headers=headers, json=data)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+            
+    
+
+            try:
+                self.nonce = r.json()['paymentMethod']['nonce']
+                self.pareq = r.json()['lookup']['pareq']
+                self.md = r.json()['lookup']['md']
+                self.transactionId = r.json()['lookup']['transactionId']
+            except:
+                self.error("Failed to complete checkout [failed to parse response]")
+                continue
+
+            data = {
+                "BrowserPayload": {
+                    "PaymentType": "CCA",
+                    "Order": {
+                        "OrderDetails": {
+                            "TransactionId": self.transactionId
+                        },
+                        "Consumer": {
+                            "BillingAddress": {},
+                            "ShippingAddress": {},
+                            "Account": {}
+                        },
+                        "Cart": [],
+                        "Token": {},
+                        "Authorization": {},
+                        "Options": {},
+                        "CCAExtension": {}
+                    }
+                },
+                "Client": {
+                    "Agent": "SongbirdJS",
+                    "Version": "1.30.2"
+                },
+                "ConsumerSessionId": self.consumerId,
+                "ServerJWT": self.config["cardinalAuthenticationJWT"]
+            }
+            headers = {
+                'authority': 'centinelapi.cardinalcommerce.com',
+                'sec-fetch-dest': 'empty',
+                'x-cardinal-tid': 'Tid-ae964bae-f800-41fe-9048-5b9cb5431588',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'content-type': 'application/json;charset=UTF-8',
+                'accept': '*/*',
+                'origin': 'https://www.sivasdescalzo.com',
+                'sec-fetch-site': 'cross-site',
+                'sec-fetch-mode': 'cors',
+            }
+            try:
+                r = self.session.post('https://centinelapi.cardinalcommerce.com/V1/Order/JWT/Continue',headers=headers,json=data)   
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            redirectHeaders = {
+                'Connection': 'keep-alive',
+                'Cache-Control': 'max-age=0',
+                'Upgrade-Insecure-Requests': '1',
+                'Origin': 'https://www.sivasdescalzo.com',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'Sec-Fetch-Dest': 'iframe',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'Sec-Fetch-Site': 'cross-site',
+                'Sec-Fetch-Mode': 'navigate',
+            }
+            data = {'PaReq': self.pareq, 'MD': self.consumerId,'TermUrl': 'https://centinelapi.cardinalcommerce.com/V1/TermURL/Overlay/CCA'}
+
+            try:
+                r = self.session.post('https://0eaf.cardinalcommerce.com/EAFService/jsp/v1/redirect',headers=redirectHeaders, data=data)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+            
+            try:
+                soup = BeautifulSoup(r.text, 'lxml')
+                self.pareq = str(soup.find("input", attrs={"name": "PaReq"})['value'])
+                self.md = soup.find("input", attrs={"name": "MD"})['value']
+            except:
+                self.error("Failed to complete checkout [failed to parse response]")
+                continue
+
+            headers = {
+                'authority': 'verifiedbyvisa.acs.touchtechpayments.com',
+                'cache-control': 'max-age=0',
+                'origin': 'https://0eaf.cardinalcommerce.com',
+                'upgrade-insecure-requests': '1',
+                'content-type': 'application/x-www-form-urlencoded',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'sec-fetch-dest': 'iframe',
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'sec-fetch-site': 'cross-site',
+                'sec-fetch-mode': 'navigate',
+            }
+            data = {'PaReq': self.pareq,
+                    'TermUrl': 'https://0eaf.cardinalcommerce.com/EAFService/jsp/v1/term', 'MD': self.md}
+
+            try:
+                r = self.session.post('https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',headers=headers, data=data)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            try:
+                soup = BeautifulSoup(r.text, 'lxml')
+                self.transToken = str(soup.find_all("script")[0]).split('"')[1]
+            except:
+                self.error("Failed to complete checkout [failed to parse response]")
+                continue
+
             return
+
+    def nonThreeDS(self):
+        while True:
+            headers = {
+                'authority': 'payments.braintree-api.com',
+                'authorization': 'Bearer {}'.format(self.bearerToken),
+                'sec-fetch-dest': 'empty',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'braintree-version': '2018-05-10',
+                'content-type': 'application/json',
+                'accept': '*/*',
+                'origin': 'https://assets.braintreegateway.com',
+                'sec-fetch-site': 'cross-site',
+                'sec-fetch-mode': 'cors',
+            }
+            data = {
+                "clientSdkMetadata": {
+                    "source": "client",
+                    "integration": "custom",
+                    "sessionId": self.sessionId
+                },
+                "query": "mutation TokenizeCreditCard($input: TokenizeCreditCardInput!) {   tokenizeCreditCard(input: $input) {     token     creditCard {       bin       brandCode       last4       binData {         prepaid         healthcare         debit         durbinRegulated         commercial         payroll         issuingBank         countryOfIssuance         productId       }     }   } }",
+                "variables": {
+                    "input": {
+                        "creditCard": {
+                            "number": self.profile["card"]["cardNumber"],
+                            "expirationMonth": self.profile["card"]["cardMonth"],
+                            "expirationYear": self.profile["card"]["cardYear"],
+                            "cvv": self.profile["card"]["cardCVV"]
+                        },
+                        "options": {"validate": False}
+                    }
+                },
+                "operationName": "TokenizeCreditCard"
+            }
+            try:
+                r = self.session.post('https://payments.braintree-api.com/graphql',headers=headers, json=data)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            try:
+                ccToken = r.json()['data']['tokenizeCreditCard']['token']
+                self.sesssionId = str(uuid.uuid4())
+            except:
+                self.error("Failed to complete checkout [failed to parse response]")
+                continue
+
+            orderData = {
+                "cartId": self.cartID,
+                "billingAddress": {
+                    "countryId": self.profile["countryCode"],
+                    "region": self.profile["region"],
+                    "street": [self.profile["house"] + " " + self.profile["addressOne"]],
+                    "telephone": self.profile["phone"],
+                    "postcode": self.profile["zip"],
+                    "city": self.profile["city"],
+                    "firstname": self.profile["firstName"],
+                    "lastname": self.profile["lastName"],
+                    "saveInAddressBook": None
+                },
+                "paymentMethod": {
+                    "method": "braintree",
+                    "additional_data": {
+                        "payment_method_nonce": self.nonce,
+                        "device_data": '{\\"device_session_id\\":\\"self.sessionId\\",\\"fraud_merchant_id\\":\\"600000\\"}'
+                    }
+                },
+                "email": self.profile["email"]
+            }
+            try:
+                if self.regionID:
+                    orderData['billingAddress']['regionId'] = self.regionID
+                    orderData['billingAddress']['regionCode'] = self.region
+            except:
+                pass
+
+                
+            headers = {
+                'authority': 'www.sivasdescalzo.com',
+                'accept': '*/*',
+                'sec-fetch-dest': 'empty',
+                'x-requested-with': 'XMLHttpRequest',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'content-type': 'application/json',
+                'origin': 'https://www.sivasdescalzo.com',
+                'sec-fetch-site': 'same-origin',
+                'sec-fetch-mode': 'cors',
+            }
+
+            try:
+                r = self.session.post('https://www.sivasdescalzo.com/en/rest/en/V1/guest-carts/{}/payment-information'.format(
+                    self.cartID), headers=headers, json=orderData)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            if r.status_code == 400:
+                self.error('Checkout Failed. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
+            if r.status_code == 200:
+                self.end = time.time() - self.start
+                updateConsoleTitle(False,True,SITE)
+                self.success('Checkout Success!')
+                return
+
+    def ThreeDS(self):
+        while True:
+
+            self.prepare('Initiating 3DS checkout')
+            headers = {
+                'authority': 'poll.touchtechpayments.com',
+                'sec-fetch-dest': 'empty',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'content-type': 'application/json',
+                'accept': '*/*',
+                'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
+                'sec-fetch-site': 'same-site',
+                'sec-fetch-mode': 'cors',
+            }
+
+            data = '{"transToken": "%s"}' % self.transToken
+            # NEED to poll the request until the user verified the payment in app
+            try:
+                r = self.session.post('https://poll.touchtechpayments.com/poll',headers=headers, data=data)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+            
+            try:
+                r.json()["status"]
+            except:
+                self.error("Failed to complete 3DS [failed to parse response]")
+
+
+            if r.json()["status"] == "blocked":
+                self.error('Card Blocked. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
+            elif r.json()["status"] == "pending":
+                self.sendToDiscord3DS()
+                
+                self.warning('Polling 3DS...')
+                while r.json()["status"] == "pending":
+                    try:
+                        r = self.session.post('https://poll.touchtechpayments.com/poll',headers=headers, data=data)
+                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                        log.info(e)
+                        self.error(f"error: {str(e)}")
+                        time.sleep(int(self.task["DELAY"]))
+                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                        continue
+            else:
+                self.error("Unknown poll response. Retrying...")
+                time.sleep(int(self.task["DELAY"]))
+                continue
+
+            try:
+                r.json()
+            except:
+                self.error("Failed to complete 3DS [failed to parse response]")
+                time.sleep(int(self.task["DELAY"]))
+                continue
+
+            if r.json()["status"] == "success":
+                authToken = r.json()['authToken']
+            else:
+                self.error("Failed to complete 3DS [failed to parse response]")
+                time.sleep(int(self.task["DELAY"]))
+                continue
+
+            authToken = r.json()['authToken']
+            self.info('3DS Authorised')
+
+            data = '{"transToken":"%s","authToken":"%s"}' % (
+                self.transToken, authToken)
+            
+            try:
+                r = self.session.post("https://macs.touchtechpayments.com/v1/confirmTransaction",headers=headers, data=data)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            try:
+                pares = r.json()['Response']
+            except:
+                self.error("Failed to complete 3DS [failed to parse response]")
+                time.sleep(int(self.task["DELAY"]))
+                continue
+
+            headers = {
+                'Connection': 'keep-alive',
+                'Cache-Control': 'max-age=0',
+                'Origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
+                'Upgrade-Insecure-Requests': '1',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'Sec-Fetch-Dest': 'iframe',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'Sec-Fetch-Site': 'cross-site',
+                'Sec-Fetch-Mode': 'navigate',
+            }
+            data = {'MD': self.md, 'PaRes': pares}
+
+            try:
+                r = self.session.post('https://0eaf.cardinalcommerce.com/EAFService/jsp/v1/term',headers=headers, data=data)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+
+            headers = {
+                'authority': 'centinelapi.cardinalcommerce.com',
+                'cache-control': 'max-age=0',
+                'origin': 'https://0eaf.cardinalcommerce.com',
+                'upgrade-insecure-requests': '1',
+                'content-type': 'application/x-www-form-urlencoded',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'sec-fetch-dest': 'iframe',
+                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'sec-fetch-site': 'same-site',
+                'sec-fetch-mode': 'navigate',
+            }
+            data = {'PaRes': pares, 'MD': self.consumerId}
+
+            try:
+                r = self.session.post('https://centinelapi.cardinalcommerce.com/V1/TermURL/Overlay/CCA',headers=headers, data=data)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+            
+
+            try:
+                soup = BeautifulSoup(r.text, 'lxml')
+                jwtCheckout = str(soup.find_all("script")[0]).split('"')[1]
+            except:
+                self.error("Failed to complete 3DS [failed to parse response]")
+                time.sleep(int(self.task["DELAY"]))
+                continue
+
+            headers = {
+                'Connection': 'keep-alive',
+                'Sec-Fetch-Dest': 'empty',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'Content-Type': 'application/json',
+                'Accept': '*/*',
+                'Origin': 'https://www.sivasdescalzo.com',
+                'Sec-Fetch-Site': 'cross-site',
+                'Sec-Fetch-Mode': 'cors',
+            }
+            data = {
+                "jwt": jwtCheckout,
+                "paymentMethodNonce": self.nonce,
+                "braintreeLibraryVersion": "braintree/web/3.48.0",
+                "_meta": {
+                    "merchantAppId": "www.sivasdescalzo.com",
+                    "platform": "web",
+                    "sdkVersion": "3.48.0",
+                    "source": "client",
+                    "integration": "custom",
+                    "integrationType": "custom",
+                    "sessionId": self.sessionId
+                },
+                "authorizationFingerprint": self.bearerToken
+            }
+
+            try:
+                r = self.session.post('https://api.braintreegateway.com/merchants/7rgb8j8vb5f4hdwg/client_api/v1/payment_methods/{}/three_d_secure/authenticate_from_jwt'.format(self.nonce), headers=headers, json=data)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+
+            headers = {
+                'authority': 'www.sivasdescalzo.com',
+                'accept': '*/*',
+                'sec-fetch-dest': 'empty',
+                'x-requested-with': 'XMLHttpRequest',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                'content-type': 'application/json',
+                'origin': 'https://www.sivasdescalzo.com',
+                'sec-fetch-site': 'same-origin',
+                'sec-fetch-mode': 'cors',
+            }
+            
+            orderData = {
+                "cartId": self.cartID,
+                "billingAddress": {
+                    "countryId": self.profile["countryCode"],
+                    "region": self.profile["region"],
+                    "street": [self.profile["house"] + " " + self.profile["addressOne"]],
+                    "telephone": self.profile["phone"],
+                    "postcode": self.profile["zip"],
+                    "city": self.profile["city"],
+                    "firstname": self.profile["firstName"],
+                    "lastname": self.profile["lastName"],
+                    "saveInAddressBook": None,
+                    "customAttributes": [
+                        {
+                            "attribute_code": "taxvat",
+                            "value": ""
+                        }
+                    ],
+                },
+                "paymentMethod": {
+                    "method": "braintree",
+                    "additional_data": {
+                        "payment_method_nonce": self.nonce,
+                        "device_data": '{\\"device_session_id\\":\\"self.sessionId\\",\\"fraud_merchant_id\\":\\"600000\\"}'
+                    }
+                },
+                "email": self.profile["email"]
+            }
+            try:
+                if self.regionID:
+                    orderData['billingAddress']['regionId'] = self.regionID
+                    orderData['billingAddress']['regionCode'] = self.region
+            except:
+                pass
+
+            try:
+                r = self.session.post('https://www.sivasdescalzo.com/en/rest/en/V1/guest-carts/{}/payment-information'.format(
+                    self.cartID), headers=headers, json=orderData)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+
+            if r.status_code == 400:
+                self.error('Checkout Failed. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
+            if r.status_code == 200:
+                self.end = time.time() - self.start
+                updateConsoleTitle(False,True,SITE)
+                self.success(SITE,self.taskID,'Checkout Success!')
+                return
+            
     
     def sendToDiscord(self):
         while True:
@@ -811,6 +1470,28 @@ class SVD:
                     pass
             except:
                 self.alert("Failed to send webhook. Checkout here ==> {}".format(self.webhookData['url']))
+    
+    def sendToDiscord3DS(self):
+          
+        self.webhookData['proxy'] = self.session.proxies  
+
+        try:
+            Webhook.threeDS(
+                webhook=loadSettings()["webhook"],
+                site=SITE,
+                url=self.webhookData['url'],
+                image=self.webhookData['image'],
+                title=self.webhookData['product'],
+                size=self.size,
+                price=self.webhookData['price'],
+                paymentMethod=self.task['PAYMENT'].strip().title(),
+                product=self.webhookData['product_url'],
+                profile=self.task["PROFILE"],
+                proxy=self.webhookData['proxy'],
+            )
+    
+        except:
+            pass
 
     def sendToDiscord2(self):
         while True:

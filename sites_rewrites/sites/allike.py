@@ -34,7 +34,7 @@ from utils.functions import (
     scraper,
     footlocker_snare
 )
-import utils.config as config
+import utils.config as CONFIG
 
 SITE = 'ALLIKE'
 class ALLIKE:
@@ -308,10 +308,10 @@ class ALLIKE:
         while True:
             self.prepare("Submitting shipping...")
             
-            if config.captcha_configs[SITE]['type'].lower() == 'v3':
-                capToken = captcha.v3(config.captcha_configs[SITE]['siteKey'],config.captcha_configs[SITE]['url'],self.session.proxies,SITE,self.taskID)
-            elif config.captcha_configs[SITE]['type'].lower() == 'v2':
-                capToken = captcha.v2(config.captcha_configs[SITE]['siteKey'],config.captcha_configs[SITE]['url'],self.session.proxies,SITE,self.taskID)
+            if CONFIG.captcha_configs[SITE]['type'].lower() == 'v3':
+                capToken = captcha.v3(CONFIG.captcha_configs[SITE]['siteKey'],CONFIG.captcha_configs[SITE]['url'],self.session.proxies,SITE,self.taskID)
+            elif CONFIG.captcha_configs[SITE]['type'].lower() == 'v2':
+                capToken = captcha.v2(CONFIG.captcha_configs[SITE]['siteKey'],CONFIG.captcha_configs[SITE]['url'],self.session.proxies,SITE,self.taskID)
 
             try:
                 day = random.randint(1,29)
@@ -346,7 +346,7 @@ class ALLIKE:
                     f'&billing[month]={month}'
                     f'&billing[day]={day}'
                     f'&billing[year]={year}'
-                    f'&billing[dob]={day}.{month}.{year}'
+                    f'&billing[dob]={month}/{day}/{year}'
                     '&billing[customer_password]='
                     '&billing[confirm_password]='
                     '&billing[save_in_address_book]=1'
@@ -355,6 +355,9 @@ class ALLIKE:
                     f'&form_key={self.formKey}'
                     
                 )
+                
+                # default: month/day/year
+                # german day.month.year
             except Exception as e:
                 self.error(f"Failed to construct shipping form ({e}). Retrying...")
                 time.sleep(int(self.task['DELAY']))
@@ -391,6 +394,7 @@ class ALLIKE:
                     soup = BeautifulSoup(shippingHtml,"html.parser")
                     self.shippingMethods = soup.find_all('input',{'name':'shipping_method'})
                 except Exception as e:
+                    # print(response.text)
                     log.info(e)
                     self.error(f"Failed to set shipping [failed to parse response]. Retrying...")
                     time.sleep(int(self.task["DELAY"]))

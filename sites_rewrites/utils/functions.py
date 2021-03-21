@@ -14,6 +14,28 @@ from pynotifier import Notification
 import uuid
 import csv
 import asyncio
+import sys
+
+if sys.platform == 'darwin':
+  from helheim.mac import helheim, isChallenge
+  from helheim.mac.exceptions import (
+    HelheimException,
+    HelheimSolveError,
+    HelheimRuntimeError,
+    HelheimSaaSError,
+    HelheimSaaSBalance,
+    HelheimVersion
+  )
+elif sys.platform != 'darwin':
+  from helheim.windows import helheim, isChallenge
+  from helheim.windows.exceptions import (
+    HelheimException,
+    HelheimSolveError,
+    HelheimRuntimeError,
+    HelheimSaaSError,
+    HelheimSaaSBalance,
+    HelheimVersion
+  )
 
 
 try:
@@ -23,27 +45,23 @@ except:
 
 from utils.logger import logger
 from utils.captcha import captcha
-from helheim import helheim
-from helheim.exceptions import (
-    HelheimException,
-    HelheimSolveError,
-    HelheimRuntimeError,
-    HelheimSaaSError,
-    HelheimSaaSBalance,
-    HelheimVersion
-)
+
 try:
   import win32console 
 except:
   pass
 
 def injection(session, response):
-  if session.is_New_IUAM_Challenge(response) \
-    or session.is_New_Captcha_Challenge(response) \
-    or session.is_BFM_Challenge(response):
-        return helheim('2044b982-151b-4fca-974d-ebad6fd10bec', session, response)
+  # if session.is_New_IUAM_Challenge(response) \
+  #   or session.is_New_Captcha_Challenge(response) \
+  #   or session.is_BFM_Challenge(response):
+  #       return helheim('2044b982-151b-4fca-974d-ebad6fd10bec', session, response)
+  # else:
+  #   return response
+  if isChallenge(response):
+      return helheim('2044b982-151b-4fca-974d-ebad6fd10bec', session, response)
   else:
-    return response
+      return response
 
 def scraper():
   settings = loadSettings()
@@ -353,7 +371,7 @@ def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
         url = 'https://venetiacli.io/checkout/retrieve/?id={}'.format(urlId)
         return url
     except Exception as e:
-      storeCookies(url,session)
+      storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice)
     
 
 def b64Decode(text):
