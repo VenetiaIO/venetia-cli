@@ -28,11 +28,14 @@ class Webhook:
         proxy = kwargs.get('proxy')
         region = kwargs.get('region')
 
-        if proxy:
-            try:
-                proxy = proxy["https"]
-            except:
-                proxy = proxy["http"]
+        try:
+            if proxy:
+                try:
+                    proxy = proxy["https"]
+                except:
+                    proxy = proxy["http"]
+        except:
+            pass
 
         logger.secondary(SITE,'Task Link',url)
 
@@ -63,14 +66,18 @@ class Webhook:
             webhook.add_embed(embed)
             webhook.execute()
 
-            myclient = pymongo.MongoClient(mongoConnect)
-            mydb = myclient["mydb"]
-            collection = mydb["collection"]
 
             user = getUser()["discordName"]
             data = { "image":image, "site":SITE, "url":product, "product":productTitle, "size":productSize, "price":productPrice, "user":user }
             updateCheckouts(productTitle,SITE,productSize,productPrice,image,product,url)
-            x = collection.insert_one(data)
+
+            try:
+                myclient = pymongo.MongoClient(mongoConnect)
+                mydb = myclient["mydb"]
+                collection = mydb["collection"]
+                x = collection.insert_one(data)
+            except:
+                pass
             
         except Exception as e:
             print(e)
@@ -156,14 +163,18 @@ class Webhook:
             webhook.add_embed(embed)
             webhook.execute()
 
-            myclient = pymongo.MongoClient(mongoConnect)
-            mydb = myclient["mydb"]
-            collection = mydb["collection"]
 
             user = getUser()["discordName"]
             data = { "image":image, "site":SITE, "url":product, "product":productTitle, "size":productSize, "price":productPrice, "user":user }
             updateCheckouts(productTitle,SITE,productSize,productPrice,image,product,url)
-            x = collection.insert_one(data)
+
+            try:
+                myclient = pymongo.MongoClient(mongoConnect)
+                mydb = myclient["mydb"]
+                collection = mydb["collection"]
+                x = collection.insert_one(data)
+            except:
+                pass
             
         except Exception as e:
             print(e)
@@ -222,19 +233,26 @@ class Webhook:
             webhook.add_embed(embed)
             webhook.execute()
 
-            myclient = pymongo.MongoClient(mongoConnect)
-            mydb = myclient["mydb"]
-            collection = mydb["collection"]
 
             user = getUser()["discordName"]
             data = { "image":image, "site":SITE, "url":product, "product":productTitle, "size":productSize, "price":productPrice, "user":user }
             updateCheckouts(productTitle,SITE,productSize,productPrice,image,product,url)
-            x = collection.insert_one(data)
+
+            try:
+                myclient = pymongo.MongoClient(mongoConnect)
+                mydb = myclient["mydb"]
+                collection = mydb["collection"]
+                x = collection.insert_one(data)
+            except:
+                pass
             
+           
         except Exception as e:
             print(e)
             log.info(e)
             pass
+
+        return
 
     @staticmethod
     def accountMade(**kwargs):

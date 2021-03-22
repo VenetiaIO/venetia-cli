@@ -17,11 +17,11 @@ class captcha:
     def v2(sitekey, url, proxy, SITE,taskID):
         try:
             cap = loadSettings()
-            if cap["captcha"].lower()  == "monster":
+            if cap["captcha"].strip().lower()  == "monster":
                 return capMonster.v2(sitekey, url, proxy, SITE,taskID)
             else:
                 return TwoCaptcha.v2(sitekey, url, proxy, SITE,taskID)
-        except:
+        except Exception as e:
             return None
 
 
@@ -29,7 +29,7 @@ class captcha:
     def Hiddenv2(sitekey, url, proxy, SITE,taskID):
         try:
             cap = loadSettings()
-            if cap["captcha"].lower()  == "monster":
+            if cap["captcha"].strip().lower()  == "monster":
                 logger.error(SITE,taskID,'CapMonster does not support V2 Invisible. Attempting to solve with 2Captcha')
                 return TwoCaptcha.Hiddenv2(sitekey, url, proxy, SITE,taskID)
             else:
@@ -42,7 +42,7 @@ class captcha:
     def v3(sitekey, url, proxy, SITE,taskID):
         try:
             cap = loadSettings()
-            if cap["captcha"].lower() == "monster":
+            if cap["captcha"].strip().lower() == "monster":
                 return capMonster.v3(sitekey, url, proxy, SITE,taskID)
             else:
                 return TwoCaptcha.v3(sitekey, url, proxy, SITE,taskID)
@@ -54,7 +54,7 @@ class captcha:
     def hcaptcha(sitekey, url, proxy, SITE,taskID):
         try:
             cap = loadSettings()
-            if cap["captcha"].lower()  == "monster":
+            if cap["captcha"].strip().lower()  == "monster":
                 return capMonster.hcaptcha(sitekey, url, proxy, SITE,taskID)
             else:
                 return TwoCaptcha.hcaptcha(sitekey, url, proxy, SITE,taskID)
@@ -65,7 +65,7 @@ class captcha:
     def geetest(gt, challenge, apiServer, pageurl, proxy, SITE, taskID):
         try:
             cap = loadSettings()
-            if cap["captcha"].lower()  == "monster":
+            if cap["captcha"].strip().lower() == "monster":
                 logger.error(SITE,taskID,'CapMonster does not support Geetest. Attempting to solve with 2Captcha')
                 return TwoCaptcha.hcaptcha(gt, challenge, apiServer, pageurl, proxy, SITE,taskID)
             else:
@@ -78,7 +78,7 @@ class captcha:
     def menuV2(sitekey, url, proxy, taskID, SITE):
         try:
             cap = loadSettings()
-            if cap["captcha"].lower() == "monster":
+            if cap["captcha"].strip().lower() == "monster":
                 # Cap monste doesnt support geetest yet
                 return capMonster.menuV2(sitekey, url, proxy, taskID, SITE)
             else:
@@ -90,7 +90,7 @@ class captcha:
     def menuV3(sitekey, url, proxy, taskID, SITE):
         try:
             cap = loadSettings()
-            if cap["captcha"].lower() == "monster":
+            if cap["captcha"].strip().lower() == "monster":
                 # Cap monste doesnt support geetest yet
                 return capMonster.menuV3(sitekey, url, proxy, taskID, SITE)
             else:

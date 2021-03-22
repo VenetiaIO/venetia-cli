@@ -14,7 +14,7 @@ from sites.footasylum import FOOTASYLUM
 # from sites.courir import COURIR
 # from sites.bstn import BSTN
 # from sites.overkill import OVERKILL
-# from sites.awlab import AWLAB
+from sites.awlab import AWLAB
 # from sites.einhalb import EINHALB
 # from sites.chmielna import CHMIELNA
 # from sites.workingClassHeroes import WCH
@@ -45,7 +45,7 @@ sites = {
     # "GROSBASKET":GROSBASKET,
     # "SCHUH":SCHUH, #WATERFALL MONITOR
     # "SLAMJAM":SLAMJAM,
-    # "AWLAB":AWLAB, #WATERFALL MONITOR
+    "AWLAB":AWLAB, #WATERFALL MONITOR
     #"EINHALB":EINHALB,
     #"STARCOW":STARCOW,
     # "CHMIELNA20":CHMIELNA, #WATERFALL MONITOR
@@ -155,10 +155,10 @@ captcha_configs = {
         "url":""
     },
     "AWLAB":{
-        "hasCaptcha":False,
-        "siteKey":"",
-        "type":"",
-        "url":""
+        "hasCaptcha":True,
+        "siteKey":"6Lf7htIZAAAAAKVu_e4Hyg3nhCXfVh2tlQbOjzYT",
+        "type":"V2",
+        "url":"https://www.aw-lab.com/"
     },
     "CHMIELNA20":{
         "hasCaptcha":False,

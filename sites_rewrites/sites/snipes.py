@@ -901,13 +901,28 @@ class SNIPES:
                     data = response.json()
 
                     if self.task['PAYMENT'].strip().lower() == 'paypal':
-                        place_order_res = str(response["continueUrl"])
+                        place_order_res = str(data["continueUrl"])
+                        self.webhookData['url'] = storeCookies(
+                            place_order_res,
+                            self.session,
+                            self.webhookData['product'],
+                            self.webhookData['image'],
+                            self.webhookData['price']
+                        )
 
                     if self.task['PAYMENT'].strip().lower() == 'card':
-                        place_order_res = str(response["continueUrl"])
+                        place_order_res = str(data["continueUrl"])
+
+                        self.webhookData['url'] = storeCookies(
+                            place_order_res,
+                            self.session,
+                            self.webhookData['product'],
+                            self.webhookData['image'],
+                            self.webhookData['price']
+                        )
 
                     if self.task['PAYMENT'].strip().lower() == 'bt':
-                        place_order_res = str(response["orderID"])
+                        place_order_res = str(data["orderID"])
                 except Exception as e:
                     log.info(e)
                     self.error("Failed to place order. Retrying...")

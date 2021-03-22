@@ -309,9 +309,9 @@ class ALLIKE:
             self.prepare("Submitting shipping...")
             
             if CONFIG.captcha_configs[SITE]['type'].lower() == 'v3':
-                capToken = captcha.v3(CONFIG.captcha_configs[SITE]['siteKey'],CONFIG.captcha_configs[SITE]['url'],self.session.proxies,SITE,self.taskID)
+                capToken = captcha.v3(CONFIG.captcha_configs[SITE]['siteKey'],CONFIG.captcha_configs[SITE]['url'],self.task['PROXIES'],SITE,self.taskID)
             elif CONFIG.captcha_configs[SITE]['type'].lower() == 'v2':
-                capToken = captcha.v2(CONFIG.captcha_configs[SITE]['siteKey'],CONFIG.captcha_configs[SITE]['url'],self.session.proxies,SITE,self.taskID)
+                capToken = captcha.v2(CONFIG.captcha_configs[SITE]['siteKey'],CONFIG.captcha_configs[SITE]['url'],self.task['PROXIES'],SITE,self.taskID)
 
             try:
                 day = random.randint(1,29)
