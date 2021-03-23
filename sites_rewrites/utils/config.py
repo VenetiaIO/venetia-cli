@@ -21,7 +21,7 @@ from sites.awlab import AWLAB
 # from sites.naked import NAKED
 # from sites.footdistrict import FOOTDISTRICT
 # from sites.prodirect import PRODIRECT
-# from sites.disney import DISNEY
+from sites.disney import DISNEY
 # from sites.cornerstreet import CORNERSTREET
 from sites.snipes import SNIPES
 # from sites.solebox import SOLEBOX
@@ -53,7 +53,7 @@ sites = {
     # "NAKED":NAKED,
     #"FOOTDISTRICT":FOOTDISTRICT,
     # "PRODIRECT":PRODIRECT,
-    # "DISNEY":DISNEY,
+    "DISNEY":DISNEY,
     #"CORNERSTREET":CORNERSTREET,
     #"BSTN":BSTN,
     "SNIPES":SNIPES, #WATERFALL MONITOR

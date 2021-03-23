@@ -797,7 +797,7 @@ class AWLAB:
                 self.webhookData['size'] = self.size
 
 
-                data = threeDSecure(
+                three_d_data = threeDSecure.solve(
                     self.session,
                     self.profile,
                     self.Dpayload,
@@ -805,7 +805,7 @@ class AWLAB:
                     self.taskID,
                     self.baseUrl
                 )
-                if data == False:
+                if three_d_data == False:
                     self.error("Checkout Failed (3DS Declined or Failed). Retrying...")
                     time.sleep(int(self.task['DELAY']))
                     continue
@@ -817,7 +817,7 @@ class AWLAB:
                         'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                         'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
                         'referer':'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
-                    }, data=data)
+                    }, data=three_d_data)
                 except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                     log.info(e)
                     self.error(f"error: {str(e)}")
@@ -833,7 +833,7 @@ class AWLAB:
                             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                             'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
                             'referer':'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
-                        }, data={"dwfrm_redirecttotop_redirecttop":"Submit","MD":self.MD,"PaRes":data['PaRes'],"csrf_token":self.csrf})
+                        }, data={"dwfrm_redirecttotop_redirecttop":"Submit","MD":self.MD,"PaRes":three_d_data['PaRes'],"csrf_token":self.csrf})
                     except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                         log.info(e)
                         self.error(f"error: {str(e)}")
@@ -862,6 +862,7 @@ class AWLAB:
 
                         self.success("Checkout Successful")
                         updateConsoleTitle(False,True,SITE)
+                        return
                     
                     else:
                         self.error("Checkout Failed. Retrying...")

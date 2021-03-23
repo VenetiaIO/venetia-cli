@@ -234,17 +234,17 @@ class Webhook:
             webhook.execute()
 
 
-            user = getUser()["discordName"]
-            data = { "image":image, "site":SITE, "url":product, "product":productTitle, "size":productSize, "price":productPrice, "user":user }
-            updateCheckouts(productTitle,SITE,productSize,productPrice,image,product,url)
+            # user = getUser()["discordName"]
+            # data = { "image":image, "site":SITE, "url":product, "product":productTitle, "size":productSize, "price":productPrice, "user":user }
+            # updateCheckouts(productTitle,SITE,productSize,productPrice,image,product,url)
 
-            try:
-                myclient = pymongo.MongoClient(mongoConnect)
-                mydb = myclient["mydb"]
-                collection = mydb["collection"]
-                x = collection.insert_one(data)
-            except:
-                pass
+            # try:
+            #     myclient = pymongo.MongoClient(mongoConnect)
+            #     mydb = myclient["mydb"]
+            #     collection = mydb["collection"]
+            #     x = collection.insert_one(data)
+            # except:
+            #     pass
             
            
         except Exception as e:
