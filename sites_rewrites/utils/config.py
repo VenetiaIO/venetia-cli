@@ -32,7 +32,7 @@ from sites.footlocker_old import FOOTLOCKER_OLD
 from sites.footlocker_new import FOOTLOCKER_NEW
 # from sites.ambush import AMBUSH
 
-# from sites.mesh.jd import JD
+from sites.jd import JD
 
 sites = {
     "SVD":SVD, #WATERFALL MONITOR
@@ -65,7 +65,7 @@ sites = {
     "FOOTLOCKER_OLD":FOOTLOCKER_OLD,
     "FOOTLOCKER_NEW":FOOTLOCKER_NEW,
     # "AMBUSH":AMBUSH, #WATERFALL MONITOR,
-    # "JD":JD
+    "JD":JD
 }
 
 def VERSION(): return '0.6.4'

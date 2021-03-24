@@ -237,6 +237,7 @@ class DISNEY:
                         self.siteBase = "https://www.shopdisney.{}".format(self.disneyRegion)
                         self.demandwareBase = self.cartURL.split('Cart-AddProduct')[0]
                         self.size = "One Size"
+                        self.webhookData['size'] = self.size
 
                         self.warning(f"Found Size => {self.size}")
                         return
