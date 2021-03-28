@@ -141,7 +141,7 @@ def convert_string(string):
 
 def get_library_path():
     p = platform.system()
-    filepath = './dist/ghttp'
+    filepath = './tls_dist/ghttp'
     if p == 'Windows':
         filepath += '_win.dll'
     elif p == 'Darwin':

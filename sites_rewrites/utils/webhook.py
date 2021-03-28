@@ -42,7 +42,7 @@ class Webhook:
         try:                
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title=':man_mage: Successful Checkout :man_mage:', description='', color=0x1d7fe9)
-            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()))
+            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()), icon_url='https://i.imgur.com/HdQACCM.png')
             embed.set_timestamp()    
             if image:
                 try:
@@ -87,7 +87,7 @@ class Webhook:
         try:
             webhookPublic = DiscordWebhook(publicWebhook)
             embed2 = DiscordEmbed(title=':man_mage: User Checkout :man_mage:', description='', color=0x1d7fe9)
-            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()))
+            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()), icon_url='https://i.imgur.com/HdQACCM.png')
             embed2.set_timestamp()
     
             if image:
@@ -100,11 +100,11 @@ class Webhook:
             else: embed2.add_embed_field(name='Site', value=SITE.title(),inline=False)
 
             if productTitle: embed2.add_embed_field(name='Product', value=f'[{productTitle}]({product})',inline=False)
-            if productSize: embed2.add_embed_field(name='Size', value=str(productSize),inline=False)
+            if productSize: embed2.add_embed_field(name='Size', value=str(productSize),inline=True)
             if productPrice: embed2.add_embed_field(name='Product Price', value=str(productPrice),inline=False)
     
             QT_URL = 'http://127.0.0.1:6969/venetia/quicktask?website={}&url={}'.format(SITE.lower().replace(' ',''),product)
-            embed2.add_embed_field(name='Quick Task',value=f'[Start Quick Task]({QT_URL})')
+            embed2.add_embed_field(name='Quick Task',value=f'[START QT]({QT_URL})')
     
             webhookPublic.add_embed(embed2)
             webhookPublic.execute()
@@ -139,7 +139,7 @@ class Webhook:
         try:                
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title=':no_entry: Failed Checkout :no_entry:', description='', color=0xc32424)
-            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()))
+            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()), icon_url='https://i.imgur.com/HdQACCM.png')
             embed.set_timestamp()    
             if image:
                 try:
@@ -209,7 +209,7 @@ class Webhook:
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title=':credit_card: Confirm 3D Secure Payment :credit_card: ',
             description='Please confirm your 3DS payment in your banking app', color=0xf5da12)
-            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()))
+            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()), icon_url='https://i.imgur.com/HdQACCM.png')
             embed.set_timestamp()    
             if image:
                 try:
@@ -265,7 +265,7 @@ class Webhook:
         try:
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title=f'{SITE} | Account Created', description='', color=0x1e68e7)
-            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()))
+            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()), icon_url='https://i.imgur.com/HdQACCM.png')
             embed.set_timestamp()
     
             if first: embed.add_embed_field(name='First Name', value=first,inline=False)
@@ -283,7 +283,7 @@ class Webhook:
         try:
             webhook = DiscordWebhook(webhook)
             embed = DiscordEmbed(title='Webhook Test', description='', color=0x2feb61)
-            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()))
+            embed.set_footer(text='VenetiaCLI | {}'.format(CONFIG.VERSION()), icon_url='https://i.imgur.com/HdQACCM.png')
             embed.set_timestamp()
     
             webhook.add_embed(embed)

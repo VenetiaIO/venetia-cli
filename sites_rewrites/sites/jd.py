@@ -23,7 +23,7 @@ from utils.log import log
 from utils.functions import (
     loadSettings,
     loadProfile,
-    loadProxy,
+    loadProxy2,
     createId,
     loadCookie,
     loadToken,
@@ -100,13 +100,15 @@ class JD:
             "product_url":self.task['PRODUCT']
         }
 
-        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+        self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
 
         self.profile = loadProfile(self.task["PROFILE"])
         if self.profile == None:
             self.error("Profile Not found. Exiting...")
             time.sleep(10)
             sys.exit()
+
+        self.region = '.co.uk'
 
         if 'https' in self.task['PRODUCT']:
             self.prodUrl = self.task['PRODUCT']
@@ -120,6 +122,7 @@ class JD:
         self.monitor()
         self.addToCart()
         self.guestCheckout()
+        self.shipping()
 
         # if self.task['PAYMENT'].strip().lower() == "paypal":
         #     self.paypal()
@@ -132,11 +135,10 @@ class JD:
         while True:
             self.prepare("Getting Product...")
 
-            self.region = '.co.uk'
             try:
                 response = self.session.get(self.prodUrl,headers={
                     'accept': '*/*',
-                    'accept-encoding': 'gzip, deflate, br',
+                    # 'accept-encoding': 'gzip, deflate, br',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/json',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
@@ -145,26 +147,18 @@ class JD:
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 self.error(f"error: {str(e)}")
-                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
                 time.sleep(int(self.task["DELAY"]))
                 continue
+            
 
-            if response.status_code == 200:
+            if response.status == 200:
                 self.start = time.time()
 
                 self.warning("Retrieved Product")
 
                 try:
                     soup = BeautifulSoup(response.text, "html.parser")
-
-                    self.webhookData['product'] = str(soup.find("title").text)
-                    self.webhookData['image'] = str(soup.find("img", {"id": "image-0"})["src"])
-                    self.webhookData['price'] = str(soup.find("span",{"class":"price"}).text)
-
-                    self.atcUrl = soup.find("form", {"id": "product_addtocart_form"})["action"].replace("checkout/cart", "oxajax/cart")
-                    self.formKey = soup.find("input", {"name": "form_key"})["value"]
-                    self.productId = soup.find("input", {"name": "product"})["value"]
-                    self.attributeId = soup.find("select", {"class": "required-entry super-attribute-select no-display swatch-select"})["id"].split("attribute")[1]
 
                     foundSizes = soup.find_all('button',{'data-e2e':'pdp-productDetails-size'})
 
@@ -211,9 +205,15 @@ class JD:
                     continue
 
                 return
+
+            elif response.status == 403:
+                self.error(f"Failed to cart [{str(response.status)}]. Retrying...")
+                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task['DELAY']))
+                continue
                     
             else:
-                self.error(f"Failed to get product [{str(response.status_code)}]. Retrying...")
+                self.error(f"Failed to get product [{str(response.status)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
     
@@ -222,16 +222,15 @@ class JD:
             self.prepare("Adding to cart...")
             
             
-
             try:
                 response = self.session.post(f'https://www.jdsports{self.region}/cart/{self.sizeSKU}/',headers={
                     'accept': '*/*',
-                    'accept-encoding': 'gzip, deflate, br',
+                    # 'accept-encoding': 'gzip, deflate, br',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/json',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest',
-                    'newrelic': ''
+                    # 'newrelic': ''
                 },data=json.dumps({
                     "customisations":False,
                     "cartPosition":'null',
@@ -243,11 +242,11 @@ class JD:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
                 continue
 
 
-            if response.status_code == 200:
+            if response.status == 200:
                 try:
                     responseBody = json.loads(response.text)
                     self.deliveryData = responseBody['delivery']
@@ -264,22 +263,28 @@ class JD:
                 self.success("Added to cart!")
                 updateConsoleTitle(True,False,SITE)
                 return
+
+            elif response.status == 403:
+                self.error(f"Failed to cart [{str(response.status)}]. Retrying...")
+                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task['DELAY']))
+                continue
+                
             
             else:
-                self.error(f"Failed to cart [{str(response.status_code)}]. Retrying...")
+                self.error(f"Failed to cart [{str(response.status)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
 
     def guestCheckout(self):
         while True:
             self.prepare("Setting email...")
-            
-            
+                
 
             try:
                 response = self.session.post(f'https://www.jdsports{self.region}/checkout/guest/',headers={
                     'accept': '*/*',
-                    'accept-encoding': 'gzip, deflate, br',
+                    # 'accept-encoding': 'gzip, deflate, br',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/json',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
@@ -292,26 +297,103 @@ class JD:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
                 continue
 
 
-            if response.status_code == 200:
+            if response.status == 200:
                 try:
                     responseBody = json.loads(response.text)
-                    print(responseBody)
+                    message = responseBody['message']
                 except Exception as e:
                     self.error("Failed to set email [failed to parse response]. Retrying...")
                     log.info(e)
                     time.sleep(int(self.task["DELAY"]))
                     continue
+                
+                if message.lower() == 'success':
+                    self.success("Set email")
+                    return
+                else:
+                    self.error(f"Failed to set email [{message}]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
 
-                self.success("Set email")
-                updateConsoleTitle(True,False,SITE)
-                return
-            
+            elif response.status == 403:
+                self.error(f"Failed to cart [{str(response.status)}]. Retrying...")
+                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task['DELAY']))
+                continue
+                
             else:
-                self.error(f"Failed to set email [{str(response.status_code)}]. Retrying...")
+                self.error(f"Failed to set email [{str(response.status)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+
+    def shipping(self):
+        while True:
+            self.prepare("Setting shipping...")
+            
+            
+
+            try:
+                response = self.session.post(f'https://www.jdsports{self.region}/myaccount/addressbook/add/',headers={
+                    'accept': '*/*',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': 'application/json',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
+                    'x-requested-with': 'XMLHttpRequest',
+                    # 'newrelic': ''
+                },data=json.dumps({
+                    "useDeliveryAsBilling":True,
+                    "country":"United Kingdom|gb",
+                    "locale":"",
+                    "firstName":self.profile['firstName'],
+                    "lastName":self.profile['lastName'],
+                    "phone":self.profile['phone'],
+                    "address1":'{} {}'.format(self.profile['house'], self.profile['addressOne']),
+                    "address2":self.profile['addressTwo'],
+                    "town":self.profile['city'],
+                    "county":self.profile['region'],
+                    "postcode":self.profile['zip'],
+                    "addressPredict":"",
+                    "setOnCart":"deliveryAddressID",
+                    "addressPredictflag":False
+                }))
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+
+            if response.status == 200:
+                try:
+                    responseBody = json.loads(response.text)
+                    print(responseBody)
+                except Exception as e:
+                    self.error("Failed to set shipping [failed to parse response]. Retrying...")
+                    log.info(e)
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+                
+                if message.lower() == 'success':
+                    self.success("Set shipping")
+                    return
+                else:
+                    self.error(f"Failed to set shipping [{message}]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+
+            elif response.status == 403:
+                self.error(f"Failed to cart [{str(response.status)}]. Retrying...")
+                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task['DELAY']))
+                continue
+                
+            else:
+                self.error(f"Failed to set shipping [{str(response.status)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
     

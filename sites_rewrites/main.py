@@ -63,24 +63,33 @@ import utils.create_data_files as dataFiles
 from utils.cartClear import cartClear
 
 def checkUpdate():
-    status = Updater.checkForUpdate(VERSION())
-    if status["error"] == False:
-        if status["latest"] == True:
-            logger.menu('VENETIA','Menu','{}'.format(colored(f'You are on the latest version! {VERSION()}','green', attrs=["bold"])))
-            return True
-        if status["latest"] == False:
-            logger.menu('VENETIA','Menu','{}'.format(colored(f'Updating...','magenta', attrs=["bold"])))
-            download = Updater.downloadLatest(status["version"])
-            if download == "complete":
-                logger.menu('VENETIA','Menu','{}'.format(colored(f'Update complete. Please delete the old file named "venetiaCLI_old.exe" and open the new one name "venetiaCLI.exe"','cyan', attrs=["bold"])))
-                time.sleep(5)
-                sys.exit()
-            else:
-                logger.menu('VENETIA','Menu','{}'.format(colored('Failed to download latest version. Please try again later.','red', attrs=["bold"])))
-    if status["error"] == True:
-        logger.menu('VENETIA','Menu','{}'.format(colored('Failed to check version. Retrying...','red', attrs=["bold"])))
-        time.sleep(10)
-        checkUpdate()
+    if VERSION() == '0.0.0':
+        return True
+    else:
+        status = Updater.checkForUpdate(VERSION())
+        if status["error"] == False:
+            if status["latest"] == True:
+                print(colored(f'You are on the latest version! {VERSION()}','green', attrs=["bold"]))
+                return True
+            if status["latest"] == False:
+                download = Updater.downloadLatest(status["version"])
+                if download == "complete":
+                    print(colored('Update complete','cyan', attrs=["bold"]))
+                    try:
+                        pass
+                        os.startfile("VenetiaCLI.exe".format(status['version']))
+                    except:
+                        pass
+                    time.sleep(5)
+                    sys.exit()
+                else:
+                    print(colored('Failed to download latest version. Please try again later.','red', attrs=["bold"]))
+                    time.sleep(5)
+                    sys.exit()
+        if status["error"] == True:
+            print(colored('Failed to download latest version. Retrying...','red', attrs=["bold"]))
+            time.sleep(10)
+            checkUpdate()
 
 def taskCount():
     total = 0
@@ -206,15 +215,11 @@ class Menu():
                 # Generate Captchas
 
             elif self.option_main_menu_choice == 6:
-                pass
+                self.accountGen()
                 # Account Generator
 
-            # elif self.option_main_menu_choice == 7:
-            #     pass
-            #     # Cookie Generator
-
             elif self.option_main_menu_choice == 7:
-                pass
+                self.viewCheckouts()
                 # View Checkouts
 
             elif self.option_main_menu_choice == 00:
@@ -224,7 +229,7 @@ class Menu():
                 os._exit(0)
             
             else:
-                colored('Invalid Menu Choice','yellow', attrs=["bold"])
+                print(colored('Invalid Menu Choice','yellow', attrs=["bold"]))
                 time.sleep(1)
                 continue
 
@@ -251,7 +256,6 @@ class Menu():
         menu_options.append( colored('[ 04 ] View|Create Profiles','red', attrs=["bold"]))
         menu_options.append( colored('[ 05 ] Generate Captchas','red', attrs=["bold"]))
         menu_options.append( colored('[ 06 ] Account Gen','red', attrs=["bold"]))
-        # menu_options.append( colored('[ 07 ] Cookie Gen','red', attrs=["bold"]))
         menu_options.append( colored('[ 07 ] View Checkouts','red', attrs=["bold"]))
         menu_options.append( colored('[ 00 ] Exit','red', attrs=["bold"]))
 
@@ -581,6 +585,135 @@ class Menu():
         else:
             self.siteSelectFunc(availableSites, siteSelection)
 
+    
+    def accountGen(self):
+        def site_selector_account():
+            questions = [
+                inquirer.List(
+                    "account_select",
+                    message="Select Site",
+                    choices=[
+                        'Holypop',
+                        'Pro-Direct',
+                        'Footasylum',
+                        'Snipes',
+                        'Naked',
+                        'WorkingClassHeroes',
+                        'Ambush',
+                        'Return to menu...'
+                    ],
+                ),
+            ]
+            answers = inquirer.prompt(questions)
+            choi = answers['account_select']
+            return choi
+
+        account_selection = site_selector_account()
+        if account_selection == 'Return to menu...':
+            return
+        else:
+            amount_account_gen = int(input("Number of accounts: "))
+            catchall_account_gen = input("Enter catchall (include @): ")
+            password_account_gen = input("Enter password for accounts: ")
+            profile_account_gen = input("Enter profile name: ")
+            proxies_account_gen = input("Enter proxylist name: ")
+
+            before_thread = threading.active_count()
+            if account_selection == 'Holypop':
+                siteKey = '6Lc8GBUUAAAAAKMfe1S46jE08TvVKNSnMYnuj6HN'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.holypop,args=(siteKey,proxies_account_gen,'Holypop',catchall_account_gen,password_account_gen, profile_account_gen)).start()
+            
+            elif account_selection == 'Pro-Direct':
+                siteKey = '6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.proDirect,args=(siteKey,proxies_account_gen,'ProDirect',catchall_account_gen,password_account_gen, profile_account_gen)).start()
+            
+            elif account_selection == 'Footasylum':
+                siteKey = 'n/a'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.footasylum,args=(siteKey,proxies_account_gen,'Footasylum',catchall_account_gen,password_account_gen, profile_account_gen)).start()
+
+            elif account_selection == 'Snipes':
+                siteKey = 'n/a'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.snipes,args=(siteKey,proxies_account_gen,'Snipes',catchall_account_gen,password_account_gen, profile_account_gen)).start()
+
+            elif account_selection == 'Naked':
+                siteKey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.naked,args=(siteKey,proxies_account_gen,'Naked',catchall_account_gen,password_account_gen, profile_account_gen)).start()
+            
+            elif account_selection == 'WorkingClassHeroes':
+                siteKey = 'n/a'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.wch,args=(siteKey,proxies_account_gen,'Wch',catchall_account_gen,password_account_gen, profile_account_gen)).start()
+            
+            elif account_selection == 'Ambush':
+                siteKey = 'n/a'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.ambush,args=(siteKey,proxies_account_gen,'Ambush',catchall_account_gen,password_account_gen, profile_account_gen)).start()
+        
+            while threading.active_count() != before_thread:
+                pass
+
+            return
+    
+
+    def viewCheckouts(self): 
+        checkoutData = loadCheckouts()
+        print(colored("Total Checkouts: [{}]".format(checkoutData['total']), 'cyan'))
+
+        if int(checkoutData['total']) == 0:
+            print(colored('No checkouts','red'))
+            time.sleep(2)
+            return
+        
+        elif int(checkoutData['total']) <= 30:
+            count = int(checkoutData['total'])
+        else:
+            count  = 30
+
+        options = []
+        i__ = 1
+        for i in checkoutData['checkouts'][-count:]:
+            if i__ < 10:
+                i_ = f'0{i__}'
+            else:
+                i_ = i__
+            data = i
+            i__ = i__ + 1
+            # options.append('[{}]     {}                {}'.format(i_,data['site'].title(), data['product']))
+            site = data['site'].title()
+            prod = data['product']
+            size = data['size']
+            options.append(f'[{i_:<3}]   {site:<10}   {prod:<20}  | {size:<5}')
+        
+        options.append('[XX] Back to menu')
+
+        def selector_checkouts():
+            print("")
+            questions = [
+                inquirer.List(
+                    "checkouts",
+                    message="Select",
+                    choices=options,
+                ),
+            ]
+            answers = inquirer.prompt(questions)
+            num = answers['checkouts'].split('[')[1].split(']')[0]
+            if num == 'XX':
+                return 'XX'
+
+            link = checkoutData['checkouts'][int(num) -1]['checkout_url']
+            webbrowser.open_new_tab(link)
+            return num
+        
+        n = selector_checkouts()
+        while n != 'XX':
+            n = selector_checkouts()
+        
+        return
 
 
 
@@ -589,7 +722,18 @@ def start_server():
 
 
     def server(port):
-        main_flask_server = Flask(__name__)
+        base_dir = '.'
+        if hasattr(sys, '_MEIPASS'):
+            base_dir = os.path.join(sys._MEIPASS)
+
+        try:
+            main_flask_server = Flask(
+                __name__,
+                static_folder=os.path.join(base_dir, 'static'),
+                template_folder=os.path.join(base_dir, 'templates')
+            )
+        except:
+            server(random.randint(1024,65535))
 
         # Captcha
         @main_flask_server.route('/captcha')

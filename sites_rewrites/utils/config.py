@@ -26,11 +26,12 @@ from sites.disney import DISNEY
 from sites.snipes import SNIPES
 # from sites.solebox import SOLEBOX
 # from sites.fenom import FENOM
-# from sites.offspring import OFFSPRING
+from sites.offspring import OFFSPRING
 # from sites.office import OFFICE
 from sites.footlocker_old import FOOTLOCKER_OLD
 from sites.footlocker_new import FOOTLOCKER_NEW
 # from sites.ambush import AMBUSH
+from sites.converse import CONVERSE
 
 from sites.jd import JD
 
@@ -60,15 +61,16 @@ sites = {
     #"COURIR":COURIR,
     #"SOLEBOX":SOLEBOX,
     # "FENOM":FENOM,
-    # "OFFSPRING":OFFSPRING, #WATERFALL MONITOR
+    "OFFSPRING":OFFSPRING, #WATERFALL MONITOR
     # "OFFICE":OFFICE, #WATERFALL MONITOR
     "FOOTLOCKER_OLD":FOOTLOCKER_OLD,
     "FOOTLOCKER_NEW":FOOTLOCKER_NEW,
     # "AMBUSH":AMBUSH, #WATERFALL MONITOR,
-    "JD":JD
+    # "JD":JD
+    "CONVERSE":CONVERSE
 }
 
-def VERSION(): return '0.6.4'
+def VERSION(): return '0.0.0'
 
 def new_footlockers(): return ['IT','BE','AT','LU','CZ','DK','PL','GR','PT','HU','ES','IE','NO','SE','DE']
 def old_footlockers(): return ['FR','NL','GB','AU','SG','MY','HK']

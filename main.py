@@ -262,7 +262,7 @@ class Menu:
                             row["SITE"] = key_chosen
                             row["TASK_NAME"] = taskName
                             row["ROW_NUMBER"] = a
-                            if key_chosen.lower() in ['slamjam','queens','airness','holypop','grosbasket','wch','naked','prodirect','disney','fenom','footlocker','footlocker_new','footlocker_old','jd','size','footpatrol']:
+                            if key_chosen.lower() in ['offspring','slamjam','queens','airness','holypop','grosbasket','wch','naked','prodirect','disney','fenom','footlocker','footlocker_new','footlocker_old','jd','size','footpatrol']:
                                 threading.Thread(target=value_chosen,args=(row,taskName, a)).start()
                             else:
                                 tasks.append(row)

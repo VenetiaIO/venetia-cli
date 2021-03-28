@@ -378,7 +378,7 @@ class FOOTLOCKER_OLD:
                     continue
 
                 updateConsoleTitle(True,False,SITE)
-                self.warning('Successfully carted product')
+                self.success("Added to cart!")
                 # self.checkoutDispatch()
                 return
 
@@ -678,6 +678,7 @@ class FOOTLOCKER_OLD:
                         continue
 
                     if "paypal" in str(self.ppreq.url):
+                        updateConsoleTitle(False,True,SITE)
                         self.end = time.time() - self.start
                         self.webhookData['speed'] = self.end
                         self.webhookData['url'] = storeCookies(

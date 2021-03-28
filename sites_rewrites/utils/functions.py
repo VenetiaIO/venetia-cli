@@ -138,11 +138,12 @@ def loadCheckouts():
   try:
     with open(f'./data/checkouts.json','r') as checkoutsRead:
       checkouts = json.loads(checkoutsRead.read())
-    return {
-      "total":len(checkouts),
-      "checkouts":checkouts
-    }
-  except:
+      return {
+        "total":len(checkouts),
+        "checkouts":checkouts
+      }
+  except Exception as e:
+    print(e)
     return {
       "total":0,
       "checkouts":[]
@@ -153,18 +154,23 @@ def updateCheckouts(product, site, size, price, image, monitor_input, checkout_u
     with open(f'./data/checkouts.json','r') as checkoutsRead:
       checkouts = json.loads(checkoutsRead.read())
 
-    checkouts.append({
-      "site":site,
-      "product":product,
-      "size":size,
-      "image":image,
-      "price":price,
-      "monitor_input":monitor_input,
-      "checkout_url":checkout_url
-    })
-    with open(f'./data/checkouts.json','w') as checkoutsDump:
-      json.dump(checkouts, checkoutsDump)
-  except:
+      checkouts.append({
+        "site":site,
+        "product":product,
+        "size":size,
+        "image":image,
+        "price":price,
+        "monitor_input":monitor_input,
+        "checkout_url":checkout_url
+      })
+      with open('./data/checkouts.json','w') as output:
+        json.dump(checkouts, output)
+    
+    checkoutsRead.close()
+    output.close()
+
+  except Exception as e:
+    print(e)
     pass
 
 def loadProxy(proxies,taskID, SITE):
@@ -208,6 +214,40 @@ def loadProxy(proxies,taskID, SITE):
       else:
         return None
 
+def loadProxy2(proxies,taskID, SITE):
+    if proxies == "":
+        return None
+    elif proxies != "":
+      if '.txt' in proxies: pass
+      else: proxies = proxies + '.txt'
+
+
+      try:
+          with open(f'./proxies/{proxies}', 'r') as proxyIn:
+              try:
+                  proxyInput = proxyIn.read().splitlines()
+              except:
+                  return None
+      except:
+          return None
+  
+      if len(proxyInput) == 0:
+          return None
+      
+
+      proxyList = [i for i in proxyInput]
+      p = random.choice(proxyList)
+      splitted = p.split(':')
+
+      if len(splitted) == 2:
+          proxy = 'http://{}'.format(splitted)
+          return proxy
+      
+      elif len(splitted) == 4:
+          proxy = 'http://{}:{}@{}:{}'.format(splitted[2], splitted[3], splitted[0], splitted[1])
+          return proxy
+      else:
+        return None
 
 def createId(length):
     return ''.join(random.choice(string.digits) for i in range(length))
@@ -273,21 +313,24 @@ def loadCookie(SITE):
 
 
 def loadToken(SITE):
-    try:
-        with open('./data/captcha/tokens.json','r') as tokens:
-            tokens = json.loads(tokens.read())
-            if len(tokens[SITE]) > 0:
-                t = tokens[SITE][0]
-                tokens[SITE].pop(0)
-                with open('./data/captcha/tokens.json','w') as output:
-                    json.dump(tokens,output)
-    
-                return t["token"]
+  try:
+    with open('./data/captcha/tokens.json','r') as tokens:
+
+        tokens = json.loads(tokens.read())
+
+        if len(tokens[SITE]) > 0:
+            t = tokens[SITE][0]
+            tokens[SITE].pop(0)
             
-            else:
-                return 'empty'
-    except:
-        return 'empty'
+            with open('./data/captcha/tokens.json','w') as output:
+                json.dump(tokens,output)
+
+            return t["token"]
+        
+        else:
+            return 'empty'
+  except:
+    return 'empty'
 
 
 def sendNotification(site, text):

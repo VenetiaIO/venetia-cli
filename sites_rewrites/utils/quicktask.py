@@ -53,6 +53,7 @@ def action():
         
         with open(f'./data/config.json') as settings:
             settings = json.loads(settings.read())
+
     
     
         row = {
@@ -69,7 +70,7 @@ def action():
     
         taskName = 'QT'
         
-
+        
         if site == 'footlocker':
             if loadProfile(row['PROFILE'])['countryCode'].upper() in new_footlockers():
                 siteModule = sites.get('FOOTLOCKER_NEW')

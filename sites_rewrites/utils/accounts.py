@@ -46,6 +46,7 @@ class ACCOUNTS:
             getLogin = session.get('https://www.holypopstore.com/')
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             return None
+
         if getLogin.status_code == 200:
             captchaResponse = captcha.Hiddenv2(sitekey,'https://www.holypopstore.com',proxies,SITE,taskID)
 
@@ -190,11 +191,14 @@ class ACCOUNTS:
 
             profile = loadProfile(profile)
 
-            soup = BeautifulSoup(prodirect_data,"html.parser")
-            options = soup.find_all("option")
-            for s in options:
-                if str(s.text).lower() == profile["country"].lower():
-                    countryId = s["value"]
+            try:
+                soup = BeautifulSoup(prodirect_data,"html.parser")
+                options = soup.find_all("option")
+                for s in options:
+                    if str(s.text).lower() == profile["country"].lower():
+                        countryId = s["value"]
+            except:
+                return None
 
             
             form2 = {

@@ -1,207 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/all.css')}}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/logo.png')}}" />
     <title>VenetiaCLI | Config</title>
 </head>
-<body class="bg-gray-800">
-<div class="container m-10 bg-gray-600 rounded-md shadow-xl mx-auto">
-<form class="space-y-8 divide-y divide-gray-200 m-10 py-12" action="/update/config" method="POST">
-    <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
+<body class="bg-background">
+    <div class="min-h-screen p-10">
+        <div class="pb-1 container bg-coolGray-700 h-full rounded-xl shadow-xl mx-auto">
+    <h1 class="text-white font-medium text-2xl p-3 text-center pt-6">Config</h1>
+<form class="space-y-8 divide-y divide-gray-200 m-10 py-" action="/update/config" method="POST">
+    <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5 text-sm font-medium">
       <div>
         <div>
-          <h3 class="text-lg leading-6 font-medium text-gray-900">
-            Config
-          </h3>
-          <p class="mt-1 max-w-2xl text-sm text-gray-300">
+          <p class="mt-1 max-w-2xl text-xl font-bold text-gray-300">
             Edit your config below and press save at the end
           </p>
         </div>
   
         <div class="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
-          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="username" class="block text-sm font-medium text-gray-300 sm:mt-px sm:pt-2">
+          <div class="config-grid">
+            <label for="username" class="input-label">
               Key
             </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-              <div class="max-w-lg flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <div class="mt-1 sm:mt-0 col-span-2">
+              <div class="input-grid">
+                <span class="input-span">
                   Key 
                 </span>
-                <input type="text" name="key" id="key" value="{{ config['key'] }}"  class="py-4 flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300">
+                <input type="text" name="key" id="key" value="{{ config['key'] }}" class="input">
               </div>
             </div>
           </div>
 
-          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="username" class="block text-sm font-medium text-gray-300 sm:mt-px sm:pt-2">
+          <div class="config-grid">
+            <label for="username" class="input-label">
             Discord Webhook
             </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-              <div class="max-w-lg flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <div class="mt-1 sm:mt-0 col-span-2">
+              <div class="input-grid">
+                <span class="input-span">
                 Webhook
                 </span>
-                <input type="text" name="webhook" id="webhook" value="{{ config['webhook'] }}"  class="py-4 flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300">
-                <button class="bg-indigo-600 px-5 rounded-md p-2 text-white font-medium" id="button-webhook" onclick="testWebhook()">test webhook</button>
+                <input type="text" name="webhook" id="webhook" value="{{ config['webhook'] }}"  class="focus:outline-none py-4 px-2 flex-1 block w-full text-sm focus:ring focus:ring-primary trans">
+                <button class="bg-primary hover:bg-primaryDark px-5 rounded-r-xl p-2 text-white font-medium focus:outline-none" id="button-webhook" onclick="testWebhook()">Test</button>
             </div>
             </div>
           </div>
   
-          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="username" class="block text-sm font-medium text-gray-300 sm:mt-px sm:pt-2">
+          <div class="config-grid">
+            <label for="username" class="input-label">
               Checkout Noise
             </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-              <div class="max-w-lg flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <div class="mt-1 sm:mt-0 col-span-2">
+              <div class="input-grid">
+                <span class="input-span">
                 Checkout Noise 
                 </span>
-                <select selected="{{ config['checkoutNoise'] }}" type="text" name="checkout_noise" id="checkout_noise" value="{{ config['checkoutNoise'] }}"  class="py-4 flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300">
-                <option value="Y">Y</option>
-                <option value="N">N</option>
+                <select selected="{{ config['checkoutNoise'] }}" type="text" name="checkout_noise" id="checkout_noise" value="{{ config['checkoutNoise'] }}"  class="input">
+                <option value="Y">On</option>
+                <option value="N">Off</option>
                 </select>
               </div>
             </div>
           </div>
   
-          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="username" class="block text-sm font-medium text-gray-300 sm:mt-px sm:pt-2">
+          <div class="config-grid">
+            <label for="username" class="input-label">
               2 Captcha
             </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-              <div class="max-w-lg flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <div class="mt-1 sm:mt-0 col-span-2">
+              <div class="input-grid">
+                <span class="input-span">
                   API Key 
                 </span>
-                <input type="text" name="2cap" id="2cap" value="{{ config['2Captcha'] }}"  class="py-4 flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300">
+                <input type="text" name="2cap" id="2cap" value="{{ config['2Captcha'] }}"  class="input">
               </div>
             </div>
           </div>
   
-          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="username" class="block text-sm font-medium text-gray-300 sm:mt-px sm:pt-2">
+          <div class="config-grid">
+            <label for="username" class="input-label">
               Cap Monster
             </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-              <div class="max-w-lg flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <div class="mt-1 sm:mt-0 col-span-2">
+              <div class="input-grid">
+                <span class="input-span">
                   API Key 
                 </span>
-                <input type="text" name="cap_mon" id="cap_mon" value="{{ config['capMonster'] }}" class="py-4 flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300">
+                <input type="text" name="cap_mon" id="cap_mon" value="{{ config['capMonster'] }}" class="input">
               </div>
             </div>
           </div>
 
-          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="username" class="block text-sm font-medium text-gray-300 sm:mt-px sm:pt-2">
+          <div class="config-grid">
+            <label for="username" class="input-label">
               Captcha Choice
             </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-              <div class="max-w-lg flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <div class="mt-1 sm:mt-0 col-span-2">
+              <div class="input-grid">
+                <span class="input-span">
                   2Cap / CapMonster 
                 </span>
-                <select type="text" name="cap_choice" id="cap_choice" class="py-4 flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300">
+                <select type="text" name="cap_choice" id="cap_choice" class="input">
                     <option value="2Cap">2Cap</option>
-                    <option value="monster">monster</option>
+                    <option value="monster">CapMonster</option>
                 </select>
               </div>
             </div>
           </div>
   
-          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="username" class="block text-sm font-medium text-gray-300 sm:mt-px sm:pt-2">
+          <div class="config-grid">
+            <label for="username" class="input-label">
               QuickTask Size
             </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-              <div class="max-w-lg flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <div class="mt-1 sm:mt-0 col-span-2">
+              <div class="input-grid">
+                <span class="input-span">
                   Size 
                 </span>
-                <input type="text" name="qt_size" id="qt_size" value="{{ config['quickTaskSize'] }}" class="py-4 flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300">
+                <input type="text" name="qt_size" id="qt_size" value="{{ config['quickTaskSize'] }}" class="input">
               </div>
             </div>
           </div>
   
-          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="username" class="block text-sm font-medium text-gray-300 sm:mt-px sm:pt-2">
+          <div class="config-grid">
+            <label for="username" class="input-label">
                 QuickTask Profile
             </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-              <div class="max-w-lg flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <div class="mt-1 sm:mt-0 col-span-2">
+              <div class="input-grid">
+                <span class="input-span">
                   Profile 
                 </span>
-                <input type="text" name="qt_profile" id="qt_profile" value="{{ config['quickTaskProfile'] }}" class="py-4 flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300">
+                <input type="text" name="qt_profile" id="qt_profile" value="{{ config['quickTaskProfile'] }}" class="input">
               </div>
             </div>
           </div>
   
-          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="username" class="block text-sm font-medium text-gray-300 sm:mt-px sm:pt-2">
+          <div class="config-grid">
+            <label for="username" class="input-label">
                 QuickTask Proxies
             </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-              <div class="max-w-lg flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <div class="mt-1 sm:mt-0 col-span-2">
+              <div class="input-grid">
+                <span class="input-span">
                   Proxies 
                 </span>
-                <input type="text" name="qt_proxies" id="qt_proxies" value="{{ config['quickTaskProxies'] }}" class="py-4 flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300">
+                <input type="text" name="qt_proxies" id="qt_proxies" value="{{ config['quickTaskProxies'] }}" class="input">
               </div>
             </div>
           </div>
 
-          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="username" class="block text-sm font-medium text-gray-300 sm:mt-px sm:pt-2">
+          <div class="config-grid">
+            <label for="username" class="input-label">
                 QuickTask Delay
             </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-              <div class="max-w-lg flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <div class="mt-1 sm:mt-0 col-span-2">
+              <div class="input-grid">
+                <span class="input-span">
                   Delay 
                 </span>
-                <input type="text" name="qt_delay" id="qt_delay" value="{{ config['quickTaskDelay'] }}" class="py-4 flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300">
+                <input type="text" name="qt_delay" id="qt_delay" value="{{ config['quickTaskDelay'] }}" class="input">
               </div>
             </div>
           </div>
 
-          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="username" class="block text-sm font-medium text-gray-300 sm:mt-px sm:pt-2">
+          <div class="config-grid">
+            <label for="username" class="input-label">
                 QuickTask Payment Method
             </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-              <div class="max-w-lg flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+            <div class="mt-1 sm:mt-0 col-span-2">
+              <div class="input-grid">
+                <span class="input-span">
                   Payment 
                 </span>
-                <input type="text" name="qt_payment" id="qt_payment" value="{{ config['quickTaskPayment'] }}" class="py-4 flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300">
+                <input type="text" name="qt_payment" id="qt_payment" value="{{ config['quickTaskPayment'] }}" class="input">
               </div>
             </div>
           </div>
 
-          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="username" class="block text-sm font-medium text-gray-300 sm:mt-px sm:pt-2">
+          <div class="config-grid">
+            <label for="username" class="input-label">
                 QuickTask Account Email
             </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-              <div class="max-w-lg flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                  email 
+            <div class="mt-1 sm:mt-0 col-span-2">
+              <div class="input-grid">
+                <span class="input-span">
+                  Email 
                 </span>
-                <input type="text" name="qt_account_email" id="qt_account_email" value="{{ config['quickTaskEmail'] }}" class="py-4 flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300">
+                <input type="text" name="qt_account_email" id="qt_account_email" value="{{ config['quickTaskEmail'] }}" class="input">
               </div>
             </div>
           </div>
 
-          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-            <label for="username" class="block text-sm font-medium text-gray-300 sm:mt-px sm:pt-2">
+          <div class="config-grid">
+            <label for="username" class="input-label">
                 QuickTask Account Password
             </label>
-            <div class="mt-1 sm:mt-0 sm:col-span-2">
-              <div class="max-w-lg flex rounded-md shadow-sm">
-                <span class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                  password 
+            <div class="mt-1 sm:mt-0 col-span-2">
+              <div class="input-grid">
+                <span class="input-span">
+                  Password 
                 </span>
-                <input type="text" name="qt_account_password" id="qt_account_password"  value="{{ config['quickTaskPassword'] }}"class="py-4 flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-r-md sm:text-sm border-gray-300">
+                <input type="text" name="qt_account_password" id="qt_account_password"  value="{{ config['quickTaskPassword'] }}"class="input">
               </div>
             </div>
           </div>
@@ -211,7 +216,7 @@
   
     <div class="pt-10">
       <div class="flex justify-end">
-        <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+        <button type="submit" class="text-white hover:text-gray-400 font-medium rounded-xl py-2 px-5 bg-green-600 hover:bg-green-700 trans float-left btn">
           Save
         </button>
       </div>

@@ -901,6 +901,7 @@ class SNIPES:
                     data = response.json()
 
                     if self.task['PAYMENT'].strip().lower() == 'paypal':
+                        updateConsoleTitle(False,True,SITE)
                         place_order_res = str(data["continueUrl"])
                         self.webhookData['url'] = storeCookies(
                             place_order_res,
@@ -911,6 +912,7 @@ class SNIPES:
                         )
 
                     if self.task['PAYMENT'].strip().lower() == 'card':
+                        updateConsoleTitle(False,True,SITE)
                         place_order_res = str(data["continueUrl"])
 
                         self.webhookData['url'] = storeCookies(
@@ -922,6 +924,7 @@ class SNIPES:
                         )
 
                     if self.task['PAYMENT'].strip().lower() == 'bt':
+                        updateConsoleTitle(False,True,SITE)
                         place_order_res = str(data["orderID"])
                 except Exception as e:
                     log.info(e)
@@ -1000,7 +1003,8 @@ class SNIPES:
                     product=self.webhookData['product_url'],
                     profile=self.task["PROFILE"],
                     proxy=self.webhookData['proxy'],
-                    speed=self.webhookData['speed']
+                    speed=self.webhookData['speed'],
+                    region=self.profile['countryCode'].lower()
                 )
                 self.secondary("Sent to discord!")
                 while True:

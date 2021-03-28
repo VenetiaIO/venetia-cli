@@ -17,8 +17,8 @@
             "zip": "",
             "card": {
                 "cardNumber": "",
-                "cardMonth": "",
-                "cardYear": "",
+                "cardMonth": "01",
+                "cardYear": "2020",
                 "cardCVV": ""
             }
         },
@@ -270,18 +270,18 @@
             "lastName": "Bottomley",
             "email": "charliebottomley11@gmail.com",
             "phonePrefix": "+44",
-            "phone": "7796233905",
+            "phone": "07796233905",
             "house": "95",
             "addressOne": "Via A.G. Alaimo",
             "addressTwo": "",
-            "city": "Castelfidardo",
+            "city": "Agrigento",
             "region": "Ancona",
             "country": "Italy",
             "countryCode": "IT",
-            "zip": "60022",
+            "zip": "92100",
             "card": {
                 "cardNumber": "5273468042304418",
-                "cardMonth": "3",
+                "cardMonth": "03",
                 "cardYear": "2025",
                 "cardCVV": "521"
             }

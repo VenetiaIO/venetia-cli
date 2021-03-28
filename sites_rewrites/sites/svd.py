@@ -1188,6 +1188,7 @@ class SVD:
                 continue
             if r.status_code == 200:
                 self.end = time.time() - self.start
+                self.webhookData['speed'] = self.end
                 updateConsoleTitle(False,True,SITE)
                 self.success('Checkout Success!')
                 return
@@ -1438,6 +1439,7 @@ class SVD:
                 continue
             if r.status_code == 200:
                 self.end = time.time() - self.start
+                self.webhookData['speed'] = self.end
                 updateConsoleTitle(False,True,SITE)
                 self.success(SITE,self.taskID,'Checkout Success!')
                 return
