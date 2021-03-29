@@ -120,7 +120,7 @@ class CONVERSE:
         self.tasks()
     
     def tasks(self):
-        self.cookie = 'AB6FCB1106FEC2C0A4D34A19132797B6~-1~YAAQ17D3SAjebnZ4AQAA7uHdeQUjbVwJ9ofRB4kc0wPkURqkhpvkgco+b2+cK1ld/L330bBbEV1vr+e/6D5+dfJVIV1EhKveWREogqJx2s37EVX7MtUClvN4HIYW5r15X0EswQRmIMVvforVnJr3RLKzdqM8fBnY/d3q1vkqDs+InmEEjfpVkn4WPelH7Xcuu77iiWN5+620KGl3OerhoMF/WL6U3FGrS7zC/KM7L1fr8QMpRz17s0X4LDtaiBYDlYbh1XPQ29X2JQ99v5+cvMQZ0TYHFuKZfZ92tpu9MewBfMlWFBKU0ifsv62yxyTturaTsg0z11InHv2x1IEADK47h9kGeCX9HMKYwSdPcteXSNg8nXOKeQw=~-1~-1~-1'
+        self.cookie = 'E9D9050ACEAD4F02477B8771A347177B~0~YAAQ17D3SMCSqXZ4AQAAxpCMfgXny4e2dsSQk4Oyi2/+4iFUi67anosowCI3mLm2yoOsRMcC5k4JCSrFJ8w42RkXykBjR5s5dyoquzai4vezbXcI1oglcrdAoaN+gbjFsSYdyXkJ1EXch9jonq+do9yAAxALcbyDh/auViZdpU/0SiktZQWroFhwE7QARdvnIxjpzIlUEClWg/1l8GLH9L7JNElgqtKrd91ZEzPNVo44+aOynR8MtebKTX3XWjGpR5Gzdc1zOuhX1ujztAGpJtuoQ0u3mADpqdxfkhfqy2OnGbqw0Tcxo05O7LBetFVcYoSVfhDB8GrFVcCGEB7crfQxE+wRoENpooLdzMGv/Ts0wdI0+7cCjRK5ZmaNR/FNI1BUlzxF9CiqVeSx3HVeXiDg4ZNEqUX/RcIeLxf8LHTjAx+NrcNA9ORir9w=~-1~||1-AnSWopVDlh-1-10-1000-2||~-1'
 
         cookie_obj = requests.cookies.create_cookie(domain='.converse.com',name='_abck',value=self.cookie)
         self.session.cookies.set_cookie(cookie_obj)
