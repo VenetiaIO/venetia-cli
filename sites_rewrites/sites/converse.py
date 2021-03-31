@@ -85,8 +85,58 @@ class CONVERSE:
             self.error(f'error => {e}')
             self.__init__(task,taskName,rowNumber)
 
+        self.profile = loadProfile(self.task["PROFILE"])
+        if self.profile == None:
+            self.error("Profile Not found. Exiting...")
+            time.sleep(10)
+            sys.exit()
+
+        if   self.profile['countryCode'].upper() == 'GB':
+            self.baseUrl = 'https://www.converse.com/uk/en'
+            self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-gb-Site/en_GB/'
+        elif self.profile['countryCode'].upper() == 'BE':
+            self.baseUrl = 'https://www.converse.com/be/en'
+            self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-be-Site/en_BE/'
+        elif self.profile['countryCode'].upper() == 'DK':
+            self.baseUrl = 'https://www.converse.com/dk/en'
+            self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-eu-Site/en_DK/'
+        elif self.profile['countryCode'].upper() == 'DE':
+            self.baseUrl = 'https://www.converse.com/de/en'
+            self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-de-Site/de_DE/'
+        elif self.profile['countryCode'].upper() == 'ES':
+            self.baseUrl = 'https://www.converse.com/es/en'
+            self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-es-Site/es_ES/'
+        elif self.profile['countryCode'].upper() == 'FI':
+            self.baseUrl = 'https://www.converse.com/fi/en'
+            self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-eu-Site/en_FI/'
+        elif self.profile['countryCode'].upper() == 'FR':
+            self.baseUrl = 'https://www.converse.com/fr/en'
+            self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-fr-Site/fr_FR/'
+        elif self.profile['countryCode'].upper() == 'IE':
+            self.baseUrl = 'https://www.converse.com/ie/en'
+            self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-eu-Site/en_IE/'
+        elif self.profile['countryCode'].upper() == 'IT':
+            self.baseUrl = 'https://www.converse.com/it/en'
+            self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-it-Site/it_IT/'
+        elif self.profile['countryCode'].upper() == 'LU':
+            self.baseUrl = 'https://www.converse.com/lu/en'
+            self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-fr-Site/en_LU/'
+        elif self.profile['countryCode'].upper() == 'NL':
+            self.baseUrl = 'https://www.converse.com/nl/en'
+            self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-nl-Site/nl_NL/'
+        elif self.profile['countryCode'].upper() == 'AT':
+            self.baseUrl = 'https://www.converse.com/at/en'
+            self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-de-Site/de_AT/'
+        elif self.profile['countryCode'].upper() == 'PT':
+            self.baseUrl = 'https://www.converse.com/pt/en'
+            self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-es-Site/en_PT/'
+        else:
+            self.error('Region not supported. Exiting...')
+            time.sleep(10)
+            sys.exit()
+
         if 'https' not in self.task['PRODUCT']:
-            self.prodUrl = 'https://www.converse.com/uk/en/regular/{}.html'.format(self.task['PRODUCT'])
+            self.prodUrl = '{}/regular/{}.html'.format(self.baseUrl,self.task['PRODUCT'])
         else:
             self.prodUrl = self.task['PRODUCT']
 
@@ -106,16 +156,6 @@ class CONVERSE:
         }
 
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-
-        self.profile = loadProfile(self.task["PROFILE"])
-        if self.profile == None:
-            self.error("Profile Not found. Exiting...")
-            time.sleep(10)
-            sys.exit()
-
-        
-        self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-gb-Site/en_GB/'
-
 
         self.tasks()
     
@@ -258,7 +298,7 @@ class CONVERSE:
             self.prepare("Getting shipping...")
 
             try:
-                response = self.session.get('https://www.converse.com/uk/en/checkout-shipping', headers={
+                response = self.session.get(f'{self.baseUrl}/checkout-shipping', headers={
                     'accept-language': 'en-US,en;q=0.9',
                     'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36'
@@ -318,11 +358,11 @@ class CONVERSE:
                 continue
 
             try:
-                response = self.session.post('https://www.converse.com/uk/en/checkout-shipping?dwcont=' +self.dwCont, data=payload, headers={
+                response = self.session.post(f'{self.baseUrl}/checkout-shipping?dwcont=' +self.dwCont, data=payload, headers={
                     'accept-language': 'en-US,en;q=0.9',
                     'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                     'content-type':'application/x-www-form-urlencoded',
-                    'referer': 'https://www.converse.com/uk/en/checkout-shipping',
+                    'referer': f'{self.baseUrl}/checkout-shipping',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36'
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -386,11 +426,11 @@ class CONVERSE:
                 continue
             
             try:
-                response = self.session.post('https://www.converse.com/uk/en/checkout-shipping?dwcont=' +self.dwCont, data=payload, headers={
+                response = self.session.post(f'{self.baseUrl}/checkout-shipping?dwcont=' +self.dwCont, data=payload, headers={
                     'accept-language': 'en-US,en;q=0.9',
                     'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                     'content-type':'application/x-www-form-urlencoded',
-                    'referer': 'https://www.converse.com/uk/en/checkout-shipping?dwcont='+self.dwCont,
+                    'referer': f'{self.baseUrl}/checkout-shipping?dwcont='+self.dwCont,
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36'
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -425,10 +465,10 @@ class CONVERSE:
                 continue
 
             try:
-                response = self.session.post('https://www.converse.com/uk/en/checkout-confirmation',data=payload,headers={
+                response = self.session.post(f'{self.baseUrl}/checkout-confirmation',data=payload,headers={
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type':'application/x-www-form-urlencoded',
-                    'referer': 'https://www.converse.com/uk/en/checkout-shipping?dwcont='+self.dwCont,
+                    'referer': f'{self.baseUrl}/checkout-shipping?dwcont='+self.dwCont,
                     'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36'
                 })

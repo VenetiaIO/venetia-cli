@@ -926,11 +926,12 @@ class SNIPES:
                     if self.task['PAYMENT'].strip().lower() == 'bt':
                         updateConsoleTitle(False,True,SITE)
                         place_order_res = str(data["orderID"])
+
                 except Exception as e:
                     log.info(e)
                     self.error("Failed to place order. Retrying...")
 
-                self.warning("Set payment method")
+                self.success("Checkout successful")
                 return
 
             if response.status_code == 403:

@@ -25,14 +25,14 @@ from utils.functions import (
 
 class datadome:
     @staticmethod
-    def reCaptchaMethod(SITE,taskID,session,responseUrl, siteUrl, UA, proxies, proxy):
+    def reCaptchaMethod(SITE,taskID,session,responseUrl, siteUrl, UA, proxies):
         try:
             responseUrl = responseUrl.replace('&t=bv','')
-        except:
+        except Exception:
             pass
 
         s = requests.session()
-        s.proxies = proxy
+        s.proxies = session.proxies
 
 
         # https://geo.captcha-delivery.com/captcha/
@@ -41,7 +41,7 @@ class datadome:
         # &hash=A55FBF4311ED6F1BF9911EB71931D5
         # &s=17434
         try:
-            datadomeCookie = str(session.cookies.jar).split('datadome=')[1].split(' ')[0]
+            datadomeCookie = str(session.cookies).split('datadome=')[1].split(' ')[0]
             geoUrl = 'https://geo.captcha-delivery.com/captcha/'
             geoParams = {
                 'initialCid': responseUrl.split('?initialCid=')[1].split('&')[0],
@@ -104,6 +104,7 @@ class datadome:
             logger.error(SITE,taskID,'Failed to get cookie. Retrying...')
             return {"cookie":None}
 
+
         try:
             response = s.get('https://geo.captcha-delivery.com/captcha/check',params=params,headers={
                 "accept": "*/*",
@@ -130,7 +131,7 @@ class datadome:
                 logger.error(SITE,taskID,'Failed to get cookie. Retrying...')
                 return {"cookie":None}
             
-            logger.success(SITE,taskID,'Retrieved cookie')
+            logger.secondary(SITE,taskID,'Retrieved cookie')
             return {"cookie":cookie}
         
         else:

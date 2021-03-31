@@ -285,6 +285,28 @@
                 "cardYear": "2025",
                 "cardCVV": "521"
             }
+        },
+        {
+            "profileName": "rev_it_fake",
+            "firstName": "Claire",
+            "lastName": "Bottomley",
+            "email": "charliebottomley11@gmail.com",
+            "phonePrefix": "+44",
+            "phone": "07796233905",
+            "house": "95",
+            "addressOne": "Via A.G. Alaimo",
+            "addressTwo": "",
+            "city": "Agrigento",
+            "region": "Ancona",
+            "country": "Italy",
+            "countryCode": "IT",
+            "zip": "92100",
+            "card": {
+                "cardNumber": "4596548022056857",
+                "cardMonth": "10",
+                "cardYear": "2024",
+                "cardCVV": "953"
+            }
         }
     ]
 }

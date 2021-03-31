@@ -21,6 +21,7 @@ from utils.logger import logger
 from utils.webhook import Webhook
 from utils.log import log
 from utils.datadome import datadome
+from utils.threeDS import threeDSecure
 from utils.functions import (
     loadSettings,
     loadProfile,
@@ -86,8 +87,9 @@ class FOOTLOCKER_OLD:
         self.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36'
 
         try:
-            self.session = client.Session(browser=client.Fingerprint.CHROME_83)
+            # self.session = client.Session(browser=client.Fingerprint.CHROME_83)
             # self.session = scraper()
+            self.session = requests.session()
         except Exception as e:
             self.error(f'error => {e}')
             self.__init__(task,taskName,rowNumber)
@@ -157,9 +159,31 @@ class FOOTLOCKER_OLD:
         self.submitShipping()
         self.submitPayment()
 
+        if self.task['PAYMENT'].lower().strip() == "card":
+            self.card()
+
         self.sendToDiscord()
 
+    def solveDD(self, response):
+        try:
+            challengeUrl = response.json()['url']
 
+            challenge = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
+            while challenge['cookie'] == None:
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                challenge = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
+            
+            del self.session.cookies['datadome']
+            # self.session.cookies.set('datadome',challenge['cookie'], domain=self.baseUrl.split('https://www')[1])
+            print('datadome',challenge['cookie'])
+            self.session.cookies.set('datadome',challenge['cookie'])
+            return
+
+        except Exception as e:
+            log.info(e)
+            self.error('Failed to solve challenge. Sleeping...')
+            time.sleep(int(self.task["DELAY"]))
+            return
 
     def retrieveSizes(self):
         while True:
@@ -187,18 +211,18 @@ class FOOTLOCKER_OLD:
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            if retrieveSizes.status == 503:
+            if retrieveSizes.status_code == 503:
                 self.info('Queue...')
                 
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            elif retrieveSizes.status == 404:
+            elif retrieveSizes.status_code == 404:
                 self.error('Sold Out. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            elif retrieveSizes.status == 403:
+            elif retrieveSizes.status_code == 403:
                 if 'nginx' in retrieveSizes.text:
                     self.error('Blocked. Rotating Proxy')
                     time.sleep(int(self.task["DELAY"]))
@@ -206,25 +230,23 @@ class FOOTLOCKER_OLD:
                     continue
                 else:
                     self.error('Blocked by DataDome (Solving Challenge...)')
-                    try:
-                        
-                        challengeUrl = retrieveSizes.json()['url']
-                        cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'], self.proxies)
-                        while cookie['cookie'] == None:
-                            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'], self.proxies)
-                        
-                        del self.session.cookies['datadome']
-                        self.session.cookies.set('datadome',cookie['cookie'], domain=self.baseUrl.split('https://www')[1])
-                        continue
-
-                    except Exception as e:
-                        self.error('Failed to solve challenge. Sleeping...')
-                        time.sleep(int(self.task["DELAY"]))
-                        continue
+                    self.solveDD(retrieveSizes)
 
             
-            if retrieveSizes.status == 200:
+            if retrieveSizes.status_code == 200:
+
+                try:
+                    response = self.session.get(self.baseUrl,headers={
+                        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                        "user-agent":self.userAgent
+                    })
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    self.error(f"error: {str(e)}")
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
                 self.start = time.time()
                 try:
                     data = retrieveSizes.json()
@@ -251,6 +273,9 @@ class FOOTLOCKER_OLD:
                 
                 try:
                     soup = BeautifulSoup(htmlContent,"html.parser")
+                    soup2 = BeautifulSoup(response.text, "html.parser")
+
+                    self.syncToken = soup2.find('input',{'name':'SynchronizerToken'})['value']
                     eu_sizes = soup.find_all('section',{'class':'fl-accordion-tab--content'})[0].find_all('button')
                 except:
                     self.error('Sizes Not Found')
@@ -307,13 +332,13 @@ class FOOTLOCKER_OLD:
                 time.sleep(int(self.task["DELAY"]))
                 continue
     
-
     def addToCart(self):
         while True:
             self.prepare('Carting product...')
             params = {
+                'SynchronizerToken':self.syncToken,
                 'Ajax': True,
-                self.relayCat: 'Category Pages',
+                self.relayCat: 'Product Pages',
                 f'acctab-tabgroup-{self.tabgroup}': None,
                 f'Quantity_{self.sizeSku}': 1,
                 'SKU': self.sizeSku
@@ -323,13 +348,9 @@ class FOOTLOCKER_OLD:
                 atcResponse = self.session.post(f'{self.baseUrl}/en/addtocart',params=params,headers={
                     "accept": "application/json, text/javascript, */*; q=0.01",
                     "accept-language": "en-US,en;q=0.9",
-                    "sec-ch-ua": "\"Google Chrome\";v=\"87\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"87\"",
-                    "sec-ch-ua-mobile": "?0",
-                    "sec-fetch-dest": "empty",
-                    "sec-fetch-mode": "cors",
-                    "sec-fetch-site": "same-origin",
                     "x-requested-with": "XMLHttpRequest",
-                    "user-agent":self.userAgent
+                    "user-agent":self.userAgent,
+                    "origin": "https://www.footlocker.co.uk"
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
@@ -338,12 +359,12 @@ class FOOTLOCKER_OLD:
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            if atcResponse.status == 503:
+            if atcResponse.status_code == 503:
                 self.info('Queue...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            elif atcResponse.status == 403:
+            elif atcResponse.status_code == 403:
                 if 'nginx' in atcResponse.text:
                     self.error('Blocked. Rotating Proxy')
                     time.sleep(int(self.task["DELAY"]))
@@ -351,24 +372,9 @@ class FOOTLOCKER_OLD:
                     continue
                 else:
                     self.error('Blocked by DataDome (Solving Challenge...)')
-                    try:
-                        
-                        challengeUrl = atcResponse.json()['url']
-                        cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'], self.proxies)
-                        while cookie['cookie'] == None:
-                            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'], self.proxies)
-                        
-                        del self.session.cookies['datadome']
-                        self.session.cookies.set('datadome',cookie['cookie'], domain=self.baseUrl.split('https://www')[1])
-                        continue
+                    self.solveDD(atcResponse)
 
-                    except Exception as e:
-                        self.error('Failed to solve challenge. Sleeping...')
-                        time.sleep(int(self.task["DELAY"]))
-                        continue
-
-            elif atcResponse.status == 200:
+            elif atcResponse.status_code == 200:
                 try:
                     self.syncToken = atcResponse.text.split('ViewCart-Checkout?SynchronizerToken=')[1].split('\\"')[0]
                     self.productPrice = atcResponse.text.split('price:\\"')[1].split('\\"')[0]
@@ -383,7 +389,7 @@ class FOOTLOCKER_OLD:
                 return
 
             else:
-                self.error(f'Failed to cart [{str(atcResponse.status)}]. Retrying...')
+                self.error(f'Failed to cart [{str(atcResponse.status_code)}]. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
@@ -411,12 +417,12 @@ class FOOTLOCKER_OLD:
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            if checkoutOverviewPage.status == 503:
+            if checkoutOverviewPage.status_code == 503:
                 self.info('Queue...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            elif checkoutOverviewPage.status == 403:
+            elif checkoutOverviewPage.status_code == 403:
                 if 'nginx' in checkoutOverviewPage.text:
                     self.error('Blocked. Rotating Proxy')
                     time.sleep(int(self.task["DELAY"]))
@@ -424,24 +430,9 @@ class FOOTLOCKER_OLD:
                     continue
                 else:
                     self.error('Blocked by DataDome (Solving Challenge...)')
-                    try:
-                        
-                        challengeUrl = checkoutOverviewPage.json()['url']
-                        cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'], self.proxies)
-                        while cookie['cookie'] == None:
-                            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'], self.proxies)
-                        
-                        del self.session.cookies['datadome']
-                        self.session.cookies.set('datadome',cookie['cookie'], domain=self.baseUrl.split('https://www')[1])
-                        continue
+                    self.solveDD(checkoutOverviewPage)
 
-                    except Exception as e:
-                        self.error('Failed to solve challenge. Sleeping...')
-                        time.sleep(int(self.task["DELAY"]))
-                        continue
-
-            elif checkoutOverviewPage.status == 200 or checkoutOverviewPage.status == 302:
+            elif checkoutOverviewPage.status_code == 200 or checkoutOverviewPage.status_code == 302:
                 self.referer = checkoutOverviewPage.url
                 try:
 
@@ -460,7 +451,7 @@ class FOOTLOCKER_OLD:
                 return
 
             else:
-                self.error(f'Failed to get checkout data [{str(checkoutOverviewPage.status)}]. Retrying...')
+                self.error(f'Failed to get checkout data [{str(checkoutOverviewPage.status_code)}]. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
@@ -490,7 +481,7 @@ class FOOTLOCKER_OLD:
                     self.profile['countryCode'],
                     self.shippingAddressId,
                     self.PaymentServiceSelection,
-                    self.deviceId,
+                    footlocker_snare(self.baseUrl),
                     self.shipMethodUUID
                 )
             except:
@@ -523,12 +514,12 @@ class FOOTLOCKER_OLD:
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            if checkoutOverviewDispatch.status == 503:
+            if checkoutOverviewDispatch.status_code == 503:
                 self.info('Queue...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            elif checkoutOverviewDispatch.status == 403:
+            elif checkoutOverviewDispatch.status_code == 403:
                 if 'nginx' in checkoutOverviewDispatch.text:
                     self.error('Blocked. Rotating Proxy')
                     time.sleep(int(self.task["DELAY"]))
@@ -536,24 +527,9 @@ class FOOTLOCKER_OLD:
                     continue
                 else:
                     self.error('Blocked by DataDome (Solving Challenge...)')
-                    try:
-                        
-                        challengeUrl = checkoutOverviewDispatch.json()['url']
-                        cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'], self.proxies)
-                        while cookie['cookie'] == None:
-                            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'], self.proxies)
-                        
-                        del self.session.cookies['datadome']
-                        self.session.cookies.set('datadome',cookie['cookie'], domain=self.baseUrl.split('https://www')[1])
-                        continue
+                    self.solveDD(checkoutOverviewDispatch)
 
-                    except Exception as e:
-                        self.error('Failed to solve challenge. Sleeping...')
-                        time.sleep(int(self.task["DELAY"]))
-                        continue
-
-            elif checkoutOverviewDispatch.status == 200 and 'OrderID' in checkoutOverviewDispatch.url or checkoutOverviewDispatch.status == 302 and 'OrderID' in checkoutOverviewDispatch.url:                
+            elif checkoutOverviewDispatch.status_code == 200 and 'OrderID' in checkoutOverviewDispatch.url or checkoutOverviewDispatch.status_code == 302 and 'OrderID' in checkoutOverviewDispatch.url:                
                 self.responseText = checkoutOverviewDispatch.text
                 self.responseUrl = checkoutOverviewDispatch.url
 
@@ -561,7 +537,7 @@ class FOOTLOCKER_OLD:
                 return
 
             else:
-                self.error(f'Failed to submit shipping [{str(checkoutOverviewDispatch.status)}]. Retrying...')
+                self.error(f'Failed to submit shipping [{str(checkoutOverviewDispatch.status_code)}]. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
@@ -582,7 +558,7 @@ class FOOTLOCKER_OLD:
                 
             except:
                 self.error("Error loading payment form")
-                time.sleep(self.delay)
+                time.sleep(int(self.task["DELAY"]))
                 continue
 
 
@@ -608,12 +584,12 @@ class FOOTLOCKER_OLD:
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            if payment.status == 503:
+            if payment.status_code == 503:
                 self.info('Queue...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            elif payment.status == 403:
+            elif payment.status_code == 403:
                 if 'nginx' in payment.text:
                     self.error('Blocked. Rotating Proxy')
                     time.sleep(int(self.task["DELAY"]))
@@ -621,24 +597,9 @@ class FOOTLOCKER_OLD:
                     continue
                 else:
                     self.error('Blocked by DataDome (Solving Challenge...)')
-                    try:
-                        
-                        challengeUrl = payment.json()['url']
-                        cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'], self.proxies)
-                        while cookie['cookie'] == None:
-                            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'], self.proxies)
-                        
-                        del self.session.cookies['datadome']
-                        self.session.cookies.set('datadome',cookie['cookie'], domain=self.baseUrl.split('https://www')[1])
-                        continue
+                    self.solveDD(payment)
 
-                    except Exception as e:
-                        self.error('Failed to solve challenge. Sleeping...')
-                        time.sleep(int(self.task["DELAY"]))
-                        continue
-
-            elif payment.status == 200 :                
+            elif payment.status_code == 200 :                
                 self.success('Payment Submitted')
 
                 if self.task['PAYMENT'].lower().strip() == "paypal":
@@ -657,7 +618,8 @@ class FOOTLOCKER_OLD:
                     payload["brandCode"] = 'paypal'
                     payload["shopperBehaviorLog"] = {"numberBind":"1","holderNameBind":"1","cvcBind":"1","deactivate":"1","activate":"1"}
                     payload["dfValue"] = 'ryEGX8eZpJ0030000000000000BTWDfYZVR30089146776cVB94iKzBGA0ghUVGkxk5S16Goh5Mk0045zgp4q8JSa00000qZkTE00000q6IQbnyNfpEC4FlSABmQ:40'
-                
+
+                    self.prepare("Getting paypal checkout...")
                     try:
                         pp_req = self.session.post("https://live.adyen.com/hpp/redirectPayPal.shtml",data=payload,headers={
                             "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
@@ -673,11 +635,14 @@ class FOOTLOCKER_OLD:
                             "user-agent":self.userAgent
                         })
                     except Exception as e:
-                        self.error(f"Error getting PayPal Url - {e}")
-                        time.sleep(self.delay)
+                        log.info(e)
+                        self.error(f"error: {str(e)}")
+                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                        time.sleep(int(self.task["DELAY"]))
                         continue
 
-                    if "paypal" in str(self.ppreq.url):
+                    if "paypal" in str(pp_req.url):
+                        self.success("Got paypal checkout!")
                         updateConsoleTitle(False,True,SITE)
                         self.end = time.time() - self.start
                         self.webhookData['speed'] = self.end
@@ -693,7 +658,7 @@ class FOOTLOCKER_OLD:
                             
                     else:
                         self.error("Error getting PayPal Url")
-                        time.sleep(self.delay)
+                        time.sleep(int(self.task["DELAY"]))
                         continue
 
                 else:
@@ -717,12 +682,135 @@ class FOOTLOCKER_OLD:
                     payload["card.expiryYear"] = self.profile['card']['cardYear']
                     payload["shopperBehaviorLog"] = {"numberBind":"1","holderNameBind":"1","cvcBind":"1","deactivate":"3","activate":"2","numberFieldFocusCount":"2","numberFieldLog":"fo@42,cl@42,cl@261,bl@347,fo@494,Cd@498,KL@499,Cu@500,ch@512,bl@512","numberFieldClickCount":"2","numberFieldBlurCount":"2","numberFieldKeyCount":"2","numberFieldChangeCount":"1","numberFieldEvHa":"total=0","holderNameFieldFocusCount":"1","holderNameFieldLog":"fo@512,cl@512,Sd@522,KL@525,KL@526,Su@526,KL@527,KL@528,Ks@530,Sd@531,Su@534,Kb@535,Kb@536,Kb@538,Kb@539,KL@543,KL@544,KL@545,Ks@548,Sd@549,KL@550,Su@551,KL@551,KL@553,KL@555,KL@556,KL@557,KL@558,KL@559,KU@560,ch@560,bl@560","holderNameFieldClickCount":"1","holderNameFieldKeyCount":"25","holderNameUnkKeysFieldLog":"9@560","holderNameFieldChangeCount":"1","holderNameFieldEvHa":"total=0","holderNameFieldBlurCount":"1","cvcFieldFocusCount":"1","cvcFieldLog":"fo@624,cl@625,KN@653,KN@656,KN@657,ch@672,bl@672","cvcFieldClickCount":"1","cvcFieldKeyCount":"3","cvcFieldChangeCount":"1","cvcFieldEvHa":"total=0","cvcFieldBlurCount":"1"}
 
+                    self.ccPayload = payload
+
                 return
 
             else:
-                self.error(f'Failed to submit payment [{str(payment.status)}]. Retrying...')
+                self.error(f'Failed to submit payment [{str(payment.status_code)}]. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
+
+    def card(self):
+        while True:
+            self.prepare("Getting card checkout...")
+
+            try:
+                response = self.session.post("https://live.adyen.com/hpp/completeCard.shtml",data=self.ccPayload,headers={
+                    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                    "accept-language": "en-US,en;q=0.9",
+                    "cache-control": "max-age=0",
+                    "content-type": "application/x-www-form-urlencoded",
+                    "sec-ch-ua": "\"Google Chrome\";v=\"87\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"87\"",
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-fetch-dest": "document",
+                    "sec-fetch-mode": "navigate",
+                    "sec-fetch-site": "cross-site",
+                    "upgrade-insecure-requests": "1",
+                    "user-agent":self.userAgent
+                })
+            except Exception as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                continue
+
+            if response.status_code == 200:
+
+                try:
+                    payerAuth = self.session.get(response.url, headers={
+                        'Referer':'https://live.adyen.com/hpp/pay.shtml',
+                        'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                        'User-Agent': self.userAgent,
+                    })
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    self.error(f"error: {str(e)}")
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                try:
+                    soup = BeautifulSoup(payerAuth.text, "html.parser")
+                    self.pareq = soup.find('input',{'name':'PaReq'})['value']
+                    self.MD= soup.find('input',{'name':'MD'})['value']
+                except:
+                    logger.error(SITE,self.taskID,'Failed to get card checkout [failed to parse response]. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+                    
+                self.Dpayload = {
+                    "TermUrl":"https://live.adyen.com/hpp/complete3dIntermediate.shtml",
+                    "PaReq":self.pareq,
+                    "MD":self.MD,
+                    "shopperBehaviorLog":""
+                }
+
+                three_d_data = threeDSecure.solve(
+                    self.session,
+                    self.profile,
+                    self.Dpayload,
+                    self.webhookData,
+                    self.taskID,
+                    self.baseUrl
+                )
+                if three_d_data == False:
+                    self.error("Checkout Failed (3DS Declined or Failed). Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+
+                try:
+                    response2 = self.session.post('https://live.adyen.com/hpp/complete3dIntermediate.shtml',headers={
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                        'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
+                        'referer':'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
+                    }, data=three_d_data)
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    self.error(f"error: {str(e)}")
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                if response2.status_code in [200,302]:
+                    try:
+                        response3 = self.session.post('https://live.adyen.com/hpp/complete3d.shtml',data=three_d_data,headers={
+                            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
+                            'content-type': 'application/x-www-form-urlencoded',
+                            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                            'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
+                            'referer':'https://live.adyen.com/hpp/complete3dIntermediate.shtml',
+                        })
+                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                        log.info(e)
+                        self.error(f"error: {str(e)}")
+                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                        time.sleep(int(self.task["DELAY"]))
+                        continue
+
+                    if response3.status_code in [200,302]:
+
+                        self.success("Checkout successful")
+                        updateConsoleTitle(False,True,SITE)
+                        self.end = time.time() - self.start
+                        self.webhookData['speed'] = self.end
+
+                        print(response3.url)
+                        return
+
+                else:
+                    self.error(f'Failed to get card checkout [{str(response.status_code)}]. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+            
+            else:
+                self.error(f'Failed to get card checkout [{str(response.status_code)}]. Retrying...')
+                time.sleep(int(self.task["DELAY"]))
+                continue
+    
     
     def sendToDiscord(self):
         while True:

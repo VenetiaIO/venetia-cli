@@ -27,6 +27,7 @@ class Webhook:
         speed = kwargs.get('speed')
         proxy = kwargs.get('proxy')
         region = kwargs.get('region')
+        orderNum = kwargs.get('orderNum')
 
         try:
             if proxy:
@@ -61,6 +62,7 @@ class Webhook:
             if profile: embed.add_embed_field(name='Task Profile', value=f'||{profile}||',inline=True)
             if accountEmail and accountEmail != '': embed.add_embed_field(name='Account Email', value=f'||{accountEmail}||',inline=False)
             if tracking and order: embed.add_embed_field(name='Tracking', value=f'||[{order}]({tracking})||',inline=False)
+            if orderNum: embed.add_embed_field(name='Order #', value=f'||`{str(orderNum)}`||',inline=False)
             if url: embed.add_embed_field(name='Checkout Link', value=f'[Checkout Here]({url})',inline=False)
             if proxy: embed.add_embed_field(name='Proxy Used', value=f'||`{str(proxy)}`||',inline=False)
             webhook.add_embed(embed)

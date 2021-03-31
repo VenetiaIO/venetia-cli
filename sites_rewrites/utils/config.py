@@ -9,7 +9,7 @@ from sites.footasylum import FOOTASYLUM
 # from sites.holypop import HOLYPOP
 # from sites.schuh import SCHUH
 # from sites.starcow import STARCOW
-# from sites.slamjam import SLAMJAM
+from sites.slamjam import SLAMJAM
 # from sites.consortium import CONSORTIUM
 # from sites.courir import COURIR
 # from sites.bstn import BSTN
@@ -45,7 +45,7 @@ sites = {
     "ALLIKE":ALLIKE, #WATERFALL MONITOR
     # "GROSBASKET":GROSBASKET,
     # "SCHUH":SCHUH, #WATERFALL MONITOR
-    # "SLAMJAM":SLAMJAM,
+    "SLAMJAM":SLAMJAM,
     "AWLAB":AWLAB, #WATERFALL MONITOR
     #"EINHALB":EINHALB,
     #"STARCOW":STARCOW,

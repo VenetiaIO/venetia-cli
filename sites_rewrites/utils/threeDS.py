@@ -33,9 +33,9 @@ class threeDSecure:
 
 
     @staticmethod
-    def solve(session, profile, data, webhookData, taskID, referer):
+    def solve(session, profile, data_in, webhookData, taskID, referer):
         try:
-            payerAuth = session.post('https://idcheck.acs.touchtechpayments.com/v1/payerAuthentication', data=data, headers={
+            payerAuth = session.post('https://idcheck.acs.touchtechpayments.com/v1/payerAuthentication', data=data_in, headers={
                 'referer':referer,
                 'content-type': 'application/x-www-form-urlencoded',
                 'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -89,14 +89,12 @@ class threeDSecure:
             
             try:
                 if poll.json()["status"] == "success":
-                    authToken = poll.json()['authToken']
-                if poll.json()["status"] == "failure":
-                    return False
+                    pass
+                elif poll.json()["status"] == "failure":
+                    raise Exception
                 else:
-                    # logger.error(self.webhookData['site'],self.taskID,'Failed to retrieve auth token for 3DS . Retrying...')
-                    time.sleep(1)
-                    return False
-            except:
+                    raise Exception
+            except Exception as e:
                 # logger.error(self.webhookData['site'],self.taskID,'Failed to retrieve auth token for 3DS. Retrying...')
                 time.sleep(1)
                 return False
@@ -107,7 +105,8 @@ class threeDSecure:
                 logger.alert(webhookData['site'],taskID,'3DS Authorised')
         
                 data = '{"transToken":"%s","authToken":"%s"}' % (transToken, authToken)
-            except:
+            except Exception as e:
+                log.info(e)
                 # logger.error(self.webhookData['site'],self.taskID,'Failed to retrieve auth token for 3DS. Retrying...')
                 time.sleep(1)
                 return False
@@ -133,8 +132,9 @@ class threeDSecure:
 
             try:
                 pares = r.json()['Response']
-                return {"MD":data['MD'], "PaRes":pares}
-            except:
+                return {"MD":data_in['MD'], "PaRes":pares}
+            except Exception as e:
+                log.info(e)
                 # logger.error(self.webhookData['site'],self.taskID,'Failed to confirm transaction. Retrying...')
                 time.sleep(1)
                 return False

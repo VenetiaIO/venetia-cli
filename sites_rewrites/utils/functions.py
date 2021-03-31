@@ -97,9 +97,10 @@ def footlocker_snare(url):
   except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
       time.sleep(3)
       footlocker_snare(url)
-  
   if response.status_code == 200:
     return response.text
+  else:
+    return ''
 
 def offspring_session(pid):
   return {

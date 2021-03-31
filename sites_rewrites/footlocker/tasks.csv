@@ -1,9 +1,2 @@
 PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,PROXIES
-314212385604,random,1,hsbc_it_fake,paypal,resigame
-314212385604,random,1,hsbc_it_fake,paypal,resigame
-314212385604,random,1,hsbc_it_fake,paypal,resigame
-314212385604,random,1,hsbc_it_fake,paypal,resigame
-314212385604,random,1,hsbc_it_fake,paypal,resigame
-314212385604,random,1,hsbc_it_fake,paypal,resigame
-314212385604,random,1,hsbc_it_fake,paypal,resigame
-314212385604,random,1,hsbc_it_fake,paypal,resigame
+319640227180,random,1,rev_it_fake,card,resigame
