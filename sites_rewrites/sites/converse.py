@@ -91,7 +91,9 @@ class CONVERSE:
             time.sleep(10)
             sys.exit()
 
+        self.sizesplit = ''
         if   self.profile['countryCode'].upper() == 'GB':
+            self.sizesplit = 'uk '
             self.baseUrl = 'https://www.converse.com/uk/en'
             self.base = 'https://www.converse.com/on/demandware.store/Sites-converse-gb-Site/en_GB/'
         elif self.profile['countryCode'].upper() == 'BE':
@@ -160,7 +162,7 @@ class CONVERSE:
         self.tasks()
     
     def tasks(self):
-        self.cookie = 'E9D9050ACEAD4F02477B8771A347177B~0~YAAQ17D3SMCSqXZ4AQAAxpCMfgXny4e2dsSQk4Oyi2/+4iFUi67anosowCI3mLm2yoOsRMcC5k4JCSrFJ8w42RkXykBjR5s5dyoquzai4vezbXcI1oglcrdAoaN+gbjFsSYdyXkJ1EXch9jonq+do9yAAxALcbyDh/auViZdpU/0SiktZQWroFhwE7QARdvnIxjpzIlUEClWg/1l8GLH9L7JNElgqtKrd91ZEzPNVo44+aOynR8MtebKTX3XWjGpR5Gzdc1zOuhX1ujztAGpJtuoQ0u3mADpqdxfkhfqy2OnGbqw0Tcxo05O7LBetFVcYoSVfhDB8GrFVcCGEB7crfQxE+wRoENpooLdzMGv/Ts0wdI0+7cCjRK5ZmaNR/FNI1BUlzxF9CiqVeSx3HVeXiDg4ZNEqUX/RcIeLxf8LHTjAx+NrcNA9ORir9w=~-1~||1-AnSWopVDlh-1-10-1000-2||~-1'
+        self.cookie = 'E40D8B98A2F52E1F2801EF3C0FFCF1AB~0~YAAQlkISAhlLRXZ4AQAAXI2qhwXDJUVd8F4a3/Crx08LdK/HFa2/UUgWyi7aNV7Gi1GqlKAQ002El5/Sg71BSqbRvIHMEwoJA7EEa1SlRkwVvFbyGRr9nSNCZK5SaApful6ncH8DiDNUDFJJSl+NEJkblGmhWCW6WhgjopnFeDGITSACxfJmKRUbm8W8G3o+WQF2Ka5/+bJrz+Sf/0KKLXhtNRxENWmTDmVbA5xd8ItkSVUKhVhoRIYPFgXddkamqfJiWX/Kbwxro2mp8kmVk5JYoz5GPHnUHNtKy5pp+PMYI7p1gK4GeMXaEaTd3QWPMwlVf4TbQ91lWpDQqCQs3N8pa0ePbGR4ZqBt7QvvwC0kSnSZ8LbEZXumHWJarAq4Tmbhh1dZzj7j6zIq/xvykbGC78qYUdJd7z5sKs5Apkwqn48dMyoc1yXCeo/OHphEiocpE2cRxLveJLMLbg==~-1~-1~-1'
 
         cookie_obj = requests.cookies.create_cookie(domain='.converse.com',name='_abck',value=self.cookie)
         self.session.cookies.set_cookie(cookie_obj)
@@ -213,11 +215,20 @@ class CONVERSE:
                     sizes = []
                     for s in foundSizes:
                         try:
-                            allSizes.append('{}:{}'.format(s.text.strip(),s['value'].split('_size=')[1].split('&')[0]))
-                            sizes.append(s.text.strip())
-                        except:
-                            pass
+                            try:
+                                size = s.text.split(' ')[1].strip()
+                            except:
+                                size = s.text.strip()
 
+                            allSizes.append('{}:{}'.format(
+                                size,
+                                s['value'].split('_size=')[1].split('&')[0]
+                            ))
+                            
+                            sizes.append(size)
+                        except Exception as e:
+                            pass
+                    
                     if len(sizes) == 0:
                         self.error("No sizes available")
                         time.sleep(int(self.task["DELAY"]))
@@ -230,7 +241,7 @@ class CONVERSE:
                             continue
                         else:
                             for size in allSizes:
-                                if size.split(':')[0].strip().lower().split('uk ')[1] == self.task["SIZE"].strip().lower():
+                                if size.split(':')[0].strip().lower() == self.task["SIZE"].strip().lower():
                                     self.size = size.split(':')[0]
                                     self.sizePID = '{}_{}'.format(self.sku,size.split(":")[1])
                                     
@@ -283,7 +294,7 @@ class CONVERSE:
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 continue
             
-            if response.status_code == 200 and 'added' in response.text.lower():
+            if response.status_code == 200 and 'subtotal' in response.text.lower():
                 self.success("Added to cart!")
                 updateConsoleTitle(True,False,SITE)
                 return
@@ -541,6 +552,7 @@ class CONVERSE:
                     image=self.webhookData['image'],
                     title=self.webhookData['product'],
                     size=self.size,
+                    region=self.profile['countryCode'].lower(),
                     price=self.webhookData['price'],
                     paymentMethod=self.task['PAYMENT'].strip().title(),
                     product=self.webhookData['product_url'],
