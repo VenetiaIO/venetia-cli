@@ -105,6 +105,14 @@ class FOOTASYLUM:
                 rfc2109=False,
             ))
 
+    def rotateProxy(self):
+        self.proxy = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+        self.session = client.Session(
+            browser=client.Fingerprint.CHROME_83,
+            proxy=self.proxy
+        )
+        return
+
     def __init__(self, task, taskName, rowNumber):
         self.task = task
         self.taskID = taskName
@@ -113,8 +121,12 @@ class FOOTASYLUM:
         if self.rowNumber != 'qt': 
             threading.Thread(target=self.task_checker,daemon=True).start()
 
+        self.proxy = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
         try:
-            self.session = client.Session(browser=client.Fingerprint.CHROME_83)
+            self.session = client.Session(
+                browser=client.Fingerprint.CHROME_83,
+                proxy=self.proxy
+            )
             # self.session = scraper()
         except Exception as e:
             self.error(f'error => {e}')
@@ -136,8 +148,6 @@ class FOOTASYLUM:
             "proxy":"n/a",
             "product_url":self.task['PRODUCT']
         }
-
-        self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
 
         self.apiKey = "lGJjE ccd0SiBdu3I6yByRp3/yY8uVIRFa9afLx 2YSrSwkWDfxq0YKUsh96/tP84CZO4phvoR 0y9wtm9Dh5w=="
 
@@ -186,7 +196,7 @@ class FOOTASYLUM:
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 self.error(f"error: {str(e)}")
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 time.sleep(int(self.task["DELAY"]))
                 continue
             
@@ -300,7 +310,7 @@ class FOOTASYLUM:
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 self.error(f"error: {str(e)}")
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 time.sleep(int(self.task["DELAY"]))
                 continue
         
@@ -317,7 +327,7 @@ class FOOTASYLUM:
             else:
                 self.error('Failed to get login page. Retrying...')
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
 
@@ -365,7 +375,7 @@ class FOOTASYLUM:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             
@@ -378,7 +388,7 @@ class FOOTASYLUM:
             else:
                 self.error("Failed to login. Retrying...")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
     
     def addToCart(self):
@@ -411,7 +421,7 @@ class FOOTASYLUM:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             with open('fa.html','w') as f:
@@ -450,7 +460,7 @@ class FOOTASYLUM:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             self.setCookies(response)
@@ -497,7 +507,7 @@ class FOOTASYLUM:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             self.setCookies(response)
@@ -551,7 +561,7 @@ class FOOTASYLUM:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             self.setCookies(response)
@@ -640,7 +650,7 @@ class FOOTASYLUM:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             self.setCookies(response)
@@ -695,7 +705,7 @@ class FOOTASYLUM:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             self.setCookies(response)
@@ -776,7 +786,7 @@ class FOOTASYLUM:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             self.setCookies(response)
@@ -825,7 +835,7 @@ class FOOTASYLUM:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             self.setCookies(response)
@@ -872,7 +882,7 @@ class FOOTASYLUM:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             self.setCookies(response)
@@ -915,7 +925,7 @@ class FOOTASYLUM:
     def sendToDiscord(self):
         while True:
             
-            self.webhookData['proxy'] = self.session.proxies
+            self.webhookData['proxy'] = self.proxy
             sendNotification(SITE,self.webhookData['product'])
             try:
                 Webhook.success(

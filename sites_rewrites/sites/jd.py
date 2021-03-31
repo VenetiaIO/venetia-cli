@@ -15,6 +15,7 @@ from urllib3.exceptions import HTTPError
 import csv
 import tls as client
 from requests_toolbelt import MultipartEncoder
+import http.cookiejar
 
 from utils.captcha import captcha
 from utils.logger import logger
@@ -36,7 +37,14 @@ from utils.functions import (
 )
 import utils.config as CONFIG
 
-SITE = 'JD'
+def getCookies(jar):
+    cookieString = ""
+    for c in jar:
+        cookieString += '{}={};'.format(c.name,c.value)
+    
+    return cookieString
+
+SITE = 'JDSports'
 class JD:
     def success(self,message):
         logger.success(SITE,self.taskID,message)
@@ -57,7 +65,7 @@ class JD:
     def task_checker(self):
         originalTask = self.task
         while True:
-            with open('./{}/tasks.csv'.format(SITE.lower()),'r') as csvFile:
+            with open('./{}/tasks.csv'.format('JD'.lower()),'r') as csvFile:
                 csv_reader = csv.DictReader(csvFile)
                 row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
                 self.task = row[0]
@@ -70,6 +78,14 @@ class JD:
 
             time.sleep(2)
 
+    def rotateProxy(self):
+        self.proxy = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+        self.session = client.Session(
+            browser=client.Fingerprint.CHROME_83,
+            proxy=self.proxy
+        )
+        return
+
     def __init__(self, task, taskName, rowNumber):
         self.task = task
         self.taskID = taskName
@@ -78,12 +94,18 @@ class JD:
         if self.rowNumber != 'qt': 
             threading.Thread(target=self.task_checker,daemon=True).start()
 
+        self.proxy = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
         try:
-            self.session = client.Session(browser=client.Fingerprint.CHROME_83)
+            self.session = client.Session(
+                browser=client.Fingerprint.CHROME_83,
+                proxy=self.proxy
+            )
             # self.session = scraper()
         except Exception as e:
             self.error(f'error => {e}')
             self.__init__(task,taskName,rowNumber)
+
+        self.cookieJar = http.cookiejar.CookieJar()
 
 
         self.webhookData = {
@@ -100,7 +122,6 @@ class JD:
             "product_url":self.task['PRODUCT']
         }
 
-        self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
 
         self.profile = loadProfile(self.task["PROFILE"])
         if self.profile == None:
@@ -110,27 +131,53 @@ class JD:
 
         self.region = '.co.uk'
 
-        if 'https' in self.task['PRODUCT']:
-            self.prodUrl = self.task['PRODUCT']
-        else:
-            self.prodUrl = f'https://www.jdsports{self.region}/product/-/' + self.task['PRODUCT'] + '/stock/?_=' + str(int(time.time()))
+
+        self.prodUrl = f'https://www.jdsports{self.region}/product/-/' + self.task['PRODUCT'] + '/stock/?_=' + str(int(time.time()))
 
         self.tasks()
+
+    def setCookies(self,response):
+        for c in response.cookies:
+            self.cookieJar.set_cookie(http.cookiejar.Cookie(
+                version=0,
+                name=c,
+                value=response.cookies[c],
+                port=None,
+                port_specified=False,
+                domain="www.offspring.co.uk",
+                domain_specified=False,
+                domain_initial_dot=False,
+                path="/",
+                path_specified=True,
+                secure=False,
+                expires=None,
+                discard=True,
+                comment=None,
+                comment_url=None,
+                rest={"HttpOnly": None},
+                rfc2109=False,
+            ))
+    
+
     
     def tasks(self):
 
         self.monitor()
         self.addToCart()
         self.guestCheckout()
+        # self.deliveryMethod()
         self.shipping()
+        # self.updateDelivery_plus_method()
+
+        self.paypal()
 
         # if self.task['PAYMENT'].strip().lower() == "paypal":
         #     self.paypal()
         # else:
         #     self.card()
 
-        # self.sendToDiscord()
-
+        self.sendToDiscord()
+    
     def monitor(self):
         while True:
             self.prepare("Getting Product...")
@@ -142,16 +189,17 @@ class JD:
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/json',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
-                    'x-requested-with': 'XMLHttpRequest'
+                    'x-requested-with': 'XMLHttpRequest',
+                    'cookie':getCookies(self.cookieJar),
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 self.error(f"error: {str(e)}")
-                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+                self.rotateProxy()
                 time.sleep(int(self.task["DELAY"]))
                 continue
             
-
+            self.setCookies(response)
             if response.status == 200:
                 self.start = time.time()
 
@@ -208,7 +256,7 @@ class JD:
 
             elif response.status == 403:
                 self.error(f"Failed to cart [{str(response.status)}]. Retrying...")
-                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+                self.rotateProxy()
                 time.sleep(int(self.task['DELAY']))
                 continue
                     
@@ -221,16 +269,17 @@ class JD:
         while True:
             self.prepare("Adding to cart...")
             
-            
             try:
                 response = self.session.post(f'https://www.jdsports{self.region}/cart/{self.sizeSKU}/',headers={
                     'accept': '*/*',
+                    'referer':f'https://www.jdsports{self.region}/product/-/' + self.task['PRODUCT'],
                     # 'accept-encoding': 'gzip, deflate, br',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/json',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest',
-                    # 'newrelic': ''
+                    'cookie':getCookies(self.cookieJar),
+                    'newrelic': 'eyJ2IjpbMCwxXSwiZCI6eyJ0eSI6IkJyb3dzZXIiLCJhYyI6IjEwNDEzNTUiLCJhcCI6Ijg4OTU5MjA1IiwiaWQiOiJjYjI5YjRjNTUxMDVlYTZiIiwidHIiOiJmYWU5NzQwNzgwYjg0YTliIiwidGkiOjE2MTcyMzE3OTc3ODZ9fQ=='
                 },data=json.dumps({
                     "customisations":False,
                     "cartPosition":'null',
@@ -242,18 +291,18 @@ class JD:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+                self.rotateProxy()
                 continue
 
-
+            self.setCookies(response)
             if response.status == 200:
                 try:
                     responseBody = json.loads(response.text)
                     self.deliveryData = responseBody['delivery']
                     self.cartID = responseBody['ID']
-                    self.productTitle = responseBody['contents'][0]['name']
-                    self.productPrice = '{} {}'.format(responseBody['productsSubtotal']['amount'],responseBody['productsSubtotal']['currency'])
-                    self.productImage = responseBody['contents'][0]['image']['originalURL']
+                    self.webhookData['product'] = responseBody['contents'][0]['name']
+                    self.webhookData['price'] = '{} {}'.format(responseBody['productsSubtotal']['amount'],responseBody['productsSubtotal']['currency'])
+                    self.webhookData['image'] = responseBody['contents'][0]['image']['originalURL']
                 except Exception as e:
                     self.error("Failed to cart [failed to parse response]. Retrying...")
                     log.info(e)
@@ -265,8 +314,9 @@ class JD:
                 return
 
             elif response.status == 403:
+                self.cookieJar.clear()
                 self.error(f"Failed to cart [{str(response.status)}]. Retrying...")
-                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+                self.rotateProxy()
                 time.sleep(int(self.task['DELAY']))
                 continue
                 
@@ -289,6 +339,7 @@ class JD:
                     'content-type': 'application/json',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest',
+                    'cookie':getCookies(self.cookieJar),
                     'newrelic': ''
                 },data=json.dumps({
                     "email":self.profile['email']
@@ -297,10 +348,10 @@ class JD:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+                self.rotateProxy()
                 continue
 
-
+            self.setCookies(response)
             if response.status == 200:
                 try:
                     responseBody = json.loads(response.text)
@@ -312,7 +363,7 @@ class JD:
                     continue
                 
                 if message.lower() == 'success':
-                    self.success("Set email")
+                    self.warning("Set email")
                     return
                 else:
                     self.error(f"Failed to set email [{message}]. Retrying...")
@@ -320,13 +371,64 @@ class JD:
                     continue
 
             elif response.status == 403:
-                self.error(f"Failed to cart [{str(response.status)}]. Retrying...")
-                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+                self.error(f"Failed to set email [{str(response.status)}]. Retrying...")
+                self.rotateProxy()
                 time.sleep(int(self.task['DELAY']))
                 continue
                 
             else:
                 self.error(f"Failed to set email [{str(response.status)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+
+    def deliveryMethod(self):
+        while True:
+            self.prepare("Setting delivery method...")
+                
+            data = str(json.dumps({
+                "deliveryMethodID":self.deliveryData["deliveryMethodID"],
+                "deliveryLocation":self.profile['countryCode'].lower()
+            }))
+            try:
+                response = self.session.put(f'https://www.jdsports{self.region}/cart/',headers={
+                    'accept': '*/*',
+                    # 'accept-encoding': 'gzip, deflate, br',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
+                    'x-requested-with': 'XMLHttpRequest',
+                    'cookie':getCookies(self.cookieJar),
+                    'newrelic': ''
+                },data=data)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.rotateProxy()
+                continue
+
+            self.setCookies(response)
+
+            if response.status == 200:
+                try:
+                    responseBody = json.loads(response.text)
+                except Exception as e:
+                    self.error("Failed to set delivery method [failed to parse response]. Retrying...")
+                    log.info(e)
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+                
+                self.warning("Set delivery method")
+                return
+
+            elif response.status == 403:
+                self.error(f"Failed to set delivery method [{str(response.status)}]. Retrying...")
+                self.rotateProxy()
+                time.sleep(int(self.task['DELAY']))
+                continue
+                
+            else:
+                self.error(f"Failed to set delivery method [{str(response.status)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
 
@@ -343,6 +445,7 @@ class JD:
                     'content-type': 'application/json',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest',
+                    'cookie':getCookies(self.cookieJar),
                     # 'newrelic': ''
                 },data=json.dumps({
                     "useDeliveryAsBilling":True,
@@ -358,37 +461,32 @@ class JD:
                     "postcode":self.profile['zip'],
                     "addressPredict":"",
                     "setOnCart":"deliveryAddressID",
-                    "addressPredictflag":False
+                    "addressPredictflag":"false"
                 }))
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+                self.rotateProxy()
                 continue
 
-
-            if response.status == 200:
+            self.setCookies(response)
+            if response.status in [200,201]:
                 try:
                     responseBody = json.loads(response.text)
-                    print(responseBody)
+                    self.addressId = responseBody['ID']
                 except Exception as e:
                     self.error("Failed to set shipping [failed to parse response]. Retrying...")
                     log.info(e)
                     time.sleep(int(self.task["DELAY"]))
                     continue
                 
-                if message.lower() == 'success':
-                    self.success("Set shipping")
-                    return
-                else:
-                    self.error(f"Failed to set shipping [{message}]. Retrying...")
-                    time.sleep(int(self.task['DELAY']))
-                    continue
+                self.warning("Set shipping")
+                return
 
             elif response.status == 403:
                 self.error(f"Failed to cart [{str(response.status)}]. Retrying...")
-                self.session.proxies = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+                self.rotateProxy()
                 time.sleep(int(self.task['DELAY']))
                 continue
                 
@@ -396,13 +494,143 @@ class JD:
                 self.error(f"Failed to set shipping [{str(response.status)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
+
+    def updateDelivery_plus_method(self):
+        while True:
+            self.prepare("Updating Delivery & Method")
+            
+            
+
+            try:
+                response = self.session.post(f'https://www.jdsports{self.region}/checkout/updateDeliveryAddressAndMethod/ajax/',headers={
+                    'accept': '*/*',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': 'application/json',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
+                    'x-requested-with': 'XMLHttpRequest',
+                    'cookie':getCookies(self.cookieJar),
+                    # 'newrelic': ''
+                },data=json.dumps({
+                    # "useDeliveryAsBilling":True,
+                    "addressId":self.addressId,
+                    "locale":{},
+                    "methodId":self.deliveryData["deliveryMethodID"],
+                }))
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.rotateProxy()
+                continue
+
+            self.setCookies(response)
+            if response.status in [200,201]:
+                try:
+                    responseBody = json.loads(response.text)
+                except Exception as e:
+                    self.error("Failed to update delivery & method [failed to parse response]. Retrying...")
+                    log.info(e)
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+                
+                self.warning("Updated delivery & method")
+                return
+
+            elif response.status == 403:
+                self.error(f"Failed to update delivery & method [{str(response.status)}]. Retrying...")
+                self.rotateProxy()
+                time.sleep(int(self.task['DELAY']))
+                continue
+                
+            else:
+                self.error(f"Failed to update delivery & method [{str(response.status)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
     
+    def paypal(self):
+        while True:
+            self.prepare("Getting paypal checkout...")
+            
+
+            try:
+                response = self.session.get(f'https://www.jdsports{self.region}/checkout/payment/?paySelect=paypalViaHosted',headers={
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': 'application/json',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
+                    'cookie':getCookies(self.cookieJar),
+                    # 'newrelic': ''
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.rotateProxy()
+                continue
+
+            self.setCookies(response)
+            if response.status in [200,302]:
+                try:
+                    response2 = self.session.get(response.url,headers={
+                        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                        "accept-language": "en-US,en;q=0.9",
+                        "sec-ch-ua": "\"Google Chrome\";v=\"89\", \"Chromium\";v=\"89\", \";Not A Brand\";v=\"99\"",
+                        "sec-ch-ua-mobile": "?0",
+                        "sec-fetch-dest": "document",
+                        "sec-fetch-mode": "navigate",
+                        "sec-fetch-site": "cross-site",
+                        "sec-fetch-user": "?1",
+                        "upgrade-insecure-requests": "1",
+                        'Cookie':getCookies(self.cookieJar),
+                        'Referer':f'https://www.jdsports{self.region}',
+                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
+                        # 'newrelic': ''
+                    })
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    self.error(f"error: {str(e)}")
+                    time.sleep(int(self.task["DELAY"]))
+                    self.rotateProxy()
+                    continue
+                
+                if response2.status in [200,302] and 'paypal' in response2.url:
+                    self.end = time.time() - self.start
+                    self.webhookData['speed'] = self.end
+
+                    self.success("Got paypal checkout!")
+                    updateConsoleTitle(False,True,SITE)
+
+                    self.webhookData['url'] = storeCookies(
+                        response2.url,self.cookieJar,
+                        self.webhookData['product'],
+                        self.webhookData['image'],
+                        self.webhookData['price'],
+                        True
+                    )
+                    return
+                
+                else:
+                    self.error(f"Failed to get paypal checkout [{str(response.status)}]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue  
+         
+
+            elif response.status == 403:
+                self.error(f"Failed to get paypal checkout [{str(response.status)}]. Retrying...")
+                self.rotateProxy()
+                time.sleep(int(self.task['DELAY']))
+                continue
+                
+            else:
+                self.error(f"Failed to get paypal checkout [{str(response.status)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
 
     
     def sendToDiscord(self):
         while True:
             
-            self.webhookData['proxy'] = self.session.proxies
+            self.webhookData['proxy'] = self.proxy
 
             sendNotification(SITE,self.webhookData['product'])
 
@@ -413,6 +641,7 @@ class JD:
                     url=self.webhookData['url'],
                     image=self.webhookData['image'],
                     title=self.webhookData['product'],
+                    region=self.profile['countryCode'].lower(),
                     size=self.size,
                     price=self.webhookData['price'],
                     paymentMethod=self.task['PAYMENT'].strip().title(),

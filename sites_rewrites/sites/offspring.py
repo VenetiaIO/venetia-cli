@@ -104,6 +104,14 @@ class OFFSPRING:
                 rest={"HttpOnly": None},
                 rfc2109=False,
             ))
+    
+    def rotateProxy(self):
+        self.proxy = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+        self.session = client.Session(
+            browser=client.Fingerprint.CHROME_83,
+            proxy=self.proxy
+        )
+        return
 
     def __init__(self, task, taskName, rowNumber):
         self.task = task
@@ -113,8 +121,12 @@ class OFFSPRING:
         if self.rowNumber != 'qt': 
             threading.Thread(target=self.task_checker,daemon=True).start()
 
+        self.proxy = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
         try:
-            self.session = client.Session(browser=client.Fingerprint.CHROME_83)
+            self.session = client.Session(
+                browser=client.Fingerprint.CHROME_83,
+                proxy=self.proxy
+            )
             # self.session = scraper()
         except Exception as e:
             self.error(f'error => {e}')
@@ -146,7 +158,6 @@ class OFFSPRING:
             "product_url":self.prodUrl
         }
 
-        self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
 
         self.profile = loadProfile(self.task["PROFILE"])
         if self.profile == None:
@@ -210,7 +221,7 @@ class OFFSPRING:
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 self.error(f"error: {str(e)}")
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
@@ -378,7 +389,7 @@ class OFFSPRING:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
             
             self.setCookies(response)
@@ -431,7 +442,7 @@ class OFFSPRING:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
             
             print(getCookies(self.cookieJar))
@@ -499,7 +510,7 @@ class OFFSPRING:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             self.setCookies(response)
@@ -566,7 +577,7 @@ class OFFSPRING:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             self.setCookies(response)
@@ -635,7 +646,7 @@ class OFFSPRING:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             self.setCookies(response)
@@ -675,7 +686,7 @@ class OFFSPRING:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = client.Session(proxy=loadProxy2(self.task["PROXIES"],self.taskID,SITE))
+                self.rotateProxy()
                 continue
 
             self.setCookies(response)
@@ -703,7 +714,7 @@ class OFFSPRING:
     def sendToDiscord(self):
         while True:
             
-            self.webhookData['proxy'] = self.session.proxies
+            self.webhookData['proxy'] = self.proxy
 
             sendNotification(SITE,self.webhookData['product'])
 

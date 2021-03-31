@@ -165,10 +165,6 @@ def checkFootlockerTasks():
 class Menu():
     def __init__(self):
         self.port = start_server()
-        pass
-    
-    def base(self):
-        checkUpdate()
 
         threading.Thread(target=QT,daemon=True).start()
         
@@ -182,6 +178,11 @@ class Menu():
             self.rpctime = int(time.time())
         except:
             pass
+
+        pass
+    
+    def base(self):
+        checkUpdate()
 
         time.sleep(1)
 
@@ -580,8 +581,8 @@ class Menu():
             return choi
 
         siteSelection = site_selector_specific()
-        if siteSelection == 00:
-            return
+        if siteSelection == 0:
+            return self.base()
         else:
             self.siteSelectFunc(availableSites, siteSelection)
 

@@ -385,10 +385,11 @@ def birthday():
     }
 
 
-def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
+def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice, jar):
     cookieList = []
     cookieString = ''
-    for c in session.cookies:
+    if jar:
+      for c in session:
             try:
                 # print(f'{c.name} | {c.domain}')
                 if 'paypal'not in c.domain:
@@ -402,6 +403,21 @@ def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
                         
             except Exception as e:
                 pass
+    else:
+      for c in session.cookies:
+              try:
+                  # print(f'{c.name} | {c.domain}')
+                  if 'paypal'not in c.domain:
+                      # url = c.domain.split('.')[1]
+                      cookieList.append(
+                          {"name": c.name, "value": c.value, "domain": c.domain, "path": c.path})
+                      cookieString += '{}##{}##{}##{}+++'.format(c.name,c.value,c.domain,c.path)
+                  # if c.name.lower() in ['session','checkout','schuhcookiecheckoutsession']:
+                    # cookieList.append(
+                          # {"name": c.name, "value": c.value, "domain": c.domain, "path": c.path})
+                          
+              except Exception as e:
+                  pass
     try:
         encoded = base64.b64encode(bytes(str(cookieString), 'utf-8'))
         encoded = str(encoded, 'utf8')
