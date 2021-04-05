@@ -49,7 +49,8 @@ def getCookies(jar):
     
     return cookieString
 
-SITE = 'OFFSPRING'
+_SITE_ = 'OFFSPRING'
+SITE = 'Offspring'
 class OFFSPRING:
     def success(self,message):
         logger.success(SITE,self.taskID,message)
@@ -70,7 +71,7 @@ class OFFSPRING:
     def task_checker(self):
         originalTask = self.task
         while True:
-            with open('./{}/tasks.csv'.format(SITE.lower()),'r') as csvFile:
+            with open('./{}/tasks.csv'.format(_SITE_.lower()),'r') as csvFile:
                 csv_reader = csv.DictReader(csvFile)
                 row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
                 self.task = row[0]
@@ -698,10 +699,11 @@ class OFFSPRING:
                 updateConsoleTitle(False,True,SITE)
 
                 self.webhookData['url'] = storeCookies(
-                    response.url,self.session,
+                    response.url,self.cookieJar,
                     self.webhookData['product'],
                     self.webhookData['image'],
-                    self.webhookData['price']
+                    self.webhookData['price'],
+                    True
                 )
                 return
             
@@ -738,7 +740,8 @@ class OFFSPRING:
                     pass
             except:
                 self.alert("Failed to send webhook. Checkout here ==> {}".format(self.webhookData['url']))
-
+                while True:
+                    pass
 
 
 

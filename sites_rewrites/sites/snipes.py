@@ -24,7 +24,8 @@ from utils.px import PX
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, scraper)
 import utils.config as config
 
-SITE = 'SNIPES'
+_SITE_ = 'SNIPES'
+SITE = 'Snipes'
 class SNIPES:
     def success(self,message):
         logger.success(SITE,self.taskID,message)
@@ -45,7 +46,7 @@ class SNIPES:
     def task_checker(self):
         originalTask = self.task
         while True:
-            with open('./{}/tasks.csv'.format(SITE.lower()),'r') as csvFile:
+            with open('./{}/tasks.csv'.format(_SITE_.lower()),'r') as csvFile:
                 csv_reader = csv.DictReader(csvFile)
                 row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
                 self.task = row[0]
@@ -908,7 +909,8 @@ class SNIPES:
                             self.session,
                             self.webhookData['product'],
                             self.webhookData['image'],
-                            self.webhookData['price']
+                            self.webhookData['price'],
+                            False
                         )
 
                     if self.task['PAYMENT'].strip().lower() == 'card':
@@ -920,7 +922,8 @@ class SNIPES:
                             self.session,
                             self.webhookData['product'],
                             self.webhookData['image'],
-                            self.webhookData['price']
+                            self.webhookData['price'],
+                            False
                         )
 
                     if self.task['PAYMENT'].strip().lower() == 'bt':
@@ -1012,3 +1015,5 @@ class SNIPES:
                     pass
             except:
                 self.alert("Failed to send webhook. Checkout here ==> {}".format(self.webhookData['url']))
+                while True:
+                    pass

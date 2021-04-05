@@ -1,508 +1,184 @@
 {
-  "order": {
-    "appliedCoupons": [],
-    "appliedOrderPromotions": [],
-    "appliedProductPromotions": [],
-    "appliedVouchers": [],
-    "calculated": false,
-    "code": "31900390331210876412",
-    "consignments": [],
-    "deliveryAddress": {
-      "billingAddress": false,
-      "country": {
-        "isocode": "IT",
-        "name": "Italy"
-      },
-      "defaultAddress": false,
-      "email": "charliebottomley11@gmail.com",
-      "firstName": "Claire",
-      "formattedAddress": "95 Via A.G. Alaimo, Agrigento, 92100",
-      "id": "9592715182103",
-      "lastName": "Bottomley",
-      "line1": "95 Via A.G. Alaimo",
-      "phone": "07796233905",
-      "postalCode": "92100",
-      "setAsBilling": false,
-      "shippingAddress": true,
-      "town": "Agrigento",
-      "visibleInAddressBook": false
-    },
-    "deliveryCost": {
-      "currencyIso": "EUR",
-      "formattedValue": "€ 7,00",
-      "priceType": "BUY",
-      "value": 7.0
-    },
-    "deliveryItemsQuantity": 1,
-    "deliveryMode": {
-      "code": "flit-standard",
-      "deliveryCost": {
-        "currencyIso": "EUR",
-        "formattedValue": "€ 7,00",
-        "priceType": "BUY",
-        "value": 7.0
-      },
-      "description": "3 Working Days",
-      "name": "3 Working Days"
-    },
-    "deliveryOrderGroups": [],
-    "entries": [
+  "fascia_id": 1,
+  "channel_id": 2,
+  "customer": {
+    "customer_id": "FFF3900D59FE4961AB7EBB26E951B092",
+    "sessionID": "XOJGNCFTCC#3FCFB469561A82C8FBF73B3447CF5F267CAA34D5",
+    "isanon": 0,
+    "isauthenticated": 1,
+    "session_state": "CUSTOMER_AUTHENTICATED",
+    "session_last_activity": "06/04/2021 00:07:05",
+    "email": "ElmerGautam121@charlieaio.com",
+    "title": "Mr",
+    "firstname": "Elmer",
+    "surname": "Gautam",
+    "email_list": "NO_EMAIL",
+    "mail_list": "NO_MAIL",
+    "sms_list": "NO_SMS",
+    "addressess": [
       {
-        "additionalAttributes": {
-          "entry": []
-        },
-        "applicableDeliveryModes": [],
-        "entryNumber": 0,
-        "product": {
-          "baseOptions": [
-            {
-              "options": [],
-              "selected": {
-                "ageBucket": [],
-                "backOrderable": false,
-                "code": "SIZE_889761",
-                "displayCountDownTimer": false,
-                "images": [
-                  {
-                    "altText": "319640227180990_small",
-                    "format": "small",
-                    "url": "default.scene7.image.url319640227180990/small/319640227180990.jpeg"
-                  }
-                ],
-                "launchProduct": false,
-                "mapEnable": false,
-                "name": "Foot Locker Re-Usable Shopper - Unisex Bags",
-                "potentialPromotions": [],
-                "preOrder": false,
-                "priceData": {
-                  "currencyIso": "EUR",
-                  "formattedOriginalPrice": "€ 1,50",
-                  "formattedValue": "€ 1,50",
-                  "originalPrice": 1.5,
-                  "priceType": "BUY",
-                  "value": 1.5
-                },
-                "recaptchaOn": false,
-                "shippingRestrictionExists": false,
-                "size": "One Size",
-                "sizeAvailableInStores": false,
-                "sku": "319640227180990",
-                "stock": {
-                  "stockLevel": 0,
-                  "stockLevelStatus": "inStock"
-                },
-                "style": "Black-Black-White",
-                "variantOptionQualifiers": [],
-                "variantOptions": []
-              },
-              "variantType": "SizeVariantProduct"
-            },
-            {
-              "options": [],
-              "selected": {
-                "ageBucket": [],
-                "backOrderable": false,
-                "code": "STYLE_120514",
-                "displayCountDownTimer": false,
-                "imageSku": "319640227180",
-                "images": [
-                  {
-                    "altText": "319640227180_cart",
-                    "format": "cart",
-                    "url": "default.scene7.image.url319640227180/cart/319640227180.jpeg"
-                  },
-                  {
-                    "altText": "319640227180_small",
-                    "format": "small",
-                    "url": "default.scene7.image.url319640227180/small/319640227180.jpeg"
-                  },
-                  {
-                    "altText": "319640227180_large",
-                    "format": "large",
-                    "url": "default.scene7.image.url319640227180/large/319640227180.jpeg"
-                  },
-                  {
-                    "altText": "319640227180_large_wide",
-                    "format": "large_wide",
-                    "url": "default.scene7.image.url319640227180/large_wide/319640227180.jpeg"
-                  },
-                  {
-                    "altText": "319640227180_zoom",
-                    "format": "zoom",
-                    "url": "default.scene7.image.url319640227180/zoom/319640227180.jpeg"
-                  }
-                ],
-                "launchProduct": false,
-                "mapEnable": false,
-                "potentialPromotions": [],
-                "preOrder": false,
-                "priceData": {
-                  "currencyIso": "EUR",
-                  "formattedOriginalPrice": "€ 1,50",
-                  "formattedValue": "€ 1,50",
-                  "originalPrice": 1.5,
-                  "priceType": "FROM",
-                  "value": 1.5
-                },
-                "recaptchaOn": false,
-                "shippingRestrictionExists": false,
-                "sizeAvailableInStores": false,
-                "sku": "319640227180",
-                "stock": {
-                  "stockLevel": 0,
-                  "stockLevelStatus": "inStock"
-                },
-                "style": "Black-Black-White | ",
-                "variantOptionQualifiers": [],
-                "variantOptions": [
-                  {
-                    "ageBucket": [],
-                    "backOrderable": false,
-                    "code": "SIZE_889761",
-                    "images": [],
-                    "mapEnable": false,
-                    "name": "Foot Locker Re-Usable Shopper - Unisex Bags",
-                    "potentialPromotions": [],
-                    "preOrder": false,
-                    "priceData": {
-                      "currencyIso": "EUR",
-                      "formattedOriginalPrice": "€ 1,50",
-                      "formattedValue": "€ 1,50",
-                      "originalPrice": 1.5,
-                      "value": 1.5
-                    },
-                    "shippingRestrictionExists": false,
-                    "size": "One Size",
-                    "sizeAvailableInStores": false,
-                    "stock": {
-                      "stockLevel": 0,
-                      "stockLevelStatus": "inStock"
-                    },
-                    "variantOptionQualifiers": [],
-                    "variantOptions": []
-                  }
-                ]
-              },
-              "variantType": "StyleVariantProduct"
-            }
-          ],
-          "baseProduct": "STYLE_120514",
-          "categories": [],
-          "classifications": [],
-          "code": "SIZE_889761",
-          "description": "<p><!--[if gte vml 1]><v:shapetype\t id=\"_x0000_t75\" coordsize=\"21600,21600\" o:spt=\"75\" o:preferrelative=\"t\"\t path=\"m@4@5l@4@11@9@11@9@5xe\" filled=\"f\" stroked=\"f\">\t <v:stroke joinstyle=\"miter\"/>\t <v:formulas>\t  <v:f eqn=\"if lineDrawn pixelLineWidth 0\"/>\t  <v:f eqn=\"sum @0 1 0\"/>\t  <v:f eqn=\"sum 0 0 @1\"/>\t  <v:f eqn=\"prod @2 1 2\"/>\t  <v:f eqn=\"prod @3 21600 pixelWidth\"/>\t  <v:f eqn=\"prod @3 21600 pixelHeight\"/>\t  <v:f eqn=\"sum @0 0 1\"/>\t  <v:f eqn=\"prod @6 1 2\"/>\t  <v:f eqn=\"prod @7 21600 pixelWidth\"/>\t  <v:f eqn=\"sum @8 21600 0\"/>\t  <v:f eqn=\"prod @7 21600 pixelHeight\"/>\t  <v:f eqn=\"sum @10 21600 0\"/>\t </v:formulas>\t <v:path o:extrusionok=\"f\" gradientshapeok=\"t\" o:connecttype=\"rect\"/>\t <o:lock v:ext=\"edit\" aspectratio=\"t\"/>\t</v:shapetype><v:shape id=\"_x0000_i1025\" type=\"#_x0000_t75\" alt=\"\" style='width:972.75pt;\t height:173.25pt'>\t <v:imagedata src=\"file:///C:/Users/VWILAS~1/AppData/Local/Temp/msohtmlclip1/01/clip_image001.gif\"\t  o:href=\"cid:_1_0D03B4A00D03B23400474ABBC12583A6\"/>\t</v:shape><![endif]--><!--[if !vml]--><!--[endif]--><!--[if gte vml 1]><v:shapetype\t id=\"_x0000_t75\" coordsize=\"21600,21600\" o:spt=\"75\" o:preferrelative=\"t\"\t path=\"m@4@5l@4@11@9@11@9@5xe\" filled=\"f\" stroked=\"f\">\t <v:stroke joinstyle=\"miter\"/>\t <v:formulas>\t  <v:f eqn=\"if lineDrawn pixelLineWidth 0\"/>\t  <v:f eqn=\"sum @0 1 0\"/>\t  <v:f eqn=\"sum 0 0 @1\"/>\t  <v:f eqn=\"prod @2 1 2\"/>\t  <v:f eqn=\"prod @3 21600 pixelWidth\"/>\t  <v:f eqn=\"prod @3 21600 pixelHeight\"/>\t  <v:f eqn=\"sum @0 0 1\"/>\t  <v:f eqn=\"prod @6 1 2\"/>\t  <v:f eqn=\"prod @7 21600 pixelWidth\"/>\t  <v:f eqn=\"sum @8 21600 0\"/>\t  <v:f eqn=\"prod @7 21600 pixelHeight\"/>\t  <v:f eqn=\"sum @10 21600 0\"/>\t </v:formulas>\t <v:path o:extrusionok=\"f\" gradientshapeok=\"t\" o:connecttype=\"rect\"/>\t <o:lock v:ext=\"edit\" aspectratio=\"t\"/>\t</v:shapetype><v:shape id=\"_x0000_i1025\" type=\"#_x0000_t75\" alt=\"\" style='width:972.75pt;\t height:173.25pt'>\t <v:imagedata src=\"file:///C:/Users/VWILAS~1/AppData/Local/Temp/msohtmlclip1/01/clip_image001.gif\"\t  o:href=\"cid:_1_0D03B4A00D03B23400474ABBC12583A6\"/>\t</v:shape><![endif]--><!--[if !vml]--><!--[endif]--><!--[if gte vml 1]><v:shapetype\t id=\"_x0000_t75\" coordsize=\"21600,21600\" o:spt=\"75\" o:preferrelative=\"t\"\t path=\"m@4@5l@4@11@9@11@9@5xe\" filled=\"f\" stroked=\"f\">\t <v:stroke joinstyle=\"miter\"/>\t <v:formulas>\t  <v:f eqn=\"if lineDrawn pixelLineWidth 0\"/>\t  <v:f eqn=\"sum @0 1 0\"/>\t  <v:f eqn=\"sum 0 0 @1\"/>\t  <v:f eqn=\"prod @2 1 2\"/>\t  <v:f eqn=\"prod @3 21600 pixelWidth\"/>\t  <v:f eqn=\"prod @3 21600 pixelHeight\"/>\t  <v:f eqn=\"sum @0 0 1\"/>\t  <v:f eqn=\"prod @6 1 2\"/>\t  <v:f eqn=\"prod @7 21600 pixelWidth\"/>\t  <v:f eqn=\"sum @8 21600 0\"/>\t  <v:f eqn=\"prod @7 21600 pixelHeight\"/>\t  <v:f eqn=\"sum @10 21600 0\"/>\t </v:formulas>\t <v:path o:extrusionok=\"f\" gradientshapeok=\"t\" o:connecttype=\"rect\"/>\t <o:lock v:ext=\"edit\" aspectratio=\"t\"/>\t</v:shapetype><v:shape id=\"_x0000_i1025\" type=\"#_x0000_t75\" alt=\"\" style='width:972.75pt;\t height:173.25pt'>\t <v:imagedata src=\"file:///C:/Users/VWILAS~1/AppData/Local/Temp/msohtmlclip1/01/clip_image001.gif\"\t  o:href=\"cid:_1_0D03B4A00D03B23400474ABBC12583A6\"/>\t</v:shape><![endif]--><!--[if !vml]--><!--[endif]--></p>\t<table border=\"1\" cellpadding=\"0\" cellspacing=\"0\">\t\t<tbody>\t\t\t<tr>\t\t\t\t<td colspan=\"2\" style=\"width:638px\">\t\t\t\t<p>Bag specifications</p>\t\t\t\t</td>\t\t\t</tr>\t\t\t<tr>\t\t\t\t<td style=\"width:187px\">\t\t\t\t<p>Thicknesses (gsm)</p>\t\t\t\t</td>\t\t\t\t<td style=\"width:451px\">\t\t\t\t<p>120</p>\t\t\t\t</td>\t\t\t</tr>\t\t\t<tr>\t\t\t\t<td style=\"width:187px\">\t\t\t\t<p>Dimensions (cm)</p>\t\t\t\t</td>\t\t\t\t<td style=\"width:451px\">\t\t\t\t<p>Length: 37, Height: 42.5 + 1 turnover top &amp; Gusset: 18</p>\t\t\t\t</td>\t\t\t</tr>\t\t\t<tr>\t\t\t\t<td style=\"width:187px\">\t\t\t\t<p>Finishing</p>\t\t\t\t</td>\t\t\t\t<td style=\"width:451px\">\t\t\t\t<p>Natural PP Non-Woven (No lamination)</p>\t\t\t\t</td>\t\t\t</tr>\t\t\t<tr>\t\t\t\t<td style=\"width:187px\">\t\t\t\t<p>Handles &amp; Material</p>\t\t\t\t</td>\t\t\t\t<td style=\"width:451px\">\t\t\t\t<p>1 set PP Non-Woven without film. Square &amp; cross stitched on the outside</p>\t\t\t\t</td>\t\t\t</tr>\t\t\t<tr>\t\t\t\t<td style=\"width:187px\">\t\t\t\t<p>Handle dimensions (cm)</p>\t\t\t\t</td>\t\t\t\t<td style=\"width:451px\">\t\t\t\t<p>1 set: 48 x 2.5</p>\t\t\t\t</td>\t\t\t</tr>\t\t</tbody>\t</table><ul><li>Color: Black</li><li>Material: Poly (Polyester)</li></ul>",
-          "displayCountDownTimer": false,
-          "freeShipping": true,
-          "futureStocks": [],
-          "giftCosts": [],
-          "images": [],
-          "launchProduct": false,
-          "potentialPromotions": [],
-          "price": {
-            "currencyIso": "EUR",
-            "formattedValue": "€ 1,50",
-            "priceType": "BUY",
-            "value": 1.5
-          },
-          "productReferences": [],
-          "reviews": [],
-          "sizeChartGridMap": [],
-          "skuExclusions": false,
-          "stock": {
-            "stockLevel": 0,
-            "stockLevelStatus": "inStock"
-          },
-          "styleVariantCode": [],
-          "variantMatrix": [],
-          "variantOptions": [],
-          "volumePrices": []
-        },
-        "productPriceVariation": false,
-        "quantity": 1,
-        "shippingRestricted": false,
-        "totalPrice": {
-          "currencyIso": "EUR",
-          "formattedValue": "€ 1,50",
-          "priceType": "BUY",
-          "value": 1.5
-        }
+        "address_id": "17972539",
+        "address_name": "Elmer",
+        "title": "Mr",
+        "firstname": "Elmer",
+        "surname": "Gautam",
+        "address1": "12 Pilmore Mews",
+        "address2": "",
+        "town": "Darlington",
+        "county": "Durham",
+        "postcode": "DL2 2BQ",
+        "country": "United Kingdom",
+        "country_id": "GB",
+        "phone": "",
+        "mobile": "07796233905",
+        "email": "ElmerGautam121@charlieaio.com",
+        "date_created": "08/03/2021 16:49:32",
+        "date_modified": "",
+        "default_address": "1"
+      }
+    ]
+  },
+  "status": { "code": "success" },
+  "errorsobject": [],
+  "basket": {
+    "currency_code": "GBP",
+    "basket_id": 697861191,
+    "date_entered": "06/04/2021 00:07:06",
+    "date_modified": "06/04/2021 00:07:06",
+    "subtotal": 74.99,
+    "subtotal_net": 62.49,
+    "subtotal_vat": 12.5,
+    "shipping_total": 0,
+    "shipping_total_net": 0,
+    "shipping_total_vat": 0,
+    "total": 74.99,
+    "total_net": 62.49,
+    "total_vat": 12.5,
+    "shipping_method_code": "MP_HERSD",
+    "shipping_method_name": "Standard Delivery",
+    "session_src": "",
+    "voucher": "",
+    "discount_total": 0,
+    "display_message_header_1": "",
+    "display_message_header_2": "",
+    "discounts_applied": [{ "name": "Free Delivery", "discount_amount": 0 }],
+    "discounted_delivery": "YES",
+    "delivery_discounts": [
+      {
+        "delivery_methods_id": "#MP_LUXSD#",
+        "discount_type": "PERCENTAGE",
+        "discount_value": 100,
+        "discount_id": "LuxemborgStandardDeliveryThreshold"
+      },
+      {
+        "delivery_methods_id": "#MP_IRE#",
+        "discount_type": "PERCENTAGE",
+        "discount_value": 100,
+        "discount_id": "IrelandStandardDeliveryThreshold"
+      },
+      {
+        "delivery_methods_id": "#MP_HERSD#",
+        "discount_type": "PERCENTAGE",
+        "discount_value": 100,
+        "discount_id": "FREEPP50"
+      },
+      {
+        "delivery_methods_id": "#MP_AUSSD#",
+        "discount_type": "PERCENTAGE",
+        "discount_value": 100,
+        "discount_id": "AustraliaStandardDeliveryThreshold"
+      },
+      {
+        "delivery_methods_id": "#MP_ASTSD#",
+        "discount_type": "PERCENTAGE",
+        "discount_value": 100,
+        "discount_id": "AustriaStandardDeliveryThreshold"
+      },
+      {
+        "delivery_methods_id": "#MP_USASD#",
+        "discount_type": "PERCENTAGE",
+        "discount_value": 100,
+        "discount_id": "UnitedStatesStandardDeliveryThreshold"
       }
     ],
-    "gfPaymentInfo": [],
-    "giftBoxAdded": false,
-    "giftOrder": false,
-    "guestCustomer": true,
-    "guid": "4d9e5c8c-431c-4b44-be76-8950818315d5",
-    "net": false,
-    "orderCreationDate": "Wed Mar 31 2021",
-    "orderDiscounts": {
-      "currencyIso": "EUR",
-      "formattedValue": "€ 0,00",
-      "priceType": "BUY",
-      "value": 0.0
-    },
-    "paymentAddress": {
-      "billingAddress": true,
-      "country": {
-        "isocode": "IT",
-        "name": "Italy"
-      },
-      "defaultAddress": false,
-      "email": "charliebottomley11@gmail.com",
-      "firstName": "Claire",
-      "formattedAddress": "95 Via A.G. Alaimo, Agrigento, 92100",
-      "id": "9592715149335",
-      "lastName": "Bottomley",
-      "line1": "95 Via A.G. Alaimo",
-      "phone": "07796233905",
-      "postalCode": "92100",
-      "setAsBilling": false,
-      "shippingAddress": false,
-      "town": "Agrigento",
-      "visibleInAddressBook": false
-    },
-    "paymentInfo": {
-      "cardNumber": "************6857",
-      "cardType": {
-        "code": "visa",
-        "name": "Visa"
-      },
-      "defaultPayment": false,
-      "expiryMonth": "10",
-      "expiryYear": "2024",
-      "id": "8844584583210",
-      "modifiedDate": "Wed Mar 31 11:13:55 CEST 2021",
-      "saved": false
-    },
-    "pickupItemsQuantity": 0,
-    "pickupOrderGroups": [],
-    "productDiscounts": {
-      "currencyIso": "EUR",
-      "formattedValue": "€ 0,00",
-      "priceType": "BUY",
-      "value": 0.0
-    },
-    "site": "flit",
-    "status": "CREATED",
-    "statusDisplay": "created",
-    "store": "footlockeritaly",
-    "subTotal": {
-      "currencyIso": "EUR",
-      "formattedValue": "€ 1,50",
-      "priceType": "BUY",
-      "value": 1.5
-    },
-    "totalDiscounts": {
-      "currencyIso": "EUR",
-      "formattedValue": "€ 0,00",
-      "priceType": "BUY",
-      "value": 0.0
-    },
-    "totalItems": 1,
-    "totalPrice": {
-      "currencyIso": "EUR",
-      "formattedValue": "€ 8,50",
-      "priceType": "BUY",
-      "value": 8.5
-    },
-    "totalPriceWithTax": {
-      "currencyIso": "EUR",
-      "formattedValue": "€ 8,50",
-      "priceType": "BUY",
-      "value": 8.5
-    },
-    "totalTax": {
-      "currencyIso": "EUR",
-      "formattedValue": "€ 0,00",
-      "priceType": "BUY",
-      "value": 0.0
-    },
-    "unconsignedEntries": [
+    "items": [
       {
-        "additionalAttributes": {
-          "entry": []
-        },
-        "applicableDeliveryModes": [],
-        "entryNumber": 0,
-        "product": {
-          "baseOptions": [
-            {
-              "options": [],
-              "selected": {
-                "ageBucket": [],
-                "backOrderable": false,
-                "code": "SIZE_889761",
-                "displayCountDownTimer": false,
-                "images": [
-                  {
-                    "altText": "319640227180990_small",
-                    "format": "small",
-                    "url": "default.scene7.image.url319640227180990/small/319640227180990.jpeg"
-                  }
-                ],
-                "launchProduct": false,
-                "mapEnable": false,
-                "name": "Foot Locker Re-Usable Shopper - Unisex Bags",
-                "potentialPromotions": [],
-                "preOrder": false,
-                "priceData": {
-                  "currencyIso": "EUR",
-                  "formattedOriginalPrice": "€ 1,50",
-                  "formattedValue": "€ 1,50",
-                  "originalPrice": 1.5,
-                  "priceType": "BUY",
-                  "value": 1.5
-                },
-                "recaptchaOn": false,
-                "shippingRestrictionExists": false,
-                "size": "One Size",
-                "sizeAvailableInStores": false,
-                "sku": "319640227180990",
-                "stock": {
-                  "stockLevel": 0,
-                  "stockLevelStatus": "inStock"
-                },
-                "style": "Black-Black-White",
-                "variantOptionQualifiers": [],
-                "variantOptions": []
-              },
-              "variantType": "SizeVariantProduct"
-            },
-            {
-              "options": [],
-              "selected": {
-                "ageBucket": [],
-                "backOrderable": false,
-                "code": "STYLE_120514",
-                "displayCountDownTimer": false,
-                "imageSku": "319640227180",
-                "images": [
-                  {
-                    "altText": "319640227180_cart",
-                    "format": "cart",
-                    "url": "default.scene7.image.url319640227180/cart/319640227180.jpeg"
-                  },
-                  {
-                    "altText": "319640227180_small",
-                    "format": "small",
-                    "url": "default.scene7.image.url319640227180/small/319640227180.jpeg"
-                  },
-                  {
-                    "altText": "319640227180_large",
-                    "format": "large",
-                    "url": "default.scene7.image.url319640227180/large/319640227180.jpeg"
-                  },
-                  {
-                    "altText": "319640227180_large_wide",
-                    "format": "large_wide",
-                    "url": "default.scene7.image.url319640227180/large_wide/319640227180.jpeg"
-                  },
-                  {
-                    "altText": "319640227180_zoom",
-                    "format": "zoom",
-                    "url": "default.scene7.image.url319640227180/zoom/319640227180.jpeg"
-                  }
-                ],
-                "launchProduct": false,
-                "mapEnable": false,
-                "potentialPromotions": [],
-                "preOrder": false,
-                "priceData": {
-                  "currencyIso": "EUR",
-                  "formattedOriginalPrice": "€ 1,50",
-                  "formattedValue": "€ 1,50",
-                  "originalPrice": 1.5,
-                  "priceType": "FROM",
-                  "value": 1.5
-                },
-                "recaptchaOn": false,
-                "shippingRestrictionExists": false,
-                "sizeAvailableInStores": false,
-                "sku": "319640227180",
-                "stock": {
-                  "stockLevel": 0,
-                  "stockLevelStatus": "inStock"
-                },
-                "style": "Black-Black-White | ",
-                "variantOptionQualifiers": [],
-                "variantOptions": [
-                  {
-                    "ageBucket": [],
-                    "backOrderable": false,
-                    "code": "SIZE_889761",
-                    "images": [],
-                    "mapEnable": false,
-                    "name": "Foot Locker Re-Usable Shopper - Unisex Bags",
-                    "potentialPromotions": [],
-                    "preOrder": false,
-                    "priceData": {
-                      "currencyIso": "EUR",
-                      "formattedOriginalPrice": "€ 1,50",
-                      "formattedValue": "€ 1,50",
-                      "originalPrice": 1.5,
-                      "value": 1.5
-                    },
-                    "shippingRestrictionExists": false,
-                    "size": "One Size",
-                    "sizeAvailableInStores": false,
-                    "stock": {
-                      "stockLevel": 0,
-                      "stockLevelStatus": "inStock"
-                    },
-                    "variantOptionQualifiers": [],
-                    "variantOptions": []
-                  }
-                ]
-              },
-              "variantType": "StyleVariantProduct"
-            }
-          ],
-          "baseProduct": "STYLE_120514",
-          "categories": [],
-          "classifications": [],
-          "code": "SIZE_889761",
-          "description": "<p><!--[if gte vml 1]><v:shapetype\t id=\"_x0000_t75\" coordsize=\"21600,21600\" o:spt=\"75\" o:preferrelative=\"t\"\t path=\"m@4@5l@4@11@9@11@9@5xe\" filled=\"f\" stroked=\"f\">\t <v:stroke joinstyle=\"miter\"/>\t <v:formulas>\t  <v:f eqn=\"if lineDrawn pixelLineWidth 0\"/>\t  <v:f eqn=\"sum @0 1 0\"/>\t  <v:f eqn=\"sum 0 0 @1\"/>\t  <v:f eqn=\"prod @2 1 2\"/>\t  <v:f eqn=\"prod @3 21600 pixelWidth\"/>\t  <v:f eqn=\"prod @3 21600 pixelHeight\"/>\t  <v:f eqn=\"sum @0 0 1\"/>\t  <v:f eqn=\"prod @6 1 2\"/>\t  <v:f eqn=\"prod @7 21600 pixelWidth\"/>\t  <v:f eqn=\"sum @8 21600 0\"/>\t  <v:f eqn=\"prod @7 21600 pixelHeight\"/>\t  <v:f eqn=\"sum @10 21600 0\"/>\t </v:formulas>\t <v:path o:extrusionok=\"f\" gradientshapeok=\"t\" o:connecttype=\"rect\"/>\t <o:lock v:ext=\"edit\" aspectratio=\"t\"/>\t</v:shapetype><v:shape id=\"_x0000_i1025\" type=\"#_x0000_t75\" alt=\"\" style='width:972.75pt;\t height:173.25pt'>\t <v:imagedata src=\"file:///C:/Users/VWILAS~1/AppData/Local/Temp/msohtmlclip1/01/clip_image001.gif\"\t  o:href=\"cid:_1_0D03B4A00D03B23400474ABBC12583A6\"/>\t</v:shape><![endif]--><!--[if !vml]--><!--[endif]--><!--[if gte vml 1]><v:shapetype\t id=\"_x0000_t75\" coordsize=\"21600,21600\" o:spt=\"75\" o:preferrelative=\"t\"\t path=\"m@4@5l@4@11@9@11@9@5xe\" filled=\"f\" stroked=\"f\">\t <v:stroke joinstyle=\"miter\"/>\t <v:formulas>\t  <v:f eqn=\"if lineDrawn pixelLineWidth 0\"/>\t  <v:f eqn=\"sum @0 1 0\"/>\t  <v:f eqn=\"sum 0 0 @1\"/>\t  <v:f eqn=\"prod @2 1 2\"/>\t  <v:f eqn=\"prod @3 21600 pixelWidth\"/>\t  <v:f eqn=\"prod @3 21600 pixelHeight\"/>\t  <v:f eqn=\"sum @0 0 1\"/>\t  <v:f eqn=\"prod @6 1 2\"/>\t  <v:f eqn=\"prod @7 21600 pixelWidth\"/>\t  <v:f eqn=\"sum @8 21600 0\"/>\t  <v:f eqn=\"prod @7 21600 pixelHeight\"/>\t  <v:f eqn=\"sum @10 21600 0\"/>\t </v:formulas>\t <v:path o:extrusionok=\"f\" gradientshapeok=\"t\" o:connecttype=\"rect\"/>\t <o:lock v:ext=\"edit\" aspectratio=\"t\"/>\t</v:shapetype><v:shape id=\"_x0000_i1025\" type=\"#_x0000_t75\" alt=\"\" style='width:972.75pt;\t height:173.25pt'>\t <v:imagedata src=\"file:///C:/Users/VWILAS~1/AppData/Local/Temp/msohtmlclip1/01/clip_image001.gif\"\t  o:href=\"cid:_1_0D03B4A00D03B23400474ABBC12583A6\"/>\t</v:shape><![endif]--><!--[if !vml]--><!--[endif]--><!--[if gte vml 1]><v:shapetype\t id=\"_x0000_t75\" coordsize=\"21600,21600\" o:spt=\"75\" o:preferrelative=\"t\"\t path=\"m@4@5l@4@11@9@11@9@5xe\" filled=\"f\" stroked=\"f\">\t <v:stroke joinstyle=\"miter\"/>\t <v:formulas>\t  <v:f eqn=\"if lineDrawn pixelLineWidth 0\"/>\t  <v:f eqn=\"sum @0 1 0\"/>\t  <v:f eqn=\"sum 0 0 @1\"/>\t  <v:f eqn=\"prod @2 1 2\"/>\t  <v:f eqn=\"prod @3 21600 pixelWidth\"/>\t  <v:f eqn=\"prod @3 21600 pixelHeight\"/>\t  <v:f eqn=\"sum @0 0 1\"/>\t  <v:f eqn=\"prod @6 1 2\"/>\t  <v:f eqn=\"prod @7 21600 pixelWidth\"/>\t  <v:f eqn=\"sum @8 21600 0\"/>\t  <v:f eqn=\"prod @7 21600 pixelHeight\"/>\t  <v:f eqn=\"sum @10 21600 0\"/>\t </v:formulas>\t <v:path o:extrusionok=\"f\" gradientshapeok=\"t\" o:connecttype=\"rect\"/>\t <o:lock v:ext=\"edit\" aspectratio=\"t\"/>\t</v:shapetype><v:shape id=\"_x0000_i1025\" type=\"#_x0000_t75\" alt=\"\" style='width:972.75pt;\t height:173.25pt'>\t <v:imagedata src=\"file:///C:/Users/VWILAS~1/AppData/Local/Temp/msohtmlclip1/01/clip_image001.gif\"\t  o:href=\"cid:_1_0D03B4A00D03B23400474ABBC12583A6\"/>\t</v:shape><![endif]--><!--[if !vml]--><!--[endif]--></p>\t<table border=\"1\" cellpadding=\"0\" cellspacing=\"0\">\t\t<tbody>\t\t\t<tr>\t\t\t\t<td colspan=\"2\" style=\"width:638px\">\t\t\t\t<p>Bag specifications</p>\t\t\t\t</td>\t\t\t</tr>\t\t\t<tr>\t\t\t\t<td style=\"width:187px\">\t\t\t\t<p>Thicknesses (gsm)</p>\t\t\t\t</td>\t\t\t\t<td style=\"width:451px\">\t\t\t\t<p>120</p>\t\t\t\t</td>\t\t\t</tr>\t\t\t<tr>\t\t\t\t<td style=\"width:187px\">\t\t\t\t<p>Dimensions (cm)</p>\t\t\t\t</td>\t\t\t\t<td style=\"width:451px\">\t\t\t\t<p>Length: 37, Height: 42.5 + 1 turnover top &amp; Gusset: 18</p>\t\t\t\t</td>\t\t\t</tr>\t\t\t<tr>\t\t\t\t<td style=\"width:187px\">\t\t\t\t<p>Finishing</p>\t\t\t\t</td>\t\t\t\t<td style=\"width:451px\">\t\t\t\t<p>Natural PP Non-Woven (No lamination)</p>\t\t\t\t</td>\t\t\t</tr>\t\t\t<tr>\t\t\t\t<td style=\"width:187px\">\t\t\t\t<p>Handles &amp; Material</p>\t\t\t\t</td>\t\t\t\t<td style=\"width:451px\">\t\t\t\t<p>1 set PP Non-Woven without film. Square &amp; cross stitched on the outside</p>\t\t\t\t</td>\t\t\t</tr>\t\t\t<tr>\t\t\t\t<td style=\"width:187px\">\t\t\t\t<p>Handle dimensions (cm)</p>\t\t\t\t</td>\t\t\t\t<td style=\"width:451px\">\t\t\t\t<p>1 set: 48 x 2.5</p>\t\t\t\t</td>\t\t\t</tr>\t\t</tbody>\t</table><ul><li>Color: Black</li><li>Material: Poly (Polyester)</li></ul>",
-          "displayCountDownTimer": false,
-          "freeShipping": true,
-          "futureStocks": [],
-          "giftCosts": [],
-          "images": [],
-          "launchProduct": false,
-          "potentialPromotions": [],
-          "price": {
-            "currencyIso": "EUR",
-            "formattedValue": "€ 1,50",
-            "priceType": "BUY",
-            "value": 1.5
-          },
-          "productReferences": [],
-          "reviews": [],
-          "sizeChartGridMap": [],
-          "skuExclusions": false,
-          "stock": {
-            "stockLevel": 0,
-            "stockLevelStatus": "inStock"
-          },
-          "styleVariantCode": [],
-          "variantMatrix": [],
-          "variantOptions": [],
-          "volumePrices": []
-        },
-        "productPriceVariation": false,
+        "row_id": 1,
+        "internal_row_id": 341168440,
+        "sku": "4053685104",
+        "pf_id": "4053685",
+        "style_group_id": "AAFMSUSUS1344",
+        "product_name": "Stan Smith Sustainable Trainer",
+        "weight": 100,
+        "image_url": "https://www.footasylum.com/images/products/productlistings/4053685.jpg",
+        "list_price": 74.99,
+        "sale_price": 74.99,
+        "sale_price_net": 62.49,
+        "sale_price_vat": 12.5,
+        "line_total": 74.99,
+        "line_total_net": 62.49,
+        "line_total_vat": 12.5,
+        "sale_item": False,
         "quantity": 1,
-        "shippingRestricted": false,
-        "totalPrice": {
-          "currencyIso": "EUR",
-          "formattedValue": "€ 1,50",
-          "priceType": "BUY",
-          "value": 1.5
-        }
+        "vat_rate": "STANDARD",
+        "free_item": "",
+        "lead_text": None,
+        "local_inventory": 3,
+        "dept_id": "FM_SNEAKERS",
+        "manufacturer_id": "AA",
+        "attributes": [
+          {
+            "name": "colour",
+            "value": "Cloud White / Cloud White / Core Black"
+          },
+          { "name": "size", "value": "7.5" }
+        ],
+        "display_message_item_1": "",
+        "display_message_item_2": "",
+        "display_message_item_3": "",
+        "discount_total": 0,
+        "line_total_before_discount": 74.99,
+        "line_total_net_before_discount": 62.49,
+        "line_total_vat_before_discount": 12.5,
+        "discounts_applied": [],
+        "date_modified": "06/04/2021 00:07:06",
+        "category": "Men/Men\\'s Footwear/Trainers",
+        "brand": "adidas Originals"
       }
     ],
-    "user": {
-      "guidanceCustomerID": "",
-      "name": "Claire Bottomley",
-      "uid": "anonymous"
+    "shipping_details": {
+      "address_name": "Elmer",
+      "address_id": "17972539",
+      "firstname": "Elmer",
+      "surname": "Gautam",
+      "title": "Mr",
+      "phone": "07796233905",
+      "fax": "",
+      "email": "ElmerGautam121@charlieaio.com",
+      "address1": "12 Pilmore Mews",
+      "address2": "",
+      "city": "Darlington",
+      "county": "Durham",
+      "postcode": "DL2 2BQ",
+      "country_id": "GB",
+      "country_name": "United Kingdom"
+    },
+    "billing_details": {
+      "address_name": "Elmer",
+      "address_id": "17972539",
+      "firstname": "Elmer",
+      "surname": "Gautam",
+      "title": "Mr",
+      "phone": "07796233905",
+      "fax": "",
+      "email": "ElmerGautam121@charlieaio.com",
+      "address1": "12 Pilmore Mews",
+      "address2": "",
+      "city": "Darlington",
+      "county": "Durham",
+      "postcode": "DL2 2BQ",
+      "country_id": "GB",
+      "country_name": "United Kingdom"
     }
   }
 }

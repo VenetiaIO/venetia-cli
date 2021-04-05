@@ -40,7 +40,8 @@ from utils.functions import (
 )
 import utils.config as CONFIG
 
-SITE = 'AWLAB'
+_SITE_ = 'AWLAB'
+SITE = 'Aw-Lab'
 class AWLAB:
     def success(self,message):
         logger.success(SITE,self.taskID,message)
@@ -61,7 +62,7 @@ class AWLAB:
     def task_checker(self):
         originalTask = self.task
         while True:
-            with open('./{}/tasks.csv'.format(SITE.lower()),'r') as csvFile:
+            with open('./{}/tasks.csv'.format(_SITE_.lower()),'r') as csvFile:
                 csv_reader = csv.DictReader(csvFile)
                 row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
                 self.task = row[0]
@@ -606,7 +607,8 @@ class AWLAB:
                     self.session,
                     self.webhookData['product'],
                     self.webhookData['image'],
-                    self.webhookData['price']
+                    self.webhookData['price'],
+                    False
                 )
                 return
 
@@ -689,13 +691,6 @@ class AWLAB:
                 self.success("Checkout Successful")
                 updateConsoleTitle(False,True,SITE)
 
-                self.webhookData['url'] = storeCookies(
-                    'https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token={}&useraction=commit'.format(token),
-                    self.session,
-                    self.webhookData['product'],
-                    self.webhookData['image'],
-                    self.webhookData['price']
-                )
                 return
 
 
@@ -902,3 +897,5 @@ class AWLAB:
                     pass
             except:
                 self.alert("Failed to send webhook. Checkout here ==> {}".format(self.webhookData['url']))
+                while True:
+                    pass

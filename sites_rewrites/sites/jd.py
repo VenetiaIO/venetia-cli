@@ -33,7 +33,8 @@ from utils.functions import (
     storeCookies,
     updateConsoleTitle,
     scraper,
-    footlocker_snare
+    footlocker_snare,
+    decodeURIComponent
 )
 import utils.config as CONFIG
 
@@ -44,6 +45,7 @@ def getCookies(jar):
     
     return cookieString
 
+_SITE_ = 'JD'
 SITE = 'JDSports'
 class JD:
     def success(self,message):
@@ -65,7 +67,7 @@ class JD:
     def task_checker(self):
         originalTask = self.task
         while True:
-            with open('./{}/tasks.csv'.format('JD'.lower()),'r') as csvFile:
+            with open('./{}/tasks.csv'.format(_SITE_.lower()),'r') as csvFile:
                 csv_reader = csv.DictReader(csvFile)
                 row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
                 self.task = row[0]
@@ -129,7 +131,10 @@ class JD:
             time.sleep(10)
             sys.exit()
 
-        self.region = '.co.uk'
+        if self.profile['countryCode'].lower() == 'gb':
+            self.region = '.co.uk'
+        else:
+            self.region = '.' + self.profile['countryCode'].lower()
 
 
         self.prodUrl = f'https://www.jdsports{self.region}/product/-/' + self.task['PRODUCT'] + '/stock/?_=' + str(int(time.time()))
@@ -169,12 +174,11 @@ class JD:
         self.shipping()
         # self.updateDelivery_plus_method()
 
-        self.paypal()
 
-        # if self.task['PAYMENT'].strip().lower() == "paypal":
-        #     self.paypal()
-        # else:
-        #     self.card()
+        if self.task['PAYMENT'].strip().lower() == "paypal":
+            self.paypal()
+        else:
+            self.card()
 
         self.sendToDiscord()
     
@@ -214,8 +218,9 @@ class JD:
                     sizes = []
                     for s in foundSizes:
                         try:
-                            allSizes.append('{}:{}:{}'.format(s['title'].split(' ')[2],s['data-sku'],s['data-upc']))
-                            sizes.append(s['title'].split(' ')[2])
+                            sizeSplit = s['title'].split(' ')
+                            allSizes.append('{}:{}:{}'.format(sizeSplit[len(sizeSplit) - 1],s['data-sku'],s['data-upc']))
+                            sizes.append(sizeSplit[len(sizeSplit) - 1])
                         except:
                             pass
 
@@ -255,7 +260,7 @@ class JD:
                 return
 
             elif response.status == 403:
-                self.error(f"Failed to cart [{str(response.status)}]. Retrying...")
+                self.error(f"Failed to get product [{str(response.status)}]. Retrying...")
                 self.rotateProxy()
                 time.sleep(int(self.task['DELAY']))
                 continue
@@ -449,7 +454,7 @@ class JD:
                     # 'newrelic': ''
                 },data=json.dumps({
                     "useDeliveryAsBilling":True,
-                    "country":"United Kingdom|gb",
+                    "country":"{}|{}".format(self.profile['country'],self.profile['countryCode'].lower()),
                     "locale":"",
                     "firstName":self.profile['firstName'],
                     "lastName":self.profile['lastName'],
@@ -562,6 +567,7 @@ class JD:
                     # 'newrelic': ''
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                print("here")
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
@@ -569,6 +575,7 @@ class JD:
                 continue
 
             self.setCookies(response)
+
             if response.status in [200,302]:
                 try:
                     response2 = self.session.get(response.url,headers={
@@ -626,6 +633,176 @@ class JD:
                 time.sleep(int(self.task['DELAY']))
                 continue
 
+    def card(self):
+        while True:
+            self.prepare("Completing card checkout...")
+            
+
+            try:
+                response = self.session.post(f'https://www.jdsports{self.region}/checkout/paymentV3/',headers={
+                    'accept': '*/*',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
+                    'cookie':getCookies(self.cookieJar),
+                    'x-requested-with': 'XMLHttpRequest',
+                    # 'newrelic': ''
+                },data="paySelect=card&isSafari=true")
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.rotateProxy()
+                continue
+
+            self.setCookies(response)
+
+            if response.status in [200,302]:
+                redirectUrl = response.text.replace('"','').replace('\/','/')
+
+                try:
+                    response2 = self.session.get(redirectUrl,headers={
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
+                        'Cookie':getCookies(self.cookieJar),
+                        # 'newrelic': ''
+                    })
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    self.error(f"error: {str(e)}")
+                    time.sleep(int(self.task["DELAY"]))
+                    self.rotateProxy()
+                    continue
+                
+                self.setCookies(response2)
+                if response2.status in [200,302]:
+
+                    try:
+                        # payload = {}
+                        soup = BeautifulSoup(response2.text,"html.parser")
+                        # adyeninputs = soup.find_all("input")
+                        # for item in adyeninputs:
+                        #     print(item)
+                        #     try:
+                        #         payload.update({item["name"]:item["value"]})
+                        #     except:
+                        #         pass
+                        cM = self.profile['card']['cardMonth']
+                        if len(str(cM)) == 1:
+                            cM = '0' + cM
+                        else:
+                            pass
+                        payload = {
+                            "displayGroup": "card",
+                            "card.cardNumber": self.profile['card']['cardNumber'],
+                            "card.cardHolderName": '{} {}'.format(self.profile['firstName'], self.profile['lastName']),
+                            "card.expiryMonth": cM,
+                            "card.expiryYear":  self.profile['card']['cardYear'],
+                            "card.cvcCode":  self.profile['card']['cardCVV'],
+                            "sig": soup.find('input',{'name':'sig'})['value'],
+                            "merchantReference": decodeURIComponent(redirectUrl.split('?merchantReference=')[1].split('&')[0]),
+                            "brandCode": 'brandCodeUndef',
+                            "paymentAmount": decodeURIComponent(redirectUrl.split('&paymentAmount=')[1].split('&')[0]),
+                            "currencyCode": decodeURIComponent(redirectUrl.split('&currencyCode=')[1].split('&')[0]),
+                            "shipBeforeDate": decodeURIComponent(redirectUrl.split('&shipBeforeDate=')[1].split('&')[0]),
+                            "skinCode": decodeURIComponent(redirectUrl.split('&skinCode=')[1].split('&')[0]),
+                            "merchantAccount": decodeURIComponent(redirectUrl.split('&merchantAccount=')[1].split('&')[0]),
+                            "shopperLocale": decodeURIComponent(redirectUrl.split('&shopperLocale=')[1].split('&')[0]),
+                            "stage": "pay",
+                            "sessionId": soup.find('input',{'name':'sessionId'})['value'],
+                            "sessionValidity": decodeURIComponent(redirectUrl.split('&sessionValidity=')[1].split('&')[0]),
+                            "shopperEmail": decodeURIComponent(redirectUrl.split('&shopperEmail=')[1].split('&')[0]),
+                            "shopperReference": decodeURIComponent(redirectUrl.split('&shopperReference=')[1].split('&')[0]),
+                            "recurringContract": soup.find('input',{'name':'recurringContract'})['value'],
+                            "resURL": decodeURIComponent(redirectUrl.split('&resURL=')[1].split('&')[0]),
+                            "allowedMethods": "card",
+                            "blockedMethods": decodeURIComponent(redirectUrl.split('&blockedMethods=')[1].split('&')[0]),
+                            "originalSession": soup.find('input',{'name':'originalSession'})['value'],
+                            "billingAddress.street": decodeURIComponent(redirectUrl.split('&billingAddress.street=')[1].split('&')[0]),
+                            "billingAddress.houseNumberOrName": decodeURIComponent(redirectUrl.split('&billingAddress.houseNumberOrName=')[1].split('&')[0]),
+                            "billingAddress.city": decodeURIComponent(redirectUrl.split('&billingAddress.city=')[1].split('&')[0]),
+                            "billingAddress.postalCode": decodeURIComponent(redirectUrl.split('&billingAddress.postalCode=')[1].split('&')[0]),
+                            "billingAddress.stateOrProvince": decodeURIComponent(redirectUrl.split('&billingAddress.stateOrProvince=')[1].split('&')[0]),
+                            "billingAddress.country": decodeURIComponent(redirectUrl.split('&billingAddress.country=')[1].split('&')[0]),
+                            "billingAddressType": decodeURIComponent(redirectUrl.split('&billingAddressType=')[1].split('&')[0]),
+                            "billingAddressSig": decodeURIComponent(redirectUrl.split('&billingAddressSig=')[1].split('&')[0]),
+                            "deliveryAddress.street": decodeURIComponent(redirectUrl.split('&deliveryAddress.street=')[1].split('&')[0]),
+                            "deliveryAddress.houseNumberOrName": decodeURIComponent(redirectUrl.split('&deliveryAddress.houseNumberOrName=')[1].split('&')[0]),
+                            "deliveryAddress.city": decodeURIComponent(redirectUrl.split('&deliveryAddress.city=')[1].split('&')[0]),
+                            "deliveryAddress.postalCode": decodeURIComponent(redirectUrl.split('&deliveryAddress.postalCode=')[1].split('&')[0]),
+                            "deliveryAddress.stateOrProvince": decodeURIComponent(redirectUrl.split('&deliveryAddress.stateOrProvince=')[1].split('&')[0]),
+                            "deliveryAddress.country": decodeURIComponent(redirectUrl.split('&deliveryAddress.country=')[1].split('&')[0]),
+                            "deliveryAddressType": decodeURIComponent(redirectUrl.split('&deliveryAddressType=')[1].split('&')[0]),
+                            "deliveryAddressSig": decodeURIComponent(redirectUrl.split('&deliveryAddressSig=')[1].split('&')[0]),
+                            "shopper.firstName": decodeURIComponent(redirectUrl.split('&shopper.firstName=')[1].split('&')[0]),
+                            "shopper.lastName": decodeURIComponent(redirectUrl.split('&shopper.lastName=')[1].split('&')[0]),
+                            "merchantIntegration.type": "HPP",
+                            "referrerURL": f'https://www.jdsports{self.region}/',
+                            "dfValue": "ryEGX8eZpJ0030000000000000BTWDfYZVR30089146776cVB94iKzBGcnZqsrHIWv5S16Goh5Mk0045zgp4q8JSa00000qZkTE00000q6IQbnyNfpG2etdcqzfW:40",
+                            "usingFrame": False,
+                            "usingPopUp": False,
+                            "shopperBehaviorLog": {"numberBind":"1","holderNameBind":"1","cvcBind":"1","deactivate":"4","activate":"3"}
+                        }
+                        # payload["displayGroup"] = "card"
+                        # payload["dfValue"] = "ryEGX8eZpJ0030000000000000BTWDfYZVR30089146776cVB94iKzBGcnZqsrHIWv5S16Goh5Mk0045zgp4q8JSa00000qZkTE00000q6IQbnyNfpG2etdcqzfW:40",
+                        # payload["brandCode"] = 'brandCodeUndef'
+                        # payload["displayGroup"] = "card"
+                        # payload["card.cardNumber"] = self.profile['card']['cardNumber']
+                        # payload["card.cardHolderName"] = "{} {}".format(self.profile['firstName'], self.profile['lastName'])
+                        # payload["card.cvcCode"] = self.profile['card']['cardCVV']
+                        # payload["card.expiryMonth"] = self.profile['card']['cardMonth']
+                        # payload["card.expiryYear"] = self.profile['card']['cardYear']
+                        # payload["shopperBehaviorLog"] = {"numberBind":"1","holderNameBind":"1","cvcBind":"1","deactivate":"3","activate":"2","numberFieldFocusCount":"2","numberFieldLog":"fo@42,cl@42,cl@261,bl@347,fo@494,Cd@498,KL@499,Cu@500,ch@512,bl@512","numberFieldClickCount":"2","numberFieldBlurCount":"2","numberFieldKeyCount":"2","numberFieldChangeCount":"1","numberFieldEvHa":"total=0","holderNameFieldFocusCount":"1","holderNameFieldLog":"fo@512,cl@512,Sd@522,KL@525,KL@526,Su@526,KL@527,KL@528,Ks@530,Sd@531,Su@534,Kb@535,Kb@536,Kb@538,Kb@539,KL@543,KL@544,KL@545,Ks@548,Sd@549,KL@550,Su@551,KL@551,KL@553,KL@555,KL@556,KL@557,KL@558,KL@559,KU@560,ch@560,bl@560","holderNameFieldClickCount":"1","holderNameFieldKeyCount":"25","holderNameUnkKeysFieldLog":"9@560","holderNameFieldChangeCount":"1","holderNameFieldEvHa":"total=0","holderNameFieldBlurCount":"1","cvcFieldFocusCount":"1","cvcFieldLog":"fo@624,cl@625,KN@653,KN@656,KN@657,ch@672,bl@672","cvcFieldClickCount":"1","cvcFieldKeyCount":"3","cvcFieldChangeCount":"1","cvcFieldEvHa":"total=0","cvcFieldBlurCount":"1"}
+                    except Exception:
+                        self.error('Failed to checkout [failed to construct form]. Retrying...')
+                        time.sleep(int(self.task["DELAY"]))
+                        continue
+                    
+     
+                    try:
+                        response3 = self.session.post('https://live.adyen.com/hpp/completeCard.shtml',headers={
+                            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                            'Accept-Language': 'en-US,en;q=0.9',
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
+                            'Cookie':getCookies(self.cookieJar),
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Referer':redirectUrl
+                            # 'newrelic': ''
+                        },data=payload)
+                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                        log.info(e)
+                        self.error(f"error: {str(e)}")
+                        time.sleep(int(self.task["DELAY"]))
+                        self.rotateProxy()
+                        continue
+
+                    self.setCookies(response3)
+
+                    
+                    print(response3.text)
+                    print(response3.url)
+                    print(response3.status)
+                    sys.exit()
+                        
+                
+                else:
+                    self.error(f"Failed to complete card checkout [{str(response.status)}]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+
+
+            elif response.status == 403:
+                self.error(f"Failed to complete card checkout [{str(response.status)}]. Retrying...")
+                self.rotateProxy()
+                time.sleep(int(self.task['DELAY']))
+                continue
+                
+            else:
+                self.error(f"Failed to complete card checkout [{str(response.status)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+
     
     def sendToDiscord(self):
         while True:
@@ -655,3 +832,5 @@ class JD:
                     pass
             except:
                 self.alert("Failed to send webhook. Checkout here ==> {}".format(self.webhookData['url']))
+                while True:
+                    pass
