@@ -206,7 +206,8 @@ class ALLIKE:
                     self.error("Failed to parse product data (maybe OOS)")
                     time.sleep(int(self.task['DELAY']))
                     continue
-
+                
+                self.webhookData['size'] = self.size
                 return
                     
             else:
@@ -309,10 +310,10 @@ class ALLIKE:
         while True:
             self.prepare("Submitting shipping...")
             
-            if CONFIG.captcha_configs[SITE]['type'].lower() == 'v3':
-                capToken = captcha.v3(CONFIG.captcha_configs[SITE]['siteKey'],CONFIG.captcha_configs[SITE]['url'],self.task['PROXIES'],SITE,self.taskID)
-            elif CONFIG.captcha_configs[SITE]['type'].lower() == 'v2':
-                capToken = captcha.v2(CONFIG.captcha_configs[SITE]['siteKey'],CONFIG.captcha_configs[SITE]['url'],self.task['PROXIES'],SITE,self.taskID)
+            if CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v3':
+                capToken = captcha.v3(CONFIG.captcha_configs[_SITE_]['siteKey'],CONFIG.captcha_configs[_SITE_]['url'],self.task['PROXIES'],SITE,self.taskID)
+            elif CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v2':
+                capToken = captcha.v2(CONFIG.captcha_configs[_SITE_]['siteKey'],CONFIG.captcha_configs[_SITE_]['url'],self.task['PROXIES'],SITE,self.taskID)
 
             try:
                 day = random.randint(1,29)
@@ -709,7 +710,7 @@ class ALLIKE:
                     url=self.webhookData['url'],
                     image=self.webhookData['image'],
                     title=self.webhookData['product'],
-                    size=self.size,
+                    size=self.webhookData['size'],
                     price=self.webhookData['price'],
                     paymentMethod=self.task['PAYMENT'].strip().title(),
                     product=self.webhookData['product_url'],

@@ -20,6 +20,7 @@ from utils.captcha import captcha
 from utils.logger import logger
 from utils.webhook import Webhook
 from utils.log import log
+from utils.datadome import datadome
 from utils.functions import (
     loadSettings,
     loadProfile,
@@ -70,6 +71,24 @@ class SLAMJAM:
                 csvFile.close()
 
             time.sleep(2)
+
+    def solveDD(self, response):
+        try:          
+
+            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
+            while cookie['cookie'] == None:
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
+            
+            del self.session.cookies['datadome']
+            self.session.cookies.set('datadome',cookie['cookie'], domain='.slamjam.com')
+            return
+
+        except Exception as e:
+            log.info(e)
+            self.error('Failed to solve challenge. Sleeping...')
+            time.sleep(int(self.task["DELAY"]))
+            return
 
     def __init__(self, task, taskName, rowNumber):
         self.task = task
@@ -146,7 +165,7 @@ class SLAMJAM:
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 time.sleep(int(self.task["DELAY"]))
                 continue
-
+            
             try:
                 response2 = self.session.get(self.queryString,headers={
                     "accept": "*/*",
@@ -165,8 +184,8 @@ class SLAMJAM:
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 time.sleep(int(self.task["DELAY"]))
                 continue
-
-            if response.status_code == 200 and response2.status_code == 200:
+            
+            if response.status_code == 200 and response2.status_code == 200 and 'Challenge' not in response2.url:
                 self.start = time.time()
 
                 self.warning("Retrieved Product")
@@ -174,9 +193,7 @@ class SLAMJAM:
                 # try:
                 soup = BeautifulSoup(response.text, "html.parser")
 
-                with open('sj.html','w') as f:
-                    f.write(response.text)
-                    f.close()
+    
 
                 self.csrf = soup.find('input',{'name':'csrf_token'})['value']
 
@@ -187,10 +204,8 @@ class SLAMJAM:
                 self.webhookData['image'] = str(soup.find("div", {"class": "slider-data-large"}).find_all('div')[0]['data-image-url'])
                 self.webhookData['price'] = str(soup.find("span",{"class":"value"}).text.strip())
 
-                print(response2)
-                print(response2.url)
-                data = response2.text
-                print(data)
+
+                data = response2.json()
                 self.uuid = data["product"]["uuid"]
                 # self.productTitle = data["product"]["productName"]
                 # self.productPrice = data["product"]["price"]["sales"]["formatted"]
@@ -240,10 +255,21 @@ class SLAMJAM:
                 #     time.sleep(int(self.task['DELAY']))
                 #     continue
 
+                self.webhookData['size'] = self.size
                 return
+            
+            elif response.status_code == 403 or response2.status_code == 403:
+                self.error('Blocked by DataDome (Solving Challenge...)')
+                self.solveDD(response2)
+                continue
+        
+            elif response.status_code == 200 or response2.status_code == 200 and 'Challenge' in response2.url:
+                self.error('Blocked by DataDome (Solving Challenge...)')
+                self.solveDD(response2)
+                continue
                     
             else:
-                self.error(f"Failed to get product [{str(response.status_code)}]. Retrying...")
+                self.error(f"Failed to get product [{str(response.status_code)}][{str(response2.status_code)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
     
@@ -322,7 +348,7 @@ class SLAMJAM:
                     url=self.webhookData['url'],
                     image=self.webhookData['image'],
                     title=self.webhookData['product'],
-                    size=self.size,
+                    size=self.webhookData['size'],
                     price=self.webhookData['price'],
                     paymentMethod=self.task['PAYMENT'].strip().title(),
                     product=self.webhookData['product_url'],

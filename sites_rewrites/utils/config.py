@@ -33,6 +33,9 @@ from sites.footlocker_new import FOOTLOCKER_NEW
 # from sites.ambush import AMBUSH
 from sites.converse import CONVERSE
 from sites.jd import JD
+from sites.size import SIZE
+from sites.footpatrol import FOOTPATROL
+from sites.asos import ASOS
 
 sites = {
     "SVD":SVD, #WATERFALL MONITOR
@@ -60,19 +63,22 @@ sites = {
     #"COURIR":COURIR,
     #"SOLEBOX":SOLEBOX,
     # "FENOM":FENOM,
-    "OFFSPRING":OFFSPRING, #WATERFALL MONITOR
+    # "OFFSPRING":OFFSPRING, #WATERFALL MONITOR
     # "OFFICE":OFFICE, #WATERFALL MONITOR
-    "FOOTLOCKER_OLD":FOOTLOCKER_OLD,
-    "FOOTLOCKER_NEW":FOOTLOCKER_NEW,
+    # "FOOTLOCKER_OLD":FOOTLOCKER_OLD,
+    "FOOTLOCKER":FOOTLOCKER_NEW,
     # "AMBUSH":AMBUSH, #WATERFALL MONITOR,
     "JD":JD,
-    "CONVERSE":CONVERSE
+    "SIZE":SIZE,
+    "FOOTPATROL":FOOTPATROL,
+    "CONVERSE":CONVERSE,
+    # "ASOS":ASOS
 }
 
 def VERSION(): return '0.0.0'
 
-def new_footlockers(): return ['IT','BE','AT','LU','CZ','DK','PL','GR','PT','HU','ES','IE','NO','SE','DE','FR','NL']
-def old_footlockers(): return ['GB','AU','SG','MY','HK']
+def new_footlockers(): return ['IT','BE','AT','LU','CZ','DK','PL','GR','PT','HU','ES','IE','NO','SE','DE','FR','NL','GB']
+def old_footlockers(): return ['AU','SG','MY','HK']
 
 def account_sites(): return ['holypop','naked','footasylum','snipes','wch','prodirect']
 
@@ -93,7 +99,7 @@ def waterfall_sites(): return [
 
 
 # types
-# V2, V3,
+# V2, V3, V2_INVISIBLE
 captcha_configs = {
     "SVD":{
         "hasCaptcha":False,
@@ -226,5 +232,23 @@ captcha_configs = {
         "siteKey":"",
         "type":"",
         "url":""
-    }
+    },
+    "JD":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "SIZE":{
+        "hasCaptcha":False,
+        "siteKey":"",
+        "type":"",
+        "url":""
+    },
+    "FOOTPATROL":{
+        "hasCaptcha":True,
+        "siteKey":"6LfEwHQUAAAAACTyJsAICi2Lz2oweGni8QOhV-Yl",
+        "type":"V2_INVISIBLE",
+        "url":"https://www.footpatrol.com/"
+    },
 }

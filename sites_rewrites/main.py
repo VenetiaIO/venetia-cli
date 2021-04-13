@@ -69,12 +69,12 @@ def checkUpdate():
         status = Updater.checkForUpdate(VERSION())
         if status["error"] == False:
             if status["latest"] == True:
-                print(colored(f'You are on the latest version! {VERSION()}','green', attrs=["bold"]))
+                print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored(f'You are on the latest version! {VERSION()}','green', attrs=["bold"])))
                 return True
             if status["latest"] == False:
                 download = Updater.downloadLatest(status["version"])
                 if download == "complete":
-                    print(colored('Update complete','cyan', attrs=["bold"]))
+                    print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('Update complete','cyan', attrs=["bold"])))
                     try:
                         pass
                         os.startfile("VenetiaCLI.exe".format(status['version']))
@@ -83,11 +83,11 @@ def checkUpdate():
                     time.sleep(5)
                     sys.exit()
                 else:
-                    print(colored('Failed to download latest version. Please try again later.','red', attrs=["bold"]))
+                    print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('Failed to download latest version. Please try again later.','red', attrs=["bold"])))
                     time.sleep(5)
                     sys.exit()
         if status["error"] == True:
-            print(colored('Failed to download latest version. Retrying...','red', attrs=["bold"]))
+            print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('Failed to download latest version. Retrying...','red', attrs=["bold"])))
             time.sleep(10)
             checkUpdate()
 
@@ -125,41 +125,41 @@ def checkTasks(site):
     elif len(tasks) == 0:
         return False
     
-def checkFootlockerTasks():
-    old_ftl = []
-    new_ftl = []
-    with open(f'./footlocker/tasks.csv','r') as csvFile:
-        csv_reader = csv.DictReader(csvFile)
-        for r in csv_reader:
-            if len(r['PRODUCT']) > 1:
-                try:
-                    prof = loadProfile(r['PROFILE'])
-                    cc = prof['countryCode'].upper()
-                except Exception:
-                    return {
-                        "status":False,
-                        "old_ftl":0,
-                        "new_ftl":0
-                    }
-                if cc in new_footlockers():
-                    new_ftl.append(1)
-                if cc in old_footlockers():
-                    old_ftl.append(1)
-                else:
-                    pass
+# def checkFootlockerTasks():
+#     old_ftl = []
+#     new_ftl = []
+#     with open(f'./footlocker/tasks.csv','r') as csvFile:
+#         csv_reader = csv.DictReader(csvFile)
+#         for r in csv_reader:
+#             if len(r['PRODUCT']) > 1:
+#                 try:
+#                     prof = loadProfile(r['PROFILE'])
+#                     cc = prof['countryCode'].upper()
+#                 except Exception:
+#                     return {
+#                         "status":False,
+#                         "old_ftl":0,
+#                         "new_ftl":0
+#                     }
+#                 if cc in new_footlockers():
+#                     new_ftl.append(1)
+#                 if cc in old_footlockers():
+#                     old_ftl.append(1)
+#                 else:
+#                     pass
         
-    if len(old_ftl) > 0 or len(new_ftl) > 0:
-        return {
-            "status":True,
-            "old_ftl":old_ftl,
-            "new_ftl":new_ftl
-        }
-    elif len(old_ftl) == 0 and len(new_ftl) == 0:
-        return {
-            "status":False,
-            "old_ftl":old_ftl,
-            "new_ftl":new_ftl
-        }
+#     if len(old_ftl) > 0 or len(new_ftl) > 0:
+#         return {
+#             "status":True,
+#             "old_ftl":old_ftl,
+#             "new_ftl":new_ftl
+#         }
+#     elif len(old_ftl) == 0 and len(new_ftl) == 0:
+#         return {
+#             "status":False,
+#             "old_ftl":old_ftl,
+#             "new_ftl":new_ftl
+#         }
 
 
 class Menu():
@@ -216,28 +216,30 @@ class Menu():
                 # Generate Captchas
 
             elif self.option_main_menu_choice == 6:
+                webbrowser.open_new(f'http://127.0.0.1:{self.port}/statistics')
+                # View Checkouts
+
+            elif self.option_main_menu_choice == 7:
                 self.accountGen()
                 # Account Generator
 
-            elif self.option_main_menu_choice == 7:
-                self.viewCheckouts()
-                # View Checkouts
-
             elif self.option_main_menu_choice == 00:
-                print(colored('Goodbye...','yellow', attrs=["bold"]))
+                print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('Goodbye...','yellow', attrs=["bold"])))
                 time.sleep(3)
                 break
                 os._exit(0)
             
             else:
-                print(colored('Invalid Menu Choice','yellow', attrs=["bold"]))
+                print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('Invalid Menu Choice','yellow', attrs=["bold"])))
                 time.sleep(1)
                 continue
 
 
     def menu(self):
-        print('                 Welcome {}...                  '.format(self.user['discordName']))
+        print('')
+        print('                 Welcome {}...                  '.format(colored(self.user['discordName'], 'magenta')))
         logger.logo(logo,VERSION())
+        print('')
         # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('01','red', attrs=["bold"]), colored('Start All Tasks','red', attrs=["bold"])))
         # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('02','red', attrs=["bold"]), colored('Start Specific Tasks','red', attrs=["bold"])))
         # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('03','red', attrs=["bold"]), colored('View Config','red', attrs=["bold"])))
@@ -251,14 +253,14 @@ class Menu():
         # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('99','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
         menu_options = []
         
-        menu_options.append( colored('[ 01 ] Start All Tasks','red', attrs=["bold"]))
-        menu_options.append( colored('[ 02 ] Start Specific Tasks','red', attrs=["bold"]))
-        menu_options.append( colored('[ 03 ] View|Edit Config','red', attrs=["bold"]))
-        menu_options.append( colored('[ 04 ] View|Create Profiles','red', attrs=["bold"]))
-        menu_options.append( colored('[ 05 ] Generate Captchas','red', attrs=["bold"]))
-        menu_options.append( colored('[ 06 ] Account Gen','red', attrs=["bold"]))
-        menu_options.append( colored('[ 07 ] View Checkouts','red', attrs=["bold"]))
-        menu_options.append( colored('[ 00 ] Exit','red', attrs=["bold"]))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|01| Start All Tasks','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|02| Start Specific Tasks','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|03| Config','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|04| Profiles','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|05| Captchas','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|06| Statistics','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|07| Account Gen','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|00| Exit','red', attrs=["bold"])))
 
         def menu_selector():
             questions = [
@@ -269,7 +271,7 @@ class Menu():
                 ),
             ]
             answers = inquirer.prompt(questions)
-            choi = answers['menu_choices'].split('[ ')[1].split(' ]')[0]
+            choi = answers['menu_choices'].split('|')[1].split('|')[0]
             return choi
 
         return menu_selector()   
@@ -296,120 +298,77 @@ class Menu():
         waterfall_tasks = []
         main_tasks = []
         for k in sites.keys():
-            if k.upper() == 'FOOTLOCKER_NEW':
+
+            allAccounts = []
+            try:
+                accounts = open(f'./{k.lower()}/accounts.txt','r').readlines()
+                for a in accounts:
+                    if a.strip() != '':
+                        a = a.replace('\n','')
+                        allAccounts.append(a)
+            except:
                 pass
-            elif k.upper() == 'FOOTLOCKER_OLD':
-                with open(f'./footlocker/tasks.csv','r') as csvFile:
-                    csv_reader = csv.DictReader(csvFile)
-                    # total =  total + sum(1 for row in csv_reader)
-                    i = 1
-                    for row in csv_reader:
-                        if row["PRODUCT"] != "":
-                            try:
-                                self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format('Footlocker EU'), start=self.rpctime,small_image="image",small_text="@venetiaIO")
-                            except:
-                                pass
+            
+            allAccCopy = copy(allAccounts)
+            if len(allAccCopy) == 0:
+                for i in range(2000):
+                    allAccCopy.append(':')
+
+            random.shuffle(allAccCopy)
+            n2 = taskCountSpecific(k) 
+
+            
+            with open(f'./{k.lower()}/tasks.csv','r') as csvFile:
+                csv_reader = csv.DictReader(csvFile)
+                # total =  total + sum(1 for row in csv_reader)
+
+                i = 1
+                zip2 = zip(csv_reader, allAccCopy[:n2])
+                for row, acc in zip2:
+                    if row["PRODUCT"] != "":
+                        try:
+                            self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format(k.title()), start=self.rpctime,small_image="image",small_text="@venetiaCLI")
+                        except:
+                            pass
+                    
+                        if len(str(i)) == 1:
+                            taskName = f'Task 000{i}'
+                        if len(str(i)) == 2:
+                            taskName = f'Task 00{i}'
+                        if len(str(i)) == 3:
+                            taskName = f'Task 0{i}'
+                        if len(str(i)) == 4:
+                            taskName = f'Task {i}'
+                        i = i + 1
+                        # row['PROXIES'] = 'proxies'
+                        row["ACCOUNT EMAIL"] = acc.split(':')[0]
+                        row["ACCOUNT PASSWORD"] = acc.split(':')[1]
+                        row["SITE"] = k
+                        row["TASK_NAME"] = taskName
+                        row["ROW_NUMBER"] = a
                         
-                            if len(str(i)) == 1:
-                                taskName = f'Task 000{i}'
-                            if len(str(i)) == 2:
-                                taskName = f'Task 00{i}'
-                            if len(str(i)) == 3:
-                                taskName = f'Task 0{i}'
-                            if len(str(i)) == 4:
-                                taskName = f'Task {i}'
-                            i = i + 1
-                            # row['PROXIES'] = 'proxies'
-
-                            prof = loadProfile(row['PROFILE'])
-                            if prof['countryCode'].upper() in new_footlockers():
-                                # new_task = asyncio.create_task( sites.get('FOOTLOCKER_NEW')(row, taskName, a).tasks())
-                                
-                                new_task = threading.Thread(target=sites.get('FOOTLOCKER_NEW'),args=(row,taskName, a))
-                                main_tasks.append(new_task)
-
-                            if prof['countryCode'].upper() in old_footlockers():
-                                # new_task = asyncio.create_task( sites.get('FOOTLOCKER_OLD')(row, taskName, a).tasks())
-                                # main_tasks.append(new_task)
-                                new_task = threading.Thread(target=sites.get('FOOTLOCKER_OLD'),args=(row,taskName, a))
-                                main_tasks.append(new_task)
-                                
-
-                for t in main_tasks:
-                    t.start()
-                return
-
-            elif k.upper() not in ['FOOTLOCKER_NEW','FOOTLOCKER_OLD']:
-                allAccounts = []
-                try:
-                    accounts = open(f'./{k.lower()}/accounts.txt','r').readlines()
-                    for a in accounts:
-                        if a.strip() != '':
-                            a = a.replace('\n','')
-                            allAccounts.append(a)
-                except:
-                    pass
-                
-                allAccCopy = copy(allAccounts)
-                if len(allAccCopy) == 0:
-                    for i in range(2000):
-                        allAccCopy.append(':')
-
-                random.shuffle(allAccCopy)
-                n2 = taskCountSpecific(k) 
-
-                
-                with open(f'./{k.lower()}/tasks.csv','r') as csvFile:
-                    csv_reader = csv.DictReader(csvFile)
-                    # total =  total + sum(1 for row in csv_reader)
-    
-                    i = 1
-                    zip2 = zip(csv_reader, allAccCopy[:n2])
-                    for row, acc in zip2:
-                        if row["PRODUCT"] != "":
-                            try:
-                                self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format(k.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
-                            except:
-                                pass
+                        if k.lower() in waterfall_sites():
+                            # threading.Thread(target=sites.get(k.upper()),args=(row,taskName, a)).start()
+                            waterfall_tasks.append(row)
                         
-                            if len(str(i)) == 1:
-                                taskName = f'Task 000{i}'
-                            if len(str(i)) == 2:
-                                taskName = f'Task 00{i}'
-                            if len(str(i)) == 3:
-                                taskName = f'Task 0{i}'
-                            if len(str(i)) == 4:
-                                taskName = f'Task {i}'
-                            i = i + 1
-                            # row['PROXIES'] = 'proxies'
-                            row["ACCOUNT EMAIL"] = acc.split(':')[0]
-                            row["ACCOUNT PASSWORD"] = acc.split(':')[1]
-                            row["SITE"] = k
-                            row["TASK_NAME"] = taskName
-                            row["ROW_NUMBER"] = a
+                        # new_task = asyncio.create_task( k.upper(row, taskName, a).tasks())
+                        new_task = threading.Thread(target=sites.get(k.upper()),args=(row,taskName, a))
+                        main_tasks.append(new_task)
                             
-                            if k.lower() in waterfall_sites():
-                                # threading.Thread(target=sites.get(k.upper()),args=(row,taskName, a)).start()
-                                waterfall_tasks.append(row)
-                            
-                            # new_task = asyncio.create_task( k.upper(row, taskName, a).tasks())
-                            new_task = threading.Thread(target=sites.get(k.upper()),args=(row,taskName, a))
-                            main_tasks.append(new_task)
-                                
-                            
-                            a = a + 1
+                        
+                        a = a + 1
 
-                if len(waterfall_tasks) > 0:
-                    if menu_selector_waterfall() == 'yes':   
-                        _delay_ =  input(f"[{get_time()}] Enter Waterfall monitor delay (in seconds) ==> ")
-                        WaterfallAssign.assign(waterfall_tasks,_delay_)
-                    else:
-                        for t in main_tasks:
-                            t.start()
-                            
+            if len(waterfall_tasks) > 0:
+                if menu_selector_waterfall() == 'yes':   
+                    _delay_ =  input(f"[{get_time()}] Enter Waterfall monitor delay (in seconds) ==> ")
+                    WaterfallAssign.assign(waterfall_tasks,_delay_)
                 else:
                     for t in main_tasks:
                         t.start()
+                        
+            else:
+                for t in main_tasks:
+                    t.start()
     
     def siteSelectFunc(self, availableSites, siteSelection):
         def menu_selector_waterfall():
@@ -428,116 +387,79 @@ class Menu():
             waterfall__tasks = []
             all_specific_tasks = []
 
-            key_chosen, value_chosen = sorted(availableSites.items())[int(siteSelection) -1 ]
-            if  key_chosen == 'Footlocker EU':
-                with open('./footlocker/tasks.csv','r') as csvFile:
-                    csv_reader = csv.DictReader(csvFile)
-                    i = 1
-                    a = 0
-                    for row in csv_reader:
-                        if row["PRODUCT"] != "":
-                            try:
-                                try:
-                                    win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),key_chosen.title(),"0","0"))
-                                except:
-                                    pass
-                                self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
-                            except:
-                                pass
-        
-                            if len(str(i)) == 1:
-                                taskName = f'Task 000{i}'
-                            if len(str(i)) == 2:
-                                taskName = f'Task 00{i}'
-                            if len(str(i)) == 3:
-                                taskName = f'Task 0{i}'
-                            if len(str(i)) == 4:
-                                taskName = f'Task {i}'
-                            i = i + 1
-                            # row['PROXIES'] = 'proxies'
 
-                            # new_task = asyncio.create_task( value_chosen(row, taskName, a).tasks())
-                            new_task = threading.Thread(target=value_chosen,args=(row,taskName,a))
-                            all_specific_tasks.append(new_task)
-                            
-                            a = a + 1
+            key_chosen, value_chosen = sorted(availableSites.items())[int(siteSelection) - 1]
 
-                # await asyncio.gather(*all_specific_tasks)
-                for t in all_specific_tasks:
-                    t.start()
-
-            else:
-
-                allAccounts = []
-                try:
-                    accounts = open(f'./{key_chosen.lower()}/accounts.txt','r').readlines()
-                    for a in accounts:
-                        if a.strip() != '':
-                            a = a.replace('\n','')
-                            allAccounts.append(a)
-                except:
-                    pass
-                
-
-                allAccCopy = copy(allAccounts)
-                if len(allAccCopy) == 0:
-                    for i in range(2000):
-                        allAccCopy.append(':')
-
-                random.shuffle(allAccCopy)
-                n = taskCountSpecific(key_chosen) 
+            allAccounts = []
+            try:
+                accounts = open(f'./{key_chosen.lower()}/accounts.txt','r').readlines()
+                for a in accounts:
+                    if a.strip() != '':
+                        a = a.replace('\n','')
+                        allAccounts.append(a)
+            except:
+                pass
             
 
-                tasks = []
-                with open('./{}/tasks.csv'.format(key_chosen.lower()),'r') as csvFile:
-                    csv_reader = csv.DictReader(csvFile)
-                    i = 1
-                    a = 0
-                    zip1 = zip(csv_reader, allAccCopy[:n])
-                    for row, acc in zip1:
-                        if row["PRODUCT"] != "":
+            allAccCopy = copy(allAccounts)
+            if len(allAccCopy) == 0:
+                for i in range(2000):
+                    allAccCopy.append(':')
+
+            random.shuffle(allAccCopy)
+            n = taskCountSpecific(key_chosen) 
+        
+
+            tasks = []
+            with open('./{}/tasks.csv'.format(key_chosen.lower()),'r') as csvFile:
+                csv_reader = csv.DictReader(csvFile)
+                i = 1
+                a = 0
+                zip1 = zip(csv_reader, allAccCopy[:n])
+                for row, acc in zip1:
+                    if row["PRODUCT"] != "":
+                        try:
                             try:
-                                try:
-                                    win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),key_chosen.title(),"0","0"))
-                                except:
-                                    pass
-                                self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
+                                win32console.SetConsoleTitle("[Version {}] VenetiaCLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),key_chosen.title(),"0","0"))
                             except:
                                 pass
-        
-                            if len(str(i)) == 1:
-                                taskName = f'Task 000{i}'
-                            if len(str(i)) == 2:
-                                taskName = f'Task 00{i}'
-                            if len(str(i)) == 3:
-                                taskName = f'Task 0{i}'
-                            if len(str(i)) == 4:
-                                taskName = f'Task {i}'
-                            i = i + 1
-                            row["ACCOUNT EMAIL"] = acc.split(':')[0]
-                            row["ACCOUNT PASSWORD"] = acc.split(':')[1]
-                            row["SITE"] = key_chosen
-                            row["TASK_NAME"] = taskName
-                            row["ROW_NUMBER"] = a
-                            if key_chosen.lower() in waterfall_sites():
-                                waterfall__tasks.append(row)
-                            
-                            # new_task = asyncio.create_task( value_chosen(row, taskName, a).tasks())
-                            new_task = threading.Thread(target=value_chosen,args=(row,taskName,a))
-                            all_specific_tasks.append(new_task)
-                            a = a + 1
-                            
-                if len(waterfall__tasks) > 0:
-                    if menu_selector_waterfall() == 'yes':   
-                        _delay_ =  input(f"[{get_time()}] Enter Waterfall monitor delay (in seconds) ==> ")
-                        WaterfallAssign.assign(waterfall__tasks,_delay_)
-                    else:
-                        for t in all_specific_tasks:
-                            t.start()
-                            
+                            self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaCLI")
+                        except:
+                            pass
+    
+                        if len(str(i)) == 1:
+                            taskName = f'Task 000{i}'
+                        if len(str(i)) == 2:
+                            taskName = f'Task 00{i}'
+                        if len(str(i)) == 3:
+                            taskName = f'Task 0{i}'
+                        if len(str(i)) == 4:
+                            taskName = f'Task {i}'
+                        i = i + 1
+                        row["ACCOUNT EMAIL"] = acc.split(':')[0]
+                        row["ACCOUNT PASSWORD"] = acc.split(':')[1]
+                        row["SITE"] = key_chosen
+                        row["TASK_NAME"] = taskName
+                        row["ROW_NUMBER"] = a
+                        if key_chosen.lower() in waterfall_sites():
+                            waterfall__tasks.append(row)
+                        
+                        # new_task = asyncio.create_task( value_chosen(row, taskName, a).tasks())
+                        new_task = threading.Thread(target=value_chosen,args=(row,taskName,a))
+                        all_specific_tasks.append(new_task)
+                        a = a + 1
+                        
+            if len(waterfall__tasks) > 0:
+                if menu_selector_waterfall() == 'yes':   
+                    _delay_ =  input(f"[{get_time()}] Enter Waterfall monitor delay (in seconds) ==> ")
+                    WaterfallAssign.assign(waterfall__tasks,_delay_)
                 else:
                     for t in all_specific_tasks:
                         t.start()
+                        
+            else:
+                for t in all_specific_tasks:
+                    t.start()
             
         except Exception as e:
             pass
@@ -549,24 +471,18 @@ class Menu():
         all_available_sites = []
 
         for row in sorted(sites):
-            if row.upper() == 'FOOTLOCKER_NEW':
-                pass
-            elif row.upper() == 'FOOTLOCKER_OLD':
-                check = checkFootlockerTasks()
-                if check['status'] == True:
-                    if len(check['old_ftl']) > 0:
-                        availableSites['Footlocker EU'] = sites['FOOTLOCKER_OLD']
-                    if len(check['new_ftl']) > 0:
-                        availableSites['Footlocker EU'] = sites['FOOTLOCKER_NEW']
-
-            elif checkTasks(row) and row.upper() not in ['FOOTLOCKER_NEW','FOOTLOCKER_OLD']:
+            if checkTasks(row):
                 availableSites[row] = sites[row]
 
         for s in availableSites:
-            all_available_sites.append( colored(f'[ {number} ] {s.title()}','red', attrs=["bold"]))
-            # logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored(number,'red', attrs=["bold"]), colored(s.title(),'red', attrs=["bold"])))
+            if len(str(number)) == 1:
+                num_a = f'0{number}'
+            else:
+                num_a = number
+            all_available_sites.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored(f'|{num_a}| {s.title()}','red', attrs=["bold"])) )
+            # all_available_sites.append( colored(f'[ {number} ] {s.title()}','red', attrs=["bold"]))
             number = number + 1
-        all_available_sites.append( colored(f'[ 00 ] Return to menu','red', attrs=["bold"]))
+        all_available_sites.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored(f'|00| Return to menu','red', attrs=["bold"])) )
 
         def site_selector_specific():
             questions = [
@@ -577,7 +493,7 @@ class Menu():
                 ),
             ]
             answers = inquirer.prompt(questions)
-            choi = int(answers['specific_site_choices'].split('[ ')[1].split(' ]')[0])
+            choi = int(answers['specific_site_choices'].split('|')[1].split('|')[0])
             return choi
 
         siteSelection = site_selector_specific()
@@ -663,10 +579,10 @@ class Menu():
 
     def viewCheckouts(self): 
         checkoutData = loadCheckouts()
-        print(colored("Total Checkouts: [{}]".format(checkoutData['total']), 'cyan'))
+        print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('Total Checkouts: [{}]'.format(checkoutData['total']),'cyan', attrs=["bold"])))
 
         if int(checkoutData['total']) == 0:
-            print(colored('No checkouts','red'))
+            print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('No Checkouts','red', attrs=["bold"])))
             time.sleep(2)
             return
         
@@ -677,6 +593,7 @@ class Menu():
 
         options = []
         i__ = 1
+        # print(f'|{"Num":<3}| {"Site":<20} {"Product":<40} {"Size":<10}')
         for i in checkoutData['checkouts'][-count:]:
             if i__ < 10:
                 i_ = f'0{i__}'
@@ -688,9 +605,9 @@ class Menu():
             site = data['site'].title()
             prod = data['product']
             size = data['size']
-            options.append(f'[{i_:<3}]   {site:<10}   {prod:<20}  | {size:<5}')
+            options.append('|{:<3}| => {:<20} {:<50} {:<10}'.format(colored(i_,"blue"),colored(site,"yellow"),colored(prod,"yellow"),colored(size,"yellow") ))
         
-        options.append('[XX] Back to menu')
+        options.append('|{}| => {:<20}'.format(colored('XX',"blue"),colored("Back to Menu","red") ))
 
         def selector_checkouts():
             print("")
@@ -702,7 +619,8 @@ class Menu():
                 ),
             ]
             answers = inquirer.prompt(questions)
-            num = answers['checkouts'].split('[')[1].split(']')[0]
+        
+            num = answers['checkouts'].split('|\x1b[34m')[1].split('\x1b[0m|')[0].strip()
             if num == 'XX':
                 return 'XX'
 
@@ -957,6 +875,14 @@ def start_server():
                 return redirect('/configuration')
 
         
+        # stats
+        @main_flask_server.route('/statistics', methods=['GET'])
+        def stats_route():
+            with open('./data/checkouts.json') as checkouts:
+                checkouts = json.loads(checkouts.read())
+                return render_template('stats.html',checkouts=json.dumps(checkouts))
+
+        
         main_flask_server.run(port=port)
     
     port = random.randint(1024,65535)
@@ -979,7 +905,7 @@ if __name__ == "__main__":
             auth = auth.auth(config["key"], uuid.getnode())
             if auth["STATUS"] == 1:
                 k = config['key']
-                print(colored(f'[ {k} ] Key Authorised','green', attrs=["bold"]))
+                print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored(f'Key Authorised [{k}]','green', attrs=["bold"])))
                 Menu().base()
 
             if auth["STATUS"] == 0:
@@ -995,12 +921,12 @@ if __name__ == "__main__":
             auth = auth.auth(config["key"], uuid.getnode())
             if auth["STATUS"] == 1:
                 k = config['key']
-                print(colored(f'[ {k} ] Key Authorised','green', attrs=["bold"]))
+                print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored(f'Key Authorised [{k}]','green', attrs=["bold"])))
                 Menu().base()
                 # asyncio.run(Menu().base())
 
             if auth["STATUS"] == 0:
-                print(colored('Failed to auth key. Closing...','red', attrs=["bold"]))
+                print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored(f'Failed to auth key. Closing...','red', attrs=["bold"])))
                 config["key"] = ""
                 with open("./data/config.json","w") as updated:
                     json.dump(config, updated)

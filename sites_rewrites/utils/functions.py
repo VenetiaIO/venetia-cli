@@ -282,7 +282,7 @@ def updateConsoleTitle(carted,checkedOut, SITE):
           newCarted = int(carted) + 1
   
           checked = title.split('Checked Out: ')[1].split(' |')[0]
-          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(CONFIG.VERSION(),SITE.title(),newCarted,checked))
+          win32console.SetConsoleTitle("[{}] VenetiaCLI - {} | Carted: {} | Checked Out: {}".format(CONFIG.VERSION(),SITE.title(),newCarted,checked))
         except Exception as e:
           pass
     if checkedOut == True:
@@ -292,7 +292,7 @@ def updateConsoleTitle(carted,checkedOut, SITE):
           newChecked = int(checked) + 1
   
           carted = title.split('Carted: ')[1].split(' |')[0]
-          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(CONFIG.VERSION(),SITE.title(),carted,newChecked))
+          win32console.SetConsoleTitle("[{}] VenetiaCLI - {} | Carted: {} | Checked Out: {}".format(CONFIG.VERSION(),SITE.title(),carted,newChecked))
         except Exception as e:
           pass
 

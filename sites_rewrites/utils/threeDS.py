@@ -34,6 +34,7 @@ class threeDSecure:
 
     @staticmethod
     def solve(session, profile, data_in, webhookData, taskID, referer):
+        session = requests.session()
         try:
             payerAuth = session.post('https://idcheck.acs.touchtechpayments.com/v1/payerAuthentication', data=data_in, headers={
                 'referer':referer,

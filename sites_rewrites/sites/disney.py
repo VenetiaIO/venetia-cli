@@ -757,7 +757,7 @@ class DISNEY:
                     url=self.webhookData['url'],
                     image=self.webhookData['image'],
                     title=self.webhookData['product'],
-                    size=self.size,
+                    size=self.webhookData['size'],
                     price=self.webhookData['price'],
                     paymentMethod=self.task['PAYMENT'].strip().title(),
                     product=self.webhookData['product_url'],

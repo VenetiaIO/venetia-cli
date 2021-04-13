@@ -127,6 +127,10 @@ class FOOTLOCKER_NEW:
 
         if self.countryCode == 'it':
             self.baseUrl = 'https://www.footlocker.it'
+        elif self.countryCode == 'gb':
+            self.baseUrl = 'https://www.footlocker.co.uk'
+        elif self.countryCode == 'fr':
+            self.baseUrl = 'https://www.footlocker.fr'
         elif self.countryCode == 'be':
             self.baseUrl = 'https://www.footlocker.be'
         elif self.countryCode == 'at':
@@ -162,6 +166,8 @@ class FOOTLOCKER_NEW:
 
         # self.baseSite = 'http://gocyberit.com.global.prod.fastly.net'
         self.lastServed = None
+        self.lastServed_0 = None
+
         self.orderNum = None
         self.tasks()
 
@@ -207,6 +213,25 @@ class FOOTLOCKER_NEW:
     def retrieveSizes(self):
         while True:
             self.prepare('Getting product data...')
+
+            heads = {
+                'host':self.baseUrl.split('https://')[1],
+                'origin':self.baseUrl,
+                "user-agent":self.userAgent,
+                'upgrade-insecure-requests': '1',
+                'x-fl-request-id': str(uuid.uuid1()),
+                'cache-control': 'private, no-cache, no-store, must-revalidate, max-age=0, stale-while-revalidate=0',
+                'pragma': 'no-cache',
+                'Connection': 'close',
+                "accept": "application/json",
+                "accept-language": "en-US",
+                'sec-fetch-site': 'same-origin',
+                'sec-fetch-mode': 'cors',
+                'sec-fetch-user': '?1',
+                'sec-fetch-dest': 'empty'
+            }
+            if self.lastServed_0 != None:
+                heads['fastly-ff'] = str(self.lastServed_0)
             
             self.relayCat = 'Relay42_Category'  #soup.find('input',{'value':'Product Pages'})['name']
 
@@ -214,22 +239,7 @@ class FOOTLOCKER_NEW:
             # url = '{}/en/product/{}/{}.html'.format(self.baseUrl, self.task['PRODUCT'], self.task['PRODUCT'])
             url = '{}/api/products/pdp/{}?timestamp={}'.format(self.baseUrl, self.task['PRODUCT'], int(datetime.now(tz=timezone.utc).timestamp() * 1000))
             try:
-                retrieveSizes = self.session.get(url,headers={
-                    'host':self.baseUrl.split('https://')[1],
-                    'origin':self.baseUrl,
-                    "user-agent":self.userAgent,
-                    'upgrade-insecure-requests': '1',
-                    'x-fl-request-id': str(uuid.uuid1()),
-                    'cache-control': 'private, no-cache, no-store, must-revalidate, max-age=0, stale-while-revalidate=0',
-                    'pragma': 'no-cache',
-                    'Connection': 'close',
-                    "accept": "application/json",
-                    "accept-language": "en-US",
-                    'sec-fetch-site': 'same-origin',
-                    'sec-fetch-mode': 'cors',
-                    'sec-fetch-user': '?1',
-                    'sec-fetch-dest': 'empty'
-                })
+                retrieveSizes = self.session.get(url,headers=heads)
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 self.error(f"error: {str(e)}")
@@ -238,7 +248,7 @@ class FOOTLOCKER_NEW:
                 continue
             
 
-            if retrieveSizes.status_code == 503:
+            if retrieveSizes.status_code == 529:
                 self.info('Queue...')
                 
                 time.sleep(int(self.task["DELAY"]))
@@ -250,6 +260,11 @@ class FOOTLOCKER_NEW:
                 continue
 
             elif retrieveSizes.status_code == 403:
+                if retrieveSizes.headers['X-Served-By']:
+                    self.lastServed_0 = retrieveSizes.headers['X-Served-By']
+                else:
+                    self.lastServed_0 = None
+
                 if 'nginx' in retrieveSizes.text:
                     self.error('Blocked. Rotating Proxy')
                     time.sleep(int(self.task["DELAY"]))
@@ -258,12 +273,16 @@ class FOOTLOCKER_NEW:
                 else:
                     self.error('Blocked by DataDome (Solving Challenge...)')
                     self.solveDD(retrieveSizes)
+                    continue
 
             
             if retrieveSizes.status_code == 200:
                 self.start = time.time()
                 try:
                     productData = json.loads(retrieveSizes.text)
+                    # with open('ftl.json','w') as f:
+                    #     f.write(productData)
+                    #     f.close()
                     # url = retrieveSizes.text.split('"@id":"')[1].split('"')[0]
                     # regex = r"window.footlocker.STATE_FROM_SERVER = {(.+)}"
                     # matches = re.search(regex, retrieveSizes.text, re.MULTILINE)
@@ -328,6 +347,7 @@ class FOOTLOCKER_NEW:
                     self.warning(f'Found Size => {self.size}')
 
                 # self.addToCart()
+                self.webhookData['size'] = self.size
                 return
 
             else:
@@ -373,7 +393,7 @@ class FOOTLOCKER_NEW:
                 self.lastServed = None
             
 
-            if response.status_code == 503:
+            if response.status_code == 529:
                 self.info('Queue...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
@@ -387,6 +407,7 @@ class FOOTLOCKER_NEW:
                 else:
                     self.error('Blocked by DataDome (Solving Challenge...)')
                     self.solveDD(response)
+                    continue
 
             elif response.status_code == 200:
                 try:
@@ -450,7 +471,7 @@ class FOOTLOCKER_NEW:
             
             
 
-            if atcResponse.status_code == 503:
+            if atcResponse.status_code == 529:
                 self.info('Queue...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
@@ -464,6 +485,7 @@ class FOOTLOCKER_NEW:
                 else:
                     self.error('Blocked by DataDome (Solving Challenge...)')
                     self.solveDD(atcResponse)
+                    continue
 
             elif atcResponse.status_code == 200:
                 try:
@@ -555,7 +577,7 @@ class FOOTLOCKER_NEW:
 
             
 
-            if response.status_code == 503:
+            if response.status_code == 529:
                 self.info('Queue...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
@@ -569,6 +591,7 @@ class FOOTLOCKER_NEW:
                 else:
                     self.error('Blocked by DataDome (Solving Challenge...)')
                     self.solveDD(response)
+                    continue
 
             elif response.status_code == 200:
 
@@ -614,7 +637,7 @@ class FOOTLOCKER_NEW:
 
 
 
-            if response.status_code == 503:
+            if response.status_code == 529:
                 self.info('Queue...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
@@ -628,6 +651,7 @@ class FOOTLOCKER_NEW:
                 else:
                     self.error('Blocked by DataDome (Solving Challenge...)')
                     self.solveDD(response)
+                    continue
 
             elif response.status_code == 200:
 
@@ -703,7 +727,7 @@ class FOOTLOCKER_NEW:
                 time.sleep(int(self.task["DELAY"]))
                 continue
             
-            if checkoutOverviewDispatch.status_code == 503:
+            if checkoutOverviewDispatch.status_code == 529:
                 self.info('Queue...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
@@ -717,6 +741,7 @@ class FOOTLOCKER_NEW:
                 else:
                     self.error('Blocked by DataDome (Solving Challenge...)')
                     self.solveDD(checkoutOverviewDispatch)
+                    continue
 
             elif checkoutOverviewDispatch.status_code in [200,201]:                
                 self.warning('Submitted Shipping')
@@ -761,7 +786,7 @@ class FOOTLOCKER_NEW:
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            if response.status_code == 503:
+            if response.status_code == 529:
                 self.info('Queue...')
                 time.sleep(int(self.task["DELAY"]))
                 continue
@@ -775,23 +800,26 @@ class FOOTLOCKER_NEW:
                 else:
                     self.error('Blocked by DataDome (Solving Challenge...)')
                     self.solveDD(response)
+                    continue
 
             elif response.status_code == 200:
                 try:
-                    self.tokenizationKey = response.json()[1]['key']
+                    self.tokenizationKey = response.json()[2]['key']
                     self.gatewayMerchantId = response.json()[1]['gatewayMerchantId']
                     self.currency = response.json()[1]['currency']
+                    self.displayName = response.json()[1]['displayName']
+
 
                     braintreeData = {
                         "returnUrl": "x",
                         "cancelUrl": "x",
                         "offerPaypalCredit": False,
                         "experienceProfile": {
-                            "brandName": "FootLocker",
+                            "brandName": self.displayName,
                             "noShipping": "false",
                             "addressOverride": False
                         },
-                        "amount": 81.96,
+                        "amount": 69.99,
                         "currencyIsoCode": self.currency,
                         "intent": "authorize",
                         "line1": self.profile['addressOne'],
@@ -817,6 +845,7 @@ class FOOTLOCKER_NEW:
                     self.error("failed to get paypal checkout [error parsing response]")
                     time.sleep(int(self.task["DELAY"]))
                     continue
+                
 
                 try:
                     response2 = self.session.post('https://api.braintreegateway.com/merchants/rfbkw27jcwmw2xgp/client_api/v1/paypal_hermes/create_payment_resource',
@@ -825,7 +854,8 @@ class FOOTLOCKER_NEW:
                         "accept-language": "en-GB,en;q=0.9",
                         "content-type": "application/json",
                         'Referer':self.baseUrl,
-                        "User-Agent":self.userAgent
+                        "User-Agent":self.userAgent,
+                        'Host':'api.braintreegateway.com'
                     })
                 except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                     log.info(e)
@@ -834,6 +864,7 @@ class FOOTLOCKER_NEW:
                     time.sleep(int(self.task["DELAY"]))
                     continue
                 
+                # {"error":{"message":"Authorization fingerprint is invalid"},"fieldErrors":[{"field":"authorizationFingerprint","code":"93201","message":"Authorization fingerprint is required"}]}
 
                 if response2.status_code in [200,201,302]:
                     try:
@@ -860,7 +891,7 @@ class FOOTLOCKER_NEW:
                     return
 
                 else:
-                    self.error(f'Failed to get paypal checkout [{str(response.status_code)}]. Retrying...')
+                    self.error(f'Failed to get paypal checkout [{str(response2.status_code)}]. Retrying...')
                     time.sleep(int(self.task["DELAY"]))
                     continue
 
@@ -950,7 +981,7 @@ class FOOTLOCKER_NEW:
                     'cache-control': 'private, no-cache, no-store, must-revalidate, max-age=0, stale-while-revalidate=0',
                     'pragma': 'no-cache',
                     "accept": "application/json",
-                    'referer': f'{self.baseUrl}/it/checkout',
+                    'referer': f'{self.baseUrl}/checkout',
                     # "accept-encoding": "gzip, deflate, br",
                     "accept-language": "en-US",
                 })
@@ -1036,7 +1067,7 @@ class FOOTLOCKER_NEW:
                         'cache-control': 'private, no-cache, no-store, must-revalidate, max-age=0, stale-while-revalidate=0',
                         'pragma': 'no-cache',
                         "accept": "application/json",
-                        'referer': f'{self.baseUrl}/it/checkout',
+                        'referer': f'{self.baseUrl}/checkout',
                         # "accept-encoding": "gzip, deflate, br",
                         "accept-language": "en-US",
                     })
@@ -1081,29 +1112,6 @@ class FOOTLOCKER_NEW:
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-    def sendToDiscord3DS(self):
-          
-        self.webhookData['proxy'] = self.session.proxies  
-
-        try:
-            Webhook.threeDS(
-                webhook=loadSettings()["webhook"],
-                site=SITE,
-                region=self.countryCode,
-                url=self.webhookData['url'],
-                image=self.webhookData['image'],
-                title=self.webhookData['product'],
-                size=self.size,
-                price=self.webhookData['price'],
-                paymentMethod=self.task['PAYMENT'].strip().title(),
-                product=self.webhookData['product_url'],
-                profile=self.task["PROFILE"],
-                proxy=self.webhookData['proxy'],
-            )
-    
-        except:
-            pass
-    
 
     def sendToDiscord(self):
         while True:
@@ -1120,7 +1128,7 @@ class FOOTLOCKER_NEW:
                     url=self.webhookData['url'],
                     image=self.webhookData['image'],
                     title=self.webhookData['product'],
-                    size=self.size,
+                    size=self.webhookData['size'],
                     price=self.webhookData['price'],
                     paymentMethod=self.task['PAYMENT'].strip().title(),
                     product=self.webhookData['product_url'],

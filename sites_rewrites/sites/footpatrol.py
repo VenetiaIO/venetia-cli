@@ -46,9 +46,9 @@ def getCookies(jar):
     
     return cookieString
 
-_SITE_ = 'JD'
-SITE = 'JDSports'
-class JD:
+_SITE_ = 'FOOTPATROL'
+SITE = 'FootPatrol'
+class FOOTPATROL:
     def success(self,message):
         logger.success(SITE,self.taskID,message)
     def error(self,message):
@@ -137,12 +137,13 @@ class JD:
             sys.exit()
 
         if self.profile['countryCode'].lower() == 'gb':
-            self.region = '.co.uk'
+            self.region = '.com'
         else:
             self.region = '.' + self.profile['countryCode'].lower()
 
 
-        self.prodUrl = f'https://www.jdsports{self.region}/product/-/' + self.task['PRODUCT'] + '/stock/?_=' + str(int(time.time()))
+        # self.prodUrl = f'https://m.footpatrol{self.region}/product/-/' + self.task['PRODUCT'] + '/stock/?_=' + str(int(time.time()))
+        self.prodUrl = 'https://www.footpatrol.com/product/white-vault-by-vans-x-wacko-maria-ua-og-authentic-lx/396041_footpatrolcom/stock'
 
         self.tasks()
 
@@ -226,7 +227,8 @@ class JD:
                             sizeSplit = s['title'].split(' ')
                             allSizes.append('{}:{}:{}'.format(sizeSplit[len(sizeSplit) - 1],s['data-sku'],s['data-upc']))
                             sizes.append(sizeSplit[len(sizeSplit) - 1])
-                        except:
+                        except Exception as e:
+                            print(e)
                             pass
 
                     if len(sizes) == 0:
@@ -279,11 +281,26 @@ class JD:
     def addToCart(self):
         while True:
             self.prepare("Adding to cart...")
+            capToken = 'null'
+
+            if CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v3':
+                capToken = captcha.v3(CONFIG.captcha_configs[_SITE_]['siteKey'],CONFIG.captcha_configs[_SITE_]['url'],self.task['PROXIES'],SITE,self.taskID)
+            elif CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v2':
+                capToken = captcha.v2(CONFIG.captcha_configs[_SITE_]['siteKey'],CONFIG.captcha_configs[_SITE_]['url'],self.task['PROXIES'],SITE,self.taskID)
+            elif CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v2_invisible':
+                capToken = captcha.Hiddenv2(CONFIG.captcha_configs[_SITE_]['siteKey'],CONFIG.captcha_configs[_SITE_]['url'],self.task['PROXIES'],SITE,self.taskID)
             
+            cartData = json.dumps({
+                    "customisations":False,
+                    "cartPosition":'null',
+                    "recaptchaResponse":capToken,
+                    "cartProductNotification":'null',
+                    "quantityToAdd":1
+            })
             try:
-                response = self.session.post(f'https://www.jdsports{self.region}/cart/{self.sizeSKU}/',headers={
+                response = self.session.post(f'https://www.footpatrol{self.region}/cart/{self.sizeSKU}/',headers={
                     'accept': '*/*',
-                    'referer':f'https://www.jdsports{self.region}/product/-/' + self.task['PRODUCT'],
+                    'referer':f'https://www.footpatrol{self.region}/product/-/' + self.task['PRODUCT'],
                     # 'accept-encoding': 'gzip, deflate, br',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/json',
@@ -291,13 +308,7 @@ class JD:
                     'x-requested-with': 'XMLHttpRequest',
                     'cookie':getCookies(self.cookieJar),
                     'newrelic': 'eyJ2IjpbMCwxXSwiZCI6eyJ0eSI6IkJyb3dzZXIiLCJhYyI6IjEwNDEzNTUiLCJhcCI6Ijg4OTU5MjA1IiwiaWQiOiJjYjI5YjRjNTUxMDVlYTZiIiwidHIiOiJmYWU5NzQwNzgwYjg0YTliIiwidGkiOjE2MTcyMzE3OTc3ODZ9fQ=='
-                },data=json.dumps({
-                    "customisations":False,
-                    "cartPosition":'null',
-                    "recaptchaResponse":False,
-                    "cartProductNotification":'null',
-                    "quantityToAdd":1
-                }))
+                },data=cartData)
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 self.error(f"error: {str(e)}")
@@ -343,7 +354,7 @@ class JD:
                 
 
             try:
-                response = self.session.post(f'https://www.jdsports{self.region}/checkout/guest/',headers={
+                response = self.session.post(f'https://www.footpatrol{self.region}/checkout/guest/',headers={
                     'accept': '*/*',
                     # 'accept-encoding': 'gzip, deflate, br',
                     'accept-language': 'en-US,en;q=0.9',
@@ -401,7 +412,7 @@ class JD:
                 "deliveryLocation":self.profile['countryCode'].lower()
             }))
             try:
-                response = self.session.put(f'https://www.jdsports{self.region}/cart/',headers={
+                response = self.session.put(f'https://www.footpatrol{self.region}/cart/',headers={
                     'accept': '*/*',
                     # 'accept-encoding': 'gzip, deflate, br',
                     'accept-language': 'en-US,en;q=0.9',
@@ -450,7 +461,7 @@ class JD:
             
 
             try:
-                response = self.session.post(f'https://www.jdsports{self.region}/myaccount/addressbook/add/',headers={
+                response = self.session.post(f'https://www.footpatrol{self.region}/myaccount/addressbook/add/',headers={
                     'accept': '*/*',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/json',
@@ -513,7 +524,7 @@ class JD:
             
 
             try:
-                response = self.session.post(f'https://www.jdsports{self.region}/checkout/updateDeliveryAddressAndMethod/ajax/',headers={
+                response = self.session.post(f'https://www.footpatrol{self.region}/checkout/updateDeliveryAddressAndMethod/ajax/',headers={
                     'accept': '*/*',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/json',
@@ -564,7 +575,7 @@ class JD:
             
 
             try:
-                response = self.session.get(f'https://www.jdsports{self.region}/checkout/payment/?paySelect=paypalViaHosted',headers={
+                response = self.session.get(f'https://www.footpatrol{self.region}/checkout/payment/?paySelect=paypalViaHosted',headers={
                     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/json',
@@ -610,7 +621,7 @@ class JD:
                             "sec-fetch-user": "?1",
                             "upgrade-insecure-requests": "1",
                             'Cookie':getCookies(self.cookieJar),
-                            'Referer':f'https://www.jdsports{self.region}',
+                            'Referer':f'https://www.footpatrol{self.region}',
                             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
                             # 'newrelic': ''
                         })
@@ -660,7 +671,7 @@ class JD:
             
 
             try:
-                response = self.session.post(f'https://www.jdsports{self.region}/checkout/paymentV3/',headers={
+                response = self.session.post(f'https://www.footpatrol{self.region}/checkout/paymentV3/',headers={
                     'accept': '*/*',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -754,7 +765,7 @@ class JD:
                             "shopper.firstName": soup.find('input',{'name':'shopper.firstName'})['value'],
                             "shopper.lastName": soup.find('input',{'name':'shopper.lastName'})['value'],
                             "merchantIntegration.type": "HPP",
-                            "referrerURL": f'https://www.jdsports{self.region}/',
+                            "referrerURL": f'https://www.footpatrol{self.region}/',
                             "dfValue": "ryEGX8eZpJ0030000000000000BTWDfYZVR30089146776cVB94iKzBGgDdf6NXC9A5S16Goh5Mk0045zgp4q8JSa00000qZkTE00000q6IQbnyNfpG2etdcqzfW:40",
                             "usingFrame": False,
                             "usingPopUp": False,
@@ -809,7 +820,7 @@ class JD:
                             self.Dpayload,
                             self.webhookData,
                             self.taskID,
-                            f'https://www.jdsports{self.region}'
+                            f'https://www.footpatrol{self.region}'
                         )
                         if three_d_data == False:
                             self.error("Checkout Failed (3DS Declined or Failed). Retrying...")

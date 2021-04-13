@@ -169,10 +169,10 @@ class FOOTLOCKER_OLD:
         try:
             challengeUrl = response.json()['url']
 
-            challenge = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
+            challenge = datadome.reCaptchaMethod(_SITE_,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
             while challenge['cookie'] == None:
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                challenge = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
+                challenge = datadome.reCaptchaMethod(_SITE_,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
             
             del self.session.cookies['datadome']
             # self.session.cookies.set('datadome',challenge['cookie'], domain=self.baseUrl.split('https://www')[1])
@@ -326,6 +326,7 @@ class FOOTLOCKER_OLD:
                     self.warning(f'Found Size => {self.size}')
 
                 # self.addToCart()
+                self.webhookData['size'] = self.size
                 return
 
             else:
@@ -828,7 +829,7 @@ class FOOTLOCKER_OLD:
                     url=self.webhookData['url'],
                     image=self.webhookData['image'],
                     title=self.webhookData['product'],
-                    size=self.size,
+                    size=self.webhookData['size'],
                     price=self.webhookData['price'],
                     paymentMethod=self.task['PAYMENT'].strip().title(),
                     product=self.webhookData['product_url'],

@@ -22,6 +22,7 @@ from utils.captcha import captcha
 from utils.logger import logger
 from utils.webhook import Webhook
 from utils.log import log
+from utils.threeDS import threeDSecure
 from utils.functions import (
     loadSettings,
     loadProfile,
@@ -40,7 +41,7 @@ from utils.functions import (
     urlEncode,
     b64Encode
 )
-from utils.config import *
+import utils.config as CONFIG
 
 def getCookies(jar):
     cookieString = ""
@@ -179,10 +180,11 @@ class FOOTASYLUM:
         if self.task['PAYMENT'].strip().lower() == "paypal":
             self.paypal()
         else:
-            pass
-            # self.card()
+            self.basketCheck()
+            self.card()
+            self.cardStage2()
 
-        self.sendToDiscord()
+        # self.sendToDiscord()
 
     def monitor(self):
         while True:
@@ -291,7 +293,8 @@ class FOOTASYLUM:
                     self.error("Failed to parse product data (maybe OOS)")
                     time.sleep(int(self.task['DELAY']))
                     continue
-
+                
+                self.webhookData['size'] = self.size
                 return
                     
             else:
@@ -667,6 +670,7 @@ class FOOTASYLUM:
                 try:
                     responseJson = json.loads(response.text)
                     # self.basketaddressResponse = responseJson
+                    self.stripePrice = str(responseJson["basket"]["total"]).replace('.','')
                     self.webhookData['price'] = '{} {}'.format(responseJson["basket"]["total"],responseJson["basket"]["currency_code"])
                 except Exception as e:
                     self.error(f"Failed to submit shipping [failed to parse response]. Retrying...")
@@ -831,6 +835,43 @@ class FOOTASYLUM:
                 self.error(f"Failed to update customer [{str(response.status)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
+    
+    def basketCheck(self):
+        while True:
+            self.prepare("Checking basket...")
+
+            if CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v3':
+                capToken = captcha.v3(CONFIG.captcha_configs[_SITE_]['siteKey'],CONFIG.captcha_configs[_SITE_]['url'],self.task['PROXIES'],SITE,self.taskID)
+            elif CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v2':
+                capToken = captcha.v2(CONFIG.captcha_configs[_SITE_]['siteKey'],CONFIG.captcha_configs[_SITE_]['url'],self.task['PROXIES'],SITE,self.taskID)
+
+            try:
+                response = self.session.post('https://api.gateway.footasylum.net/basket/check?medium={}&apiKey={}&checkout_client={}'.format(
+                    "web",
+                    self.apiKey,
+                    "secure"
+                ),json={
+                    "checkoutSessionId": self.checkoutSessionId,
+                    "websaleId": self.checkoutSessionId.split('-')[len(self.checkoutSessionId.split('-')) - 1],
+                    "recaptchaToken": capToken,
+                    "cartId": self.pasparBasketId,
+                    "customer": { "parasparId": self.customerId },
+                    "source": "new-checkout"
+                }
+                ,headers={
+                    'user-agent':self.ua,
+                    'accept':'application/json',
+                    'cookie':getCookies(self.cookieJar),
+                    'referer':'https://secure.footasylum.com'
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.rotateProxy()
+                continue
+                  
+            return
 
     def paymentToken(self):
         while True:
@@ -920,7 +961,7 @@ class FOOTASYLUM:
                     self.end = time.time() - self.start
                     self.webhookData['speed'] = self.end
 
-                    self.warning("Got paypal checkout")
+                    self.success("Got paypal checkout")
                     updateConsoleTitle(False,True,SITE)
                     paypalURL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token={}&useraction=commit'.format(ecToken)
                     self.webhookData['url'] = storeCookies(
@@ -941,6 +982,358 @@ class FOOTASYLUM:
                 self.error(f"Failed to get payment token [{str(response.status)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
+
+    def card(self):
+        self.pk_live = 'pk_live_y7GywYfDSuh3fr8oraR8g66U'
+        while True:
+            self.prepare("Completing card checkout...")
+
+            if len(self.profile['card']['cardMonth']) == 1:
+                month = '0' + self.profile['card']['cardMonth']
+            else:
+                month = self.profile['card']['cardMonth']
+
+            self.muid = str(uuid.uuid4())
+            self.sid  = str(uuid.uuid4())
+            self.guid = str(uuid.uuid4())
+
+            payload1 = {
+                'type': 'card',
+                'currency': self.currency,
+                'amount': self.stripePrice,
+                'owner[name]': '{} {}'.format(self.profile['firstName'], self.profile['lastName']),
+                'owner[email]': self.customer['email'],
+                'owner[address][line1]': self.shippingDetails['address1'],
+                'owner[address][city]': self.shippingDetails['city'],
+                'owner[address][postal_code]': self.shippingDetails['postcode'],
+                'owner[address][country]': self.profile['countryCode'],
+                'metadata[description]': 'New Checkout payment for FA products',
+                'redirect[return_url]': f'https://secure.footasylum.com/redirect-result?checkoutSessionId={self.checkoutSessionId}&disable_root_load=true',
+                'card[number]': self.profile['card']['cardNumber'],
+                'card[cvc]': self.profile['card']['cardCVV'],
+                'card[exp_month]': month,
+                'card[exp_year]': self.profile['card']['cardYear'][-2:],
+                'guid': self.guid,
+                'muid': self.muid,
+                'sid': self.sid,
+                'pasted_fields': 'number',
+                'payment_user_agent': 'stripe.js/696e73007; stripe-js-v3/696e73007',
+                'time_on_page': '479625',
+                'referrer': 'https://secure.footasylum.com/',
+                'key': self.pk_live
+            }
+
+
+            try:
+                response = self.session.post('https://api.stripe.com/v1/sources',data=payload1,headers={
+                    "user-agent":self.ua,
+                    "accept": "application/json",
+                    "accept-language": "en-US,en;q=0.9",
+                    'Authorization':'Bearer '+self.pk_live,
+                    "accept-encoding": "gzip, deflate, br",
+                    "referrer": "https://js.stripe.com/",
+                    "content-type": "application/x-www-form-urlencoded",
+                    "cookie":getCookies(self.cookieJar),
+                    "authority": "api.stripe.com"
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.rotateProxy()
+                continue
+
+            self.setCookies(response)
+            if response.status == 200:
+                try:
+                    responseJson = json.loads(response.text)
+                    amount = responseJson['amount']
+                    currency = responseJson['currency']
+                    _id_ = responseJson['id']
+                    self.src = _id_
+                except Exception as e:
+                    self.error(f"Failed to complete card checkout [failed to parse response]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+
+                payload2 = {
+                    'type': 'three_d_secure',
+                    'amount': amount,
+                    'currency': currency,
+                    'metadata[cart_id]': self.pasparBasketId,
+                    'metadata[customer_id]': self.customerId,
+                    'metadata[description]': 'New Checkout payment for FA products',
+                    'three_d_secure[card]': _id_,
+                    'redirect[return_url]': f'https://secure.footasylum.com/redirect-result?checkoutSessionId={self.checkoutSessionId}&disable_root_load=true',
+                    'guid': self.guid,
+                    'muid': self.muid,
+                    'sid': self.sid,
+                    'payment_user_agent': 'stripe.js/696e73007; stripe-js-v3/696e73007',
+                    'time_on_page': '480452',
+                    'referrer': 'https://secure.footasylum.com/',
+                    'key': self.pk_live
+                }
+
+                try:
+                    response2 = self.session.post('https://api.stripe.com/v1/sources',data=payload2,headers={
+                        "user-agent":self.ua,
+                        "accept": "application/json",
+                        "accept-language": "en-US,en;q=0.9",
+                        'Authorization':'Bearer '+self.pk_live,
+                        "accept-encoding": "gzip, deflate, br",
+                        "referrer": "https://js.stripe.com/",
+                        "content-type": "application/x-www-form-urlencoded",
+                        "cookie":getCookies(self.cookieJar),
+                        "authority": "api.stripe.com"
+                    })
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    self.error(f"error: {str(e)}")
+                    time.sleep(int(self.task["DELAY"]))
+                    self.rotateProxy()
+                    continue
+                
+                self.setCookies(response2)
+                if response2.status == 200:
+                    try:
+                        responseJson = json.loads(response2.text)
+                        self.redirectUrl = responseJson['redirect']['url']
+                    except Exception as e:
+                        self.error(f"Failed to complete card checkout [failed to parse response]. Retrying...")
+                        time.sleep(int(self.task['DELAY']))
+                        continue
+
+                    self.warning("Got 3DS Redirect")
+                    return
+                
+                else:
+                    self.error(f"Failed to complete card checkout [{str(response.status)}]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+
+            else:
+                self.error(f"Failed to complete card checkout [{str(response.status)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+    
+    def cardStage2(self):
+        while True:
+            self.prepare("Getting 3DS checkout...")
+
+            try:
+                response0 = self.session.put(f'https://api.gateway.footasylum.net/basket/trans-code?medium=web&apiKey={self.apiKey}&checkout_client=secure',headers={
+                    "user-agent":self.ua,
+                    "accept": "application/json",
+                    "content-type":"application/json",
+                    "referrer": "https://secure.footasylum.com/",
+                    "cookie":getCookies(self.cookieJar),
+                },json={"basketId":self.pasparBasketId,"stripeToken":self.src,"tracking":{"utm":{"utm_source":None,"utm_medium":None,"utm_campaign":None}}})
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.rotateProxy()
+                continue
+
+            try:
+                response = self.session.get(self.redirectUrl,headers={
+                    "user-agent":self.ua,
+                    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                    "referrer": "https://secure.footasylum.com/",
+                    "cookie":getCookies(self.cookieJar),
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.rotateProxy()
+                continue
+            
+            self.setCookies(response)
+            if response.status == 200 and 'three_d_secure' in response.url:
+
+                try:
+                    response2 = self.session.get(response.url,headers={
+                        "user-agent":self.ua,
+                        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                        "referrer": "https://secure.footasylum.com/",
+                        "cookie":getCookies(self.cookieJar),
+                    })
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    self.error(f"error: {str(e)}")
+                    time.sleep(int(self.task["DELAY"]))
+                    self.rotateProxy()
+                    continue
+                
+                self.setCookies(response2)
+                if response2.status == 200:
+                    try:
+                        soup = BeautifulSoup(response2.text, "html.parser")
+                        PaReq = soup.find('input',{'name':'PaReq'})['value']
+                        termUrl = soup.find('input',{'name':'TermUrl'})['value']
+                        MD = soup.find('input',{'name':'MD'})['value']
+                    except Exception as e:
+                        self.error(f"Failed to complete card checkout [failed to parse response]. Retrying...")
+                        time.sleep(int(self.task['DELAY']))
+                        continue
+
+                    self.Dpayload = {
+                        "TermUrl":termUrl,
+                        "PaReq":PaReq,
+                        "MD":MD 
+                    }
+
+                    three_d_data = threeDSecure.solve(
+                        self.session,
+                        self.profile,
+                        self.Dpayload,
+                        self.webhookData,
+                        self.taskID,
+                        'https://secure.footasylum.com/'
+                    )
+                    if three_d_data == False:
+                        self.error("Checkout Failed (3DS Declined or Failed). Retrying...")
+                        time.sleep(int(self.task['DELAY']))
+                        continue
+                    
+                    try:
+                        response3 = self.session.post(termUrl,data=three_d_data,headers={
+                            "user-agent":self.ua,
+                            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                            "referrer": "https://idcheck.acs.touchtechpayments.com/",
+                            "cookie":getCookies(self.cookieJar),
+                            "content-type":"application/x-www-form-urlencoded"
+                        })
+                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                        log.info(e)
+                        self.error(f"error: {str(e)}")
+                        time.sleep(int(self.task["DELAY"]))
+                        self.rotateProxy()
+                        continue
+                    
+                    self.setCookies(response3)
+                    if response3.status == 200:
+                        try:
+                            soup = BeautifulSoup(response3.text, "html.parser")
+
+                            form = {
+                                "MD":soup.find("input",{"name":"MD"})["value"],
+                                "PaRes":soup.find("input",{"name":"PaRes"})["value"],
+                                "splat":"[]",
+                                "captures":soup.find("input",{"name":"captures"})["value"].replace('&quot;','"'),
+                                "merchant":soup.find("input",{"name":"merchant"})["value"],
+                                "three_d_secure":soup.find("input",{"name":"three_d_secure"})["value"]
+                            }
+                        except Exception as e:
+                            self.error('Checkout failed [failed to construct form]. Retrying...')
+                            time.sleep(int(self.task['DELAY']))
+                            continue
+
+
+                        try:
+                            response4 = self.session.post('https://hooks.stripe.com/3d_secure/complete/{}/{}'.format(
+                                form['merchant'],
+                                form['three_d_secure']
+                            ),data=form,headers={
+                                "user-agent":self.ua,
+                                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                                "cookie":getCookies(self.cookieJar),
+                                "content-type":"application/x-www-form-urlencoded"
+                            })
+                        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                            log.info(e)
+                            self.error(f"error: {str(e)}")
+                            time.sleep(int(self.task["DELAY"]))
+                            self.rotateProxy()
+                            continue
+
+                        self.setCookies(response4)
+
+                        try:
+                            response4_2 = self.session.get(response4.url,headers={
+                                "user-agent":self.ua,
+                                "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                                "cookie":getCookies(self.cookieJar),
+                            })
+                        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                            log.info(e)
+                            self.error(f"error: {str(e)}")
+                            time.sleep(int(self.task["DELAY"]))
+                            self.rotateProxy()
+                            continue
+
+                        self.setCookies(response4_2)
+
+                        data = {"v2":1,"id":"98ce2f3e182bf0c7201bbc9454520c33","t":12.235,"tag":"4.5.33","src":"js","a":None,"b":{"a":"https://X_vWOpYQw2yimPza2ldilssZ1VglAh6V3hxkTTckm14._8wrI_NcLHROIIp-rJqJVzDj90mhkLycGJKH9HLnNEA.g2u9-hqZvGIqYJcPlPfwJAf-v3RgyK_x1NppzAlA12M/","b":"https://XW--CjQ6ARIrtwKkUdDOT6_ElKEAHtCC5OnmtVzlflM._8wrI_NcLHROIIp-rJqJVzDj90mhkLycGJKH9HLnNEA.g2u9-hqZvGIqYJcPlPfwJAf-v3RgyK_x1NppzAlA12M/?SmKn4lEUIkiv_WZvrf1ZHDHgJBR0QN-PaFSux3friFo=SUoCS2gwAE6UalNlis6j0n5SbFnzYi0OP267powH-ks&iaAjQViUAbyoAYlkGgErk1k93Sj3OPSzGAzIl12EL0M=lK1ZkhyHBPZ7KjMmBpeilxU_nQtjBHoZOvjTU7IoF6o&5BfI-LadMPTtA4Dy6LGfyTVW8aearj6c8X4e7dzgnZw=2SxPraL_Dje7GdpjYwH71YMKlm-uSf2EGsC-Vwi_UkY&c-WGxTDFRhUJJaiMQlSPK713IWcZcz2h1S-tr_O57J0=ehAG0Tla-Ac9uu3VIUkZyfBih2KDEkh8J21BwFNdW7s&24MSuryDTJkCj7fO-CRoGX_imkOojhD1l5WxLUDmjo4=P-prQhyF56HYdVMU-N9hCqwgzMYWSwYeWnKs5G6722g","c":"MeXcP0ZYFQZ_Mzlfv6yXN5KF49_3dxHJRTRvhvSv0x4","d":self.muid,"e":self.sid,"f":False,"g":True,"h":True,"i":["location"],"j":[],"n":217.08000032231212,"u":"secure.footasylum.com","v":"www.footasylum.com"},"h":"6ffcda1bf79588189e52"}
+                        data = urlEncode(data)
+                        data = b64Encode(data)
+                        try:
+                            response4_5 = self.session.post('https://m.stripe.com/6',data=data,headers={
+                                "user-agent":self.ua,
+                                "accept": "*/*",
+                                "cookie":getCookies(self.cookieJar),
+                                "referer":"https://m.stripe.network/",
+                                "content-type":"text/plain;charset=UTF-8"
+                            })
+                        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                            log.info(e)
+                            self.error(f"error: {str(e)}")
+                            time.sleep(int(self.task["DELAY"]))
+                            self.rotateProxy()
+                            continue
+                        self.setCookies(response4_5)
+
+                        # print(response4_5.status)
+                        # print(response4_5.text)
+
+                        status = 'pending'
+                        while status == 'pending':
+                            try:
+                                response5 = self.session.get('https://api.gateway.footasylum.net/basket/trans-code?code={}&medium={}&apiKey={}&checkout_client={}'.format(
+                                    self.checkoutSessionId,
+                                    "web",
+                                    self.apiKey,
+                                    "secure"
+                                ),headers={
+                                    "user-agent":self.ua,
+                                    "accept": "application/json",
+                                    "cookie":getCookies(self.cookieJar),
+                                    "referer":"https://secure.footasylum.com/"
+                                })
+                            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                                log.info(e)
+                                self.error(f"error: {str(e)}")
+                                time.sleep(int(self.task["DELAY"]))
+                                self.rotateProxy()
+                                continue
+                            self.setCookies(response5)
+                            
+                            status = response5.json()['basket']['payment_status']
+                            print(status)
+                            time.sleep(3)
+                        
+                        print(response5.status)
+                        print(response5.json())
+
+                    
+                        return
+
+
+                    else:
+                        self.error(f"Checkout failed [{str(response3.status)}]. Retrying...")
+                        time.sleep(int(self.task['DELAY']))
+                        continue
+
+                else:
+                    self.error(f"Failed to get 3DS checkout [{str(response2.status)}]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+
+            else:
+                self.error(f"Failed to get 3DS checkout [{str(response.status)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
     
     
 
@@ -956,7 +1349,7 @@ class FOOTASYLUM:
                     url=self.webhookData['url'],
                     image=self.webhookData['image'],
                     title=self.webhookData['product'],
-                    size=self.size,
+                    size=self.webhookData['size'],
                     price=self.webhookData['price'],
                     paymentMethod=self.task['PAYMENT'].strip().title(),
                     product=self.webhookData['product_url'],

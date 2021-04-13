@@ -19,7 +19,7 @@ class PX:
         
         r = requests.get('https://px.invincible.services/api/v1/px/snipes',headers=headers,params=params)
         if r.status_code == 200:
-            logger.success('SNIPES',taskID,'Successfully Generated PX Cookies')
+            logger.success('Snipes',taskID,'Successfully Generated PX Cookies')
             return r.json()
         else:
             return {"px3":"error","vid":"error"}
@@ -39,7 +39,7 @@ class PX:
         
         r = requests.get('https://px.invincible.services/api/v1/px/solebox',headers=headers,params=params)
         if r.status_code == 200:
-            logger.success('SOLEBOX',taskID,'Successfully Generated PX Cookies')
+            logger.success('Solebox',taskID,'Successfully Generated PX Cookies')
             return r.json()
         else:
             return {"px3":"error","vid":"error"}
@@ -64,7 +64,7 @@ class PX:
         r = requests.get(f'https://px.invincible.services/api/v1/px-captcha/{site.lower()}/{cs}/{sid}',headers=headers,params=params)
         if r.status_code == 200:
             print(r.json())
-            logger.success(site.upper(),taskID,'Successfully Solved PX Captcha')
+            logger.success(site,taskID,'Successfully Solved PX Captcha')
             return r.json()
         else:
             return {"px3":"error","vid":"error"}

@@ -46,9 +46,9 @@ def getCookies(jar):
     
     return cookieString
 
-_SITE_ = 'JD'
-SITE = 'JDSports'
-class JD:
+_SITE_ = 'SIZE'
+SITE = 'Size'
+class SIZE:
     def success(self,message):
         logger.success(SITE,self.taskID,message)
     def error(self,message):
@@ -142,7 +142,7 @@ class JD:
             self.region = '.' + self.profile['countryCode'].lower()
 
 
-        self.prodUrl = f'https://www.jdsports{self.region}/product/-/' + self.task['PRODUCT'] + '/stock/?_=' + str(int(time.time()))
+        self.prodUrl = f'https://www.size{self.region}/product/-/' + self.task['PRODUCT'] + '/stock/?_=' + str(int(time.time()))
 
         self.tasks()
 
@@ -281,9 +281,9 @@ class JD:
             self.prepare("Adding to cart...")
             
             try:
-                response = self.session.post(f'https://www.jdsports{self.region}/cart/{self.sizeSKU}/',headers={
+                response = self.session.post(f'https://www.size{self.region}/cart/{self.sizeSKU}/',headers={
                     'accept': '*/*',
-                    'referer':f'https://www.jdsports{self.region}/product/-/' + self.task['PRODUCT'],
+                    'referer':f'https://www.size{self.region}/product/-/' + self.task['PRODUCT'],
                     # 'accept-encoding': 'gzip, deflate, br',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/json',
@@ -343,7 +343,7 @@ class JD:
                 
 
             try:
-                response = self.session.post(f'https://www.jdsports{self.region}/checkout/guest/',headers={
+                response = self.session.post(f'https://www.size{self.region}/checkout/guest/',headers={
                     'accept': '*/*',
                     # 'accept-encoding': 'gzip, deflate, br',
                     'accept-language': 'en-US,en;q=0.9',
@@ -401,7 +401,7 @@ class JD:
                 "deliveryLocation":self.profile['countryCode'].lower()
             }))
             try:
-                response = self.session.put(f'https://www.jdsports{self.region}/cart/',headers={
+                response = self.session.put(f'https://www.size{self.region}/cart/',headers={
                     'accept': '*/*',
                     # 'accept-encoding': 'gzip, deflate, br',
                     'accept-language': 'en-US,en;q=0.9',
@@ -450,7 +450,7 @@ class JD:
             
 
             try:
-                response = self.session.post(f'https://www.jdsports{self.region}/myaccount/addressbook/add/',headers={
+                response = self.session.post(f'https://www.size{self.region}/myaccount/addressbook/add/',headers={
                     'accept': '*/*',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/json',
@@ -513,7 +513,7 @@ class JD:
             
 
             try:
-                response = self.session.post(f'https://www.jdsports{self.region}/checkout/updateDeliveryAddressAndMethod/ajax/',headers={
+                response = self.session.post(f'https://www.size{self.region}/checkout/updateDeliveryAddressAndMethod/ajax/',headers={
                     'accept': '*/*',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/json',
@@ -564,7 +564,7 @@ class JD:
             
 
             try:
-                response = self.session.get(f'https://www.jdsports{self.region}/checkout/payment/?paySelect=paypalViaHosted',headers={
+                response = self.session.get(f'https://www.size{self.region}/checkout/payment/?paySelect=paypalViaHosted',headers={
                     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/json',
@@ -610,7 +610,7 @@ class JD:
                             "sec-fetch-user": "?1",
                             "upgrade-insecure-requests": "1",
                             'Cookie':getCookies(self.cookieJar),
-                            'Referer':f'https://www.jdsports{self.region}',
+                            'Referer':f'https://www.size{self.region}',
                             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
                             # 'newrelic': ''
                         })
@@ -660,7 +660,7 @@ class JD:
             
 
             try:
-                response = self.session.post(f'https://www.jdsports{self.region}/checkout/paymentV3/',headers={
+                response = self.session.post(f'https://www.size{self.region}/checkout/paymentV3/',headers={
                     'accept': '*/*',
                     'accept-language': 'en-US,en;q=0.9',
                     'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -754,7 +754,7 @@ class JD:
                             "shopper.firstName": soup.find('input',{'name':'shopper.firstName'})['value'],
                             "shopper.lastName": soup.find('input',{'name':'shopper.lastName'})['value'],
                             "merchantIntegration.type": "HPP",
-                            "referrerURL": f'https://www.jdsports{self.region}/',
+                            "referrerURL": f'https://www.size{self.region}/',
                             "dfValue": "ryEGX8eZpJ0030000000000000BTWDfYZVR30089146776cVB94iKzBGgDdf6NXC9A5S16Goh5Mk0045zgp4q8JSa00000qZkTE00000q6IQbnyNfpG2etdcqzfW:40",
                             "usingFrame": False,
                             "usingPopUp": False,
@@ -809,7 +809,7 @@ class JD:
                             self.Dpayload,
                             self.webhookData,
                             self.taskID,
-                            f'https://www.jdsports{self.region}'
+                            f'https://www.size{self.region}'
                         )
                         if three_d_data == False:
                             self.error("Checkout Failed (3DS Declined or Failed). Retrying...")

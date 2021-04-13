@@ -198,7 +198,8 @@ class TITOLO:
                     self.error("Failed to parse product data (maybe OOS)")
                     time.sleep(int(self.task['DELAY']))
                     continue
-
+                
+                self.webhookData['size'] = self.size
                 return
                     
             else:
@@ -784,7 +785,7 @@ class TITOLO:
                     url=self.webhookData['url'],
                     image=self.webhookData['image'],
                     title=self.webhookData['product'],
-                    size=self.size,
+                    size=self.webhookData['size'],
                     price=self.webhookData['price'],
                     paymentMethod=self.task['PAYMENT'].strip().title(),
                     product=self.webhookData['product_url'],

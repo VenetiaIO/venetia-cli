@@ -533,10 +533,10 @@ class AWLAB:
         while True:
             self.prepare("Getting paypal checkout...")
 
-            if CONFIG.captcha_configs[SITE]['type'].lower() == 'v3':
-                capToken = captcha.v3(CONFIG.captcha_configs[SITE]['siteKey'],self.baseUrl,self.task['PROXIES'],SITE,self.taskID)
-            elif CONFIG.captcha_configs[SITE]['type'].lower() == 'v2':
-                capToken = captcha.v2(CONFIG.captcha_configs[SITE]['siteKey'],self.baseUrl,self.task['PROXIES'],SITE,self.taskID)
+            if CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v3':
+                capToken = captcha.v3(CONFIG.captcha_configs[_SITE_]['siteKey'],self.baseUrl,self.task['PROXIES'],SITE,self.taskID)
+            elif CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v2':
+                capToken = captcha.v2(CONFIG.captcha_configs[_SITE_]['siteKey'],self.baseUrl,self.task['PROXIES'],SITE,self.taskID)
 
             try:
                 payload = {
@@ -623,10 +623,10 @@ class AWLAB:
         while True:
             self.prepare("Getting CAD checkout...")
 
-            if CONFIG.captcha_configs[SITE]['type'].lower() == 'v3':
-                capToken = captcha.v3(CONFIG.captcha_configs[SITE]['siteKey'],self.baseUrl,self.task['PROXIES'],SITE,self.taskID)
-            elif CONFIG.captcha_configs[SITE]['type'].lower() == 'v2':
-                capToken = captcha.v2(CONFIG.captcha_configs[SITE]['siteKey'],self.baseUrl,self.task['PROXIES'],SITE,self.taskID)
+            if CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v3':
+                capToken = captcha.v3(CONFIG.captcha_configs[_SITE_]['siteKey'],self.baseUrl,self.task['PROXIES'],SITE,self.taskID)
+            elif CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v2':
+                capToken = captcha.v2(CONFIG.captcha_configs[_SITE_]['siteKey'],self.baseUrl,self.task['PROXIES'],SITE,self.taskID)
 
             try:
                 payload = {
@@ -712,10 +712,10 @@ class AWLAB:
             if str(number[0]) == "5":
                 cType = 'mc'
 
-            if CONFIG.captcha_configs[SITE]['type'].lower() == 'v3':
-                capToken = captcha.v3(CONFIG.captcha_configs[SITE]['siteKey'],self.baseUrl,self.task['PROXIES'],SITE,self.taskID)
-            elif CONFIG.captcha_configs[SITE]['type'].lower() == 'v2':
-                capToken = captcha.v2(CONFIG.captcha_configs[SITE]['siteKey'],self.baseUrl,self.task['PROXIES'],SITE,self.taskID)
+            if CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v3':
+                capToken = captcha.v3(CONFIG.captcha_configs[_SITE_]['siteKey'],self.baseUrl,self.task['PROXIES'],SITE,self.taskID)
+            elif CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v2':
+                capToken = captcha.v2(CONFIG.captcha_configs[_SITE_]['siteKey'],self.baseUrl,self.task['PROXIES'],SITE,self.taskID)
 
 
             try:
@@ -884,7 +884,7 @@ class AWLAB:
                     url=self.webhookData['url'],
                     image=self.webhookData['image'],
                     title=self.webhookData['product'],
-                    size=self.size,
+                    size=self.webhookData['size'],
                     price=self.webhookData['price'],
                     paymentMethod=self.task['PAYMENT'].strip().title(),
                     product=self.webhookData['product_url'],

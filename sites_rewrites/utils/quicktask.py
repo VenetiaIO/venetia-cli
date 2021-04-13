@@ -83,7 +83,7 @@ def action():
 
         threading.Thread(target=siteModule,args=(row,taskName,'qt')).start()
         try:
-            win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),row["SITE"].upper(),"0","0"))
+            win32console.SetConsoleTitle("[Version {}] VenetiaCLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),row["SITE"].upper(),"0","0"))
         except:
             pass
     
