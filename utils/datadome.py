@@ -8,12 +8,19 @@ import threading
 import cloudscraper
 import urllib
 import js2py
+import sys
+# import asyncio
 
 from utils.logger import logger
 from utils.captcha import captcha
-from helheim import helheim
 from utils.log import log
-from utils.functions import (encodeURIComponent,decodeURIComponent,loadSettings,loadProxy,injection)
+from utils.functions import (
+    encodeURIComponent,
+    decodeURIComponent,
+    loadSettings,
+    loadProxy,
+    injection
+)
 
 
 class datadome:
@@ -21,8 +28,12 @@ class datadome:
     def reCaptchaMethod(SITE,taskID,session,responseUrl, siteUrl, UA, proxies):
         try:
             responseUrl = responseUrl.replace('&t=bv','')
-        except:
+        except Exception:
             pass
+
+        s = requests.session()
+        s.proxies = session.proxies
+
 
         # https://geo.captcha-delivery.com/captcha/
         # ?initialCid=AHrlqAAAAAMAS2mURaQAc8YAueGcYg==
@@ -37,18 +48,16 @@ class datadome:
                 'referer': responseUrl.split('&referer=')[1].split('&')[0],
                 'hash': responseUrl.split('&hash=')[1].split('&')[0],
                 's': responseUrl.split('&s=')[1],
-                'cid': datadomeCookie
+                'cid': datadomeCookie,
+                't':'fe'
             }
         except Exception as e:
             log.info(e)
             return {"cookie":None}
 
+        
         try:
-            geoParams['t'] = responseUrl.replace('&t=bv','')
-        except:
-            pass
-        try:
-            response = session.get(geoUrl,params=geoParams,headers={
+            response = s.get(geoUrl,params=geoParams,headers={
                 "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
                 "accept-language": "en-US,en;q=0.9",
                 "sec-ch-ua": "\"Google Chrome\";v=\"87\", \" Not;A Brand\";v=\"99\", \"Chromium\";v=\"87\"",
@@ -64,9 +73,9 @@ class datadome:
             log.info(e)
             logger.error(SITE,taskID,'Error: {}'.format(e))
 
-        with open('datadome.html','w') as dd:
-            dd.write(response.text)
-            dd.close()
+        # with open('datadome.html','w') as dd:
+        #     dd.write(response.text)
+        #     dd.close()
 
         try:
             siteKey = response.text.split("'sitekey' : '")[1].split("'")[0]
@@ -75,7 +84,7 @@ class datadome:
             log.info(e)
             logger.error(SITE,taskID,'Failed to solve captcha. Retrying...')
             return {"cookie":None}
-
+        
         try:
             params = {
                 "cid": encodeURIComponent(datadomeCookie),
@@ -84,8 +93,8 @@ class datadome:
                 "g-recaptcha-response": capResponse,
                 "hash": response.text.split("'&hash=' + encodeURIComponent('")[1].split("'")[0],
                 "ua": encodeURIComponent(UA),
-                "referer": encodeURIComponent('https://' + response.text.split("'&referer=' + encodeURIComponent('")[1].split("'")[0]),
-                "parent_url":encodeURIComponent('https://' + response.text.split("'&referer=' + encodeURIComponent('")[1].split("'")[0]),
+                "referer": response.text.split("'&referer=' + encodeURIComponent('")[1].split("'")[0],
+                "parent_url":response.text.split("'&referer=' + encodeURIComponent('")[1].split("'")[0],
                 "x-forwarded-for": encodeURIComponent(response.text.split("'&x-forwarded-for=' + encodeURIComponent('")[1].split("'")[0]),
                 "captchaChallenge": capChallenge(datadomeCookie,10,UA,"en-US",["en-US", "en"]), #false
                 "s": response.text.split("'&s=' + encodeURIComponent('")[1].split("'")[0],
@@ -95,8 +104,9 @@ class datadome:
             logger.error(SITE,taskID,'Failed to get cookie. Retrying...')
             return {"cookie":None}
 
+
         try:
-            response = session.get('https://geo.captcha-delivery.com/captcha/check',params=params,headers={
+            response = s.get('https://geo.captcha-delivery.com/captcha/check',params=params,headers={
                 "accept": "*/*",
                 "accept-encoding": "gzip, deflate, br",
                 "accept-language": "en-US,en;q=0.9",
@@ -112,6 +122,7 @@ class datadome:
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             log.info(e)
             logger.error(SITE,taskID,'Error: {}'.format(e))
+            return {"cookie":None}
         
         if response.status_code == 200:
             try:
@@ -120,11 +131,11 @@ class datadome:
                 logger.error(SITE,taskID,'Failed to get cookie. Retrying...')
                 return {"cookie":None}
             
-            logger.success(SITE,taskID,'Retrieved cookie')
+            logger.secondary(SITE,taskID,'Retrieved cookie')
             return {"cookie":cookie}
         
         else:
-            logger.error(SITE,taskID,'Failed to get cookie. Retrying...')
+            logger.error(SITE,taskID,f'Failed to get cookie [{str(response.status_code)}]. Retrying...')
             return {"cookie":None}
                     
     
@@ -241,3 +252,4 @@ def capChallenge(cookie,a,userAgent,language,languages):
         language,
         languages
     )
+

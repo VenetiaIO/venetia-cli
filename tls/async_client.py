@@ -1,16 +1,17 @@
 import functools
 from .utils import (
-            Lib,
-            CFUNCTYPE,
-            GoString,
-            c_char_p,
-            Fingerprint,
-            synchronized,
-            GoResponse,
-            Structure
-    )
+    Lib,
+    CFUNCTYPE,
+    GoString,
+    c_char_p,
+    Fingerprint,
+    synchronized,
+    GoResponse,
+    Structure
+)
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+
 
 class Session:
     lib = None
@@ -24,13 +25,19 @@ class Session:
         cls.executor = ThreadPoolExecutor(max_workers=500)
         return cls.executor
 
-    def __init__(self, proxy=None, browser=Fingerprint.CHROME, ja3=None, timeout=20):
+    def __init__(self, proxy=None, fingerprint=Fingerprint.CHROME, timeout=20, redirect=True, verify_ssl=True):
         self.lib = Lib()
+        self.client_id = self.lib.new_client(
+            proxy, fingerprint, timeout=timeout, redirect=redirect, verify_ssl=verify_ssl)
+        self.fingerprint = fingerprint
+        self.proxy = proxy
+
         self.executor = self.set_executor()
-        self.client_id, self.fingerprint, self.proxy = self.lib.new_client(proxy, browser, ja3, timeout=timeout)
-        self.ja3 = ja3
         self.request = self.request2
 
+    def switch_proxy(self, proxy, fingerprint=None):
+        self.lib.switch_proxy(
+            self.client_id, proxy or self.proxy, fingerprint or self.fingerprint)
 
     def get_cb(self, loop, future):
         def callback(out):
@@ -64,9 +71,10 @@ class Session:
 
     async def request1(self, method, url, **kw):
         loop = asyncio.get_running_loop()
-        #return await loop.run_in_executor(self.executor, self.lib.request, self.client_id, url, method, **kw)
-        return await loop.run_in_executor(self.executor, functools.partial(self.lib.request, **kw), self.client_id, url, method) #, **kw)
-        
+        # return await loop.run_in_executor(self.executor, self.lib.request, self.client_id, url, method, **kw)
+        # , **kw)
+        return await loop.run_in_executor(self.executor, functools.partial(self.lib.request, **kw), self.client_id, url, method)
+
     async def get(self, url, **kw):
         return await self.request('GET', url, **kw)
 
@@ -84,6 +92,7 @@ class Session:
 
     async def delete(self, url, **kw):
         return await self.request('DELETE', url, **kw)
-    
+
+
 def main():
     pass

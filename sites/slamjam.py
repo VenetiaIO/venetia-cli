@@ -13,21 +13,53 @@ import cloudscraper
 import string
 from urllib3.exceptions import HTTPError
 import csv
+import tls as client
+from requests_toolbelt import MultipartEncoder
 
+from utils.captcha import captcha
 from utils.logger import logger
-from utils.webhook import discord
+from utils.webhook import Webhook
 from utils.log import log
 from utils.datadome import datadome
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, scraper)
-SITE = 'SLAMJAM'
+from utils.functions import (
+    loadSettings,
+    loadProfile,
+    loadProxy,
+    createId,
+    loadCookie,
+    loadToken,
+    sendNotification,
+    injection,
+    storeCookies,
+    updateConsoleTitle,
+    scraper,
+    footlocker_snare
+)
+import utils.config as CONFIG
 
-
-
+_SITE_ = 'SLAMJAM'
+SITE = 'SlamJam'
 class SLAMJAM:
+    def success(self,message):
+        logger.success(SITE,self.taskID,message)
+    def error(self,message):
+        logger.error(SITE,self.taskID,message)
+    def prepare(self,message):
+        logger.prepare(SITE,self.taskID,message)
+    def warning(self,message):
+        logger.warning(SITE,self.taskID,message)
+    def info(self,message):
+        logger.info(SITE,self.taskID,message)
+    def secondary(self,message):
+        logger.secondary(SITE,self.taskID,message)
+    def alert(self,message):
+        logger.alert(SITE,self.taskID,message)
+
+
     def task_checker(self):
         originalTask = self.task
         while True:
-            with open('./{}/tasks.csv'.format(SITE.lower()),'r') as csvFile:
+            with open('./{}/tasks.csv'.format(_SITE_.lower()),'r') as csvFile:
                 csv_reader = csv.DictReader(csvFile)
                 row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
                 self.task = row[0]
@@ -37,615 +69,295 @@ class SLAMJAM:
                 except:
                     pass
                 csvFile.close()
+
             time.sleep(2)
 
-    def __init__(self,task,taskName,rowNumber):
+    def solveDD(self, response):
+        try:          
+
+            cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
+            while cookie['cookie'] == None:
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                cookie = datadome.reCaptchaMethod(SITE,self.taskID,self.session,challengeUrl, self.baseUrl, self.userAgent, self.task['PROXIES'])
+            
+            del self.session.cookies['datadome']
+            self.session.cookies.set('datadome',cookie['cookie'], domain='.slamjam.com')
+            return
+
+        except Exception as e:
+            log.info(e)
+            self.error('Failed to solve challenge. Sleeping...')
+            time.sleep(int(self.task["DELAY"]))
+            return
+
+    def __init__(self, task, taskName, rowNumber):
         self.task = task
-        self.sess = requests.session()
         self.taskID = taskName
         self.rowNumber = rowNumber
 
-        twoCap = loadSettings()["2Captcha"]
-        self.session = scraper()
-        self.session.headers = {
-            "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-            "accept-encoding": "gzip, deflate, br",
-            "accept-language": "en-US,en;q=0.9",
-            "cache-control": "no-cache",
-            "dnt": "1",
-            "pragma": "no-cache",
-            "sec-fetch-dest": "document",
-            "sec-fetch-mode": "navigate",
-            "sec-fetch-site": "none",
-            "sec-fetch-user": "?1",
-            "upgrade-insecure-requests": "1",
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
+        if self.rowNumber != 'qt': 
+            threading.Thread(target=self.task_checker,daemon=True).start()
+
+        try:
+            # self.session = client.Session(browser=client.Fingerprint.CHROME_83)
+            self.session = scraper()
+        except Exception as e:
+            self.error(f'error => {e}')
+            self.__init__(task,taskName,rowNumber)
+
+    
+
+
+
+        self.webhookData = {
+            "site":SITE,
+            "product":"n/a",
+            "size":"n/a",
+            "image":"https://i.imgur.com/VqWvzDN.png",
+            "price":"0",
+            "profile":self.task['PROFILE'],
+            "speed":0,
+            "url":"https://venetiacli.io",
+            "paymentMethod":"n/a",
+            "proxy":"n/a",
+            "product_url":""
         }
-        profile = loadProfile(self.task["PROFILE"])
-        if profile == None:
-            logger.error(SITE,self.taskID,'Profile Not Found.')
-            time.sleep(10)
-            sys.exit()
-        self.region = profile["countryCode"].upper()
 
         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
 
-        threading.Thread(target=self.task_checker,daemon=True).start()
-        self.collect()
+        self.profile = loadProfile(self.task["PROFILE"])
+        if self.profile == None:
+            self.error("Profile Not found. Exiting...")
+            time.sleep(10)
+            sys.exit()
+        self.region = self.profile['countryCode'].upper()
+        
+        if 'https' in self.task["PRODUCT"]:
+            self.pid = self.task['PRODUCT'].split('.html')[0].split('/')[ len(self.task['PRODUCT'].split('.html')[0].split('/')) - 1]
+            self.prodUrl = self.task["PRODUCT"]
+        else:
+            self.pid = self.task['PRODUCT']
+            self.prodUrl = 'https://www.slamjam.com/en_{}/{}.html'.format(self.region,self.task["PRODUCT"])
 
-    def collect(self):
+
+        self.webhookData['product_url'] = self.prodUrl
+        self.queryString = f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/Product-Variation?pid={self.pid}'
+        self.tasks()
+    
+    def tasks(self):
+
+        self.monitor()
+        # self.addToCart()
+
+
+        # self.sendToDiscord()
+
+    def monitor(self):
         while True:
-            logger.prepare(SITE,self.taskID,'Getting product page...')
-            if 'https' in self.task["PRODUCT"]:
-                self.url = self.task["PRODUCT"]
-            else:
-                self.url = 'https://www.slamjam.com/en_{}/{}.html'.format(self.region,self.task["PRODUCT"])
-            
+            self.prepare("Getting Product...")
+
+
             try:
-                retrieve = self.session.get(self.url,timeout=10)
+                response = self.session.get(self.prodUrl)
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
-                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.error(f"error: {str(e)}")
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 time.sleep(int(self.task["DELAY"]))
-                continue
-
-            self.start = time.time()
-            regex = r"[A-Z](\d+).html"
-            matches = re.search(regex, retrieve.url)
-            if matches:
-                self.pid = matches.group().split('.html')[0]
-            else:
-                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 continue
             
-        
-            self.cookie = loadCookie('SLAMJAM')["cookie"]
-            if self.cookie == 'empty':
-                del self.session.cookies["datadome"]
-                self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
-                self.session.cookies["datadome"]  = self.cookie
-            else:
-                del self.session.cookies["datadome"]
-                self.session.cookies["datadome"]  = self.cookie
-                self.session.proxies = self.cookie["proxy"]
-
-
-            if retrieve.status_code == 200:
-                
-                self.redirectUrl = retrieve.url
-                logger.warning(SITE,self.taskID,'Got product page')
-                try:
-                    soup = BeautifulSoup(retrieve.text, "html.parser")
-                    #self.pid = retrieve.text.split("criteoProductsArray.push('")[1].split("');")[0]
-                    self.csrf = soup.find('input',{'name':'csrf_token'})['value']
-                    categorys = soup.find_all("li",{"class":"breadcrumb-item"})[3]
-                    aCategorys = categorys.find('a')
-                    self.productCategory = aCategorys.find('span').text
-                    self.queryString = f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/Product-Variation?pid={self.pid}'
-                            
-                except Exception as e:
-                    log.info(e)
-                    logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-                    time.sleep(int(self.task["DELAY"]))
-                    continue
-
-                self.retrieve()
-
-            else:
-                logger.error(SITE,self.taskID,f'Failed to get product page => {str(retrieve.status_code)}. Retrying...')
-                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                time.sleep(int(self.task["DELAY"]))
-                continue
-
-
-    def retrieve(self):
-        while True:
-            logger.prepare(SITE,self.taskID,'Getting product info...')
             try:
-                data = self.session.get(self.queryString,headers={
-                    'referer':self.url
+                response2 = self.session.get(self.queryString,headers={
+                    "accept": "*/*",
+                    "accept-language": "en-US,en;q=0.9",
+                    "sec-ch-ua": "\"Google Chrome\";v=\"89\", \"Chromium\";v=\"89\", \";Not A Brand\";v=\"99\"",
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-fetch-dest": "empty",
+                    "sec-fetch-mode": "cors",
+                    "sec-fetch-site": "same-origin",
+                    "x-requested-with": "XMLHttpRequest",
+                    "referer":str(response.url)
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
-                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.error(f"error: {str(e)}")
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 time.sleep(int(self.task["DELAY"]))
                 continue
             
-            if data:
-                if 'DDUser' in data.url:
-                    logger.info(SITE,self.taskID,'Challenge Found, Solving...')
-                    self.cookie = loadCookie('SLAMJAM')["cookie"]
-                    if self.cookie == 'empty':
-                        del self.session.cookies["datadome"]
-                        self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
-                        self.session.cookies["datadome"]  = self.cookie
+            if response.status_code == 200 and response2.status_code == 200 and 'Challenge' not in response2.url:
+                self.start = time.time()
+
+                self.warning("Retrieved Product")
+
+                # try:
+                soup = BeautifulSoup(response.text, "html.parser")
+
+    
+
+                self.csrf = soup.find('input',{'name':'csrf_token'})['value']
+
+                categorys = soup.find_all("li",{"class":"breadcrumb-item"})
+                self.productCategory = categorys[len(categorys) -1].find('a').find('span').text
+
+                self.webhookData['product'] = str(soup.find("h1",{"class":"product-name"}).text)
+                self.webhookData['image'] = str(soup.find("div", {"class": "slider-data-large"}).find_all('div')[0]['data-image-url'])
+                self.webhookData['price'] = str(soup.find("span",{"class":"value"}).text.strip())
+
+
+                data = response2.json()
+                self.uuid = data["product"]["uuid"]
+                # self.productTitle = data["product"]["productName"]
+                # self.productPrice = data["product"]["price"]["sales"]["formatted"]
+                # self.productImage = data["product"]["images"]["hi-res"][0]["absURL"]
+
+                sizeData = data["product"]["variationAttributes"][1]["values"]
+
+                allSizes = []
+                sizes = []
+                for s in sizeData:
+                    # SIZE : SIZE ID : SIZE PRODUCT ID : IN STOCK (TRUE / FALSE )
+                    if s["selectable"] == True:
+                        allSizes.append('{}:{}:{}:{}'.format(s["displayValue"],s["id"],s["productID"],s["selectable"]))
+                        sizes.append(s["displayValue"])
+
+
+                if len(sizes) == 0:
+                    self.error("No sizes available")
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                if self.task["SIZE"].strip().lower() != "random":
+                    if self.task["SIZE"] not in sizes:
+                        self.error("Size not available")
+                        time.sleep(int(self.task["DELAY"]))
+                        continue
                     else:
-                        del self.session.cookies["datadome"]
-                        self.session.cookies["datadome"]  = self.cookie
-                        self.session.proxies = self.cookie["proxy"]
-
-                    self.retrieve()
+                        for size in allSizes:
+                            if size.split(':')[0].strip().lower() == self.task["SIZE"].strip().lower():
+                                self.size = size.split(':')[0]
+                                self.sizeID = size.split(':')[1]
+                                self.sizeProductID = size.split(":")[2]
+                                
+                                self.warning(f"Found Size => {self.size}")
+    
                 else:
-                    if data.status_code == 200:
-                        try:
-                            data = data.json()
-                        except:
-                            logger.error(SITE,self.taskID,'Failed to retrieve product info. Retrying...')
-                            time.sleep(int(self.task["DELAY"]))
-                            continue
+                    selected = random.choice(allSizes)
+                    self.size = selected.split(':')[0]
+                    self.sizeID = selected.split(':')[1]
+                    self.sizeProductID = selected.split(":")[2]
+                    
+                    self.warning(f"Found Size => {self.size}")
 
-        
-                        self.uuid = data["product"]["uuid"]
-                        self.productTitle = data["product"]["productName"]
-                        self.productPrice = data["product"]["price"]["sales"]["formatted"]
-                        self.productImage = data["product"]["images"]["hi-res"][0]["absURL"]
-        
-                        sizeData = data["product"]["variationAttributes"][1]["values"]
-        
-                        allSizes = []
-                        sizes = []
-                        for s in sizeData:
-                            # SIZE : SIZE ID : SIZE PRODUCT ID : IN STOCK (TRUE / FALSE )
-                            if s["selectable"] == True:
-                                allSizes.append('{}:{}:{}:{}'.format(s["displayValue"],s["id"],s["productID"],s["selectable"]))
-                                sizes.append(s["displayValue"])
-        
-        
-                        if len(sizes) == 0:
-                            logger.error(SITE,self.taskID,'Size Not Found')
-                            time.sleep(int(self.task["DELAY"]))
-                            continue
-        
-                            
-                        if self.task["SIZE"].lower() != "random":
-                            if self.task["SIZE"] not in sizes:
-                                logger.error(SITE,self.taskID,'Size Not Found')
-                                time.sleep(int(self.task["DELAY"]))
-                                continue
-                            else:
-                                for size in allSizes:
-                                    if size.split(':')[0] == self.task["SIZE"]:
-                                        self.size = size.split(':')[0]
-                                        self.sizeID = size.split(':')[1]
-                                        self.sizeProductID = size.split(":")[2]
-                                        logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                                        self.addToCart()
+                # except Exception as e:
+                #     log.info(e)
+                #     self.error("Failed to parse product data (maybe OOS)")
+                #     time.sleep(int(self.task['DELAY']))
+                #     continue
+
+                self.webhookData['size'] = self.size
+                return
             
-                        
-                        elif self.task["SIZE"].lower() == "random":
-                            selected = random.choice(allSizes)
-                            self.size = selected.split(':')[0]
-                            self.sizeProductID = selected.split(":")[2]
-                            self.sizeID = selected.split(':')[1]
-                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                            self.addToCart()
-
+            elif response.status_code == 403 or response2.status_code == 403:
+                self.error('Blocked by DataDome (Solving Challenge...)')
+                self.solveDD(response2)
+                continue
+        
+            elif response.status_code == 200 or response2.status_code == 200 and 'Challenge' in response2.url:
+                self.error('Blocked by DataDome (Solving Challenge...)')
+                self.solveDD(response2)
+                continue
+                    
             else:
-                logger.error(SITE,self.taskID,'Failed to get product info.')
+                self.error(f"Failed to get product [{str(response.status_code)}][{str(response2.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+    
+    def addToCart(self):
+        while True:
+            self.prepare("Adding to cart...")
+            
+            boundary = ''.join(random.choices(string.ascii_uppercase + string.digits + string.ascii_lowercase, k=16))
+            payload = {
+                'isAjax':'1',
+                'form_key': self.formKey,
+                'product': self.productId,
+                'related_product': '',
+                f'super_attribute[{self.attributeId}]': self.sizeID,
+                'product_id': '',
+                'email_notification': '',
+                'parent_id': self.productId
+
+            }
+            payload_encoded = MultipartEncoder(payload, boundary=f'----WebKitFormBoundary{boundary}')
+            
+
+            try:
+                response = self.session.post(self.atcUrl, data=payload_encoded.to_string(), headers={
+                    'authority': 'www.allikestore.com',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': f'multipart/form-data; boundary=----WebKitFormBoundary{boundary}',
+                    'origin': 'https://www.allikestore.com',
+                    'referer': self.task["PRODUCT"],
+                    'sec-fetch-dest': 'empty',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-site': 'same-origin',
+                    'x-requested-with': 'XMLHttpRequest',
+                    'accept':'text/javascript, application/javascript, application/ecmascript, application/x-ecmascript, */*; q=0.01'
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
                 continue
 
 
+            try:
+                splitText = response.text.split('({')[1].split('})')[0]
+                data = json.loads('{' + splitText + '}')
+                status_code = data["status"]
+            except Exception as e:
+                log.info(e)
+                self.error("Failed to cart [failed to parse response]. Retrying...")
+                time.sleep(int(self.task["DELAY"]))
+                continue
 
-    def addToCart(self):
-        del self.session.cookies["datadome"]
-        self.session.cookies["datadome"]  = self.cookie
-        logger.prepare(SITE,self.taskID,'Carting Product...')
-        self.session.headers = {}
-        self.session.headers = {
-            'accept': '*/*',
-            'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'origin': 'https://www.slamjam.com',
-            'referer': self.redirectUrl,
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36',
-            'x-requested-with': 'XMLHttpRequest'
-        }
-        cartPayload = {
-            'pid': self.sizeProductID,
-            'quantity': 1,
-            'category': self.productCategory,
-            'viewFrom': 'si',
-            'options': []
-        }
-        try:
-            cart = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/Cart-AddProduct',data=cartPayload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.addToCart()
-
-        if cart:
-            if 'DDUser' in cart.url:
-                logger.info(SITE,self.taskID,'Challenge Found, Solving...')
-                self.cookie = loadCookie('SLAMJAM')["cookie"]
-                if self.cookie == 'empty':
-                    del self.session.cookies["datadome"]
-                    self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
-                    self.session.cookies["datadome"]  = self.cookie
-                else:
-                    del self.session.cookies["datadome"]
-                    self.session.cookies["datadome"]  = self.cookie
-                    self.session.proxies = self.cookie["proxy"]
-                self.addToCart()
-            else:    
-                try:
-                    cart.json()
-                except:
-                    logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-        
-                if cart.status_code == 200 and int(cart.json()["quantityTotal"]) > 0:
-                    updateConsoleTitle(True,False,SITE)
-                    logger.warning(SITE,self.taskID,'Successfully Carted Product!')
-                    self.shipping()
-                else:
-                    logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.addToCart()
-
-    def shipping(self):
-        profile = loadProfile(self.task["PROFILE"])
-        if profile == None:
-            logger.error(SITE,self.taskID,'Profile Not Found.')
-            time.sleep(10)
-            sys.exit()
-        logger.prepare(SITE,self.taskID,'Getting checkout page...')
-        self.session.headers = {}
-        self.session.headers = {
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'accept-language': 'en-US,en;q=0.9',
-            'referer': f'https://www.slamjam.com/en_{self.region}/checkout',
-            'sec-fetch-dest': 'document',
-            'sec-fetch-mode': 'navigate',
-            'sec-fetch-site': 'same-origin',
-            'sec-fetch-user': '?1',
-            'upgrade-insecure-requests': '1',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36'
-        }
-
-        try:
-            shipping = self.session.get(f'https://www.slamjam.com/en_{self.region}/checkout-begin?stage=shipping#shipping')
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.shipping()
-
-        if shipping:
-            if 'DDUser' in shipping.url:
-                logger.info(SITE,self.taskID,'Challenge Found, Solving...')
-                self.cookie = loadCookie('SLAMJAM')["cookie"]
-                if self.cookie == 'empty':
-                    del self.session.cookies["datadome"]
-                    self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
-                    self.session.cookies["datadome"]  = self.cookie
-                else:
-                    del self.session.cookies["datadome"]
-                    self.session.cookies["datadome"]  = self.cookie
-                    self.session.proxies = self.cookie["proxy"]
-
-                self.shipping()
-            else:
-                if shipping.status_code == 200:
-                    logger.warning(SITE,self.taskID,'Got checkout page')
-                    soup = BeautifulSoup(shipping.text,"html.parser")
-                    # try:
-                    self.shipmentUUID = soup.find("input",{"name":"shipmentUUID"})["value"]
-                    self.csrfToken = soup.find("input",{"name":"csrf_token"})["value"]
-                    
-                    states = soup.find("select",{"name":"dwfrm_shipping_shippingAddress_addressFields_states_stateCode"})
-                    for s in states:
-                        try:
-                            if s.text.lower() == profile["region"].lower():
-                                self.stateID = s["id"]
-                        except:
-                            pass
-                    # except Exception as e:
-                        # log.info(e)
-                        # logger.error(SITE,self.taskID,'Failed to get shipping page. Retrying...')
-                        # time.sleep(int(self.task["DELAY"]))
-                        # self.shipping()
-                else:
-                    logger.error(SITE,self.taskID,'Failed to get shipping page. Retrying...')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.shipping()
-    
-        else:
-            logger.error(SITE,self.taskID,'Failed to get shipping page. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.shipping()
-
-        self.session.headers = {}
-        self.session.headers = {
-            'accept': 'application/json, text/javascript, */*; q=0.01',
-            'accept-language': 'en-US,en;q=0.9',
-            'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'origin': 'https://www.slamjam.com',
-            'referer': 'https://www.slamjam.com/en_GB/checkout-begin?stage=shipping',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-origin',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.135 Safari/537.36',
-            'x-requested-with': 'XMLHttpRequest'
-        }
-        
-        payload = {
-            'firstName': profile["firstName"],
-            'lastName': profile["lastName"],
-            'address1': profile["house"] + " " + profile["addressOne"],
-            'address2': profile["addressTwo"],
-            'city': profile["city"],
-            'postalCode': profile["zip"],
-            'stateCode': self.stateID,
-            'countryCode': profile["countryCode"],
-            'phone': '',
-            'shipmentUUID': self.shipmentUUID,
-            'idAddress': 'new'
-        }
-        logger.prepare(SITE,self.taskID,'Retrieving shipping rates')
-        try:
-            shippingMethods = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/CheckoutShippingServices-UpdateShippingMethodsList',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.shipping()
-        
-        if shippingMethods:
-            if 'DDUser' in shippingMethods.url:
-                logger.info(SITE,self.taskID,'Challenge Found, Solving...')
-                self.cookie = loadCookie('SLAMJAM')["cookie"]
-                if self.cookie == 'empty':
-                    del self.session.cookies["datadome"]
-                    self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
-                    self.session.cookies["datadome"]  = self.cookie
-                else:
-                    del self.session.cookies["datadome"]
-                    self.session.cookies["datadome"]  = self.cookie
-                    self.session.proxies = self.cookie["proxy"]
-
-                self.shipping()
-            else:
-
-                if shippingMethods.status_code == 200:
-                    try:
-                        self.shippingMethodId = shippingMethods.json()["order"]["shipping"][0]["applicableShippingMethods"][0]["ID"]
-                        logger.warning(SITE,self.taskID,'Got shipping rate')
-                    except Exception as e:
-                        log.info(e)
-                        logger.error(SITE,self.taskID,'Failed to get shipping methods. Retrying...')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.shipping()
-                else:
-                    logger.error(SITE,self.taskID,'Failed to get shipping methods. Retrying...')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.shipping()
-
-        else:
-            logger.error(SITE,self.taskID,'Failed to get shipping methods. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.shipping()
-
-        payload = {
-            'originalShipmentUUID': self.csrfToken,
-            'shipmentUUID': self.shipmentUUID,
-            'shipmentSelector': 'new',
-            'dwfrm_shipping_shippingAddress_addressFields_firstName': profile["firstName"],
-            'dwfrm_shipping_shippingAddress_addressFields_lastName': profile["lastName"],
-            'dwfrm_shipping_shippingAddress_addressFields_states_country': profile["countryCode"],
-            'dwfrm_shipping_shippingAddress_addressFields_states_stateCode': self.stateID,
-            'dwfrm_shipping_shippingAddress_addressFields_city': profile["city"],
-            'dwfrm_shipping_shippingAddress_addressFields_states_postalCode': profile["zip"],
-            'dwfrm_shipping_shippingAddress_addressFields_address1': profile["house"] + " " + profile["addressOne"],
-            'dwfrm_shipping_shippingAddress_addressFields_address2': profile["addressTwo"],
-            'dwfrm_shipping_shippingAddress_addressFields_prefix': profile["phonePrefix"],
-            'dwfrm_shipping_shippingAddress_addressFields_phone': profile["phone"],
-            'dwfrm_shipping_shippingAddress_shippingMethodID': self.shippingMethodId,
-            'csrf_token': self.csrfToken,
-        }
-        logger.prepare(SITE,self.taskID,'Submitting shipping details...')
-        try:
-            shipping = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/CheckoutShippingServices-SubmitShipping',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.addToCart()
-        
-        try:
-            data = shipping.json()
-        except:
-            logger.error(SITE,self.taskID,'Failed to post shipping details. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.shipping()
-        
-        if shipping:
-            if 'DDUser' in shipping.url:
-                logger.info(SITE,self.taskID,'Challenge Found, Solving...')
-                self.cookie = loadCookie('SLAMJAM')["cookie"]
-                if self.cookie == 'empty':
-                    del self.session.cookies["datadome"]
-                    self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
-                    self.session.cookies["datadome"]  = self.cookie
-                else:
-                    del self.session.cookies["datadome"]
-                    self.session.cookies["datadome"]  = self.cookie
-                    self.session.proxies = self.cookie["proxy"]
-
-                self.shipping()
-            else:
-                if shipping.status_code == 200 and data:
-                    logger.warning(SITE,self.taskID,'Submitted shipping details')
-                    self.PayPalpayment()
-                else:
-                    logger.error(SITE,self.taskID,'Failed to submit shipping details. Retrying...')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.shipping()
-
-
-    def PayPalpayment(self):
-        logger.preare(SITE,self.taskID,'Submitting payment...')
-        profile = loadProfile(self.task["PROFILE"])
-        if profile == None:
-            logger.error(SITE,self.taskID,'Profile Not Found.')
-            time.sleep(10)
-            sys.exit()
-        payload = {
-            'addressSelector': self.shipmentUUID,
-            'dwfrm_billing_addressFields_firstName': profile["firstName"],
-            'dwfrm_billing_addressFields_lastName': profile["lastName"],
-            'dwfrm_billing_addressFields_states_country': profile["countryCode"],
-            'dwfrm_billing_addressFields_states_stateCode': self.stateID,
-            'dwfrm_billing_addressFields_city': profile["city"],
-            'dwfrm_billing_addressFields_states_postalCode': profile["zip"],
-            'dwfrm_billing_addressFields_address1': profile["house"] + " " + profile["addressOne"],
-            'dwfrm_billing_addressFields_address2': profile["addressTwo"],
-            'dwfrm_billing_paymentMethod': 'PayPal',
-            'dwfrm_billing_creditCardFields_email': profile["email"],
-            'dwfrm_billing_privacy': 'true',
-            'isPaypal': 'true',
-            'dwfrm_billing_paymentMethod': 'PayPal',
-            'dwfrm_billing_paymentMethod': 'CREDIT_CARD',
-            'dwfrm_billing_creditCardFields_cardType': '',
-            'dwfrm_billing_creditCardFields_adyenEncryptedData': '',
-            'dwfrm_billing_creditCardFields_selectedCardID': '',
-            'dwfrm_billing_creditCardFields_cardNumber': '',
-            'dwfrm_billing_creditCardFields_expirationMonth': '',
-            'dwfrm_billing_creditCardFields_expirationYear': '',
-            'csrf_token': self.csrfToken
-        }
-
-        try:
-            payment = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/CheckoutServices-SubmitPayment',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.PayPalpayment()
-        if payment:
-            if 'DDUser' in payment.url:
-                logger.info(SITE,self.taskID,'Challenge Found, Solving...')
-                self.cookie = loadCookie('SLAMJAM')["cookie"]
-                if self.cookie == 'empty':
-                    del self.session.cookies["datadome"]
-                    self.cookie = datadome.slamjam(self.session.proxies, self.taskID, 'return')
-                    self.session.cookies["datadome"]  = self.cookie
-                else:
-                    del self.session.cookies["datadome"]
-                    self.session.cookies["datadome"]  = self.cookie
-                    self.session.proxies = self.cookie["proxy"]
-                    
-                self.PayPalpayment()
-            else:
-                try:
-                    data = payment.json()
-                except:
-                    logger.error(SITE,self.taskID,'Failed to submit payment. Retrying...')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.PayPalpayment()
-        
-                if payment.status_code == 200 and data:
-                    self.end = time.time() - self.start
-                    logger.warning(SITE,self.taskID,'Successfully submitted payment')
-                    
-                    try:
-                        self.paypalToken = data["paypalProcessorResult"]["paypalToken"]
-                    except:
-                        logger.error(SITE,self.taskID,'Failed to submit payments. Retrying...')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.PayPalpayment()
-        
-                    paypalURL = 'https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token={}&useraction=commit'.format(self.paypalToken)
-                    logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
-                    updateConsoleTitle(False,True,SITE)
-                    
-                    url = storeCookies(paypalURL,self.session, self.productTitle, self.productImage, self.productPrice)
+            if response.status_code == 200 and status_code == "SUCCESS":
+                self.success("Added to cart!")
+                updateConsoleTitle(True,False,SITE)
+                return
             
-                    try:
-                        discord.success(
-                            webhook=loadSettings()["webhook"],
-                            site=SITE,
-                            url=url,
-                            image=self.productImage,
-                            title=self.productTitle,
-                            size=self.size,
-                            price=self.productPrice,
-                            paymentMethod='PayPal',
-                            profile=self.task["PROFILE"],
-                            product=self.task["PRODUCT"],
-                            proxy=self.session.proxies,
-                            speed=self.end
-                        )
-                        sendNotification(SITE,self.productTitle)
-                        while True:
-                            pass
-                    except:
-                        logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
-                    
-                else:
-                    logger.error(SITE,self.taskID,'Failed to submit payment. Retrying...')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.PayPalpayment()
+            else:
+                self.error(f"Failed to cart [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
 
-    def ccPayment(self):
-        logger.prepare(SITE,self.taskID,'Submitting payment...')
-        profile = loadProfile(self.task["PROFILE"])
-        if profile == None:
-            logger.error(SITE,self.taskID,'Profile Not Found.')
-            time.sleep(10)
-            sys.exit()
-        firstNumber = profile["card"]["cardNumber"]
-        if firstNumber == "3":
-            CARD_TYPE = 'American Express'
-        if firstNumber == "4":
-            CARD_TYPE = 'Visa'
-        if firstNumber == "5":
-            CARD_TYPE = 'Master Card'
-        if firstNumber == "6":
-            CARD_TYPE = 'Discover Card'
+    
+    def sendToDiscord(self):
+        while True:
+            
+            self.webhookData['proxy'] = self.session.proxies
 
-        LAST_4_CARD = profile["card"]["cardNumber"][-4:]
-        payload = {
-            'addressSelector': self.shipmentUUID,
-            'dwfrm_billing_addressFields_firstName': profile["firstName"],
-            'dwfrm_billing_addressFields_lastName': profile["lastName"],
-            'dwfrm_billing_addressFields_states_country': profile["countryCode"],
-            'dwfrm_billing_addressFields_states_stateCode': self.stateID,
-            'dwfrm_billing_addressFields_city': profile["city"],
-            'dwfrm_billing_addressFields_states_postalCode': profile["zip"],
-            'dwfrm_billing_addressFields_address1': profile["house"] + " " + profile["addressOne"],
-            'dwfrm_billing_addressFields_address2': profile["addressTwo"],
-            'dwfrm_billing_paymentMethod': 'CREDIT_CARD',
-            'dwfrm_billing_creditCardFields_email': profile["email"],
-            'dwfrm_billing_privacy': 'true',
-            'dwfrm_billing_paymentMethod': 'CREDIT_CARD',
-            'dwfrm_billing_creditCardFields_cardType': CARD_TYPE,
-            'dwfrm_billing_creditCardFields_adyenEncryptedData': '',
-            'dwfrm_billing_creditCardFields_selectedCardID': '',
-            'dwfrm_billing_creditCardFields_cardNumber': f'************{LAST_4_CARD}',
-            'dwfrm_billing_creditCardFields_expirationMonth': profile["card"]["cardMonth"],
-            'dwfrm_billing_creditCardFields_expirationYear': profile["card"]["cardYear"],
-            'csrf_token': self.csrfToken
-        }
-        try:
-            payment = self.session.post(f'https://www.slamjam.com/on/demandware.store/Sites-slamjam-Site/en_{self.region}/CheckoutServices-SubmitPayment',data=payload)
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.ccPayment()
+            sendNotification(SITE,self.webhookData['product'])
 
-
-        
-
-  
+            try:
+                Webhook.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.webhookData['url'],
+                    image=self.webhookData['image'],
+                    title=self.webhookData['product'],
+                    size=self.webhookData['size'],
+                    price=self.webhookData['price'],
+                    paymentMethod=self.task['PAYMENT'].strip().title(),
+                    product=self.webhookData['product_url'],
+                    profile=self.task["PROFILE"],
+                    proxy=self.webhookData['proxy'],
+                    speed=self.webhookData['speed']
+                )
+                self.secondary("Sent to discord!")
+                while True:
+                    pass
+            except:
+                self.alert("Failed to send webhook. Checkout here ==> {}".format(self.webhookData['url']))

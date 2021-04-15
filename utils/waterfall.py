@@ -56,9 +56,13 @@ class Waterfall:
         self.data = json.loads(data)
         self.delay = int(delay)
         self.s = scraper()
-        self.SITE = self.data['SITE']
+        self.SITE = self.data['SITE'].title()
         self.taskID = 'Waterfall'
-        self.s.proxies = loadProxy(self.data["PROXIES"],self.taskID,self.SITE)
+
+        if self.data['PROXIES'][0] == '':
+            pass
+        else:
+            self.s.proxies = loadProxy(self.data["PROXIES"][0],self.taskID,self.SITE)
 
         self.counter = 1
 

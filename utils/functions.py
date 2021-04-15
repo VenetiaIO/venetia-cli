@@ -13,6 +13,29 @@ import base64
 from pynotifier import Notification
 import uuid
 import csv
+import asyncio
+import sys
+
+if sys.platform == 'darwin':
+  from helheim.mac import helheim, isChallenge
+  from helheim.mac.exceptions import (
+    HelheimException,
+    HelheimSolveError,
+    HelheimRuntimeError,
+    HelheimSaaSError,
+    HelheimSaaSBalance,
+    HelheimVersion
+  )
+elif sys.platform != 'darwin':
+  from helheim.windows import helheim, isChallenge
+  from helheim.windows.exceptions import (
+    HelheimException,
+    HelheimSolveError,
+    HelheimRuntimeError,
+    HelheimSaaSError,
+    HelheimSaaSBalance,
+    HelheimVersion
+  )
 
 
 try:
@@ -22,38 +45,37 @@ except:
 
 from utils.logger import logger
 from utils.captcha import captcha
-from helheim import helheim
-from helheim.exceptions import (
-    HelheimException,
-    HelheimSolveError,
-    HelheimRuntimeError,
-    HelheimSaaSError,
-    HelheimSaaSBalance,
-    HelheimVersion
-)
+
 try:
   import win32console 
 except:
   pass
 
 def injection(session, response):
-  if session.is_New_IUAM_Challenge(response) \
-    or session.is_New_Captcha_Challenge(response) \
-    or session.is_BFM_Challenge(response):
-        return helheim('2044b982-151b-4fca-974d-ebad6fd10bec', session, response)
+  # if session.is_New_IUAM_Challenge(response) \
+  #   or session.is_New_Captcha_Challenge(response) \
+  #   or session.is_BFM_Challenge(response):
+  #       return helheim('2044b982-151b-4fca-974d-ebad6fd10bec', session, response)
+  # else:
+  #   return response
+  if isChallenge(response):
+      return helheim('2044b982-151b-4fca-974d-ebad6fd10bec', session, response)
   else:
-    return response
+      return response
 
 def scraper():
-  if loadSettings()["captcha"].lower() == "monster":
-    apiKey = loadSettings()["capMonster"]
+  settings = loadSettings()
+  if settings["captcha"].strip().lower() == "monster":
+    apiKey = settings["capMonster"]
     provider = 'capmonster'
   else:
-    apiKey = loadSettings()["2Captcha"]
+    apiKey = settings["2Captcha"]
     provider = '2captcha'
+    
   scraper = cloudscraper.create_scraper(
       requestPostHook=injection,
       interpreter='nodejs',
+      # session=session,
       browser={
           'browser': 'chrome',
           'mobile': False,
@@ -75,9 +97,10 @@ def footlocker_snare(url):
   except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
       time.sleep(3)
       footlocker_snare(url)
-  
   if response.status_code == 200:
     return response.text
+  else:
+    return ''
 
 def offspring_session(pid):
   return {
@@ -96,10 +119,6 @@ def offspring_session(pid):
 
 
 
-def loadSettings():
-    with open(f'./data/config.json') as settings:
-        settings = json.loads(settings.read())
-        return settings
 
 
 def loadProfile(profile):
@@ -120,11 +139,12 @@ def loadCheckouts():
   try:
     with open(f'./data/checkouts.json','r') as checkoutsRead:
       checkouts = json.loads(checkoutsRead.read())
-    return {
-      "total":len(checkouts),
-      "checkouts":checkouts
-    }
-  except:
+      return {
+        "total":len(checkouts),
+        "checkouts":checkouts
+      }
+  except Exception as e:
+    print(e)
     return {
       "total":0,
       "checkouts":[]
@@ -135,52 +155,100 @@ def updateCheckouts(product, site, size, price, image, monitor_input, checkout_u
     with open(f'./data/checkouts.json','r') as checkoutsRead:
       checkouts = json.loads(checkoutsRead.read())
 
-    checkouts.append({
-      "site":site,
-      "product":product,
-      "size":size,
-      "image":image,
-      "price":price,
-      "monitor_input":monitor_input,
-      "checkout_url":checkout_url
-    })
-    with open(f'./data/checkouts.json','w') as checkoutsDump:
-      json.dump(checkouts, checkoutsDump)
-  except:
-    pass
+      checkouts.append({
+        "site":site,
+        "product":product,
+        "size":size,
+        "image":image,
+        "price":price,
+        "monitor_input":monitor_input,
+        "checkout_url":checkout_url
+      })
+      with open('./data/checkouts.json','w') as output:
+        json.dump(checkouts, output)
+    
+    checkoutsRead.close()
+    output.close()
 
+  except Exception as e:
+    print(e)
+    pass
 
 def loadProxy(proxies,taskID, SITE):
     if proxies == "":
         return None
     elif proxies != "":
-        try:
-            with open(f'./proxies/{proxies}.txt', 'r') as proxyIn:
-                try:
-                    proxyInput = proxyIn.read().splitlines()
-                except:
-                    return None
-        except:
-            return None
-    
-        if len(proxyInput) == 0:
-            return None
-        
+      if '.txt' in proxies: pass
+      else: proxies = proxies + '.txt'
 
-        proxyList = [i for i in proxyInput]
-        p = random.choice(proxyList)
-        p = p.split(':')
 
-        try:
-            proxies = {
-                'https': f'http://{p[2]}:{p[3]}@{p[0]}:{p[1]}',
-            }
-        except:
-            proxies = {
-                'https': f'http://{p[0]}:{p[1]}'
-            }
-        # logger.info(SITE,taskID,'Proxy Loaded')
-        return proxies
+      try:
+          with open(f'./proxies/{proxies}', 'r') as proxyIn:
+              try:
+                  proxyInput = proxyIn.read().splitlines()
+              except:
+                  return None
+      except:
+          return None
+  
+      if len(proxyInput) == 0:
+          return None
+      
+
+      proxyList = [i for i in proxyInput]
+      p = random.choice(proxyList)
+      splitted = p.split(':')
+
+      if len(splitted) == 2:
+          proxy = {
+            'http':'http://{}'.format(splitted),
+            'https':'http://{}'.format(splitted)
+          }
+          return proxy
+      
+      elif len(splitted) == 4:
+          proxy = {
+            'http':'http://{}:{}@{}:{}'.format(splitted[2], splitted[3], splitted[0], splitted[1]),
+            'https':'http://{}:{}@{}:{}'.format(splitted[2], splitted[3], splitted[0], splitted[1])
+          }
+          return proxy
+      else:
+        return None
+
+def loadProxy2(proxies,taskID, SITE):
+    if proxies == "":
+        return None
+    elif proxies != "":
+      if '.txt' in proxies: pass
+      else: proxies = proxies + '.txt'
+
+
+      try:
+          with open(f'./proxies/{proxies}', 'r') as proxyIn:
+              try:
+                  proxyInput = proxyIn.read().splitlines()
+              except:
+                  return None
+      except:
+          return None
+  
+      if len(proxyInput) == 0:
+          return None
+      
+
+      proxyList = [i for i in proxyInput]
+      p = random.choice(proxyList)
+      splitted = p.split(':')
+
+      if len(splitted) == 2:
+          proxy = 'http://{}'.format(splitted)
+          return proxy
+      
+      elif len(splitted) == 4:
+          proxy = 'http://{}:{}@{}:{}'.format(splitted[2], splitted[3], splitted[0], splitted[1])
+          return proxy
+      else:
+        return None
 
 def createId(length):
     return ''.join(random.choice(string.digits) for i in range(length))
@@ -188,14 +256,22 @@ def createId(length):
 def randomString(length):
     return ''.join(random.choice(string.ascii_lowercase) for i in range(length))
 
+def loadSettings():
+  with open(f'./data/config.json') as settings:
+    settings = json.loads(settings.read())
+    return settings
+
+
 def getUser():
-    key = loadSettings()["key"]
-    headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
-    response = requests.get('https://venetiacli.io/api/v1/users/' + key,headers=headers)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
+  settings = loadSettings()
+
+  key = settings["key"]
+  headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
+  response = requests.get('https://venetiacli.io/api/v1/users/' + key,headers=headers)
+  if response.status_code == 200:
+      return response.json()
+  else:
+      return None
 
 
 def updateConsoleTitle(carted,checkedOut, SITE):
@@ -206,7 +282,7 @@ def updateConsoleTitle(carted,checkedOut, SITE):
           newCarted = int(carted) + 1
   
           checked = title.split('Checked Out: ')[1].split(' |')[0]
-          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(CONFIG.VERSION(),SITE.title(),newCarted,checked))
+          win32console.SetConsoleTitle("[{}] VenetiaCLI - {} | Carted: {} | Checked Out: {}".format(CONFIG.VERSION(),SITE.title(),newCarted,checked))
         except Exception as e:
           pass
     if checkedOut == True:
@@ -216,7 +292,7 @@ def updateConsoleTitle(carted,checkedOut, SITE):
           newChecked = int(checked) + 1
   
           carted = title.split('Carted: ')[1].split(' |')[0]
-          win32console.SetConsoleTitle("[{}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(CONFIG.VERSION(),SITE.title(),carted,newChecked))
+          win32console.SetConsoleTitle("[{}] VenetiaCLI - {} | Carted: {} | Checked Out: {}".format(CONFIG.VERSION(),SITE.title(),carted,newChecked))
         except Exception as e:
           pass
 
@@ -238,26 +314,30 @@ def loadCookie(SITE):
 
 
 def loadToken(SITE):
-    try:
-        with open('./data/captcha/tokens.json','r') as tokens:
-            tokens = json.loads(tokens.read())
-            if len(tokens[SITE]) > 0:
-                t = tokens[SITE][0]
-                tokens[SITE].pop(0)
-                with open('./data/captcha/tokens.json','w') as output:
-                    json.dump(tokens,output)
-    
-                return t["token"]
+  try:
+    with open('./data/captcha/tokens.json','r') as tokens:
+
+        tokens = json.loads(tokens.read())
+
+        if len(tokens[SITE]) > 0:
+            t = tokens[SITE][0]
+            tokens[SITE].pop(0)
             
-            else:
-                return 'empty'
-    except:
-        return 'empty'
+            with open('./data/captcha/tokens.json','w') as output:
+                json.dump(tokens,output)
+
+            return t["token"]
+        
+        else:
+            return 'empty'
+  except:
+    return 'empty'
 
 
 def sendNotification(site, text):
     try:
-        noise = loadSettings()["checkoutNoise"]
+        settings = loadSettings()
+        noise = settings["checkoutNoise"]
     except:
         noise = ""
     if noise.upper() == "Y" or noise.upper() == "":
@@ -305,10 +385,11 @@ def birthday():
     }
 
 
-def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
+def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice, jar):
     cookieList = []
     cookieString = ''
-    for c in session.cookies:
+    if jar:
+      for c in session:
             try:
                 # print(f'{c.name} | {c.domain}')
                 if 'paypal'not in c.domain:
@@ -322,6 +403,21 @@ def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
                         
             except Exception as e:
                 pass
+    else:
+      for c in session.cookies:
+              try:
+                  # print(f'{c.name} | {c.domain}')
+                  if 'paypal'not in c.domain:
+                      # url = c.domain.split('.')[1]
+                      cookieList.append(
+                          {"name": c.name, "value": c.value, "domain": c.domain, "path": c.path})
+                      cookieString += '{}##{}##{}##{}+++'.format(c.name,c.value,c.domain,c.path)
+                  # if c.name.lower() in ['session','checkout','schuhcookiecheckoutsession']:
+                    # cookieList.append(
+                          # {"name": c.name, "value": c.value, "domain": c.domain, "path": c.path})
+                          
+              except Exception as e:
+                  pass
     try:
         encoded = base64.b64encode(bytes(str(cookieString), 'utf-8'))
         encoded = str(encoded, 'utf8')
@@ -335,12 +431,16 @@ def storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice):
         url = 'https://venetiacli.io/checkout/retrieve/?id={}'.format(urlId)
         return url
     except Exception as e:
-        storeCookies(url,session)
+      storeCookies(checkoutURL,session, prodTitle, prodImage, prodPrice)
     
 
 def b64Decode(text):
   return base64.b64decode(text)
 
+def b64Encode(text):
+  encoded = base64.b64encode(bytes(str(text), 'utf-8'))
+  encoded = str(encoded, 'utf8')
+  return encoded
 
 def randomUA():
     return random.choice(userAgents)["ua"]

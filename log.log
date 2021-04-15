@@ -1,0 +1,1016 @@
+23:55:38,254 root ERROR write() argument must be str, not dict
+23:55:41,780 root ERROR write() argument must be str, not dict
+23:55:44,140 root ERROR write() argument must be str, not dict
+23:55:46,311 root ERROR write() argument must be str, not dict
+23:55:48,217 root ERROR write() argument must be str, not dict
+23:59:40,933 root ERROR ("Connection broken: InvalidChunkLength(got length b'', 0 bytes read)", InvalidChunkLength(got length b'', 0 bytes read))
+00:02:52,856 root ERROR Unterminated string starting at: line 1 column 13257 (char 13256)
+08:08:29,887 root ERROR Expecting value: line 2 column 1 (char 1)
+08:08:31,606 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952106247 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 503 Service Unavailable')))
+08:08:32,635 root ERROR Expecting value: line 2 column 1 (char 1)
+08:08:35,303 root ERROR Expecting value: line 2 column 1 (char 1)
+08:08:37,959 root ERROR Expecting value: line 2 column 1 (char 1)
+08:08:40,645 root ERROR Expecting value: line 2 column 1 (char 1)
+08:08:43,369 root ERROR Expecting value: line 2 column 1 (char 1)
+08:08:46,68 root ERROR Expecting value: line 2 column 1 (char 1)
+08:08:49,958 root ERROR Expecting value: line 2 column 1 (char 1)
+08:08:50,84 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952126875 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:08:50,164 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952126953 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:08:50,180 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952126958 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:08:50,195 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952126985 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:08:50,392 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952127173 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:08:52,672 root ERROR Expecting value: line 2 column 1 (char 1)
+08:08:55,468 root ERROR Expecting value: line 2 column 1 (char 1)
+08:08:57,108 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952133876 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:08:57,428 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952134215 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:08:58,243 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:01,125 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:03,821 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:05,584 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952143995 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:09:06,540 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:09,194 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:11,946 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:14,692 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:17,366 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:20,49 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:22,709 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:25,391 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:26,79 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952162862 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:09:26,90 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952162870 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:09:26,125 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952156405 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:09:26,168 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952162947 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:09:26,275 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952163060 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:09:27,314 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952163056 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:09:28,274 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:29,175 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:30,990 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:32,55 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:33,660 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:34,921 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:36,362 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:37,931 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:39,395 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:40,785 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:42,47 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:44,739 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:44,926 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:47,455 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:47,705 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:50,135 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:50,503 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:52,855 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:53,382 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:55,539 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:56,212 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:58,293 root ERROR Expecting value: line 2 column 1 (char 1)
+08:09:59,42 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:01,308 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:01,845 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:03,991 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:04,661 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:06,649 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:07,492 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:09,349 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:10,339 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:12,23 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:13,121 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:14,704 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:15,950 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:17,359 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:18,728 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:20,57 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:20,863 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952125032 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Bad Gateway')))
+08:10:21,541 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:22,747 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:24,630 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:24,749 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952219682 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 503 Service Unavailable')))
+08:10:25,452 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:26,164 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:27,472 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:28,217 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:30,0 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:30,232 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952106197 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:10:30,260 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:31,214 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:33,93 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:33,898 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:36,599 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:36,986 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:39,474 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:39,658 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:42,291 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:42,389 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:45,89 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:45,161 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:47,888 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:48,53 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:50,578 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:50,882 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:52,98 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952230357 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Bad Gateway')))
+08:10:53,279 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:53,736 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:56,115 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:56,543 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:59,428 root ERROR Expecting value: line 2 column 1 (char 1)
+08:10:59,905 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:02,143 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:03,550 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:04,825 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:06,455 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:07,506 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:09,295 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:10,242 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:12,127 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:12,947 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:14,973 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:15,685 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:17,828 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:18,377 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:20,628 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:21,176 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:23,475 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:23,841 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:26,331 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:26,639 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:29,990 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:30,121 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:32,771 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:32,941 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:35,494 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:35,801 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:38,132 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:38,639 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:40,816 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:41,450 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:43,507 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:44,319 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:46,788 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:47,416 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:49,451 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:50,226 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:52,189 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:53,60 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:54,983 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:55,879 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:57,739 root ERROR Expecting value: line 2 column 1 (char 1)
+08:11:58,685 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:00,418 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:01,502 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:03,111 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:04,355 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:05,789 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:07,169 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:08,482 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:09,985 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:11,297 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:14,367 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:14,423 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:17,110 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:17,183 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:19,836 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:19,974 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:22,513 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:22,795 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:25,363 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:25,599 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:28,86 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:28,455 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:30,767 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:31,275 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:33,501 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:34,82 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:37,31 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:38,336 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:39,757 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:41,279 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:42,448 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:44,288 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:45,158 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:47,132 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:47,234 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952270494 (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+08:12:47,866 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:50,817 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:50,948 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:53,628 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:53,726 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:56,458 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:56,525 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:59,229 root ERROR Expecting value: line 2 column 1 (char 1)
+08:12:59,268 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:01,914 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:02,100 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:04,638 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:04,922 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:05,968 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952123827 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:13:07,444 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:07,744 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:10,147 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:10,316 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952368706 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Bad Gateway')))
+08:13:10,605 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:12,785 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:14,89 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:16,604 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:16,999 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:19,229 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:20,507 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:21,976 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:23,397 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:24,677 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:24,773 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952320796 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:13:24,773 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952320400 (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+08:13:26,197 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:28,336 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:29,791 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952322718 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:13:29,794 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:31,108 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:32,706 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:33,943 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:35,524 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:36,618 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:38,396 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:39,593 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:41,344 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:42,307 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:44,161 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:44,973 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:47,129 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:47,725 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:49,956 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:50,401 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:52,872 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:53,77 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:55,699 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:55,817 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:58,451 root ERROR Expecting value: line 2 column 1 (char 1)
+08:13:58,636 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:01,139 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:01,442 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:03,629 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952442766 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:14:04,2 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:04,534 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:06,708 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:07,396 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:09,438 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:10,244 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:12,152 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:13,77 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:16,62 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:16,70 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:18,826 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:18,878 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:21,536 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:21,706 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:24,638 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:24,776 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:27,800 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:28,22 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:30,522 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:30,688 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952406945 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:14:30,857 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:32,788 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952166087 (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+08:14:33,288 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:33,727 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:35,966 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:36,588 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:40,243 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:41,567 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:42,937 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:44,470 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:45,644 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:48,288 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:49,580 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:50,997 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:52,530 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:53,684 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:55,341 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:56,417 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:58,230 root ERROR Expecting value: line 2 column 1 (char 1)
+08:14:59,157 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:01,57 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:03,976 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:04,690 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:06,721 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:07,568 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:09,419 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:10,398 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:12,105 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:13,221 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:14,831 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:16,844 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:17,524 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:19,700 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:20,249 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:22,528 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:22,938 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:25,414 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:25,626 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:28,282 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:28,412 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:31,85 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:31,144 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:33,786 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:34,182 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:36,540 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:37,5 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:39,305 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:39,885 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:42,30 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:42,803 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:44,677 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:45,631 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:47,355 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:48,441 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:50,33 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:51,281 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:52,742 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:54,191 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:55,421 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:57,34 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:58,151 root ERROR Expecting value: line 2 column 1 (char 1)
+08:15:59,880 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:00,832 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:02,956 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:03,520 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:05,778 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:06,250 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:08,631 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:08,967 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:11,426 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:11,696 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:14,260 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:14,374 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:17,153 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:17,743 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:19,971 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:20,456 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:22,926 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:23,165 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:25,789 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:25,874 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:28,559 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:28,660 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:31,366 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:31,475 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:34,368 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:34,389 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:37,139 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:37,267 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:39,793 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:40,131 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:42,463 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:42,994 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:45,149 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:45,850 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:47,828 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:48,751 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:50,508 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:51,612 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:53,300 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:54,447 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:55,971 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:57,320 root ERROR Expecting value: line 2 column 1 (char 1)
+08:16:58,678 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:00,312 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:01,362 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:03,123 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:04,140 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:05,959 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:06,842 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:08,764 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:09,530 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:11,880 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:12,222 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:14,706 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:14,954 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:17,557 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:17,654 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:21,78 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:21,81 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:23,927 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:24,23 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:26,618 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:26,897 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:29,327 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:29,803 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:31,998 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:32,608 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:34,701 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:35,424 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:37,373 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:38,233 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:40,9 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:41,53 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:42,692 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:43,872 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:45,344 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:46,685 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:48,629 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:49,484 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:51,424 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:52,374 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:54,202 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:55,213 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:56,974 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:58,53 root ERROR Expecting value: line 2 column 1 (char 1)
+08:17:59,744 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:00,775 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952380356 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 504 Gateway Time-out')))
+08:18:00,872 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:02,750 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:03,706 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:05,426 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:06,811 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:08,254 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:09,603 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:11,20 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:12,492 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:13,851 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:15,437 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:16,652 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:18,289 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:19,427 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:21,560 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:22,175 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:24,472 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:24,863 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:27,276 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:27,522 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:30,86 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:30,517 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:32,888 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:33,281 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:35,680 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:36,33 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:37,143 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952411623 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:18:38,528 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:39,136 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:41,306 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:41,984 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:44,109 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:44,845 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:47,275 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:47,873 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:50,85 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:50,829 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:53,90 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:53,638 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:56,688 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:57,690 root ERROR Expecting value: line 2 column 1 (char 1)
+08:18:59,671 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:00,558 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:02,560 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:03,495 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:05,362 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:07,138 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:08,158 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:10,100 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:11,767 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:13,36 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:14,548 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:16,90 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:17,371 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:18,952 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:20,217 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:22,310 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:25,167 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:26,297 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952762618 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:19:26,297 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952762632 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:19:26,300 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952762250 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:19:26,344 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952763130 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:19:26,790 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952763550 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 407 Proxy Authentication Required')))
+08:19:28,519 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:31,510 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:34,707 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:37,774 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:40,499 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:43,311 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:46,423 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:49,187 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:52,37 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:54,968 root ERROR Expecting value: line 2 column 1 (char 1)
+08:19:57,897 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:01,6 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:03,925 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:07,20 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:09,834 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:12,723 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:15,538 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:18,530 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:21,370 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:24,243 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:27,217 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:30,542 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:33,341 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:36,563 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:40,504 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:43,236 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:46,261 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:49,314 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:52,385 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:55,357 root ERROR Expecting value: line 2 column 1 (char 1)
+08:20:58,206 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:00,440 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952860218 (Caused by ProxyError('Cannot connect to proxy.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None)))
+08:21:00,765 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952859539 (Caused by ProxyError('Cannot connect to proxy.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None)))
+08:21:01,63 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:04,98 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:07,34 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:10,209 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:11,34 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952869421 (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+08:21:13,204 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:16,86 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:19,143 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:20,992 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952859942 (Caused by ProxyError('Cannot connect to proxy.', NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000012DE19E5B20>: Failed to establish a new connection: [WinError 10060] A connection attempt failed because the connected party did not properly respond after a period of time, or established connection failed because connected host has failed to respond')))
+08:21:22,239 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:25,260 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:28,249 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:32,690 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:35,551 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:38,506 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:41,882 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:45,32 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:48,32 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:51,262 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:54,144 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:57,122 root ERROR Expecting value: line 2 column 1 (char 1)
+08:21:59,957 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:02,803 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:05,791 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:08,766 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:11,617 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:14,536 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:17,507 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:20,386 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:23,261 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:26,411 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:27,15 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952640489 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:22:29,356 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:32,120 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:34,871 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:38,47 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:41,111 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:44,213 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:47,346 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:50,194 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:53,197 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:56,416 root ERROR Expecting value: line 2 column 1 (char 1)
+08:22:59,161 root ERROR Expecting value: line 2 column 1 (char 1)
+08:23:02,321 root ERROR Expecting value: line 2 column 1 (char 1)
+08:23:05,492 root ERROR Expecting value: line 2 column 1 (char 1)
+08:23:08,583 root ERROR Expecting value: line 2 column 1 (char 1)
+08:23:11,493 root ERROR Expecting value: line 2 column 1 (char 1)
+08:23:14,266 root ERROR Expecting value: line 2 column 1 (char 1)
+08:23:19,885 root ERROR Expecting value: line 2 column 1 (char 1)
+08:23:28,474 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952702811 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:24:03,450 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952737735 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+08:25:22,363 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/316701629004?timestamp=1617952814841 (Caused by ProxyError('Cannot connect to proxy.', OSError(0, 'Error')))
+20:12:35,45 root ERROR Expecting value: line 2 column 1 (char 1)
+20:12:37,178 root ERROR Expecting value: line 2 column 1 (char 1)
+20:12:39,232 root ERROR Expecting value: line 2 column 1 (char 1)
+20:12:41,360 root ERROR Expecting value: line 2 column 1 (char 1)
+20:12:43,397 root ERROR Expecting value: line 2 column 1 (char 1)
+20:12:45,774 root ERROR Expecting value: line 2 column 1 (char 1)
+20:16:52,411 root ERROR RequestFailed: Get "https://www.jdsports.co.uk/product/-/16117688/stock/?_=1618082192": net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
+20:16:52,421 root ERROR RequestFailed: Get "https://www.jdsports.co.uk/product/-/16117688/stock/?_=1618082192": net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
+20:16:52,457 root ERROR RequestFailed: Get "https://www.jdsports.co.uk/product/-/16117688/stock/?_=1618082192": context deadline exceeded
+20:16:52,476 root ERROR RequestFailed: Get "https://www.jdsports.co.uk/product/-/16117688/stock/?_=1618082192": context deadline exceeded
+17:55:57,257 root ERROR RequestFailed: Get "https://www.paypal.com/cgi-bin/webscr?useraction=commit&cmd=_express-checkout&token=EC-0JA24422W52262105": unexpected EOF
+17:56:06,143 root ERROR RequestFailed: Get "https://www.paypal.com/cgi-bin/webscr?useraction=commit&cmd=_express-checkout&token=EC-3M292917M38412035": unexpected EOF
+17:58:40,455 root ERROR RequestFailed: Get "https://www.paypal.com/cgi-bin/webscr?useraction=commit&cmd=_express-checkout&token=EC-2WB16948WJ854433D": unexpected EOF
+19:37:50,340 root ERROR list index out of range
+19:37:53,719 root ERROR list index out of range
+12:28:59,898 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:29:30,127 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:29:35,900 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:30:00,143 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:30:31,427 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:31:01,291 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:31:03,297 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:32:01,62 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:32:31,481 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:32:59,894 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:33:35,509 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:33:53,742 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:34:21,289 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:34:48,815 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:35:38,744 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:35:59,93 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 669, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:37:53,354 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 672, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:38:29,339 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 673, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:38:55,425 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 673, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:39:01,744 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 673, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:39:34,168 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 673, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:40:31,10 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 673, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:41:04,679 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 673, in captcha_main_route
+    types.push(captcha_configs[a.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+12:42:23,848 main ERROR Exception on /captcha [GET]
+Traceback (most recent call last):
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 2447, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1952, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1821, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\_compat.py", line 39, in reraise
+    raise value
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1950, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\Charlie Bottomley\AppData\Local\Programs\Python\Python38\lib\site-packages\flask\app.py", line 1936, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "main.py", line 672, in captcha_main_route
+    types.push(captcha_configs[x.upper()]['type'])
+AttributeError: 'list' object has no attribute 'push'
+17:12:22,283 root ERROR Unterminated string starting at: line 1 column 4727 (char 4726)
+17:12:22,420 root ERROR Unterminated string starting at: line 1 column 4727 (char 4726)
+17:12:23,38 root ERROR Unterminated string starting at: line 1 column 4727 (char 4726)
+17:12:23,938 root ERROR Unterminated string starting at: line 1 column 4727 (char 4726)
+17:12:24,407 root ERROR Unterminated string starting at: line 1 column 4727 (char 4726)
+17:12:24,566 root ERROR Unterminated string starting at: line 1 column 4727 (char 4726)
+17:12:25,1 root ERROR Unterminated string starting at: line 1 column 4727 (char 4726)
+17:12:25,2 root ERROR Unterminated string starting at: line 1 column 4727 (char 4726)
+17:12:26,57 root ERROR Expecting value: line 1 column 1 (char 0)
+17:12:26,933 root ERROR ('Connection broken: IncompleteRead(0 bytes read, 1786 more expected)', IncompleteRead(0 bytes read, 1786 more expected))
+17:12:29,20 root ERROR ('Connection broken: IncompleteRead(0 bytes read, 1790 more expected)', IncompleteRead(0 bytes read, 1790 more expected))
+17:12:29,540 root ERROR ('Connection broken: IncompleteRead(0 bytes read, 1816 more expected)', IncompleteRead(0 bytes read, 1816 more expected))
+17:12:42,611 root ERROR Expecting value: line 2 column 1 (char 1)
+17:13:04,137 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/users/carts/current/entries?timestamp=1618416782922 (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+17:13:22,84 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/315345250302?timestamp=1618416740990 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Bad Gateway')))
+17:13:25,878 root ERROR HTTPSConnectionPool(host='www.footlocker.co.uk', port=443): Max retries exceeded with url: /api/products/pdp/315345250302?timestamp=1618416741241 (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 502 Bad Gateway')))
+17:34:49,522 root ERROR expected string or bytes-like object
+17:34:50,538 root ERROR expected string or bytes-like object
+17:34:51,545 root ERROR expected string or bytes-like object
+17:34:52,559 root ERROR expected string or bytes-like object
+17:34:53,571 root ERROR expected string or bytes-like object
+17:34:54,582 root ERROR expected string or bytes-like object
+17:34:55,590 root ERROR expected string or bytes-like object
+17:34:56,610 root ERROR expected string or bytes-like object
+17:35:12,363 root ERROR expected string or bytes-like object
+17:35:13,383 root ERROR expected string or bytes-like object
+17:35:14,392 root ERROR expected string or bytes-like object
+18:33:03,711 root ERROR HTTPSConnectionPool(host='www.converse.com', port=443): Max retries exceeded with url: /it/en/regular/162050MP.html (Caused by ProxyError('Cannot connect to proxy.', RemoteDisconnected('Remote end closed connection without response')))
+18:38:05,195 root ERROR HTTPSConnectionPool(host='www.converse.com', port=443): Max retries exceeded with url: /it/en/regular/162050MP.html (Caused by ProxyError('Cannot connect to proxy.', OSError('Tunnel connection failed: 504 Gateway Time-out')))

@@ -15,7 +15,7 @@ def get_task(SITE,taskID,color):
     x = datetime.datetime.now().strftime('%Y.%m.%d | %H:%M:%S.%f')
     #thread = threading.currentThread().getName()
     # status = '[{}{}{}{}{:<12}{}'.format(Fore.CYAN + Style.BRIGHT + x, Fore.WHITE + '][ ', Fore.YELLOW + taskID, Fore.WHITE + ' ][ ',Fore.WHITE + SITE.title(), Fore.WHITE + ' ]')
-    status = '[{}{}{}{}{:<10}{}'.format(Fore.CYAN + Style.BRIGHT + x, Fore.WHITE + ']' + color + '[ ', color + taskID, ' ][ ', SITE.title(), ' ]')
+    status = '[{}{}{}{}{:<10}{}'.format(Fore.CYAN + Style.BRIGHT + x, Fore.WHITE + ']' + color + '[ ', color + taskID, ' ][ ', SITE, ' ]')
     return status
 
     # 10:35:56.191801
@@ -123,6 +123,16 @@ class logger:
 
     @staticmethod
     def menu(site,taskID,message):
+        lock.acquire()
+        try:
+            #print('{} {}'.format(get_task(site,taskID), f'{message}\n'))
+            return '{} {}'.format(get_task(site.title(),taskID,Fore.WHITE), message)
+            # sys.stdout.flush()
+        finally:
+            lock.release()
+
+    @staticmethod
+    def menu2(site,taskID,message):
         lock.acquire()
         try:
             #print('{} {}'.format(get_task(site,taskID), f'{message}\n'))
