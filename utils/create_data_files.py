@@ -9,6 +9,12 @@ def execute():
     except:
         pass
 
+    try:
+        os.mkdir('proxies')
+    except:
+        pass
+
+
     #check site folders
     try:
         for k in CONFIG.sites.keys():
@@ -25,14 +31,14 @@ def execute():
                 except IOError as e:
                     print("Creating tasks.csv for {}".format('footlocker'))
                     with open('./{}/tasks.csv'.format('footlocker'),'w') as tasks:
-                        tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT')
+                        tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,PROXIES')
 
-                try:
-                    f = open('./{}/proxies.txt'.format('footlocker'))
-                    f.readlines()
-                except IOError as e:
-                    print("Creating proxies.txt for {}".format('footlocker'))
-                    open('./{}/proxies.txt'.format('footlocker'),'w')
+                # try:
+                #     f = open('./{}/proxies.txt'.format('footlocker'))
+                #     f.readlines()
+                # except IOError as e:
+                #     print("Creating proxies.txt for {}".format('footlocker'))
+                #     open('./{}/proxies.txt'.format('footlocker'),'w')
 
                 # try:
                     # f = open('./footlocker/tasks.csv')
@@ -68,14 +74,14 @@ def execute():
                 except IOError as e:
                     print("Creating tasks.csv for {}".format(k.lower()))
                     with open('./{}/tasks.csv'.format(k.lower()),'w') as tasks:
-                        tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT')
+                        tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,PROXIES')
 
-                try:
-                    f = open('./{}/proxies.txt'.format(k.lower()))
-                    f.readlines()
-                except IOError as e:
-                    print("Creating proxies.txt for {}".format(k.lower()))
-                    open('./{}/proxies.txt'.format(k.lower()),'w')
+                # try:
+                #     f = open('./{}/proxies.txt'.format(k.lower()))
+                #     f.readlines()
+                # except IOError as e:
+                #     print("Creating proxies.txt for {}".format(k.lower()))
+                #     open('./{}/proxies.txt'.format(k.lower()),'w')
 
     
 
@@ -137,32 +143,46 @@ def execute():
 
 
     #check datadome.json
-    try:
-        f = open('./data/cookies/datadome.json')
-        f.readlines()
-    except IOError:
-        print('Creating datadome.json')
-        datadomeFile = {}
-        for k in CONFIG.sites.keys():
-            datadomeFile[k.upper()] = []
+    # try:
+    #     f = open('./data/cookies/datadome.json')
+    #     f.readlines()
+    # except IOError:
+    #     print('Creating datadome.json')
+    #     datadomeFile = {}
+    #     for k in CONFIG.sites.keys():
+    #         datadomeFile[k.upper()] = []
 
-        try:
-            os.mkdir('data/cookies')
-        except:
-            pass
-        with open('./data/cookies/datadome.json','w') as dd:
-            json.dump(datadomeFile, dd)
+    #     try:
+    #         os.mkdir('data/cookies')
+    #     except:
+    #         pass
+    #     with open('./data/cookies/datadome.json','w') as dd:
+    #         json.dump(datadomeFile, dd)
 
 
     #check tokens.json
     try:
-        f = open('./data/captcha/tokens.json')
-        f.readlines()
+        with open('./data/captcha/tokens.json', 'r') as f:
+            jsontokens = json.loads(f.read())
+            current = []
+            required = []
+            for k in jsontokens:
+                current.append(k.upper())
+            for k in CONFIG.captcha_configs:
+                if CONFIG.captcha_configs[k]['hasCaptcha']:
+                    required.append(k.upper())
+            
+            if current != required:
+                raise IOError
+            else:
+                pass
+
     except IOError:
-        print('Creating tokens.json')
+        print('Creating/Updating tokens.json')
         tokensFile = {}
-        for k in CONFIG.sites.keys():
-            tokensFile[k.upper()] = []
+        for k in CONFIG.captcha_configs:
+            if CONFIG.captcha_configs[k]['hasCaptcha']:
+                tokensFile[k.upper()] = []
             
         try:
             os.mkdir('data/captcha')

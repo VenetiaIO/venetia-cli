@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 from utils.captcha import captcha
 from utils.logger import logger
-from utils.webhook import discord
+from utils.webhook import Webhook
 from utils.functions import (loadProxy,loadProfile,loadSettings, scraper)
 
 
@@ -46,6 +46,7 @@ class ACCOUNTS:
             getLogin = session.get('https://www.holypopstore.com/')
         except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
             return None
+
         if getLogin.status_code == 200:
             captchaResponse = captcha.Hiddenv2(sitekey,'https://www.holypopstore.com',proxies,SITE,taskID)
 
@@ -128,7 +129,7 @@ class ACCOUNTS:
                     return None
 
                 logger.success(SITE,taskID,'Address Added!')
-                discord.accountMade(
+                Webhook.accountMade(
                     webhook=loadSettings()["webhook"],
                     site=SITE,
                     first=customer["first"],
@@ -190,11 +191,14 @@ class ACCOUNTS:
 
             profile = loadProfile(profile)
 
-            soup = BeautifulSoup(prodirect_data,"html.parser")
-            options = soup.find_all("option")
-            for s in options:
-                if str(s.text).lower() == profile["country"].lower():
-                    countryId = s["value"]
+            try:
+                soup = BeautifulSoup(prodirect_data,"html.parser")
+                options = soup.find_all("option")
+                for s in options:
+                    if str(s.text).lower() == profile["country"].lower():
+                        countryId = s["value"]
+            except:
+                return None
 
             
             form2 = {
@@ -224,7 +228,7 @@ class ACCOUNTS:
                 return None
             if addAddress.status_code == 200:
                 logger.success(SITE,taskID,'Address Added!')
-                discord.accountMade(
+                Webhook.accountMade(
                     webhook=loadSettings()["webhook"],
                     site=SITE,
                     first=customer["first"],
@@ -303,7 +307,7 @@ class ACCOUNTS:
 
         if formPost.status_code in [200,302]:
             logger.success(SITE,taskID,'Account Created | ' + customer["email"])
-            discord.accountMade(
+            Webhook.accountMade(
                 webhook=loadSettings()["webhook"],
                 site=SITE,
                 first=customer["first"],
@@ -394,7 +398,7 @@ class ACCOUNTS:
 
         if response.status_code in [200,302]:
             logger.success(SITE,taskID,'Account Created | ' + customer["email"])
-            discord.accountMade(
+            Webhook.accountMade(
                 webhook=loadSettings()["webhook"],
                 site=SITE,
                 first=customer["first"],
@@ -463,7 +467,7 @@ class ACCOUNTS:
 
         if response.status_code in [200,302]:
             logger.success(SITE,taskID,'Account Created | ' + customer["email"])
-            discord.accountMade(
+            Webhook.accountMade(
                 webhook=loadSettings()["webhook"],
                 site=SITE,
                 first=customer["first"],
@@ -536,7 +540,7 @@ class ACCOUNTS:
 
         if response.status_code in [200,302]:
             logger.success(SITE,taskID,'Account Created | ' + customer["email"])
-            discord.accountMade(
+            Webhook.accountMade(
                 webhook=loadSettings()["webhook"],
                 site=SITE,
                 first=customer["first"],
@@ -614,7 +618,7 @@ class ACCOUNTS:
 
         if response.status_code in [200,302,201]:
             logger.success(SITE,taskID,'Account Created | ' + customer["email"])
-            discord.accountMade(
+            Webhook.accountMade(
                 webhook=loadSettings()["webhook"],
                 site=SITE,
                 first=customer["first"],

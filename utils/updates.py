@@ -2,6 +2,8 @@ import requests
 import shutil
 import os
 import sys
+from colorama import Fore, Back, Style, init
+init()
 
 class Updater:
     @staticmethod
@@ -23,6 +25,22 @@ class Updater:
                 name = file.split('.exe')[0]
                 os.rename(file, f'{name}_old.exe')
         response = requests.get('https://venetiacli.io/venetia-cli-latest/download',stream=True)
+        total_length = response.headers.get('content-length')
+
+        dl = 0
+        total_length = int(total_length)
+        for data in response.iter_content(chunk_size=4096):
+            dl += len(data)
+            done = int(50 * dl / total_length)
+            sys.stdout.write( Fore.YELLOW+ Style.DIM +"\rUpdating: {} [{}] {}".format(
+                str(int((int(dl) / int(total_length)) * 100)) + '%',
+                '=' * done + '.' * (50 - done),
+                '{}/{}'.format(str(dl),str(total_length)) 
+            ))
+            sys.stdout.flush()
+
+        sys.stdout.write('\n')
+
         with open(f'venetiaCLI.exe', 'wb') as f:
             shutil.copyfileobj(response.raw, f)
 

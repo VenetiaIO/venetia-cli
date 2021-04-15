@@ -7,25 +7,45 @@ import sys
 import time
 import re
 import json
+import os
 import base64
-import string
 import cloudscraper
+import string
 from urllib3.exceptions import HTTPError
 import csv
+import tls as client
+from requests_toolbelt import MultipartEncoder
 
-SITE = 'TITOLO'
-
-from utils.logger import logger
 from utils.captcha import captcha
-from utils.webhook import discord
+from utils.logger import logger
+from utils.webhook import Webhook
 from utils.log import log
 from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, scraper)
+import utils.config as config
 
+_SITE_ = 'TITOLO'
+SITE = 'Titolo'
 class TITOLO:
+    def success(self,message):
+        logger.success(SITE,self.taskID,message)
+    def error(self,message):
+        logger.error(SITE,self.taskID,message)
+    def prepare(self,message):
+        logger.prepare(SITE,self.taskID,message)
+    def warning(self,message):
+        logger.warning(SITE,self.taskID,message)
+    def info(self,message):
+        logger.info(SITE,self.taskID,message)
+    def secondary(self,message):
+        logger.secondary(SITE,self.taskID,message)
+    def alert(self,message):
+        logger.alert(SITE,self.taskID,message)
+
+
     def task_checker(self):
         originalTask = self.task
         while True:
-            with open('./{}/tasks.csv'.format(SITE.lower()),'r') as csvFile:
+            with open('./{}/tasks.csv'.format(_SITE_.lower()),'r') as csvFile:
                 csv_reader = csv.DictReader(csvFile)
                 row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
                 self.task = row[0]
@@ -34,540 +54,749 @@ class TITOLO:
                     self.task['ACCOUNT PASSWORD'] = originalTask['ACCOUNT PASSWORD']
                 except:
                     pass
-                self.task['PROXIES'] = 'proxies'
                 csvFile.close()
+
             time.sleep(2)
 
-    def __init__(self,task,taskName,rowNumber):
+    def __init__(self, task, taskName, rowNumber):
         self.task = task
         self.taskID = taskName
-
-        twoCap = loadSettings()["2Captcha"]
-        self.session = scraper()
-        self.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-        self.session.proxies = self.proxies
         self.rowNumber = rowNumber
 
-        threading.Thread(target=self.task_checker,daemon=True).start()
-        self.collect()
-
-    def collect(self):
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.task["PRODUCT"],headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-    
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.collect()
-
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
-            try:
-                split = self.task["PRODUCT"].split("titoloshop.")[1]
-                self.region = split.split('/')[0]
-                self.baseSite = 'https://en.titoloshop.com'
-            except:
-                split = self.task["PRODUCT"].split("titolo.")[1]
-                self.region = split.split('/')[0]
-                self.baseSite = 'https://en.titolo.ch'
-            try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-
-                soup = BeautifulSoup(retrieve.text,"html.parser")
-                self.productTitle = soup.find("img",{"id":"image"})["title"]
-                self.productImage = soup.find("img",{"id":"image"})["src"]
-                self.productPrice = soup.find("span",{"class":"price"}).text
-                self.atcUrl = soup.find("form", {"id": "product_addtocart_form"})["action"].replace(',',',,')
-                self.formKey = soup.find("input", {"name": "form_key"})["value"]
-                self.productId = soup.find("input", {"name": "product"})["value"]
-                self.attributeIdColor = soup.find_all("select", {"class": "required-entry super-attribute-select"})[0]["id"].split("attribute")[1]
-                self.attributeId = soup.find_all("select", {"class": "required-entry super-attribute-select"})[1]["id"].split("attribute")[1]
-                sizeSelect = soup.find("select",{"id":"attributesize-size_eu"})
-    
-                regex = r"{\"attributes\":(.*?)}}\)"
-                matches = re.search(regex, retrieve.text, re.MULTILINE)
-                if matches:
-                    productData = json.loads(
-                        matches.group()[:-1])["attributes"][self.attributeIdColor]
-                    self.color = productData["options"][0]["id"]
-    
-                allSizes = []
-                sizes = []
-                for s in sizeSelect:
-                    try:
-                        allSizes.append('{}:{}:{}'.format(s.text,s["value"],s["source"]))
-                        sizes.append(s.text)
-                    except:
-                        pass
-    
-                if len(sizes) == 0:
-                    logger.error(SITE,self.taskID,'Size Not Found')
-                    time.sleep(int(self.task["DELAY"]))
-                    self.collect()
-    
-                if self.task["SIZE"].lower() == "random":
-                    chosen = random.choice(allSizes)
-                    self.sizeValue = chosen.split(':')[1]
-                    self.size = chosen.split(':')[0]
-                    self.sizeAttributeId = chosen.split(':')[2]
-                    logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-                
-        
-    
-                else:
-                    if self.task["SIZE"] not in sizes:
-                        logger.error(SITE,self.taskID,'Size Not Found')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.collect()
-                    for size in allSizes:
-                        if self.task["SIZE"] == size.split(':')[0]:
-                            self.sizeValue = chosen.split(':')[1]
-                            self.size = chosen.split(':')[0]
-                            self.sizeAttributeId = chosen.split(':')[2]
-                            logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-
-
-
-            except Exception as e:
-                log.info(e)
-                logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                self.collect()
-
-            self.addToCart()
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-
-    def addToCart(self):
-        logger.prepare(SITE,self.taskID,'Carting product...')
-        captchaResponse = loadToken(SITE)
-        if captchaResponse == "empty":
-            captchaResponse = captcha.v2('6Ldpi-gUAAAAANpo2mKVvIR6u8nUGrInKKik8MME',self.task["PRODUCT"],self.proxies,SITE,self.taskID)
-    
-        payload = {
-            'product': self.productId,
-            'related_product': '',
-            'standard_attribute[size]': 'size_us',
-            f'super_attribute[{self.attributeIdColor}]': self.color,
-            f'super_attribute[{self.attributeId}]': self.sizeAttributeId,
-            'size_attribute[size]': self.sizeValue,
-            'return_url': '',
-            'g-recaptcha-response': captchaResponse,
-            'amasty_invisible_token': captchaResponse
-        }
-        try:
-            postCart = self.session.post(self.atcUrl,data=payload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.addToCart()
-
-        if postCart.status_code == 200 and "/checkout/cart/" in postCart.url:
-            updateConsoleTitle(True,False,SITE)
-            logger.warning(SITE,self.taskID,'Successfully carted')
-            self.method()
-        else:
-            logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
-            if self.task['SIZE'].lower() == "random":
-                self.collect()
-            else:
-                time.sleep(int(self.task["DELAY"]))
-                self.addToCart()
-
-    def method(self):
-        logger.prepare(SITE,self.taskID,'Setting checkout method...')
-        try:
-            setMethod = self.session.post(f'{self.baseSite}/checkout/onepage/saveMethod/',data={"method": "guest"},headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                'accept': 'text/javascript, text/html, application/xml, text/xml, */*',
-                'referer': f'{self.baseSite}/checkout/onepage/',
-                'x-requested-with': 'XMLHttpRequest',
-                'x-prototype-version': '1.7'
-
-            })
-            setMethod = self.session.post(f'{self.baseSite}/checkout/onepage/saveMethod/',data={"method": "guest"},headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                'accept': 'text/javascript, text/html, application/xml, text/xml, */*',
-                'referer': f'{self.baseSite}/checkout/onepage/',
-                'x-requested-with': 'XMLHttpRequest',
-                'x-prototype-version': '1.7'
-
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.method()
-
+        if self.rowNumber != 'qt': 
+            threading.Thread(target=self.task_checker,daemon=True).start()
 
         try:
-            data = setMethod.json()
+            # self.session = client.Session(browser=client.Fingerprint.CHROME_83)
+            self.session = scraper()
         except Exception as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Failed to save method. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.method()
+            self.error(f'error => {e}')
+            self.__init__(task,taskName,rowNumber)
+
+        self.baseSite = 'https://www.titoloshop.com'
+
+        try:
+            split = self.task["PRODUCT"].split("titoloshop.")[1]
+            self.reg = 'eu_en'
+        except:
+            self.reg = 'ch_en'
 
 
-        if setMethod.status_code == 200 and data == []:
-            logger.warning(SITE,self.taskID,'Saved Method')
-            self.billing()
-        else:
-            logger.error(SITE,self.taskID,'Failed to save method. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.method()
+        self.webhookData = {
+            "site":SITE,
+            "product":"n/a",
+            "size":"n/a",
+            "image":"https://i.imgur.com/VqWvzDN.png",
+            "price":"0",
+            "profile":self.task['PROFILE'],
+            "speed":0,
+            "url":"https://venetiacli.io",
+            "paymentMethod":"n/a",
+            "proxy":"n/a",
+            "product_url":self.task['PRODUCT']
+        }
 
+        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
 
-
-    def billing(self):
-        profile = loadProfile(self.task["PROFILE"])
-        if profile == None:
-            logger.error(SITE,self.taskID,'Profile Not Found.')
+        self.profile = loadProfile(self.task["PROFILE"])
+        if self.profile == None:
+            self.error("Profile Not found. Exiting...")
             time.sleep(10)
             sys.exit()
-        countryCode = profile["countryCode"]
-        logger.prepare(SITE,self.taskID,'Submitting billing...')
 
-        payload = {
-            'billing[address_id]': '',
-            'billing[firstname]': profile["firstName"],
-            'billing[lastname]': profile["lastName"],
-            'billing[company]': '',
-            'billing[email]': profile["email"],
-            'billing[street][]': profile["house"] + " " + profile["addressOne"],
-            'billing[city]': profile["city"],
-            'billing[region_id]': '',
-            'billing[region]': profile["region"],
-            'billing[postcode]': profile["zip"],
-            'billing[country_id]': countryCode,
-            'billing[telephone]': profile["phone"],
-            'billing[fax]': '',
-            'billing[customer_password]': '',
-            'billing[confirm_password]': '',
-            'billing[save_in_address_book]': '1',
-            'billing[use_for_shipping]': '1',
-            'form_key': self.formKey
-        }
+        self.tasks()
+    
+    def tasks(self):
 
-        try:
-            postBilling = self.session.post(f'{self.baseSite}/checkout/onepage/saveBilling/',data=payload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                'accept': 'text/javascript, text/html, application/xml, text/xml, */*'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.billing()
+        self.monitor()
+        self.addToCart()
+        self.method()
+        self.getShippingMethod()
+        self.shipping()
+        self.paymentMethod()
 
-        if postBilling.status_code == 200:
-            if postBilling.text:
-                shippingOptions = json.loads(postBilling.text)
-                shippingHtml = shippingOptions["update_section"]["html"]
-                soup = BeautifulSoup(shippingHtml,"html.parser")
-                self.shippingMethods = soup.find_all('input',{'name':'shipping_method'})
-                logger.warning(SITE,self.taskID,'Successfully set shipping')
-                self.shippingMethod()
-            else:
-                logger.error(SITE,self.taskID,'Failed to set shipping. Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                self.collect()
-        elif postBilling.status_code != 200:
-            logger.error(SITE,self.taskID,'Failed to set shipping. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.billing()
-
-    def shippingMethod(self):
-        logger.prepare(SITE,self.taskID,'Submitting shipping method...')
-        try:
-            setShippingMethod = self.session.post(f'{self.baseSite}/SaferpayCw/onepage/saveShippingMethod/',data={"shipping_method": self.shippingMethods[0]["value"],"form_key":self.formKey},headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                'accept': 'text/javascript, text/html, application/xml, text/xml, */*'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.shippingMethod()
-
-        if setShippingMethod.status_code == 200:
-            logger.warning(SITE,self.taskID,'Successfully set shipping method')
-            if self.task["PAYMENT"].lower() == "paypal":
-                self.paypal()
-            if self.task["PAYMENT"].lower() == "mastercard":
-                self.paymentMethod = 'saferpaycw_mastercard'
-                self.card()
-            if self.task["PAYMENT"].lower() == "visa":
-                self.paymentMethod = 'saferpaycw_visa'
-                self.card()
-            elif self.task["PAYMENT"].lower() not in ["paypal","mastercard","visa"]:
-                self.paypal()
- 
+        if self.task['PAYMENT'].strip().lower() == "visa" or self.task['PAYMENT'].strip().lower() == "mastercard" or self.task['PAYMENT'].strip().lower() == "card":
+            self.placeOrder_cc()
         else:
-            logger.error(SITE,self.taskID,'Failed to set shipping method')
-            time.sleep(int(self.task["DELAY"]))
-            self.shippingMethod()
+            self.placeOrder_pp()
 
+        self.sendToDiscord()
 
-    def paypal(self):
-        logger.info(SITE,self.taskID,'Starting [PAYPAL] checkout...')
-        logger.prepare(SITE,self.taskID,'Setting payment method...')
-        try:
-            setPayment = self.session.post(f'{self.baseSite}/checkout/onepage/savePayment/',data={"payment[method]": "paypal_express","form_key":self.formKey},headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                'accept': 'text/javascript, text/html, application/xml, text/xml, */*'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.paypal()
+    def monitor(self):
+        while True:
+            self.prepare("Getting Product...")
 
-        if setPayment.status_code == 200:
-            logger.warning(SITE,self.taskID,'Successfully set payment method')
             try:
-                getPaypal = self.session.get(f'{self.baseSite}/paypal/express/start/',headers={
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+                response = self.session.get(self.task["PRODUCT"])
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                continue
+
+            if response.status_code == 200:
+                self.start = time.time()
+
+                self.warning("Retrieved Product")
+
+                try:
+                    soup = BeautifulSoup(response.text, "html.parser")
+
+                    self.webhookData['product'] = str(soup.find("meta",{"property":"og:image:alt"})["content"])
+                    self.webhookData['image'] = str(soup.find("meta",{"property":"og:image"})["content"])
+                    self.webhookData['price'] = str(soup.find("span",{"class":"price"}).text)
+
+                    self.atcUrl = soup.find("form", {"id": "product_addtocart_form"})["action"].replace(',',',,')
+                    self.formKey = soup.find("input", {"name": "form_key"})["value"]
+                    self.productId = soup.find("input", {"name": "product_id"})["value"]
+                    self.attributeId = response.text.split('{"attributes":{"')[1].split('"')[0]
+                    sizeSelect = soup.find("div",{"id":"tab-size_eu"})
+
+                    cookie_obj = requests.cookies.create_cookie(domain='.www.titoloshop.com', name='form_key', value=self.formKey)
+                    self.session.cookies.set_cookie(cookie_obj)
+
+                    allSizes = []
+                    sizes = []
+                    for s in sizeSelect:
+                        try:
+                            allSizes.append('{}:{}:{}'.format(s['option-label'],s["data-option-label"], s['data-option-id']))
+                            sizes.append(s['option-label'])
+                        except:
+                            pass
+
+                    if len(sizes) == 0:
+                        self.error("No sizes available")
+                        time.sleep(int(self.task["DELAY"]))
+                        continue
+
+                    if self.task["SIZE"].strip().lower() != "random":
+                        if self.task["SIZE"] not in sizes:
+                            self.error("Size not available")
+                            time.sleep(int(self.task["DELAY"]))
+                            continue
+                        else:
+                            for size in allSizes:
+                                if size.split(':')[0].strip().lower() == self.task["SIZE"].strip().lower():
+                                    self.size = size.split(':')[0]
+                                    self.sizeValue = size.split(":")[1]
+                                    self.optionId = size.split(':')[2]
+                                    
+                                    self.warning(f"Found Size => {self.size}")
+        
+                    else:
+                        selected = random.choice(allSizes)
+                        self.size = selected.split(":")[0]
+                        self.sizeValue = selected.split(":")[1]
+                        self.optionId = selected.split(":")[2]
+                        
+                        self.warning(f"Found Size => {self.size}")
+
+
+                except Exception as e:
+                    log.info(e)
+                    self.error("Failed to parse product data (maybe OOS)")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+                
+                self.webhookData['size'] = self.size
+                return
+                    
+            else:
+                self.error(f"Failed to get product [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+    
+    def addToCart(self):
+        while True:
+            self.prepare("Adding to cart...")
+            
+            boundary = ''.join(random.choices(string.ascii_uppercase + string.digits + string.ascii_lowercase, k=16))
+            payload = {
+                'product': self.productId,
+                'selected_configurable_option': '',
+                'related_product': '',
+                'item': self.productId,
+                'form_key': self.formKey,
+                f'super_attribute[{self.attributeId}]': self.optionId,
+                'qty': '1',
+                f'formatted_size_value[{self.attributeId}]': self.sizeValue
+            }
+            payload_encoded = MultipartEncoder(payload, boundary=f'----WebKitFormBoundary{boundary}')
+            
+
+            try:
+                response = self.session.post(self.atcUrl, data=payload_encoded.to_string(), headers={
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': f'multipart/form-data; boundary=----WebKitFormBoundary{boundary}',
+                    'referer': self.task["PRODUCT"],
+                    'sec-fetch-dest': 'empty',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-site': 'same-origin',
+                    'x-requested-with': 'XMLHttpRequest',
+                    'accept':'application/json, text/javascript, */*; q=0.01'
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
-                logger.error(SITE,self.taskID,'Error: {}'.format(e))
+                self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = None
-                self.paypal()
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
 
+
+            try:
+                response_data = response.json()
+            except Exception as e:
+                log.info(e)
+                self.error("Failed to cart [failed to parse response]. Retrying...")
+                time.sleep(int(self.task["DELAY"]))
+                continue
+
+            if response.status_code == 200 and response_data == []:
+                self.success("Added to cart!")
+                updateConsoleTitle(True,False,SITE)
+                return
+            
+            else:
+                self.error(f"Failed to cart [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
     
-            if "paypal" in getPaypal.url:
-                self.end = time.time() - self.start
-                logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
-                url = storeCookies(getPaypal.url,self.session, self.productTitle, self.productImage, self.productPrice)
-                updateConsoleTitle(False,True,SITE)
+    def method(self):
+        while True:
+            self.prepare("Getting basket ID")
+            
+            try:
+                response = self.session.get(f'{self.baseSite}/{self.reg}/checkout/',headers={
+                    'referer': self.task['PRODUCT'],
+                    'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+                })
+
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            if response.status_code == 200:
+
+                try:
+                    self.sessionId = response.text.split('"quoteData":{"entity_id":"')[1].split('"')[0]
+                except Exception as e:
+                    log.info(e)
+                    self.error("Failed to get basket ID [failed to parse response]. Retrying...")
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                self.warning("Got basket ID")
+                return
+            else:
+                self.error(f"Failed to get basket ID [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+
+    def getShippingMethod(self):
+        while True:
+            self.prepare("Getting shipping method")
+
+            try:
+                payload = {
+                    "address": {
+                        "street": ["{} {}".format(self.profile["addressOne"], self.profile["addressTwo"]), self.profile["house"]],
+                        "city": self.profile["city"],
+                        "country_id": self.profile["countryCode"],
+                        "postcode": self.profile["zip"],
+                        "firstname": self.profile["firstName"],
+                        "lastname": self.profile["lastName"],
+                        "telephone": self.profile["phone"]
+                    }
+                }
+            except Exception:
+                self.error(f"Failed to get shipping method [Failed to construct payload]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+            
+            try:
+                response = self.session.post(f'{self.baseSite}/{self.reg}/rest/{self.reg}/V1/guest-carts/{self.sessionId}/estimate-shipping-methods',
+                json=payload,headers={
+                    "accept": "*/*",
+                    "accept-language": "en-US,en;q=0.9",
+                    "accept-encoding": "gzip, deflate, br",
+                    "content-type": "application/json",
+                    "referrer": f"{self.baseSite}/{self.reg}",
+                    "x-requested-with": "XMLHttpRequest"
+                })
+
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            if response.status_code == 200:
+                try:
+                    responseJson = response.json()
+                except Exception as e:
+                    log.info(e)
+                    self.error("Failed to get shipping method [failed to parse response]. Retrying...")
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                if len(responseJson) > 0:
+                    self.shippingMethod = responseJson[0]
+                    self.warning("Got shipping method")
+                    return
+                else:
+                    self.error(f"Failed to get shipping method [empty response]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+            else:
+                self.error(f"Failed to get shipping method [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+
+    def shipping(self):
+        while True:
+            self.prepare("Submitting shipping...")
+
+            try:
+                payload = {
+                    "addressInformation": {
+                        "shipping_address": {
+                        "countryId": self.profile["countryCode"],
+                        "street": ["{} {}".format(self.profile["addressOne"], self.profile["addressTwo"]), self.profile["house"]],
+                        "telephone": self.profile["phone"],
+                        "postcode": self.profile["zip"],
+                        "city": self.profile["city"],
+                        "firstname": self.profile["firstName"],
+                        "lastname": self.profile["lastName"]
+                        },
+                        "billing_address": {
+                        "countryId": self.profile["countryCode"],
+                        "street": ["{} {}".format(self.profile["addressOne"], self.profile["addressTwo"]), self.profile["house"]],
+                        "telephone": self.profile["phone"],
+                        "postcode": self.profile["zip"],
+                        "city": self.profile["city"],
+                        "firstname": self.profile["firstName"],
+                        "lastname": self.profile["lastName"],
+                        "saveInAddressBook": None
+                        },
+                        "shipping_method_code": self.shippingMethod['method_code'],
+                        "shipping_carrier_code": self.shippingMethod['carrier_code'],
+                        "extension_attributes": {}
+                    }
+                }
+            except Exception as e:
+                self.error(f"Failed to construct shipping form ({e}). Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
                 
-                sendNotification(SITE,self.productTitle)
-                try:
-                    discord.success(
-                        webhook=loadSettings()["webhook"],
-                        site=SITE,
-                        url=url,
-                        image=self.productImage,
-                        title=self.productTitle,
-                        size=self.size,
-                        price=self.productPrice,
-                        paymentMethod='PayPal',
-                        profile=self.task["PROFILE"],
-                        product=self.task["PRODUCT"],
-                        proxy=self.session.proxies,
-                        speed=self.end
-                    )
-                    while True:
-                        pass
-                except:
-                    logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
-            elif "paypal" not in getPaypal.url:
-                try:
-                    discord.failed(
-                        webhook=loadSettings()["webhook"],
-                        site=SITE,
-                        url=self.task["PRODUCT"],
-                        image=self.productImage,
-                        title=self.productTitle,
-                        size=self.size,
-                        price=self.productPrice,
-                        paymentMethod='PayPal',
-                        profile=self.task["PROFILE"],
-                        proxy=self.session.proxies
-                    )
-                except:
-                    pass
-                logger.error(SITE,self.taskID,'Failed to get PayPal checkout link. Retrying...')
-                self.paypal()
-            
-        else:
-            logger.error(SITE,self.taskID,'Failed to set payment. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.shippingMethod()
+            try:
+                response = self.session.post(f'{self.baseSite}/{self.reg}/rest/{self.reg}/V1/guest-carts/{self.sessionId}/shipping-information',
+                json=payload, headers={
+                    "accept": "*/*",
+                    "accept-language": "en-US,en;q=0.9",
+                    "accept-encoding": "gzip, deflate, br",
+                    "content-type": "application/json",
+                    "referrer": f"{self.baseSite}/{self.reg}",
+                    "x-requested-with": "XMLHttpRequest"
+                })
 
-
-    def card(self):
-        logger.info(SITE,self.taskID,'Starting [CARD] checkout...')
-        logger.prepare(SITE,self.taskID,'Setting payment method...')
-        try:
-            savePayment = self.session.post(f'{self.baseSite}/checkout/onepage/savePayment/',data={"payment[method]": self.paymentMethod,"form_key":self.formKey},headers={
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-            'accept': 'text/javascript, text/html, application/xml, text/xml, */*'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.card()
-
-        if savePayment.status_code == 200:
-            logger.warning(SITE,self.taskID,'Successfully set payment method')
-            self.placeOrder()  
-        elif savePayment.status_code != 200:
-            logger.error(SITE,self.taskID,'Failed to set payment. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.card()
-
-    def placeOrder(self):
-        logger.prepare(SITE,self.taskID,'Placing Order...')
-        captchaResponse = loadToken(SITE)
-        if captchaResponse == "empty":
-            captchaResponse = captcha.v2('6Ldpi-gUAAAAANpo2mKVvIR6u8nUGrInKKik8MME',self.task["PRODUCT"],self.proxies,SITE,self.taskID)
-            
-        payload = {
-            'payment[method]': self.paymentMethod,
-            'form_key': self.formKey,
-            'agreement[1]': 1,
-            'agreement[3]': 1,
-            'g-recaptcha-response': captchaResponse,
-            'amasty_invisible_token': captchaResponse
-        }
-
-        try:
-            saveOrder = self.session.post(f'{self.baseSite}/checkout/onepage/saveOrder/form_key/{self.formKey}',data=payload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                'accept': 'text/javascript, text/html, application/xml, text/xml, */*',
-                'content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                'referer':f'{self.baseSite}/checkout/onepage/'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.placeOrder()
-
-
-        try:
-            json = saveOrder.json()
-        except:
-            logger.error(SITE,self.taskID,'Failed to retrieve SaferPay redirect. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.placeOrder()
-
-        if saveOrder.json()["success"] == True:
-            logger.warning(SITE,self.taskID,'Successfully placed order')
-            self.ccRedirect = saveOrder.json()["redirect"]
-#            
-            profile = loadProfile(self.task["PROFILE"])
-            if profile == None:
-                logger.error(SITE,self.taskID,'Profile Not Found.')
-                time.sleep(10)
-                sys.exit()
-            getSaferPay = self.session.get(self.ccRedirect,headers={
-                'authority': 'en.titoloshop.com',
-                'method': 'GET',
-                'scheme': 'https',
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'accept-encoding': 'gzip, deflate, br',
-                'accept-language': 'en-US,en;q=0.9',
-                'referer':f'{self.baseSite}/checkout/onepage/',
-                'sec-fetch-dest': 'document',
-                'sec-fetch-mode': 'navigate',
-                'sec-fetch-site': 'same-origin',
-                'sec-fetch-user': '?1',
-                'upgrade-insecure-requests': '1',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
-            })
-    
-            cardPayload = {
-                'CardNumber': profile["card"]["cardNumber"],
-                'ExpMonth': profile["card"]["cardMonth"],
-                'ExpYear':  profile["card"]["cardYear"],
-                'HolderName': '{} {}'.format(profile["firstName"],profile["lastName"]),
-                'VerificationCode':  profile["card"]["cardCVV"],
-                'SubmitToNext': '',
-            }
-    
-            submitCard = self.session.post(getSaferPay.url,data=cardPayload,headers={
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
-            })
-
-            
-            if submitCard.status_code == 200:
-                self.end = time.time() - self.start
-                logger.alert(SITE,self.taskID,'Sending Card checkout to Discord!')
-                updateConsoleTitle(False,True,SITE)
-                url = storeCookies(submitCard.url,self.session, self.productTitle, self.productImage, self.productPrice)
-    
-                try:
-                    discord.success(
-                        webhook=loadSettings()["webhook"],
-                        site=SITE,
-                        url=url,
-                        image=self.productImage,
-                        title=self.productTitle,
-                        size=self.size,
-                        price=self.productPrice,
-                        paymentMethod=self.paymentMethod,
-                        profile=self.task["PROFILE"],
-                        product=self.task["PRODUCT"],
-                        proxy=self.session.proxies,
-                        speed=self.end
-                    )
-                    while True:
-                        pass
-                except:
-                    logger.alert(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
-            elif submitCard.status_code != 200:
-                logger.error(SITE,self.taskID,'Error submitting card. Retrying...')
-                try:
-                    discord.failed(
-                        webhook=loadSettings()["webhook"],
-                        site=SITE,
-                        url=self.task["PRODUCT"],
-                        image=self.productImage,
-                        title=self.productTitle,
-                        size=self.size,
-                        price=self.productPrice,
-                        paymentMethod=self.paymentMethod,
-                        profile=self.task["PROFILE"],
-                        proxy=self.session.proxies
-                    )
-                except:
-                    pass
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.placeOrder()
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
 
-        if saveOrder.json()["success"] == False:
-            logger.error(SITE,self.taskID,'Failed to retrieve SaferPay redirect. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.placeOrder()
         
-        else:
-            logger.error(SITE,self.taskID,'Failed to retrieve SaferPay redirect. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.placeOrder()
+            if response.status_code == 200:
+                self.warning("Successfully set shipping")
+                return
+            else:
+                self.error(f"Failed to set shipping [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+
+    def paymentMethod(self):
+        while True:
+            self.prepare("Setting payment method...")
 
 
 
+            try:
+                paymentM = "datatranscw_paypal"
+                if self.task['PAYMENT'].strip().lower() == "visa" or self.task['PAYMENT'].strip().lower() == "mastercard" or self.task['PAYMENT'].strip().lower() == "card": paymentM = "datatranscw_creditcard"
+
+                payload = {
+                    "cartId": self.sessionId,
+                    "billingAddress": {
+                        "countryId": self.profile["countryCode"],
+                        "street": ["{} {}".format(self.profile["addressOne"], self.profile["addressTwo"]), self.profile["house"]],
+                        "telephone": self.profile["phone"],
+                        "postcode": self.profile["zip"],
+                        "city": self.profile["city"],
+                        "firstname": self.profile["firstName"],
+                        "lastname": self.profile["lastName"],
+                        "saveInAddressBook": None
+                    },
+                    "paymentMethod": {
+                        "method": paymentM,
+                        "po_number": None,
+                        "additional_data": {}
+                    },
+                    "email": self.profile['email']
+                }
+            except Exception as e:
+                self.error(f"Failed to construct payment form ({e}). Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+            
+            try:
+                response = self.session.post(f'{self.baseSite}/{self.reg}/rest/{self.reg}/V1/guest-carts/{self.sessionId}/payment-information',
+                json=payload, headers={
+                    "accept": "*/*",
+                    "accept-language": "en-US,en;q=0.9",
+                    "accept-encoding": "gzip, deflate, br",
+                    "content-type": "application/json",
+                    "referrer": f"{self.baseSite}/{self.reg}",
+                    "x-requested-with": "XMLHttpRequest"
+                })
+
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            if response.status_code == 200:
+
+                try:
+                    self.orderId = response.json()
+                except Exception:
+                    self.error(f'Failed to set payment method [failed to parse response]. Retrying...')
+                    time.sleep(int(self.task["DELAY"]))
+                    self.payment_method()
+
+                self.warning("Set payment method")
+    
+                return
+            else:
+                self.error(f"Failed to set payment method [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+    
+    def placeOrder_pp(self):
+        while True:
+            self.prepare("Getting paypal checkout...")
+
+            try:
+                payload = {
+                    'orderId': self.orderId
+                }
+            except Exception:
+                self.error(f"Failed to construct checkout form. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+            
+            try:
+                response = self.session.post(f'{self.baseSite}/{self.reg}/rest/{self.reg}/V1/guest-carts/{self.sessionId}/datatranscw/checkout/authorize',
+                json=payload,headers={
+                    "accept": "*/*",
+                    "accept-language": "en-US,en;q=0.9",
+                    "accept-encoding": "gzip, deflate, br",
+                    "content-type": "application/json",
+                    "referrer": f"{self.baseSite}/{self.reg}",
+                    "x-requested-with": "XMLHttpRequest"
+                })
+
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            if response.status_code == 200:
+                try:
+                    responseJson = response.json()
+                    params = {
+                        "uppModuleName": "Customweb Magento",
+                        "uppModuleVersion": responseJson['java_script_callback_function'].split('\"data-upp-module-version\", \"')[1].split('\")')[0],
+                        "merchantId": responseJson['java_script_callback_function'].split('\"data-merchant-id\", \"')[1].split('\")')[0],
+                        "amount": responseJson['java_script_callback_function'].split('\"data-amount\", \"')[1].split('\")')[0],
+                        "currency": responseJson['java_script_callback_function'].split('\"data-currency\", \"')[1].split('\")')[0],
+                        "refno": responseJson['java_script_callback_function'].split('\"data-refno\", \"')[1].split('\")')[0],
+                        "successUrl": responseJson['java_script_callback_function'].split('\"data-success-url\", \"')[1].split('\")')[0],
+                        "errorUrl": responseJson['java_script_callback_function'].split('\"data-error-url\", \"')[1].split('\")')[0],
+                        "cancelUrl": responseJson['java_script_callback_function'].split('\"data-cancel-url\", \"')[1].split('\")')[0],
+                        "uppReturnMaskedCC": responseJson['java_script_callback_function'].split('\"data-upp-return-masked-c-c\", \"')[1].split('\")')[0],
+                        "language": responseJson['java_script_callback_function'].split('\"data-language\", \"')[1].split('\")')[0],
+                        "reqtype": responseJson['java_script_callback_function'].split('\"data-reqtype\", \"')[1].split('\")')[0],
+                        "uppCustomerName": responseJson['java_script_callback_function'].split('\"data-upp-customer-name\", \"')[1].split('\")')[0],
+                        "uppCustomerFirstName": responseJson['java_script_callback_function'].split('\"data-upp-customer-first-name\", \"')[1].split('\")')[0],
+                        "uppCustomerLastName": responseJson['java_script_callback_function'].split('\"data-upp-customer-last-name\", \"')[1].split('\")')[0],
+                        "uppCustomerStreet": responseJson['java_script_callback_function'].split('\"data-upp-customer-street\", \"')[1].split('\")')[0],
+                        "uppCustomerCity": responseJson['java_script_callback_function'].split('\"data-upp-customer-city\", \"')[1].split('\")')[0],
+                        "uppCustomerCountry": responseJson['java_script_callback_function'].split('\"data-upp-customer-country\", \"')[1].split('\")')[0],
+                        "uppCustomerZipCode": responseJson['java_script_callback_function'].split('\"data-upp-customer-zip-code\", \"')[1].split('\")')[0],
+                        "uppCustomerEmail": responseJson['java_script_callback_function'].split('\"data-upp-customer-email\", \"')[1].split('\")')[0],
+                        "uppCustomerDetails": responseJson['java_script_callback_function'].split('\"data-upp-customer-details\", \"')[1].split('\")')[0],
+                        "paymentmethod": responseJson['java_script_callback_function'].split('\"data-paymentmethod\", \"')[1].split('\")')[0],
+                        "L_AMT0": responseJson['java_script_callback_function'].split('\"data--l_-a-m-t0\", \"')[1].split('\")')[0],
+                        "L_TAXAMT0": responseJson['java_script_callback_function'].split('\"data--l_-t-a-x-a-m-t0\", \"')[1].split('\")')[0],
+                        "L_NAME0": responseJson['java_script_callback_function'].split('\"data--l_-n-a-m-e0\", \"')[1].split('\")')[0],
+                        "L_Number0": responseJson['java_script_callback_function'].split('\"data--l_-number0\", \"')[1].split('\")')[0],
+                        "L_Desc0": responseJson['java_script_callback_function'].split('\"data--l_-desc0\", \"')[1].split('\")')[0],
+                        "SHIPPINGAMT": responseJson['java_script_callback_function'].split('\"data--s-h-i-p-p-i-n-g-a-m-t\", \"')[1].split('\")')[0],
+                        "ITEMAMT": responseJson['java_script_callback_function'].split('\"data--i-t-e-m-a-m-t\", \"')[1].split('\")')[0],
+                        "TAXAMT": responseJson['java_script_callback_function'].split('\"data--t-a-x-a-m-t\", \"')[1].split('\")')[0],
+                        "cwDataTransId": responseJson['java_script_callback_function'].split('\"data-cw-data-trans-id\", \"')[1].split('\")')[0],
+                        "theme": responseJson['java_script_callback_function'].split('\"data-theme\", \"')[1].split('\")')[0],
+                        "sign": responseJson['java_script_callback_function'].split('\"data-sign\", \"')[1].split('\")')[0],
+                        "version": "2.0.0"
+                    }
+                except Exception:
+                    self.error(f"Failed to get paypal checkout [failed to parse response]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+                
+                try:
+                    response2 = self.session.get('https://pay.datatrans.com/upp/jsp/upStart.jsp',params=params,headers={
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "Accept-Language": "en-US,en;q=0.9",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    })
+
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    self.error(f"error: {str(e)}")
+                    time.sleep(int(self.task["DELAY"]))
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    continue
+
+                if response2.status_code == 200:
+                    try:
+                        trx = response2.text.split('name="datatransTrxId" value="')[1].split('"')[0]
+                        payload = {
+                            "datatransTrxId": trx,
+                            "hiddenFrame": False,
+                            "uppScreenWidth": 999,
+                            "iframed": "",
+                            "browserUserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.82 Safari/537.36",
+                            "browserJavaEnabled": False,
+                            "browserLanguage": "en-US",
+                            "browserColorDepth": 24,
+                            "browserScreenHeight": 1440,
+                            "browserScreenWidth": 2560,
+                            "browserTZ": 0
+                        }
+                    except Exception:
+                        self.error(f"Failed to get paypal checkout [failed to parse response]. Retrying...")
+                        time.sleep(int(self.task['DELAY']))
+                        continue
+
+                    try:
+                        response3 = self.session.post('https://pay.datatrans.com/upp/jsp/upStart_1.jsp',data=payload,headers={
+                            "Accept-Encoding": "gzip, deflate, br",
+                            "Accept-Language": "en-US,en;q=0.9",
+                            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            "Referer":response2.url,
+                            "Host": "pay.datatrans.com",
+                            "Origin": "https://pay.datatrans.com"
+                        })
+
+                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                        log.info(e)
+                        self.error(f"error: {str(e)}")
+                        time.sleep(int(self.task["DELAY"]))
+                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                        continue
+
+                    if response3.status_code == 200:
+
+                        try:
+                            ec = response3.text.split("name='token' value='")[1].split("'")[0]
+                            ppurl = f'https://www.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token={ec}&useraction=commit'
+                        except Exception:
+                            self.error(f"Failed to get paypal checkout [failed to parse response]. Retrying...")
+                            time.sleep(int(self.task['DELAY']))
+                            continue
+
+                        self.end = time.time() - self.start
+                        self.webhookData['speed'] = self.end
+
+                        self.success("Got paypal checkout!")
+                        updateConsoleTitle(False,True,SITE)
+
+                        self.webhookData['url'] = storeCookies(
+                            ppurl,self.session,
+                            self.webhookData['product'],
+                            self.webhookData['image'],
+                            self.webhookData['price'],
+                            False
+                        )
+                        return
+                
+                else:
+                    self.error(f"Failed to get paypal checkout [{str(response.status_code)}]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+
+                
+            else:
+                self.error(f"Failed to get paypal checkout [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
 
     
-        
+    def placeOrder_cc(self):
+        while True:
+            self.prepare("Getting card checkout...")
 
+            try:
+                val = ""
+                if self.task['PAYMENT'].strip().lower() == "visa": val = "VIS"
+                else: val = "ECA"
+
+                payload = {
+                    'orderId': self.orderId,
+                    "formValues":[{"key":"pmethod","value":val}]
+                }
+            except Exception:
+                self.error(f"Failed to construct checkout form. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+            
+            try:
+                response = self.session.post(f'{self.baseSite}/{self.reg}/rest/{self.reg}/V1/guest-carts/{self.sessionId}/datatranscw/checkout/authorize',
+                json=payload,headers={
+                    "accept": "*/*",
+                    "accept-language": "en-US,en;q=0.9",
+                    "accept-encoding": "gzip, deflate, br",
+                    "content-type": "application/json",
+                    "referrer": f"{self.baseSite}/{self.reg}",
+                    "x-requested-with": "XMLHttpRequest"
+                })
+
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            if response.status_code == 200:
+
+                try:
+                    responseJson = response.json()
+                    params = {
+                        "uppModuleName": responseJson['hidden_form_fields'][0]['value'],
+                        "uppModuleVersion": responseJson['hidden_form_fields'][1]['value'],
+                        "merchantId": responseJson['hidden_form_fields'][2]['value'],
+                        "amount": responseJson['hidden_form_fields'][3]['value'],
+                        "currency": responseJson['hidden_form_fields'][4]['value'],
+                        "refno": responseJson['hidden_form_fields'][5]['value'],
+                        "successUrl": responseJson['hidden_form_fields'][6]['value'],
+                        "errorUrl": responseJson['hidden_form_fields'][7]['value'],
+                        "cancelUrl": responseJson['hidden_form_fields'][8]['value'],
+                        "uppReturnMaskedCC": responseJson['hidden_form_fields'][9]['value'],
+                        "language": responseJson['hidden_form_fields'][10]['value'],
+                        "reqtype": responseJson['hidden_form_fields'][11]['value'],
+                        "uppCustomerName": responseJson['hidden_form_fields'][12]['value'],
+                        "uppCustomerFirstName": responseJson['hidden_form_fields'][13]['value'],
+                        "uppCustomerLastName": responseJson['hidden_form_fields'][14]['value'],
+                        "uppCustomerStreet": responseJson['hidden_form_fields'][15]['value'],
+                        "uppCustomerCity": responseJson['hidden_form_fields'][16]['value'],
+                        "uppCustomerCountry": responseJson['hidden_form_fields'][17]['value'],
+                        "uppCustomerZipCode": responseJson['hidden_form_fields'][18]['value'],
+                        "uppCustomerEmail": responseJson['hidden_form_fields'][19]['value'],
+                        "uppCustomerDetails": responseJson['hidden_form_fields'][20]['value'],
+                        "paymentmethod": responseJson['hidden_form_fields'][21]['value'],
+                        "cwDataTransId": responseJson['hidden_form_fields'][22]['value'],
+                        "theme":responseJson['hidden_form_fields'][23]['value'],
+                        "sign": responseJson['hidden_form_fields'][24]['value'],
+                        "version": "2.0.0"
+                    }
+                except Exception:
+                    self.error(f"Failed to get card checkout [failed to parse response]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+                
+                try:
+                    response2 = self.session.get('https://pay.datatrans.com/upp/jsp/upStart.jsp',params=params,headers={
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "Accept-Language": "en-US,en;q=0.9",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    })
+
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    self.error(f"error: {str(e)}")
+                    time.sleep(int(self.task["DELAY"]))
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    continue
+
+                if response2.status_code == 200:
+
+                    self.end = time.time() - self.start
+                    self.webhookData['speed'] = self.end
+
+                    self.success("Got card checkout!")
+                    updateConsoleTitle(False,True,SITE)
+
+                    self.webhookData['url'] = storeCookies(
+                        response2.url,self.session,
+                        self.webhookData['product'],
+                        self.webhookData['image'],
+                        self.webhookData['price'],
+                        False
+                    )
+                    return
+                
+                else:
+                    self.error(f"Failed to get card checkout [{str(response.status_code)}]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+
+                
+            else:
+                self.error(f"Failed to get card checkout [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+    
+    def sendToDiscord(self):
+        while True:
+            
+            self.webhookData['proxy'] = self.session.proxies
+
+            sendNotification(SITE,self.webhookData['product'])
+
+            try:
+                Webhook.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.webhookData['url'],
+                    image=self.webhookData['image'],
+                    title=self.webhookData['product'],
+                    size=self.webhookData['size'],
+                    price=self.webhookData['price'],
+                    paymentMethod=self.task['PAYMENT'].strip().title(),
+                    product=self.webhookData['product_url'],
+                    profile=self.task["PROFILE"],
+                    proxy=self.webhookData['proxy'],
+                    speed=self.webhookData['speed']
+                )
+                self.secondary("Sent to discord!")
+                while True:
+                    pass
+            except:
+                self.alert("Failed to send webhook. Checkout here ==> {}".format(self.webhookData['url']))
+                while True:
+                    pass

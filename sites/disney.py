@@ -13,61 +13,53 @@ import cloudscraper
 import string
 from urllib3.exceptions import HTTPError
 import csv
+import tls as client
+from requests_toolbelt import MultipartEncoder
 
-
+from utils.captcha import captcha
 from utils.logger import logger
-from utils.webhook import discord
+from utils.webhook import Webhook
 from utils.log import log
-from utils.functions import (loadSettings, loadProfile, loadProxy, createId, loadCookie, loadToken, sendNotification, injection,storeCookies, updateConsoleTitle, scraper)
-SITE = 'DISNEY'
+from utils.threeDS import threeDSecure
+from utils.functions import (
+    loadSettings,
+    loadProfile,
+    loadProxy,
+    createId,
+    loadCookie,
+    loadToken,
+    sendNotification,
+    injection,
+    storeCookies,
+    updateConsoleTitle,
+    scraper,
+    footlocker_snare
+)
+import utils.config as CONFIG
 
-
-def findProduct(url, session, taskID, SITE, task, disneyRegion):
-    logger.prepare(SITE,taskID,'Searching for product...')
-    try:
-        kwget = session.get(url, headers={
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
-        })
-    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-        log.info(e)
-        logger.error(SITE,taskID,'Error: {}'.format(e))
-        time.sleep(int(task["DELAY"]))
-        # https://www.shopdisney.{}/new?srule=Newest&sz=96&start=0
-        findProduct("https://www.shopdisney.{}/search?srule=Newest&q={}".format(disneyRegion,"+".join(task["PRODUCT"].split('|'))),session,taskID,SITE,task,disneyRegion)
-    try:
-        if kwget.status_code == 200:
-            kws = task["PRODUCT"].split('|')
-            kws = [x.lower() for x in kws]
-            foundItem = ""
-            soup = BeautifulSoup(kwget.text,"html.parser")
-            section = soup.find('section',{'class':'catlisting__product-grid js-catlisting-product-grid'})
-            # print(section)
-            row = section.find('div',{'class':'row'}).find_all('div')
-            for r in row:
-                # r = BeautifulSoup(r,"htm.parser")
-                try:
-                    p = r.find('a',{'class':'product__linkcontainer js-catlisting-productlink-container no-transform'})
-                    title = p['title']
-                    link = p['href']
-                    title_ = [x.lower() for x in title.split(' ')]
-                    if all(kw in title_ for kw in kws):
-                        link = p['href']
-                        foundItem = '{}|{}'.format(title,link)
-                except:
-                    pass
-            if len(foundItem) > 0:
-                return foundItem.split('|')
-            else:
-                return None
-    except:
-        return None
-    
+_SITE_ = 'DISNEY'
+SITE = 'Disney'
 class DISNEY:
+    def success(self,message):
+        logger.success(SITE,self.taskID,message)
+    def error(self,message):
+        logger.error(SITE,self.taskID,message)
+    def prepare(self,message):
+        logger.prepare(SITE,self.taskID,message)
+    def warning(self,message):
+        logger.warning(SITE,self.taskID,message)
+    def info(self,message):
+        logger.info(SITE,self.taskID,message)
+    def secondary(self,message):
+        logger.secondary(SITE,self.taskID,message)
+    def alert(self,message):
+        logger.alert(SITE,self.taskID,message)
+
+
     def task_checker(self):
         originalTask = self.task
         while True:
-            with open('./{}/tasks.csv'.format(SITE.lower()),'r') as csvFile:
+            with open('./{}/tasks.csv'.format(_SITE_.lower()),'r') as csvFile:
                 csv_reader = csv.DictReader(csvFile)
                 row = [row for idx, row in enumerate(csv_reader) if idx in (self.rowNumber,self.rowNumber)]
                 self.task = row[0]
@@ -76,710 +68,707 @@ class DISNEY:
                     self.task['ACCOUNT PASSWORD'] = originalTask['ACCOUNT PASSWORD']
                 except:
                     pass
-                self.task['PROXIES'] = 'proxies'
                 csvFile.close()
+
             time.sleep(2)
 
-    def __init__(self,task,taskName,rowNumber):
+    def __init__(self, task, taskName, rowNumber):
         self.task = task
-        self.sess = requests.session()
         self.taskID = taskName
         self.rowNumber = rowNumber
 
-        twoCap = loadSettings()["2Captcha"]
-        self.session = scraper()
+        if self.rowNumber != 'qt': 
+            threading.Thread(target=self.task_checker,daemon=True).start()
 
-        profile = loadProfile(self.task["PROFILE"])
-        if profile == None:
-            logger.error(SITE,self.taskID,'Profile Not Found.')
+        try:
+            # self.session = client.Session(browser=client.Fingerprint.CHROME_83)
+            self.session = scraper()
+        except Exception as e:
+            self.error(f'error => {e}')
+            self.__init__(task,taskName,rowNumber)
+
+
+        self.webhookData = {
+            "site":SITE,
+            "product":"n/a",
+            "size":"n/a",
+            "image":"https://i.imgur.com/VqWvzDN.png",
+            "price":"0",
+            "profile":self.task['PROFILE'],
+            "speed":0,
+            "url":"https://venetiacli.io",
+            "paymentMethod":"n/a",
+            "proxy":"n/a",
+            "product_url":self.task['PRODUCT']
+        }
+
+        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+
+        self.profile = loadProfile(self.task["PROFILE"])
+        if self.profile == None:
+            self.error("Profile Not found. Exiting...")
             time.sleep(10)
             sys.exit()
-        self.region = profile["countryCode"].lower()
-        
-        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-        threading.Thread(target=self.task_checker,daemon=True).start()
-        self.collect()
 
-
-    def collect(self):
-
-        if self.region == 'fr':
+        if self.profile['countryCode'].lower() == 'fr':
             self.disneyRegion = 'fr'
-        if self.region == 'de':
+        if self.profile['countryCode'].lower() == 'de':
             self.disneyRegion = 'de'
-        if self.region == 'it':
+        if self.profile['countryCode'].lower() == 'it':
             self.disneyRegion = 'it'
-        if self.region == 'es':
+        if self.profile['countryCode'].lower() == 'es':
             self.disneyRegion = 'es'
-        if self.region == 'us':
+        if self.profile['countryCode'].lower() == 'us':
             self.disneyRegion = 'com'
         else:
             self.disneyRegion = 'co.uk'
-        
 
-        if "|" in self.task["PRODUCT"]:
-            self.product = findProduct("https://www.shopdisney.{}/search?srule=Newest&q={}".format(self.disneyRegion,"+".join(self.task["PRODUCT"].split('|'))),self.session,self.taskID,SITE,self.task,self.disneyRegion)
-            while self.product == None:
-                logger.error(SITE,self.taskID,'Failed to find product. Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                self.collect()
-            logger.warning(SITE,self.taskID,'Successfully found product => {}'.format(self.product[0]))
-            self.product = self.product[1]
-        elif "shopdisney" in self.task["PRODUCT"]:
-            self.product = self.task["PRODUCT"]
-        else:
-            self.product = "https://www.shopdisney.{}/{}.html".format(self.disneyRegion,self.task["PRODUCT"])
-
-        logger.prepare(SITE,self.taskID,'Getting product page...')
-        try:
-            retrieve = self.session.get(self.product, headers={
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-
-        if retrieve.status_code == 200:
-            self.start = time.time()
-            logger.warning(SITE,self.taskID,'Got product page')
-            regex = r"fe.data.urls.cartShow(.+);"
-            matches = re.search(regex, retrieve.text, re.MULTILINE)
-            if matches:
-
-                self.bag = str(matches.group()).split('= "/')[1].split('"')[0]
-            try:
-                logger.prepare(SITE,self.taskID,'Getting product data...')
-                soup = BeautifulSoup(retrieve.text, "html.parser")
-                self.productTitle = soup.find("title").text.strip(" ").replace("\n","").split(' - ')[0]
-                self.productImage = soup.find("meta", {"property": "og:image"})["content"]
-                self.productPrice = soup.find("meta", {"itemprop": "price"}).text.replace('\n','')
-                self.csrf = soup.find("input",{"name":"csrf_token"})["value"]
-                self.pid = soup.find("input",{"name":"pid"})["value"]
-                self.cartURL = soup.find("form",{"class":"js-pdp-form"})["action"]
-                self.siteBase = "https://www.shopdisney.{}".format(self.disneyRegion)
-                self.demandwareBase = self.cartURL.split('Cart-AddProduct')[0]
-
-                self.size = "One Size"
-
-                logger.warning(SITE,self.taskID,f'Found Size => {self.size}')
-
-                        
-            except Exception as e:
-               log.info(e)
-               logger.error(SITE,self.taskID,'Failed to scrape page (Most likely out of stock). Retrying...')
-               time.sleep(int(self.task["DELAY"]))
-               self.collect()
-
-            self.addToCart()
-
-        else:
-            try:
-                status = retrieve.status_code
-            except:
-                status = 'Unknown'
-            logger.error(SITE,self.taskID,f'Failed to get product page => {status}. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.collect()
-
+        self.tasks()
     
-    def addToCart(self):
-        logger.prepare(SITE,self.taskID,'Adding to cart...')
+    def tasks(self):
 
-        payload = {
-            'format': 'ajax',
-            'Quantity': 1,
-            'pid': self.pid,
-            'csrf_token': self.csrf
-        }
+        self.monitor()
+        self.addToCart()
+        self.secKey()
+        self.shipKey()
+        self.shipMethods()
+        self.shipping()
 
-        try:
-            postCart = self.session.post(self.cartURL, data=payload, headers={
-                'accept': '*/*',
-                'referer': self.product,
-                'x-requested-with': 'XMLHttpRequest',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.addToCart()
-
-
-
-        try:
-            soup = BeautifulSoup(postCart.text,"html.parser")
-            count = soup.find("span",{"class":"bag-count"}).text
-        except Exception as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.addToCart()
-        if postCart.status_code == 200 and int(count) > 0:
-            updateConsoleTitle(True,False,SITE)
-            logger.warning(SITE,self.taskID,'Successfully carted')
-            self.initiate()
-        else:
-            logger.error(SITE,self.taskID,'Failed to cart. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.addToCart()
-
-    def initiate(self):
-        logger.prepare(SITE,self.taskID,'Getting bag...')
-        try:
-            bag = self.session.get(self.siteBase + '/' + self.bag, headers={
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'referer': self.product,
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.initiate()
-
-
-        if bag.status_code == 200:
-            try:
-                soup = BeautifulSoup(bag.text,"html.parser")
-                self.bagUrl = soup.find('form',{'name':'dwfrm_cart'})['action']
-                self.secureKey = self.bagUrl.split('?dwcont=')[1]
-                self.checkoutCart = soup.find('button',{'name':'dwfrm_cart_checkoutCart'})['value']
-                logger.warning(SITE,self.taskID,'Got bag data')
-            except Exception as e:
-                log.info(e)
-                logger.error(SITE,self.taskID,'Failed to get keys')
-                time.sleep(int(self.task["DELAY"]))
-                self.initiate()
-        else:
-            logger.error(SITE,self.taskID,'Failed to get keys')
-            time.sleep(int(self.task["DELAY"]))
-            self.initiate()
-
-        logger.prepare(SITE,self.taskID,'Initializing checkout...')
-        try:
-            initiate = self.session.post(self.bagUrl,data={"dwfrm_cart_checkoutCart": self.checkoutCart} ,headers={
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'referer': self.siteBase + "/" + self.bag,
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.initiate()
-
-
-        if initiate.status_code == 200:
-            try:
-                soup = BeautifulSoup(initiate.text,"html.parser")
-
-                self.bagUrl = soup.find('form',{'id':'checkout-shipping-form'})['action']
-                self.shippingKey = soup.find('input',{'name':'dwfrm_singleshipping_securekey'})['value']
-                logger.warning(SITE,self.taskID,'Checkout initialized')
-            except Exception as e:
-                log.info(e)
-                logger.error(SITE,self.taskID,'Failed to initialize')
-                time.sleep(int(self.task["DELAY"]))
-                self.initiate()
-
-    
-            self.methods()
-        else:
-            logger.error(SITE,self.taskID,'Failed to initialize')
-            time.sleep(int(self.task["DELAY"]))
-            self.initiate()
-
-
-    def methods(self):
-        logger.prepare(SITE,self.taskID,'Getting shipping methods')
-        profile = loadProfile(self.task["PROFILE"])
-        if profile == None:
-            logger.error(SITE,self.taskID,'Profile Not Found.')
-            time.sleep(10)
-            sys.exit()
-
-
-        params = {
-            'countryCode': profile["countryCode"],
-            'postalCode': profile["zip"],
-            'city': profile["city"],
-            '_': int(time.time())
-        }
-        try:
-            shippingMethods = self.session.get(self.demandwareBase + "COShippingHook-UpdateShippingMethodList",params=params,headers={
-                'accept': '*/*',
-                'referer': self.bagUrl,
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
-                'x-requested-with': 'XMLHttpRequest'
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.methods()
-
-
-        if shippingMethods.status_code == 200:
-        
-            try:
-                soup = BeautifulSoup(shippingMethods.text,"html.parser")
-                methods = soup.find_all('input',{'name':'dwfrm_singleshipping_shippingAddress_shippingMethodList'})
-                self.method = methods[0]["value"]
-            except Exception as e:
-                log.info(e)
-                logger.error(SITE,self.taskID,'Failed to get shipping')
-                time.sleep(int(self.task["DELAY"]))
-                self.methods()
-
-            logger.warning(SITE,self.taskID,'Retrieved shipping method.')
-            self.shipping()
-        else:
-            logger.error(SITE,self.taskID,'Failed to get shipping')
-            time.sleep(int(self.task["DELAY"]))
-            self.methods()
-
-
-    def shipping(self):
-        logger.prepare(SITE,self.taskID,'Submitting shipping...')
-        profile = loadProfile(self.task["PROFILE"])
-        if profile == None:
-            logger.error(SITE,self.taskID,'Profile Not Found.')
-            time.sleep(10)
-            sys.exit()
-        payload = {
-            'dwfrm_singleshipping_securekey': self.shippingKey,
-            'dwfrm_singleshipping_shippingAddress_addressFields_addressid': None,
-            'dwfrm_singleshipping_shippingAddress_addressFields_firstName': profile["firstName"],
-            'dwfrm_singleshipping_shippingAddress_addressFields_lastName': profile["lastName"],
-            'dwfrm_singleshipping_shippingAddress_addressFields_phone': profile["phonePrefix"] + profile["phone"],
-            'dwfrm_singleshipping_shippingAddress_addressFields_email': profile["email"],
-            'dwfrm_singleshipping_shippingAddress_addressFields_country': profile["countryCode"],
-            'dwfrm_singleshipping_shippingAddress_addressFields_houseNumber': profile["house"],
-            'dwfrm_singleshipping_shippingAddress_addressFields_zip': profile["zip"],
-            'dwfrm_singleshipping_shippingAddress_addressFields_address1': profile["addressOne"],
-            'dwfrm_singleshipping_shippingAddress_addressFields_address2': profile["addressTwo"],
-            'dwfrm_singleshipping_shippingAddress_addressFields_city': profile["city"],
-            'accordionSectionCheckbox': 'on',
-            'dwfrm_singleshipping_shippingAddress_shippingMethodList': self.method,
-            'dwfrm_singleshipping_shippingAddress_addressFields_deliveryInstructions': '',
-            'dwfrm_singleshipping_shippingAddress_save': 1,
-        }
-        try:
-            postShipping = self.session.post(self.bagUrl,data=payload,headers={
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'referer': self.bagUrl,
-                'authority': f'www.shopdisney.{self.disneyRegion}',
-                'origin': f'https://www.shopdisney.{self.disneyRegion}',
-                'content-type': 'application/x-www-form-urlencoded',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-            self.shipping()
-
-
-        if postShipping.status_code in [200,302]:
-            logger.warning(SITE,self.taskID,'Successfully submitted shipping')
-            try:
-                soup = BeautifulSoup(postShipping.text,"html.parser")
-                self.billingSecureKey = soup.find('input',{'name':'dwfrm_billing_securekey'})['value']
-                self.bagUrl = soup.find('form',{'id':'js-checkout-billing-form'})['action']
-            except Exception as e:
-                logger.info(SITE,self.taskID,'Failed to submit shipping. Retrying...')
-                time.sleep(int(self.task["DELAY"]))
-                self.shipping()
-
-            if self.task["PAYMENT"].lower() == "paypal":
-                self.paypal()
-            if self.task["PAYMENT"].lower() == "card":
-                self.card()
-        else:
-            logger.error(SITE,self.taskID,'Failed to submit shipping. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.shipping()
-        
-
-    def paypal(self):
-        logger.prepare(SITE,self.taskID,'Submitting payment...')
-        profile = loadProfile(self.task["PROFILE"])
-        if profile == None:
-            logger.error(SITE,self.taskID,'Profile Not Found.')
-            time.sleep(10)
-            sys.exit()
-        payload = {
-            'dwfrm_billing_paymentMethods_selectedPaymentMethodID': 'WORLDPAY_PAYPAL',
-            'dwfrm_billing_paymentMethods_creditCard_type': '',
-            'dwfrm_billing_paymentMethods_creditCard_owner': '',
-            'dwfrm_billing_paymentMethods_creditCard_number': '',
-            'dwfrm_billing_paymentMethods_creditCard_month': '',
-            'dwfrm_billing_paymentMethods_creditCard_yearshort': '',
-            'dwfrm_billing_paymentMethods_creditCard_year': None,
-            'dwfrm_billing_paymentMethods_creditCard_cvn': '',
-            'dwfrm_billing_paymentMethods_creditCard_uuid': '',
-            'paymentmethods': 'WORLDPAY_PAYPAL',
-            'dwfrm_billing_threeDSReferenceId': '',
-            'dwfrm_billing_useShippingAddress': 0,
-            'dwfrm_billing_save': True,
-            'dwfrm_billing_billingAddress_addressFields_firstName': profile["firstName"],
-            'dwfrm_billing_billingAddress_addressFields_lastName': profile["lastName"],
-            'dwfrm_billing_billingAddress_addressFields_country': profile["countryCode"],
-            'dwfrm_billing_billingAddress_addressFields_houseNumber': profile["house"],
-            'dwfrm_billing_billingAddress_addressFields_zip': profile["zip"],
-            'dwfrm_billing_billingAddress_addressFields_address1': profile["addressOne"],
-            'dwfrm_billing_billingAddress_addressFields_address2': profile["addressTwo"],
-            'dwfrm_billing_billingAddress_addressFields_city': profile["city"],
-            'dwfrm_billing_securekey': self.billingSecureKey
-        }
-
-        try:
-            postFinal = self.session.post(self.bagUrl,data=payload,headers={
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'referer': self.demandwareBase + 'COShipping-Start/{}'.format(self.secureKey),
-                'authority': f'www.shopdisney.{self.disneyRegion}',
-                'origin': f'https://www.shopdisney.{self.disneyRegion}',
-                'content-type': 'application/x-www-form-urlencoded',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+        if self.task['PAYMENT'].strip().lower() == "paypal":
             self.paypal()
-
-        if postFinal.status_code in [200,302]:
-            try:
-                soup = BeautifulSoup(postFinal.text,"html.parser")
-                self.submitVal = soup.find('button',{'name':'submit-order'})['value']
-                logger.warning(SITE,self.taskID,'Submitted payment')
-            except Exception as e:
-                log.info(e)
-                time.sleep(int(self.task["DELAY"]))
-                logger.error(SITE,self.taskID,'Failed to submit payment. Retrying...')
-
-            logger.prepare(SITE,self.taskID,'Getting paypal link...')
-            try:
-                pp = self.session.post(self.demandwareBase + "COSummary-Submit",data={'submit-order': self.submitVal, 'csrf_token':self.csrf},headers={
-                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                    'referer': self.siteBase + '/{}?dwcont={}'.format(self.bag,self.secureKey),
-                    'content-type': 'application/x-www-form-urlencoded',
-                    'authority': f'www.shopdisney.{self.disneyRegion}',
-                    'origin': f'https://www.shopdisney.{self.disneyRegion}',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
-                })
-            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                log.info(e)
-                logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                time.sleep(int(self.task["DELAY"]))
-                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                self.paypal()
-            
-    
-            if pp.status_code in [200,302] and "paypal" in pp.url:
-                logger.warning(SITE,self.taskID,'Got paypal link')
-                self.end = time.time() - self.start
-                logger.alert(SITE,self.taskID,'Sending PayPal checkout to Discord!')
-                updateConsoleTitle(False,True,SITE)
-                url = storeCookies(pp.url,self.session, self.productTitle, self.productImage, self.productPrice)
-                sendNotification(SITE,self.productTitle)
-                try:
-                    discord.success(
-                        webhook=loadSettings()["webhook"],
-                        site=SITE,
-                        url=url,
-                        image=self.productImage,
-                        title=self.productTitle,
-                        size=self.size,
-                        price=self.productPrice,
-                        paymentMethod='PayPal',
-                        profile=self.task["PROFILE"],
-                        product=self.task["PRODUCT"],
-                        proxy=self.session.proxies,
-                        speed=self.end
-                    )
-                    while True:
-                        pass
-                except:
-                    logger.secondary(SITE,self.taskID,'Failed to send webhook. Checkout here ==> {}'.format(url))
-            
-            else:
-                try:
-                    discord.failed(
-                        webhook=loadSettings()["webhook"],
-                        site=SITE,
-                        url=self.task["PRODUCT"],
-                        image=self.productImage,
-                        title=self.productTitle,
-                        size=self.size,
-                        price=self.productPrice,
-                        paymentMethod='PayPal',
-                        profile=self.task["PROFILE"],
-                        proxy=self.session.proxies
-                    )
-                except:
-                    pass
-                logger.error(SITE,self.taskID,'Failed to get PayPal checkout link. Retrying...')
-                self.paypal()
         else:
-            logger.error(SITE,self.taskID,'Failed to submit payment. Retrying...')
-            time.sleep(int(self.task["DELAY"]))
-            self.paypal()
-
-
-    def card(self):
-        logger.info(SITE,self.taskID,'Starting [CREDIT CARD] checkout...')
-        profile = loadProfile(self.task["PROFILE"])
-        if profile == None:
-            logger.error(SITE,self.taskID,'Profile Not Found.')
-            time.sleep(10)
-            sys.exit()
-        number = profile["card"]["cardNumber"]
-        if str(number[0]) == "3":
-            cType = 'Amex'
-        if str(number[0]) == "4":
-            cType = 'Visa'
-        if str(number[0]) == "5":
-            cType = 'Master'
-
-        n = 4
-        cardSplit = [number[i:i+n] for i in range(0, len(number), n)]
-        cardNumbers = f'{cardSplit[0]} / {cardSplit[1]} / {cardSplit[2]} / {cardSplit[3]}'
-
-
-        payload = {
-            'dwfrm_billing_paymentMethods_selectedPaymentMethodID': 'WORLDPAY_CREDIT_CARD',
-            'dwfrm_billing_paymentMethods_creditCard_type': cType,
-            'dwfrm_billing_paymentMethods_creditCard_owner': profile["firstName"] + " " + profile["lastName"],
-            'dwfrm_billing_paymentMethods_creditCard_number': cardNumbers,
-            'dwfrm_billing_paymentMethods_creditCard_month': profile["card"]["cardMonth"],
-            'dwfrm_billing_paymentMethods_creditCard_yearshort': profile["card"]["cardYear"][2:],
-            'dwfrm_billing_paymentMethods_creditCard_year': profile["card"]["cardYear"],
-            'dwfrm_billing_paymentMethods_creditCard_cvn': profile["card"]["cardCVV"],
-            'dwfrm_billing_paymentMethods_creditCard_uuid': '',
-            'paymentmethods': 'WORLDPAY_CREDIT_CARD',
-            'dwfrm_billing_threeDSReferenceId': '',
-            'dwfrm_billing_useShippingAddress': 0,
-            'dwfrm_billing_save': True,
-            'dwfrm_billing_billingAddress_addressFields_firstName': profile["firstName"],
-            'dwfrm_billing_billingAddress_addressFields_lastName': profile["lastName"],
-            'dwfrm_billing_billingAddress_addressFields_country': profile["countryCode"],
-            'dwfrm_billing_billingAddress_addressFields_houseNumber': profile["house"],
-            'dwfrm_billing_billingAddress_addressFields_zip': profile["zip"],
-            'dwfrm_billing_billingAddress_addressFields_address1': profile["addressOne"],
-            'dwfrm_billing_billingAddress_addressFields_address2': profile["addressTwo"],
-            'dwfrm_billing_billingAddress_addressFields_city': profile["city"],
-            'dwfrm_billing_securekey': self.billingSecureKey
-        }
-
-        logger.prepare(SITE,self.taskID,'Submitting order data...')
-        try:
-            postFinal = self.session.post(self.bagUrl,data=payload,headers={
-                'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'referer': self.demandwareBase + 'COShipping-Start/{}'.format(self.secureKey),
-                'authority': f'www.shopdisney.{self.disneyRegion}',
-                'origin': f'https://www.shopdisney.{self.disneyRegion}',
-                'content-type': 'application/x-www-form-urlencoded',
-                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
-            })
-        except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-            log.info(e)
-            logger.error(SITE,self.taskID,'Error: {}'.format(e))
-            time.sleep(int(self.task["DELAY"]))
-            self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
             self.card()
 
-        if postFinal.status_code in [200,302]:
-            logger.warning(SITE,self.taskID,'Submitted order data')
-            logger.prepare(SITE,self.taskID,'Submitting order...')
+        self.sendToDiscord()
+
+    def findProduct(self):
+        self.prepare("Searching for product...")
+        while True:
             try:
-                submit = self.session.post(self.demandwareBase + "COSummary-Submit",data={'submit-order': 'Submit Order', 'csrf_token':self.csrf},headers={
-                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                    'referer': self.siteBase + '/{}?dwcont={}'.format(self.bag,self.secureKey),
-                    'content-type': 'application/x-www-form-urlencoded',
-                    'authority': f'www.shopdisney.{self.disneyRegion}',
-                    'origin': f'https://www.shopdisney.{self.disneyRegion}',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36',
+                response = self.session.get(self.kwUrl, headers={
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36'
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
-                logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                time.sleep(int(self.task["DELAY"]))
+                self.error(f"error: {str(e)}")
                 self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                self.card()
-            
-            logger.warning(SITE,self.taskID,'Successfully submitted order.')
-            if submit.status_code == 200:
-                logger.prepare(SITE,self.taskID,'Starting 3DS Process...')
-                try:
-                    soup = BeautifulSoup(submit.text, "html.parser")
-                    PaReq = soup.find('input',{'name':'PaReq'})['value']
-                    termUrl = soup.find('input',{'name':'TermUrl'})['value']
-                    MD = soup.find('input',{'name':'MD'})['value']
-                except Exception as e:
-                    log.info(e)
-                    self.card()
+                time.sleep(int(self.task["DELAY"]))
+                continue
+                # https://www.shopdisney.{}/new?srule=Newest&sz=96&start=0
+
+            try:
+                if response.status_code == 200:
+                    try:
+                        kws = self.task["PRODUCT"].split('|')
+                        kws = [x.lower() for x in kws]
+                        foundItem = ""
+                        soup = BeautifulSoup(response.text,"html.parser")
+                        section = soup.find('section',{'class':'catlisting__product-grid js-catlisting-product-grid'})
+                        # print(section)
+                        row = section.find('div',{'class':'row'}).find_all('div')
+                        for r in row:
+                            # r = BeautifulSoup(r,"htm.parser")
+                            try:
+                                p = r.find('a',{'class':'product__linkcontainer js-catlisting-productlink-container no-transform'})
+                                title = p['title']
+                                link = p['href']
+                                title_ = [x.lower() for x in title.split(' ')]
+                                if all(kw in title_ for kw in kws):
+                                    link = p['href']
+                                    foundItem = '{}|{}'.format(title,link)
+                            except:
+                                pass
+
+                        if len(foundItem) > 0:
+                            self.success("Found Product => {}".format(foundItem.split('|')[0]))
+                            return foundItem.split('|')
+                        else:
+                            continue
+
+                    except Exception as e:
+                        log.info(e)
+                        continue
+            except:
+                log.info(e)
+                continue
+
+    def monitor(self):
+        while True:
+
+            if '|' in self.task['PRODUCT']:
+                self.kwUrl = "https://www.shopdisney.{}/search?srule=Newest&q={}".format(self.disneyRegion,"+".join(self.task["PRODUCT"].split('|')))
+                self.prodUrl = self.findProduct()
+            elif "shopdisney" in self.task["PRODUCT"]:
+                self.prodUrl = self.task["PRODUCT"]
+            else:
+                self.prodUrl = "https://www.shopdisney.{}/{}.html".format(self.disneyRegion,self.task["PRODUCT"]) 
+
+            self.prepare("Getting Product...")
+
+            try:
+                response = self.session.get(self.prodUrl)
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                continue
+
+            if response.status_code == 200:
+                self.start = time.time()
+
+                self.warning("Retrieved Product")
 
                 try:
-                    payload = {"PaReq":PaReq, "TermUrl":termUrl,  "MD":MD}
-                    payAuth = self.session.post('https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication', data=payload, headers={
-                        'authority': 'verifiedbyvisa.acs.touchtechpayments.com',
-                        'accept-language': 'en-US,en;q=0.9',
-                        'referer': 'https://www.workingclassheroes.co.uk/ssl/controls/3DAuthentication/3DRedirect.aspx',
-                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                        'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    regex = r"fe.data.urls.cartShow(.+);"
+                    matches = re.search(regex, response.text, re.MULTILINE)
+                    if matches:
+                        self.bag = str(matches.group()).split('= "/')[1].split('"')[0]
+
+                        soup = BeautifulSoup(response.text, "html.parser")
+
+                        self.webhookData['product'] = str(soup.find("title").text.strip(" ").replace("\n","").split(' - ')[0])
+                        self.webhookData['image'] = str(soup.find("meta", {"property": "og:image"})["content"])
+                        self.webhookData['price'] = str(soup.find("meta", {"itemprop": "price"})["content"])
+
+                        self.csrf = soup.find("input",{"name":"csrf_token"})["value"]
+                        self.pid = soup.find("input",{"name":"pid"})["value"]
+                        self.cartURL = soup.find("form",{"class":"js-pdp-form"})["action"]
+                        self.siteBase = "https://www.shopdisney.{}".format(self.disneyRegion)
+                        self.demandwareBase = self.cartURL.split('Cart-AddProduct')[0]
+                        self.size = "One Size"
+                        self.webhookData['size'] = self.size
+
+                        self.warning(f"Found Size => {self.size}")
+                        return
+
+                    else:
+                        raise Exception
+                except Exception as e:
+                    log.info(e)
+                    self.error("Failed to parse product data (maybe OOS)")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+
+                return
+                    
+            else:
+                self.error(f"Failed to get product [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+    
+    def addToCart(self):
+        while True:
+            self.prepare("Adding to cart...")
+            
+            payload = {
+                'format': 'ajax',
+                'Quantity': 1,
+                'pid': self.pid,
+                'csrf_token': self.csrf
+            }   
+            
+
+            try:
+                response = self.session.post(self.cartURL, data=payload, headers={
+                    'accept': '*/*',
+                    'referer': self.prodUrl,
+                    'x-requested-with': 'XMLHttpRequest'
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            if response.status_code == 200:
+                try:
+                    soup = BeautifulSoup(response.text,"html.parser")
+                    count = soup.find("span",{"class":"bag-count"}).text
+                except Exception as e:
+                    log.info(e)
+                    self.error("Failed to cart [failed to parse response]. Retrying...")
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+                
+                if int(count) > 0:
+                    self.success("Added to cart!")
+                    updateConsoleTitle(True,False,SITE)
+                    return
+                else:
+                    self.error(f"Failed to cart. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+            
+            else:
+                self.error(f"Failed to cart [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+    
+    def secKey(self):
+        while True:
+            self.prepare("Getting secure key...")
+            
+            try:
+                response = self.session.get(self.siteBase + '/' + self.bag, headers={
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'referer': self.prodUrl,
+                })
+
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            if response.status_code == 200:
+
+                try:
+                    soup = BeautifulSoup(response.text,"html.parser")
+                    self.bagUrl = soup.find('form',{'name':'dwfrm_cart'})['action']
+                    self.secureKey = self.bagUrl.split('?dwcont=')[1]
+                    self.checkoutCart = soup.find('button',{'name':'dwfrm_cart_checkoutCart'})['value']
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to get secure key [failed to parse response]')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                self.warning("Got secure key")
+                return
+            else:
+                self.error(f"Failed to get secure key [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+
+    def shipKey(self):
+        while True:
+            self.prepare("Getting shipping key...")
+            
+            try:
+                response = self.session.post(self.bagUrl,data={"dwfrm_cart_checkoutCart": self.checkoutCart} ,headers={
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'referer': self.siteBase + "/" + self.bag,
+                })
+
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            if response.status_code == 200:
+
+                try:
+                    soup = BeautifulSoup(response.text,"html.parser")
+                    self.bagUrl = soup.find('form',{'id':'checkout-shipping-form'})['action']
+                    self.shippingKey = soup.find('input',{'name':'dwfrm_singleshipping_securekey'})['value']
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to get shipping key [failed to parse response]')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                self.warning("Got shipping key")
+                return
+            else:
+                self.error(f"Failed to get shipping key [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+
+    def shipMethods(self):
+        while True:
+            self.prepare("Getting shipping method...")
+
+            params = {
+                'countryCode': self.profile["countryCode"],
+                'postalCode': self.profile["zip"],
+                'city': self.profile["city"],
+                '_': int(time.time())
+            }
+            
+            try:
+                response = self.session.get(self.demandwareBase + "COShippingHook-UpdateShippingMethodList",params=params,headers={
+                    'accept': '*/*',
+                    'referer': self.bagUrl,
+                    'x-requested-with': 'XMLHttpRequest'
+                })
+
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            if response.status_code == 200:
+
+                try:
+                    soup = BeautifulSoup(response.text,"html.parser")
+                    methods = soup.find_all('input',{'name':'dwfrm_singleshipping_shippingAddress_shippingMethodList'})
+                    self.method = methods[0]["value"]
+                except Exception as e:
+                    log.info(e)
+                    logger.error(SITE,self.taskID,'Failed to get shipping method [failed to parse response]')
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                self.warning("Got shipping method")
+                return
+            else:
+                self.error(f"Failed to get shipping method [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+
+    def shipping(self):
+        while True:
+            self.prepare("Submitting shipping...")
+          
+            try:
+                payload = {
+                    'dwfrm_singleshipping_securekey': self.shippingKey,
+                    'dwfrm_singleshipping_shippingAddress_addressFields_addressid': None,
+                    'dwfrm_singleshipping_shippingAddress_addressFields_firstName': self.profile["firstName"],
+                    'dwfrm_singleshipping_shippingAddress_addressFields_lastName': self.profile["lastName"],
+                    'dwfrm_singleshipping_shippingAddress_addressFields_phone': self.profile["phonePrefix"] + self.profile["phone"],
+                    'dwfrm_singleshipping_shippingAddress_addressFields_email': self.profile["email"],
+                    'dwfrm_singleshipping_shippingAddress_addressFields_country': self.profile["countryCode"],
+                    'dwfrm_singleshipping_shippingAddress_addressFields_houseNumber': self.profile["house"],
+                    'dwfrm_singleshipping_shippingAddress_addressFields_zip': self.profile["zip"],
+                    'dwfrm_singleshipping_shippingAddress_addressFields_address1': self.profile["addressOne"],
+                    'dwfrm_singleshipping_shippingAddress_addressFields_address2': self.profile["addressTwo"],
+                    'dwfrm_singleshipping_shippingAddress_addressFields_city': self.profile["city"],
+                    'accordionSectionCheckbox': 'on',
+                    'dwfrm_singleshipping_shippingAddress_shippingMethodList': self.method,
+                    'dwfrm_singleshipping_shippingAddress_addressFields_deliveryInstructions': '',
+                    'dwfrm_singleshipping_shippingAddress_save': 1,
+                }
+
+            except Exception as e:
+                self.error(f"Failed to construct shipping form ({e}). Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+                
+            try:
+                response = self.session.post(self.bagUrl,data=payload,headers={
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'referer': self.bagUrl,
+                    'authority': f'www.shopdisney.{self.disneyRegion}',
+                    'origin': f'https://www.shopdisney.{self.disneyRegion}',
+                    'content-type': 'application/x-www-form-urlencoded',
+                })
+
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+        
+            if response.status_code == 200:
+                try:
+                    soup = BeautifulSoup(response.text,"html.parser")
+                    self.billingSecureKey = soup.find('input',{'name':'dwfrm_billing_securekey'})['value']
+                    self.bagUrl = soup.find('form',{'id':'js-checkout-billing-form'})['action']
+                except Exception as e:
+                    # print(response.text)
+                    log.info(e)
+                    self.error(f"Failed to set shipping [failed to parse response]. Retrying...")
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                self.warning("Successfully set shipping")
+                return
+
+            else:
+                self.error(f"Failed to set shipping [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+
+    def paypal(self):
+        while True:
+            self.prepare("Getting paypal checkout...")
+
+            try:
+                payload = {
+                    'dwfrm_billing_paymentMethods_selectedPaymentMethodID': 'WORLDPAY_PAYPAL',
+                    'dwfrm_billing_paymentMethods_creditCard_type': '',
+                    'dwfrm_billing_paymentMethods_creditCard_owner': '',
+                    'dwfrm_billing_paymentMethods_creditCard_number': '',
+                    'dwfrm_billing_paymentMethods_creditCard_month': '',
+                    'dwfrm_billing_paymentMethods_creditCard_yearshort': '',
+                    'dwfrm_billing_paymentMethods_creditCard_year': None,
+                    'dwfrm_billing_paymentMethods_creditCard_cvn': '',
+                    'dwfrm_billing_paymentMethods_creditCard_uuid': '',
+                    'paymentmethods': 'WORLDPAY_PAYPAL',
+                    'dwfrm_billing_threeDSReferenceId': '',
+                    'dwfrm_billing_useShippingAddress': 0,
+                    'dwfrm_billing_save': True,
+                    'dwfrm_billing_billingAddress_addressFields_firstName': self.profile["firstName"],
+                    'dwfrm_billing_billingAddress_addressFields_lastName': self.profile["lastName"],
+                    'dwfrm_billing_billingAddress_addressFields_country': self.profile["countryCode"],
+                    'dwfrm_billing_billingAddress_addressFields_houseNumber': self.profile["house"],
+                    'dwfrm_billing_billingAddress_addressFields_zip': self.profile["zip"],
+                    'dwfrm_billing_billingAddress_addressFields_address1': self.profile["addressOne"],
+                    'dwfrm_billing_billingAddress_addressFields_address2': self.profile["addressTwo"],
+                    'dwfrm_billing_billingAddress_addressFields_city': self.profile["city"],
+                    'dwfrm_billing_securekey': self.billingSecureKey
+                }
+            except Exception as e:
+                self.error(f"Failed to construct paypal form ({e}). Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+
+            try:
+                response = self.session.post(self.bagUrl,data=payload,headers={
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'referer': self.demandwareBase + 'COShipping-Start/{}'.format(self.secureKey),
+                    'authority': f'www.shopdisney.{self.disneyRegion}',
+                    'origin': f'https://www.shopdisney.{self.disneyRegion}',
+                    'content-type': 'application/x-www-form-urlencoded',
+                })
+
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                continue
+
+            if response.status_code in [200,302]:
+
+                try:
+                    soup = BeautifulSoup(response.text,"html.parser")
+                    self.submitVal = soup.find('button',{'name':'submit-order'})['value']
+                except:
+                    self.error("Failed to get paypal checkout [failed to parse response]. Retrying...")
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+                
+                try:
+                    response2 = self.session.post(self.demandwareBase + "COSummary-Submit",data={'submit-order': self.submitVal, 'csrf_token':self.csrf},headers={
+                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                        'referer': self.siteBase + '/{}?dwcont={}'.format(self.bag,self.secureKey),
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'authority': f'www.shopdisney.{self.disneyRegion}',
+                        'origin': f'https://www.shopdisney.{self.disneyRegion}',
+                    })
+
+                except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                    log.info(e)
+                    self.error(f"error: {str(e)}")
+                    time.sleep(int(self.task["DELAY"]))
+                    self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                    continue
+
+                if response2.status_code in [200,302] and "paypal" in response2.url:
+                    self.end = time.time() - self.start
+                    self.webhookData['speed'] = self.end
+
+                    self.success("Got paypal checkout!")
+                    updateConsoleTitle(False,True,SITE)
+
+                    self.webhookData['url'] = storeCookies(
+                        response2.url,self.session,
+                        self.webhookData['product'],
+                        self.webhookData['image'],
+                        self.webhookData['price'],
+                        False
+                    )
+                    return
+                
+                else:
+                    self.error(f"Failed to get paypal checkout [{str(response.status_code)}]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+
+                
+            else:
+                self.error(f"Failed to get paypal checkout [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+  
+    def card(self):
+        while True:
+            self.prepare("Completing card checkout...")
+            number = self.profile["card"]["cardNumber"]
+            if str(number[0]) == "3":
+                cType = 'Amex'
+            if str(number[0]) == "4":
+                cType = 'Visa'
+            if str(number[0]) == "5":
+                cType = 'Master'
+            if str(number[0]) == "6":
+                cType = 'Master' 
+
+            try:
+                n = 4
+                cardSplit = [number[i:i+n] for i in range(0, len(number), n)]
+                cardNumbers = f'{cardSplit[0]} / {cardSplit[1]} / {cardSplit[2]} / {cardSplit[3]}'
+
+                payload = {
+                    'dwfrm_billing_paymentMethods_selectedPaymentMethodID': 'WORLDPAY_CREDIT_CARD',
+                    'dwfrm_billing_paymentMethods_creditCard_type': cType,
+                    'dwfrm_billing_paymentMethods_creditCard_owner': self.profile["firstName"] + " " + self.profile["lastName"],
+                    'dwfrm_billing_paymentMethods_creditCard_number': cardNumbers,
+                    'dwfrm_billing_paymentMethods_creditCard_month': self.profile["card"]["cardMonth"],
+                    'dwfrm_billing_paymentMethods_creditCard_yearshort': self.profile["card"]["cardYear"][2:],
+                    'dwfrm_billing_paymentMethods_creditCard_year': self.profile["card"]["cardYear"],
+                    'dwfrm_billing_paymentMethods_creditCard_cvn': self.profile["card"]["cardCVV"],
+                    'dwfrm_billing_paymentMethods_creditCard_uuid': '',
+                    'paymentmethods': 'WORLDPAY_CREDIT_CARD',
+                    'dwfrm_billing_threeDSReferenceId': '',
+                    'dwfrm_billing_useShippingAddress': 0,
+                    'dwfrm_billing_save': True,
+                    'dwfrm_billing_billingAddress_addressFields_firstName': self.profile["firstName"],
+                    'dwfrm_billing_billingAddress_addressFields_lastName': self.profile["lastName"],
+                    'dwfrm_billing_billingAddress_addressFields_country': self.profile["countryCode"],
+                    'dwfrm_billing_billingAddress_addressFields_houseNumber': self.profile["house"],
+                    'dwfrm_billing_billingAddress_addressFields_zip': self.profile["zip"],
+                    'dwfrm_billing_billingAddress_addressFields_address1': self.profile["addressOne"],
+                    'dwfrm_billing_billingAddress_addressFields_address2': self.profile["addressTwo"],
+                    'dwfrm_billing_billingAddress_addressFields_city': self.profile["city"],
+                    'dwfrm_billing_securekey': self.billingSecureKey
+                }
+            except:
+                self.error("Failed to construct checkout form. Retrying...")
+                time.sleep(int(self.task["DELAY"]))
+                continue
+
+            try:
+                response = self.session.post(self.bagUrl,data=payload,headers={
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    'referer': self.demandwareBase + 'COShipping-Start/{}'.format(self.secureKey),
+                    'authority': f'www.shopdisney.{self.disneyRegion}',
+                    'origin': f'https://www.shopdisney.{self.disneyRegion}',
+                    'content-type': 'application/x-www-form-urlencoded',
+                })
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
+                time.sleep(int(self.task["DELAY"]))
+                continue
+ 
+            if response.status_code in [200,302]:
+
+                try:
+                    response2 = self.session.post(self.demandwareBase + "COSummary-Submit",data={'submit-order': 'Submit Order', 'csrf_token':self.csrf},headers={
+                        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                        'referer': self.siteBase + '/{}?dwcont={}'.format(self.bag,self.secureKey),
+                        'content-type': 'application/x-www-form-urlencoded',
+                        'authority': f'www.shopdisney.{self.disneyRegion}',
+                        'origin': f'https://www.shopdisney.{self.disneyRegion}',
                     })
                 except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                     log.info(e)
-                    logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                    time.sleep(int(self.task["DELAY"]))
+                    self.error(f"error: {str(e)}")
                     self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                    self.card()
-            
-                if payAuth.status_code == 200:
-                    soup = BeautifulSoup(payAuth.text, "html.parser")
-                    transToken = str(soup.find_all("script")[0]).split('"')[1]
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+
+                if response2.status_code in [200,302]:
+
                     try:
-                        payload = {"transToken":transToken}
-                        poll = self.session.post('https://poll.touchtechpayments.com/poll', json=payload, headers={
-                            'authority': 'verifiedbyvisa.acs.touchtechpayments.com',
-                            'accept-language': 'en-US,en;q=0.9',
-                            'referer': 'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
-                            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                            'accept':'*/*',
+                        soup = BeautifulSoup(response2.text, "html.parser")
+                        PaReq = soup.find('input',{'name':'PaReq'})['value']
+                        termUrl = soup.find('input',{'name':'TermUrl'})['value']
+                        MD = soup.find('input',{'name':'MD'})['value']
+                    except Exception as e:
+                        self.error(f"Failed to complete card checkout [{str(response.status_code)}]. Retrying...")
+                        time.sleep(int(self.task['DELAY']))
+                        continue
+
+                    self.Dpayload = {
+                        "TermUrl":termUrl,
+                        "PaReq":PaReq,
+                        "MD":MD 
+                    }
+
+                    three_d_data = threeDSecure.solve(
+                        self.session,
+                        self.profile,
+                        self.Dpayload,
+                        self.webhookData,
+                        self.taskID,
+                        f'https://www.shopdisney.{self.disneyRegion}'
+                    )
+                    if three_d_data == False:
+                        self.error("Checkout Failed (3DS Declined or Failed). Retrying...")
+                        time.sleep(int(self.task['DELAY']))
+                        continue
+                    
+
+                    try:
+                        response3 = self.session.post(termUrl,data=three_d_data,headers={
+                            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                            'referer': self.siteBase + '/{}?dwcont={}'.format(self.bag,self.secureKey),
+                            'content-type': 'application/x-www-form-urlencoded',
+                            'authority': f'www.shopdisney.{self.disneyRegion}',
+                            'origin': f'https://www.shopdisney.{self.disneyRegion}',
                         })
                     except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                         log.info(e)
-                        logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                        time.sleep(int(self.task["DELAY"]))
+                        self.error(f"error: {str(e)}")
                         self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                        self.card()
-
-                    if poll.json()["status"] == "blocked":
-                        logger.error(SITE,self.taskID,'Card Blocked. Retrying...')
                         time.sleep(int(self.task["DELAY"]))
-                        self.card()
-                    if poll.json()["status"] == "pending":
-                        logger.warning(SITE,self.taskID,'Polling 3DS...')
-                        while poll.json()["status"] == "pending":
-                            poll = self.session.post('https://poll.touchtechpayments.com/poll',headers={
-                                'authority': 'verifiedbyvisa.acs.touchtechpayments.com',
-                                'accept-language': 'en-US,en;q=0.9',
-                                'referer': 'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
-                                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36',
-                                'accept':'*/*',}, json=payload)
-                    
-                    try:
-                        json = poll.json()
-                    except:
-                        logger.error(SITE,self.taskID,'Failed to retrieve auth token for 3DS. Retrying...')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.card()
+                        continue
 
-                    if poll.json()["status"] == "success":
-                        authToken = poll.json()['authToken']
-                    else:
-                        logger.error(SITE,self.taskID,'Failed to retrieve auth token for 3DS. Retrying...')
-                        time.sleep(int(self.task["DELAY"]))
-                        self.card()
-
-                    authToken = poll.json()['authToken']
-                    logger.alert(SITE,self.taskID,'3DS Authorised')
-            
-                    data = '{"transToken":"%s","authToken":"%s"}' % (transToken, authToken)
-
-                    headers = {
-                        'authority': 'macs.touchtechpayments.com',
-                        'sec-fetch-dest': 'empty',
-                        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
-                        'content-type': 'application/json',
-                        'accept': '*/*',
-                        'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
-                        'referer': 'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
-                        'sec-fetch-site': 'same-site',
-                        'sec-fetch-mode': 'cors',
-                    }
-
-                    try:
-                        r = self.session.post("https://macs.touchtechpayments.com/v1/confirmTransaction",headers=headers, data=data)
-                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                        log.info(e)
-                        logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                        time.sleep(int(self.task["DELAY"]))
-                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                        self.card()
-
-                    pares = r.json()['Response']
-
-                    data = {"MD":MD, "PaRes":pares}
-                    try:
-                        r = self.session.post(termUrl,headers={
-                            'authority': 'www.workingclassheroes.co.uk',
-                            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.163 Safari/537.36',
-                            'content-type': 'application/x-www-form-urlencoded',
-                            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                            'origin': 'https://verifiedbyvisa.acs.touchtechpayments.com',
-                            'referer':'https://verifiedbyvisa.acs.touchtechpayments.com/v1/payerAuthentication',
-                        }, data=data)
-                    except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
-                        log.info(e)
-                        logger.error(SITE,self.taskID,'Error: {}'.format(e))
-                        time.sleep(int(self.task["DELAY"]))
-                        self.session.proxies = loadProxy(self.task["PROXIES"],self.taskID,SITE)
-                        self.card()
-                    
-                    if r.status_code in [200,302] and 'WorldPay' in r.url:
+                    if response3.status_code in [200,302] and 'WorldPay' in response3.url:
                         self.end = time.time() - self.start
-                        logger.alert(SITE,self.taskID,'Checkout Successful!')
-                        updateConsoleTitle(False,True,SITE)
-                        try:
-                            discord.success(
-                                webhook=loadSettings()["webhook"],
-                                site=SITE,
-                                image=self.productImage,
-                                title=self.productTitle,
-                                size=self.size,
-                                price=self.productPrice,
-                                paymentMethod='Card',
-                                profile=self.task["PROFILE"],
-                                product=self.task["PRODUCT"],
-                                proxy=self.session.proxies,
-                                speed=self.end
-                            )
-                            sendNotification(SITE,self.productTitle)
-                            while True:
-                                pass
-                        except:
-                            pass
-                    
-                    else:
-                        try:
-                            discord.failed(
-                                webhook=loadSettings()["webhook"],
-                                site=SITE,
-                                url=self.task["PRODUCT"],
-                                image=self.productImage,
-                                title=self.productTitle,
-                                size=self.size,
-                                price=self.productPrice,
-                                paymentMethod='Card',
-                                profile=self.task["PROFILE"],
-                                proxy=self.session.proxies
-                            )
-                        except:
-                            pass
-                        logger.error(SITE,self.taskID,'Checkout Failed [{}]. Retrying...'.format(r.status_code))
-                        time.sleep(int(self.task["DELAY"]))
-                        self.card()
+                        self.webhookData['speed'] = self.end
 
+                        self.success("Checkout Successful")
+                        updateConsoleTitle(False,True,SITE)
+                        return
+                    else:
+                        self.error("Checkout Failed. Retrying...")
+                        time.sleep(int(self.task['DELAY']))
+                        continue
+                        
+                else:
+                    self.error(f"Failed to complete card checkout [{str(response.status_code)}]. Retrying...")
+                    time.sleep(int(self.task['DELAY']))
+                    continue
+
+            else:
+                self.error(f"Failed to complete card checkout [{str(response.status_code)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+           
+        
+    
+    def sendToDiscord(self):
+        while True:
+            
+            self.webhookData['proxy'] = self.session.proxies
+
+            sendNotification(SITE,self.webhookData['product'])
+
+            try:
+                Webhook.success(
+                    webhook=loadSettings()["webhook"],
+                    site=SITE,
+                    url=self.webhookData['url'],
+                    image=self.webhookData['image'],
+                    title=self.webhookData['product'],
+                    size=self.webhookData['size'],
+                    price=self.webhookData['price'],
+                    paymentMethod=self.task['PAYMENT'].strip().title(),
+                    product=self.webhookData['product_url'],
+                    profile=self.task["PROFILE"],
+                    proxy=self.webhookData['proxy'],
+                    speed=self.webhookData['speed']
+                )
+                self.secondary("Sent to discord!")
+                while True:
+                    pass
+            except:
+                self.alert("Failed to send webhook. Checkout here ==> {}".format(self.webhookData['url']))
+                while True:
+                    pass

@@ -14,27 +14,15 @@ import os
 import click
 from pprint import pprint
 import inquirer
+from inquirer.themes import GreenPassion
+from flask import Flask,render_template,request,redirect
+
 import webbrowser
 import names
 import random
+from copy import copy
+# import asyncio
 
-
-try:
-    import win32console 
-except:
-    pass
-#utils
-from utils.quicktask import QT
-from utils.captcha import captcha
-from utils.logger import logger
-from utils.accounts import ACCOUNTS
-from utils.auth import auth
-from utils.datadome import datadome
-from utils.ascii import logo
-from utils.updates import Updater
-from utils.functions import (loadCheckouts, getUser, loadProfile)
-from utils.config import *
-import utils.create_data_files as dataFiles
 init(autoreset=True)
 
 def secho(text, file=None, nl=None, err=None, color=None, **styles):
@@ -46,19 +34,62 @@ def echo(text, file=None, nl=None, err=None, color=None, **styles):
 click.echo = echo
 click.secho = secho
 
-
-# os.system("title VenetiaIO CLI [Version {}]".format(VERSION))
 try:
-    win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI".format(VERSION()))
+    win32console.SetConsoleTitle("[Version {}] VenetiaCLI".format(VERSION()))
 except:
     pass
 
 
+try:
+    import win32console 
+except:
+    pass
 
-def get_time():
-    x = datetime.datetime.now()
-    x = f'{x.strftime("%X")}.{x.strftime("%f")}'
-    return x
+#utils
+
+from utils.waterfall import WaterfallAssign
+from utils.quicktask import QT
+from utils.captcha import captcha
+from utils.logger import logger
+from utils.accounts import ACCOUNTS
+from utils.auth import auth
+from utils.datadome import datadome
+from utils.ascii import logo
+from utils.updates import Updater
+from utils.functions import (loadCheckouts, getUser, loadProfile, decodeURIComponent,b64Encode)
+from utils.webhook import Webhook
+from utils.config import *
+import utils.create_data_files as dataFiles
+from utils.cartClear import cartClear
+
+def checkUpdate():
+    if VERSION() == '0.0.0':
+        return True
+    else:
+        status = Updater.checkForUpdate(VERSION())
+        if status["error"] == False:
+            if status["latest"] == True:
+                print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored(f'You are on the latest version! {VERSION()}','green', attrs=["bold"])))
+                return True
+            if status["latest"] == False:
+                download = Updater.downloadLatest(status["version"])
+                if download == "complete":
+                    print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('Update complete','cyan', attrs=["bold"])))
+                    try:
+                        pass
+                        os.startfile("VenetiaCLI.exe".format(status['version']))
+                    except:
+                        pass
+                    time.sleep(5)
+                    sys.exit()
+                else:
+                    print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('Failed to download latest version. Please try again later.','red', attrs=["bold"])))
+                    time.sleep(5)
+                    sys.exit()
+        if status["error"] == True:
+            print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('Failed to download latest version. Retrying...','red', attrs=["bold"])))
+            time.sleep(10)
+            checkUpdate()
 
 def taskCount():
     total = 0
@@ -69,14 +100,17 @@ def taskCount():
     
     return total
 
+def taskCountSpecific(site):
+    total = 0
+    with open(f'./{site.lower()}/tasks.csv','r') as csvFile:
+            csv_reader = csv.DictReader(csvFile)
+            total = total + len(list(csv_reader))
+    
+    return total
 
-def clearTokens():
-    data = {}
-    for k in sites.keys():
-        data[k.upper()] = []
-    with open('./data/captcha/tokens.json','w') as tokenFile:
-        json.dump(data,tokenFile)
-    return 'complete'
+def get_time():
+    x = datetime.datetime.now().strftime('%Y.%m.%d | %H:%M:%S.%f')
+    return x
 
 def checkTasks(site):
     tasks = []
@@ -85,71 +119,58 @@ def checkTasks(site):
         for r in csv_reader:
             if len(r['PRODUCT']) > 1:
                 tasks.append(1)
-        
+    
     if len(tasks) > 0:
         return True
     elif len(tasks) == 0:
         return False
     
-def checkFootlockerTasks():
-    old_ftl = []
-    new_ftl = []
-    with open(f'./footlocker/tasks.csv','r') as csvFile:
-        csv_reader = csv.DictReader(csvFile)
-        for r in csv_reader:
-            if len(r['PRODUCT']) > 1:
-                try:
-                    cc = loadProfile(r['PROFILE'])['countryCode'].upper()
-                except Exception:
-                    return {
-                        "status":False,
-                        "old_ftl":0,
-                        "new_ftl":0
-                    }
-                if cc in new_footlockers():
-                    new_ftl.append(1)
-                if cc in old_footlockers():
-                    old_ftl.append(1)
-                else:
-                    pass
+# def checkFootlockerTasks():
+#     old_ftl = []
+#     new_ftl = []
+#     with open(f'./footlocker/tasks.csv','r') as csvFile:
+#         csv_reader = csv.DictReader(csvFile)
+#         for r in csv_reader:
+#             if len(r['PRODUCT']) > 1:
+#                 try:
+#                     prof = loadProfile(r['PROFILE'])
+#                     cc = prof['countryCode'].upper()
+#                 except Exception:
+#                     return {
+#                         "status":False,
+#                         "old_ftl":0,
+#                         "new_ftl":0
+#                     }
+#                 if cc in new_footlockers():
+#                     new_ftl.append(1)
+#                 if cc in old_footlockers():
+#                     old_ftl.append(1)
+#                 else:
+#                     pass
         
-    if len(old_ftl) > 0 or len(new_ftl) > 0:
-        return {
-            "status":True,
-            "old_ftl":old_ftl,
-            "new_ftl":new_ftl
-        }
-    elif len(old_ftl) == 0 and len(new_ftl) == 0:
-        return {
-            "status":False,
-            "old_ftl":old_ftl,
-            "new_ftl":new_ftl
-        }
+#     if len(old_ftl) > 0 or len(new_ftl) > 0:
+#         return {
+#             "status":True,
+#             "old_ftl":old_ftl,
+#             "new_ftl":new_ftl
+#         }
+#     elif len(old_ftl) == 0 and len(new_ftl) == 0:
+#         return {
+#             "status":False,
+#             "old_ftl":old_ftl,
+#             "new_ftl":new_ftl
+#         }
 
-def checkUpdate():
-    status = Updater.checkForUpdate(VERSION())
-    if status["error"] == False:
-        if status["latest"] == True:
-            logger.menu('VENETIA','Menu','{}'.format(colored(f'You are on the latest version! {VERSION()}','green', attrs=["bold"])))
-            return True
-        if status["latest"] == False:
-            logger.menu('VENETIA','Menu','{}'.format(colored(f'Updating...','magenta', attrs=["bold"])))
-            download = Updater.downloadLatest(status["version"])
-            if download == "complete":
-                logger.menu('VENETIA','Menu','{}'.format(colored(f'Update complete. Please delete the old file named "venetiaCLI_old.exe" and open the new one name "venetiaCLI.exe"','cyan', attrs=["bold"])))
-                time.sleep(5)
-                sys.exit()
-            else:
-                logger.menu('VENETIA','Menu','{}'.format(colored('Failed to download latest version. Please try again later.','red', attrs=["bold"])))
-    if status["error"] == True:
-        logger.menu('VENETIA','Menu','{}'.format(colored('Failed to check version. Retrying...','red', attrs=["bold"])))
-        time.sleep(10)
-        checkUpdate()
 
-class Menu:
+class Menu():
     def __init__(self):
-        checkUpdate()
+        self.port = None
+        while self.port == None:
+            self.port = start_server()
+            time.sleep(2)
+
         threading.Thread(target=QT,daemon=True).start()
+        
 
         self.user = getUser()
         
@@ -161,1143 +182,764 @@ class Menu:
         except:
             pass
 
+        pass
+    
+    def base(self):
+        checkUpdate()
+
         time.sleep(1)
+
         with open('./data/config.json') as config:
             self.config = json.loads(config.read())
             self.key = self.config["key"]
-        self.menu()
-
-
-    def siteSelectFunc(self, availableSites, siteSelection):
-        try:
-            key_chosen, value_chosen = sorted(availableSites.items())[int(siteSelection) -1 ]
-            if  key_chosen == 'Footlocker EU':
-                with open('./footlocker/tasks.csv','r') as csvFile:
-                    csv_reader = csv.DictReader(csvFile)
-                    i = 1
-                    a = 0
-                    for row in csv_reader:
-                        if row["PRODUCT"] != "":
-                            try:
-                                try:
-                                    win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),key_chosen.title(),"0","0"))
-                                except:
-                                    pass
-                                self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
-                            except:
-                                pass
         
-                            if len(str(i)) == 1:
-                                taskName = f'Task 000{i}'
-                            if len(str(i)) == 2:
-                                taskName = f'Task 00{i}'
-                            if len(str(i)) == 3:
-                                taskName = f'Task 0{i}'
-                            if len(str(i)) == 4:
-                                taskName = f'Task {i}'
-                            i = i + 1
-                            row['PROXIES'] = 'proxies'
-                            threading.Thread(target=value_chosen,args=(row,taskName,a)).start()
-                            a = a + 1
+        while True:
+            self.option_main_menu_choice = int(self.menu())
+            if self.option_main_menu_choice == 1:
+                self.startAllTasks()
+                break
+                # Start All Tasks
+
+            elif self.option_main_menu_choice == 2:
+                self.startSpecificTasks()
+                break
+                # Start Specific Tasks
+
+            elif self.option_main_menu_choice == 3:
+                webbrowser.open_new(f'http://127.0.0.1:{self.port}/configuration')
+                # View / Edit Config
+
+
+            elif self.option_main_menu_choice == 4:
+                webbrowser.open_new(f'http://127.0.0.1:{self.port}/profiles')
+                # Create Profile
+
+            elif self.option_main_menu_choice == 5:
+                webbrowser.open_new(f'http://127.0.0.1:{self.port}/captcha')
+                # Generate Captchas
+
+            elif self.option_main_menu_choice == 6:
+                webbrowser.open_new(f'http://127.0.0.1:{self.port}/statistics')
+                # View Checkouts
+
+            elif self.option_main_menu_choice == 7:
+                self.accountGen()
+                # Account Generator
+
+            elif self.option_main_menu_choice == 00:
+                print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('Goodbye...','yellow', attrs=["bold"])))
+                time.sleep(3)
+                break
+                os._exit(0)
+            
             else:
-                allAccounts = []
-                try:
-                    accounts = open(f'./{key_chosen.lower()}/accounts.txt','r').readlines()
-                    for a in accounts:
-                        if a.strip() != '':
-                            allAccounts.append(a)
-                except:
-                    pass
-                
-                for i in range(2000):
-                    allAccounts.append(':')
+                print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('Invalid Menu Choice','yellow', attrs=["bold"])))
+                time.sleep(1)
+                continue
 
-                with open('./{}/tasks.csv'.format(key_chosen.lower()),'r') as csvFile:
-                    csv_reader = csv.DictReader(csvFile)
-                    i = 1
-                    a = 0
-                    zip1 = zip(csv_reader, allAccounts)
-                    for row, acc in zip1:
-                        if row["PRODUCT"] != "":
-                            try:
-                                try:
-                                    win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),key_chosen.title(),"0","0"))
-                                except:
-                                    pass
-                                self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
-                            except:
-                                pass
-        
-                            if len(str(i)) == 1:
-                                taskName = f'Task 000{i}'
-                            if len(str(i)) == 2:
-                                taskName = f'Task 00{i}'
-                            if len(str(i)) == 3:
-                                taskName = f'Task 0{i}'
-                            if len(str(i)) == 4:
-                                taskName = f'Task {i}'
-                            i = i + 1
-                            row['PROXIES'] = 'proxies'
-                            row["ACCOUNT EMAIL"] = acc.split(':')[0]
-                            row["ACCOUNT PASSWORD"] = acc.split(':')[1]
-
-                            threading.Thread(target=value_chosen,args=(row,taskName, a)).start()
-                            a = a + 1
-        except Exception as e:
-            print(e)
-            pass
-
-   
 
     def menu(self):
-        headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
-        requests.post('https://venetiacli.io/api/last/opened',headers=headers,json={"key":self.config["key"],"date":str(datetime.datetime.now())})
+        print('')
+        print('                 Welcome {}...                  '.format(colored(self.user['discordName'], 'magenta')))
+        logger.logo(logo,VERSION())
+        print('')
+        # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('01','red', attrs=["bold"]), colored('Start All Tasks','red', attrs=["bold"])))
+        # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('02','red', attrs=["bold"]), colored('Start Specific Tasks','red', attrs=["bold"])))
+        # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('03','red', attrs=["bold"]), colored('View Config','red', attrs=["bold"])))
+        # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('04','red', attrs=["bold"]), colored('Edit Config','red', attrs=["bold"])))
+        # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('05','red', attrs=["bold"]), colored('Create Profile','red', attrs=["bold"])))
+        # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('06','red', attrs=["bold"]), colored('View|Edit Profiles','red', attrs=["bold"])))
+        # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('07','red', attrs=["bold"]), colored('Generate Captchas','red', attrs=["bold"])))
+        # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('08','red', attrs=["bold"]), colored('Account Gen','red', attrs=["bold"])))
+        # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('09','red', attrs=["bold"]), colored('Cookie Gen','red', attrs=["bold"])))
+        # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('10','red', attrs=["bold"]), colored('View Checkouts','red', attrs=["bold"])))
+        # logger.menu('VenetiaCLI','Menu','[ {} ] => {}'.format(colored('99','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
+        menu_options = []
+        
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|01| Start All Tasks','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|02| Start Specific Tasks','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|03| Config','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|04| Profiles','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|05| Captchas','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|06| Statistics','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|07| Account Gen','red', attrs=["bold"])))
+        menu_options.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored('|00| Exit','red', attrs=["bold"])))
+
+        def menu_selector():
+            questions = [
+                inquirer.List(
+                    "menu_choices",
+                    message="Menu Selection",
+                    choices=menu_options,
+                ),
+            ]
+            answers = inquirer.prompt(questions)
+            choi = answers['menu_choices'].split('|')[1].split('|')[0]
+            return choi
+
+        return menu_selector()   
+
+    def startAllTasks(self):         
         try:
-            self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Main Menu', start=self.rpctime,small_image="image",small_text="@venetiaIO")
+            win32console.SetConsoleTitle("[Version {}] VenetiaCLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),"Running Tasks","0","0"))
         except:
             pass
 
-     
-        print('                 Welcome {}...                  '.format(self.user['discordName']))
-        logger.logo(logo,VERSION())
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('01','red', attrs=["bold"]), colored('Start All Tasks','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('02','red', attrs=["bold"]), colored('Start Specific Tasks','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('03','red', attrs=["bold"]), colored('View Config','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('04','red', attrs=["bold"]), colored('Edit Config','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('05','red', attrs=["bold"]), colored('Create Profile','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('06','red', attrs=["bold"]), colored('View|Edit Profiles','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('07','red', attrs=["bold"]), colored('Generate Captchas','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('08','red', attrs=["bold"]), colored('Account Gen','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('09','red', attrs=["bold"]), colored('Cookie Gen','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('10','red', attrs=["bold"]), colored('View Checkouts','red', attrs=["bold"])))
-        logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored('11','red', attrs=["bold"]), colored('Exit','red', attrs=["bold"])))
-        #sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-        sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-        option = ''
-        try:
-            option = int(input(' Pick an option => '))
-        except Exception:
-            logger.error('VENETIA','Menu','Please enter a number')
-            self.menu()
-        
-        if option == 1:
+        def menu_selector_waterfall():
+            questions = [
+                inquirer.List(
+                    "waterfall_choices",
+                    message="Use Waterfall",
+                    choices=['Yes','No'],
+                ),
+            ]
+            answers = inquirer.prompt(questions)
+            choi = answers['waterfall_choices']
+            return choi
+
+        a = 0
+        waterfall_tasks = []
+        main_tasks = []
+        for k in sites.keys():
+
+            allAccounts = []
             try:
-                win32console.SetConsoleTitle("[Version {}] VenetiaIO CLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),"Running Tasks","0","0"))
+                accounts = open(f'./{k.lower()}/accounts.txt','r').readlines()
+                for a in accounts:
+                    if a.strip() != '':
+                        a = a.replace('\n','')
+                        allAccounts.append(a)
             except:
                 pass
+            
+            allAccCopy = copy(allAccounts)
+            if len(allAccCopy) == 0:
+                for i in range(2000):
+                    allAccCopy.append(':')
 
-            total = 0
-            a = 0
-            for k in sites.keys():
-                if k.upper() == 'FOOTLOCKER_NEW':
-                    pass
-                elif k.upper() == 'FOOTLOCKER_OLD':
-                    with open(f'./footlocker/tasks.csv','r') as csvFile:
-                        csv_reader = csv.DictReader(csvFile)
-                        # total =  total + sum(1 for row in csv_reader)
-                        i = 1
-                        for row in csv_reader:
-                            if row["PRODUCT"] != "":
-                                try:
-                                    self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format('Footlocker EU'), start=self.rpctime,small_image="image",small_text="@venetiaIO")
-                                except:
-                                    pass
-                            
-                                if len(str(i)) == 1:
-                                    taskName = f'Task 000{i}'
-                                if len(str(i)) == 2:
-                                    taskName = f'Task 00{i}'
-                                if len(str(i)) == 3:
-                                    taskName = f'Task 0{i}'
-                                if len(str(i)) == 4:
-                                    taskName = f'Task {i}'
-                                i = i + 1
-                                row['PROXIES'] = 'proxies'
+            random.shuffle(allAccCopy)
+            n2 = taskCountSpecific(k) 
 
-                                if loadProfile(row['PROFILE'])['countryCode'].upper() in new_footlockers():
-                                    threading.Thread(target=sites.get('FOOTLOCKER_NEW'),args=(row,taskName, a)).start()
+            
+            with open(f'./{k.lower()}/tasks.csv','r') as csvFile:
+                csv_reader = csv.DictReader(csvFile)
+                # total =  total + sum(1 for row in csv_reader)
 
-                                if loadProfile(row['PROFILE'])['countryCode'].upper() in old_footlockers():
-                                    threading.Thread(target=sites.get('FOOTLOCKER_OLD'),args=(row,taskName, a)).start()
-
-                elif k.upper() not in ['FOOTLOCKER_NEW','FOOTLOCKER_OLD']:
-                    accounts = open(f'./{k.lower()}/accounts.txt','r').readlines()
-                    allAccounts = []
-                    for a in accounts:
-                        if a.strip() != '':
-                            allAccounts.append(a)
+                i = 1
+                zip2 = zip(csv_reader, allAccCopy[:n2])
+                for row, acc in zip2:
+                    if row["PRODUCT"] != "":
+                        try:
+                            self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format(k.title()), start=self.rpctime,small_image="image",small_text="@venetiaCLI")
+                        except:
+                            pass
                     
-                    for i in range(2000):
-                        allAccounts.append(':')
-
-                    with open(f'./{k.lower()}/tasks.csv','r') as csvFile:
-                        csv_reader = csv.DictReader(csvFile)
-                        # total =  total + sum(1 for row in csv_reader)
-        
-                        i = 1
-                        zip2 = zip(csv_reader, allAccounts)
-                        for row, acc in zip2:
-                            if row["PRODUCT"] != "":
-                                try:
-                                    self.RPC.update(large_image="image", state=f"Version {VERSION()}", details=f'Running {taskCount()} Task(s)...'.format(k.title()), start=self.rpctime,small_image="image",small_text="@venetiaIO")
-                                except:
-                                    pass
+                        if len(str(i)) == 1:
+                            taskName = f'Task 000{i}'
+                        if len(str(i)) == 2:
+                            taskName = f'Task 00{i}'
+                        if len(str(i)) == 3:
+                            taskName = f'Task 0{i}'
+                        if len(str(i)) == 4:
+                            taskName = f'Task {i}'
+                        i = i + 1
+                        # row['PROXIES'] = 'proxies'
+                        row["ACCOUNT EMAIL"] = acc.split(':')[0]
+                        row["ACCOUNT PASSWORD"] = acc.split(':')[1]
+                        row["SITE"] = k
+                        row["TASK_NAME"] = taskName
+                        row["ROW_NUMBER"] = a
+                        
+                        if k.lower() in waterfall_sites():
+                            # threading.Thread(target=sites.get(k.upper()),args=(row,taskName, a)).start()
+                            waterfall_tasks.append(row)
+                        
+                        # new_task = asyncio.create_task( k.upper(row, taskName, a).tasks())
+                        new_task = threading.Thread(target=sites.get(k.upper()),args=(row,taskName, a))
+                        main_tasks.append(new_task)
                             
-                                if len(str(i)) == 1:
-                                    taskName = f'Task 000{i}'
-                                if len(str(i)) == 2:
-                                    taskName = f'Task 00{i}'
-                                if len(str(i)) == 3:
-                                    taskName = f'Task 0{i}'
-                                if len(str(i)) == 4:
-                                    taskName = f'Task {i}'
-                                i = i + 1
-                                row['PROXIES'] = 'proxies'
-                                row["ACCOUNT EMAIL"] = acc.split(':')[0]
-                                row["ACCOUNT PASSWORD"] = acc.split(':')[1]
-                                
-                                threading.Thread(target=sites.get(k.upper()),args=(row,taskName, a)).start()
+                        
+                        a = a + 1
+
+            if len(waterfall_tasks) > 0:
+                if menu_selector_waterfall() == 'Yes':   
+                    _delay_ =  input(f"[{get_time()}] Enter Waterfall monitor delay (in seconds) ==> ")
+                    WaterfallAssign.assign(waterfall_tasks,_delay_)
+                else:
+                    for t in main_tasks:
+                        t.start()
+                        
+            else:
+                for t in main_tasks:
+                    t.start()
+    
+    def siteSelectFunc(self, availableSites, siteSelection):
+        def menu_selector_waterfall():
+            questions = [
+                inquirer.List(
+                    "waterfall_choices",
+                    message="Use Waterfall",
+                    choices=['Yes','No'],
+                ),
+            ]
+            answers = inquirer.prompt(questions)
+            choi = answers['waterfall_choices']
+            return choi
+
+        try:
+            waterfall__tasks = []
+            all_specific_tasks = []
+
+
+            key_chosen, value_chosen = sorted(availableSites.items())[int(siteSelection) - 1]
+
+            allAccounts = []
+            try:
+                accounts = open(f'./{key_chosen.lower()}/accounts.txt','r').readlines()
+                for a in accounts:
+                    if a.strip() != '':
+                        a = a.replace('\n','')
+                        allAccounts.append(a)
+            except:
+                pass
             
-                a = a + 1
-            # if total == 0:
-                # self.menu()
- 
-        elif option == 2:
-            number = 1
-            availableSites = {}
-            for row in sorted(sites):
-                if row.upper() == 'FOOTLOCKER_NEW':
-                    pass
-                elif row.upper() == 'FOOTLOCKER_OLD':
-                    check = checkFootlockerTasks()
-                    if check['status'] == True:
-                        if len(check['old_ftl']) > 0:
-                            availableSites['Footlocker EU'] = sites['FOOTLOCKER_OLD']
-                        if len(check['new_ftl']) > 0:
-                            availableSites['Footlocker EU'] = sites['FOOTLOCKER_NEW']
 
-                elif checkTasks(row) and row.upper() not in ['FOOTLOCKER_NEW','FOOTLOCKER_OLD']:
-                    availableSites[row] = sites[row]
+            allAccCopy = copy(allAccounts)
+            if len(allAccCopy) == 0:
+                for i in range(2000):
+                    allAccCopy.append(':')
 
-            for s in availableSites:
-                logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored(number,'red', attrs=["bold"]), colored(s.title(),'red', attrs=["bold"])))
-                number = number + 1
-            
-
+            random.shuffle(allAccCopy)
+            n = taskCountSpecific(key_chosen) 
         
-            menuNum = number
-            logger.menu('VENETIA','Menu','[ {} ] => {}'.format(colored(menuNum,'red', attrs=["bold"]), colored('RETURN TO MAIN Menu','red', attrs=["bold"])))
-            sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            siteSelection = input(' Select a site => ')
-            if int(siteSelection) == menuNum:
-                self.menu()
+
+            tasks = []
+            with open('./{}/tasks.csv'.format(key_chosen.lower()),'r') as csvFile:
+                csv_reader = csv.DictReader(csvFile)
+                i = 1
+                a = 0
+                zip1 = zip(csv_reader, allAccCopy[:n])
+                for row, acc in zip1:
+                    if row["PRODUCT"] != "":
+                        try:
+                            try:
+                                win32console.SetConsoleTitle("[Version {}] VenetiaCLI - {} | Carted: {} | Checked Out: {}".format(VERSION(),key_chosen.title(),"0","0"))
+                            except:
+                                pass
+                            self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Destroying {}...'.format(key_chosen.title()), start=self.rpctime,small_image="image",small_text="@venetiaCLI")
+                        except:
+                            pass
+    
+                        if len(str(i)) == 1:
+                            taskName = f'Task 000{i}'
+                        if len(str(i)) == 2:
+                            taskName = f'Task 00{i}'
+                        if len(str(i)) == 3:
+                            taskName = f'Task 0{i}'
+                        if len(str(i)) == 4:
+                            taskName = f'Task {i}'
+                        i = i + 1
+                        row["ACCOUNT EMAIL"] = acc.split(':')[0]
+                        row["ACCOUNT PASSWORD"] = acc.split(':')[1]
+                        row["SITE"] = key_chosen
+                        row["TASK_NAME"] = taskName
+                        row["ROW_NUMBER"] = a
+                        if key_chosen.lower() in waterfall_sites():
+                            waterfall__tasks.append(row)
+                        
+                        # new_task = asyncio.create_task( value_chosen(row, taskName, a).tasks())
+                        new_task = threading.Thread(target=value_chosen,args=(row,taskName,a))
+                        all_specific_tasks.append(new_task)
+                        a = a + 1
+                        
+            if len(waterfall__tasks) > 0:
+                if menu_selector_waterfall() == 'Yes':   
+                    _delay_ =  input(f"[{get_time()}] Enter Waterfall monitor delay (in seconds) ==> ")
+                    WaterfallAssign.assign(waterfall__tasks,_delay_)
+                else:
+                    for t in all_specific_tasks:
+                        t.start()
+                        
+            else:
+                for t in all_specific_tasks:
+                    t.start()
+            
+        except Exception as e:
+            pass
+
+
+    def startSpecificTasks(self):
+        number = 1
+        availableSites = {}
+        all_available_sites = []
+
+        for row in sorted(sites):
+            if checkTasks(row):
+                availableSites[row] = sites[row]
+
+        for s in availableSites:
+            if len(str(number)) == 1:
+                num_a = f'0{number}'
+            else:
+                num_a = number
+            all_available_sites.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored(f'|{num_a}| {s.title()}','red', attrs=["bold"])) )
+            # all_available_sites.append( colored(f'[ {number} ] {s.title()}','red', attrs=["bold"]))
+            number = number + 1
+        all_available_sites.append( '{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]), colored(f'|00| Return to menu','red', attrs=["bold"])) )
+
+        def site_selector_specific():
+            questions = [
+                inquirer.List(
+                    "specific_site_choices",
+                    message="Select Site",
+                    choices=all_available_sites,
+                ),
+            ]
+            answers = inquirer.prompt(questions)
+            choi = int(answers['specific_site_choices'].split('|')[1].split('|')[0])
+            return choi
+
+        siteSelection = site_selector_specific()
+        if siteSelection == 0:
+            return self.base()
+        else:
             self.siteSelectFunc(availableSites, siteSelection)
 
-        elif option == 3:
-            try:
-                with open('./data/config.json') as config:
-                    config = json.loads(config.read())
-                    k = config["key"]
-                    checkoutN = config["checkoutNoise"]
-                    w = config["webhook"]
-                    twoC = config["2Captcha"]
-                    cm = config["capMonster"]
-                    captchaChoice = config["captcha"]
-                    qtProfile = config["quickTaskProfile"]
-                    qtProxies = config["quickTaskProxies"]
-                    qtDelay = config["quickTaskDelay"]
-                    qtEmail = config["quickTaskEmail"]
-                    qtPassword = config["quickTaskPassword"]
-                    qtPayment = config["quickTaskPayment"]
-                    qtSize = config["quickTaskSize"]
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('KEY','red', attrs=["bold"]), colored(k,'cyan')))
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CHECKOUT NOISE','red', attrs=["bold"]), colored(checkoutN,'cyan')))
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('WEBHOOK','red', attrs=["bold"]), colored(w,'cyan')))
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('2 CAPTCHA','red', attrs=["bold"]), colored(twoC,'cyan')))
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CAPTCHA MONSTER','red', attrs=["bold"]), colored(cm,'cyan')))
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CAPTCHA CHOICE','red', attrs=["bold"]), colored(captchaChoice,'cyan')))
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('QT SIZE','red', attrs=["bold"]), colored(qtSize,'cyan')))
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('QT PROFILE','red', attrs=["bold"]), colored(qtProfile,'cyan')))
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('QT PROXIES','red', attrs=["bold"]), colored(qtProxies,'cyan')))
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('QT DELAY','red', attrs=["bold"]), colored(qtDelay,'cyan')))
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('QT PAYMENT','red', attrs=["bold"]), colored(qtPayment,'cyan')))
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('QT ACCOUNT EMAIL','red', attrs=["bold"]), colored(qtEmail,'cyan')))
-                    logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('QT ACCOUNT PASSWORD','red', attrs=["bold"]), colored(qtPassword,'cyan')))
-                    sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-                    option = input(' [ENTER] TO RETURN TO Menu ')
-                    self.menu()
-            except Exception as e:
-                logger.error('VENETIA','Menu','Error reading config [{}]. Please edit...'.format(e))
-                sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-                option = input(' [ENTER] TO RETURN TO Menu ')
-                self.menu()
+    
+    def accountGen(self):
+        def site_selector_account():
+            questions = [
+                inquirer.List(
+                    "account_select",
+                    message="Select Site",
+                    choices=[
+                        'Holypop',
+                        'Pro-Direct',
+                        'Footasylum',
+                        'Snipes',
+                        'Naked',
+                        'WorkingClassHeroes',
+                        'Ambush',
+                        'Return to menu...'
+                    ],
+                ),
+            ]
+            answers = inquirer.prompt(questions)
+            choi = answers['account_select']
+            return choi
 
-        elif option == 4:
-            with open('./data/config.json') as config:
-                config = json.loads(config.read())
-                print(colored(f"[{get_time()}] Configure Config Below (Leave blank to leave unchanged) ", "red",attrs=['bold']))
+        account_selection = site_selector_account()
+        if account_selection == 'Return to menu...':
+            return
+        else:
+            amount_account_gen = int(input("Number of accounts: "))
+            catchall_account_gen = input("Enter catchall (include @): ")
+            password_account_gen = input("Enter password for accounts: ")
+            profile_account_gen = input("Enter profile name: ")
+            proxies_account_gen = input("Enter proxylist name: ")
 
-                checkoutNoise = input(f"[{get_time()}] Checkout Noise (Y / N) ==> ")
-                if checkoutNoise == "":
-                    try:
-                        checkoutNoise = config["checkoutNoise"]
-                    except:
-                        checkoutNoise = "Y"
+            before_thread = threading.active_count()
+            if account_selection == 'Holypop':
+                siteKey = '6Lc8GBUUAAAAAKMfe1S46jE08TvVKNSnMYnuj6HN'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.holypop,args=(siteKey,proxies_account_gen,'Holypop',catchall_account_gen,password_account_gen, profile_account_gen)).start()
+            
+            elif account_selection == 'Pro-Direct':
+                siteKey = '6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.proDirect,args=(siteKey,proxies_account_gen,'ProDirect',catchall_account_gen,password_account_gen, profile_account_gen)).start()
+            
+            elif account_selection == 'Footasylum':
+                siteKey = 'n/a'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.footasylum,args=(siteKey,proxies_account_gen,'Footasylum',catchall_account_gen,password_account_gen, profile_account_gen)).start()
 
-                webhook = input(f"[{get_time()}] Enter Webhook ==> ")
-                if webhook == "":
-                    try:
-                        webhook = config["webhook"]
-                    except:
-                        webhook = ""
+            elif account_selection == 'Snipes':
+                siteKey = 'n/a'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.snipes,args=(siteKey,proxies_account_gen,'Snipes',catchall_account_gen,password_account_gen, profile_account_gen)).start()
 
-                twoCaptcha =  input(f"[{get_time()}] Enter 2 Captcha API Key ==> ")
-                if twoCaptcha == "":
-                    try:
-                        twoCaptcha = config["2Captcha"]
-                    except:
-                        twoCaptcha = ""
-
-                capMonster = input(f"[{get_time()}] Enter Captcha Monster API Key ==> ")
-                if capMonster == "":
-                    try:
-                        capMonster = config["capMonster"]
-                    except:
-                        capMonster = ""
-
-                capType = input(f"[{get_time()}] Enter captcha choice ('2cap' or 'monster') ==> ")
-                if capType == "":
-                    try:
-                        capType = config["captcha"]
-                    except:
-                        capType = ""
-
-                qtSize = input(f"[{get_time()}] Enter QT Size ==> ")
-                if qtSize == "":
-                    try:
-                        qtSize = config["quickTaskSize"]
-                    except:
-                        qtSize = ""
-
-                qtProfile = input(f"[{get_time()}] Enter QT Profile ==> ")
-                if qtProfile == "":
-                    try:
-                        qtProfile = config["quickTaskProfile"]
-                    except:
-                        qtProfile = ""
-
-                qtProxies = input(f"[{get_time()}] Enter QT Proxies ==> ")
-                if qtProxies == "":
-                    try:
-                        qtProxies = config["quickTaskProxies"]
-                    except:
-                        qtProxies = ""
-
-                qtDelay = input(f"[{get_time()}] Enter QT Delay ==> ")
-                if qtDelay == "":
-                    try:
-                        qtDelay = config["quickTaskDelay"]
-                    except:
-                        qtDelay = "0"
-
-                qtPayment = input(f"[{get_time()}] Enter QT Payment ==> ")
-                if qtPayment == "":
-                    try:
-                        qtPayment = config["quickTaskPayment"]
-                    except:
-                        qtPayment = ""
-
-                qtEmail = input(f"[{get_time()}] Enter QT Account Email ==> ")
-                if qtEmail == "":
-                    try:
-                        qtEmail = config["quickTaskEmail"]
-                    except:
-                        qtEmail = ""
-
-                qtPassword = input(f"[{get_time()}] Enter QT Account Password ==> ")
-                if qtPassword == "":
-                    try:
-                        qtPassword = config["quickTaskPassword"]
-                    except:
-                        qtPassword = ""
-
-
-                config_updated = {"key":config["key"],"checkoutNoise":checkoutNoise.upper(),"webhook":webhook,"2Captcha":twoCaptcha,"capMonster":capMonster,"captcha":capType,"quickTaskSize":qtSize,"quickTaskProfile":qtProfile,"quickTaskProxies":qtProxies,"quickTaskDelay":qtDelay,"quickTaskPayment":qtPayment,"quickTaskEmail":qtEmail,"quickTaskPassword":qtPassword}
-
-                with open("./data/config.json","w") as updated:
-                    json.dump(config_updated, updated)
-
-                sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-                option = input(' [ENTER] TO RETURN TO Menu ')
-                self.menu()
-
-        elif option == 5:
-            try:
-                self.RPC.update(large_image="image", state=f"Version {VERSION()}", details='Creating Profiles...', start=self.rpctime,small_image="image",small_text="@venetiaIO")
-            except:
+            elif account_selection == 'Naked':
+                siteKey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.naked,args=(siteKey,proxies_account_gen,'Naked',catchall_account_gen,password_account_gen, profile_account_gen)).start()
+            
+            elif account_selection == 'WorkingClassHeroes':
+                siteKey = 'n/a'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.wch,args=(siteKey,proxies_account_gen,'Wch',catchall_account_gen,password_account_gen, profile_account_gen)).start()
+            
+            elif account_selection == 'Ambush':
+                siteKey = 'n/a'
+                for i in range(int(amount_account_gen)):
+                    threading.Thread(target=ACCOUNTS.ambush,args=(siteKey,proxies_account_gen,'Ambush',catchall_account_gen,password_account_gen, profile_account_gen)).start()
+        
+            while threading.active_count() != before_thread:
                 pass
+
+            return
+    
+
+    def viewCheckouts(self): 
+        checkoutData = loadCheckouts()
+        print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('Total Checkouts: [{}]'.format(checkoutData['total']),'cyan', attrs=["bold"])))
+
+        if int(checkoutData['total']) == 0:
+            print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored('No Checkouts','red', attrs=["bold"])))
+            time.sleep(2)
+            return
+        
+        elif int(checkoutData['total']) <= 30:
+            count = int(checkoutData['total'])
+        else:
+            count  = 30
+
+        options = []
+        i__ = 1
+        # print(f'|{"Num":<3}| {"Site":<20} {"Product":<40} {"Size":<10}')
+        for i in checkoutData['checkouts'][-count:]:
+            if i__ < 10:
+                i_ = f'0{i__}'
+            else:
+                i_ = i__
+            data = i
+            i__ = i__ + 1
+            # options.append('[{}]     {}                {}'.format(i_,data['site'].title(), data['product']))
+            site = data['site'].title()
+            prod = data['product']
+            size = data['size']
+            options.append('|{:<3}| => {:<20} {:<50} {:<10}'.format(colored(i_,"blue"),colored(site,"yellow"),colored(prod,"yellow"),colored(size,"yellow") ))
+        
+        options.append('|{}| => {:<20}'.format(colored('XX',"blue"),colored("Back to Menu","red") ))
+
+        def selector_checkouts():
+            print("")
+            questions = [
+                inquirer.List(
+                    "checkouts",
+                    message="Select",
+                    choices=options,
+                ),
+            ]
+            answers = inquirer.prompt(questions)
+        
+            num = answers['checkouts'].split('|\x1b[34m')[1].split('\x1b[0m|')[0].strip()
+            if num == 'XX':
+                return 'XX'
+
+            link = checkoutData['checkouts'][int(num) -1]['checkout_url']
+            webbrowser.open_new_tab(link)
+            return num
+        
+        n = selector_checkouts()
+        while n != 'XX':
+            n = selector_checkouts()
+        
+        return
+
+
+
+
+def start_server():
+
+
+    def server(port):
+        base_dir = '.'
+        if hasattr(sys, '_MEIPASS'):
+            base_dir = os.path.join(sys._MEIPASS)
+
+        try:
+            main_flask_server = Flask(
+                __name__,
+                static_folder=os.path.join(base_dir, 'static'),
+                template_folder=os.path.join(base_dir, 'templates')
+            )
+        except Exception:
+            server(random.randint(1024,65535))
+
+        # Captcha
+        @main_flask_server.route('/captcha')
+        def captcha_main_route():
+            sites = []
+            types = []
+            with open('./data/captcha/tokens.json') as cap_data:
+                cap_data = json.loads(cap_data.read())
+
+                for k in cap_data:
+                    sites.append(k)
+
+                for x in sites:
+                    types.append(captcha_configs[x.upper()]['type'])
+
+                return render_template('captcha.html',captchas=json.dumps(cap_data), sites=sites, types=types)
+
+
+        @main_flask_server.route('/start_generating', methods=['POST'])
+        def captcha_gen_route():
+            site = request.form['site'].split(':')[0].upper()
+            amount = request.form['amount']
+            proxies = request.form['proxies']
+
+            print("")
+            print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored(f'Solving {amount} captcha(s)','blue', attrs=["bold"])))
+            for a in range(int(amount)):
+                siteKey = captcha_configs[site]['siteKey']
+                siteUrl = captcha_configs[site]['url']
+                if captcha_configs[site]['type'].lower() == 'v2':
+                    threading.Thread(target=captcha.menuV2,args=(siteKey,siteUrl,proxies,'Captcha',site)).start()
+
+                elif captcha_configs[site]['type'].lower() == 'v3':
+                    threading.Thread(target=captcha.menuV3,args=(siteKey,siteUrl,proxies,'Captcha',site)).start()
+                
+                elif captcha_configs[site]['type'].lower() == 'v2_invisible':
+                    threading.Thread(target=captcha.menuV2_invisible,args=(siteKey,siteUrl,proxies,'Captcha',site)).start()
+            
+            return redirect('/captcha')
+
+        @main_flask_server.route('/captchas/reset', methods=['GET'])
+        def captcha_reset_route():
+
+            
+            data = {}
+            for k in captcha_configs:
+                if captcha_configs[k]['hasCaptcha'] == True:
+                    data[k.upper()] = []
+
+            with open('./data/captcha/tokens.json','w') as tokenFile:
+                json.dump(data,tokenFile)
+
+
+            
+            return redirect('/captcha')
+
+        # profiles
+        @main_flask_server.route('/profiles')
+        def edit_profile_route():
+            with open('./data/profiles/profiles.json') as profiles_data:
+                profiles_ = json.loads(profiles_data.read())
+                return render_template('profiles.html',profiles=json.dumps(profiles_))
+
+        @main_flask_server.route('/new/profile', methods=['POST'])
+        def edit_profile_route_post_create():
 
             with open(f'./data/profiles/profiles.json','r') as profileRead:
                 profiles = json.loads(profileRead.read())
             
-
-            
-            # profiles["profiles"].append({
-                # "profileName":profileName,
-                # "firstName":input(f"[{get_time()}] First Name ==> "),
-                # "lastName":input(f"[{get_time()}] Last Name ==> "),
-                # "email":input(f"[{get_time()}] Email ==> "),
-                # "phonePrefix":input(f"[{get_time()}] Phone Prefix (example: +44) ==> "),
-                # "phone": input(f"[{get_time()}] Phone ==> "),
-                # "house":input(f"[{get_time()}] House (Number / Name ) ==> "),
-                # "addressOne":input(f"[{get_time()}] Address 1 ==> "),
-                # "addressTwo":input(f"[{get_time()}] Address 2 ==> "),
-                # "city":input(f"[{get_time()}] City ==> "),
-                # "region":input(f"[{get_time()}] Region/Province/State ==> "),
-                # "country":input(f"[{get_time()}] Country (example: United Kingdom) ==> "),
-                # "countryCode":input(f"[{get_time()}] Country Code (example: GB) ==> "),
-                # "zip":input(f"[{get_time()}] Zipcode/Postcode ==> "),
-                # "card":{
-                    # "cardNumber":input(f"[{get_time()}] Card Number ==> "),
-                    # "cardMonth": input(f"[{get_time()}] Card Expiry Month (example: 8) ==> "),
-                    # "cardYear":input(f"[{get_time()}] Card Expiry Year (example: 2024) ==> "),
-                    # "cardCVV":input(f"[{get_time()}] Card CVV/CVC ==> ")
-                # }
-            # })
             p = {
-                "profileName":"",
-                "firstName":"",
-                "lastName":"",
-                "email":"",
-                "phonePrefix":"",
-                "phone": "",
-                "house":"",
-                "addressOne":"",
-                "addressTwo":"",
-                "city":"",
-                "region":"",
-                "country":"",
-                "countryCode":"",
-                "zip":"",
+                "profileName":request.form['profile_name'],
+                "firstName":request.form['first_name'],
+                "lastName":request.form['last_name'],
+                "email":request.form['email_address'],
+                "phonePrefix":request.form['phone_prefix'],
+                "phone": request.form['phone'],
+                "house":request.form['house'],
+                "addressOne":request.form['street_address'],
+                "addressTwo":request.form['street_address_2'],
+                "city":request.form['city'],
+                "region":request.form['state'],
+                "country":request.form['country'].split(':')[0],
+                "countryCode":request.form['country'].split(':')[1],
+                "zip":request.form['postal_code'],
                 "card":{
-                    "cardNumber":"",
-                    "cardMonth":"",
-                    "cardYear":"",
-                    "cardCVV":""
+                    "cardNumber":request.form['card_number'],
+                    "cardMonth":request.form['card_month'],
+                    "cardYear":request.form['card_year'],
+                    "cardCVV":request.form['card_cvv']
                 }
             }
-
-
-            profileName =  input(f"[{get_time()}] Profile Name ==> ")
-            if profileName == "":
-                try:
-                    profileName = p['profileName']
-                except:
-                    profileName = ""
-            else:
-                p['profileName'] = profileName
-
-            gender = random.choice(['male','female'])
-
-            firtn =  input(f"[{get_time()}] First Name (Enter 'random' for a random name) ==> ")
-            if firtn == "":
-                try:
-                    firtn = p['firstName']
-                except:
-                    firtn = ""
-            else:
-                if firtn.lower() == 'random':
-                    p['firstName'] = names.get_first_name(gender=gender)
-                else:    
-                    p['firstName'] = firtn
-
-            lastn =  input(f"[{get_time()}] Last Name (Enter 'random' for a random name) ==> ")
-            if lastn == "":
-                try:
-                    lastn = p['lastName']
-                except:
-                    lastn = ""
-            else:
-                if lastn.lower() == 'random':
-                    p['lastName'] = names.get_last_name()
-                else:
-                    p['lastName'] = lastn
-
-            email =  input(f"[{get_time()}] Email (Enter your catchall with the @ for a random email) ==> ")
-            if email == "":
-                try:
-                    email = p['email']
-                except:
-                    email = ""
-            else:
-                if email.split('@')[0] == '':
-                    p['email'] = '{}{}{}{}{}{}'.format(p['firstName'],p['lastName'],random.randint(1,9),random.randint(1,9),random.randint(1,9),email)
-                else:
-                    p['email'] = email
-
-            prefix =  input(f"[{get_time()}] Phone Prefix (example: +44) ==> ")
-            if prefix == "":
-                try:
-                    prefix = p['phonePrefix']
-                except:
-                    prefix = ""
-            else:
-                p['phonePrefix'] = prefix
-
-            phone =  input(f"[{get_time()}] Phone (Enter 'random' for a random phone) ==> ")
-            if phone == "":
-                try:
-                    phone = p['phone']
-                except:
-                    phone = ""
-            else:
-                if phone.lower() == 'random':
-                    p['phone'] = '{}{}{}{}{}{}{}{}{}{}'.format(random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9))
-                else:
-                    p['phone'] = phone
-
-            house =  input(f"[{get_time()}] House (Number / Name ) ==> ")
-            if house == "":
-                try:
-                    house = p['house']
-                except:
-                    house = ""
-            else:
-                p['house'] = house
-
-            add1 =  input(f"[{get_time()}] Address 1 ==> ")
-            if add1 == "":
-                try:
-                    add1 = p['addressOne']
-                except:
-                    add1 = ""
-            else:
-                p['addressOne'] = add1
-
-            add2 =  input(f"[{get_time()}] Address 2 (Enter 'random' for a random address 2) ==> ")
-            if add2 == "":
-                try:
-                    add2 = p['addressTwo']
-                except:
-                    add2 = ""
-            else:
-                if add2.lower() == 'random':
-                    p['addressTwo'] = 'Unit {}{}{}'.format(random.randint(1,9),random.randint(1,9),random.randint(1,9))
-                else:
-                    p['addressTwo'] = add2
-                    
-            city =  input(f"[{get_time()}] City ==> ")
-            if city == "":
-                try:
-                    city = p['city']
-                except:
-                    city = ""
-            else:
-                p['city'] = city
-
-            region =  input(f"[{get_time()}] Region/Province/State ==> ")
-            if region == "":
-                try:
-                    region = p['region']
-                except:
-                    region = ""
-            else:
-                p['region'] = region
-
-            country =  input(f"[{get_time()}] Country (example: United Kingdom) ==> ")
-            if country == "":
-                try:
-                    country = p['country']
-                except:
-                    country = ""
-            else:
-                p['country'] = country
-            
-            countryC =  input(f"[{get_time()}] Country Code (example: GB) ==> ")
-            if countryC == "":
-                try:
-                    countryC = p['countryCode']
-                except:
-                    countryC = ""
-            else:
-                p['countryCode'] = countryC
-
-            zip =  input(f"[{get_time()}] Zipcode/Postcode ==> ")
-            if zip == "":
-                try:
-                    zip = p['zip']
-                except:
-                    zip = ""
-            else:
-                p['zip'] = zip
-
-            cn =  input(f"[{get_time()}] Card Number ==> ")
-            if cn == "":
-                try:
-                    cn = p['card']['cardNumber']
-                except:
-                    cn = ""
-            else:
-                p['card']['cardNumber'] = cn
-
-            expm =  input(f"[{get_time()}] Card Expiry Month (example: 8) ==> ")
-            if expm == "":
-                try:
-                    expm = p['card']['cardMonth']
-                except:
-                    expm = ""
-            else:
-                p['card']['cardMonth'] = expm
-
-            expy =  input(f"[{get_time()}] Card Expiry Year (example: 2024) ==> ")
-            if expy == "":
-                try:
-                    expy = p['card']['cardYear']
-                except:
-                    expy = ""
-            else:
-                p['card']['cardYear'] = expy
-
-            cvv =  input(f"[{get_time()}] Card CVV/CVC ==> ")
-            if cvv == "":
-                try:
-                    cvv = p['card']['cardCVV']
-                except:
-                    cvv = ""
-            else:
-                p['card']['cardCVV'] = cvv
-
-
             profiles["profiles"].append(p)
             with open(f'./data/profiles/profiles.json','w') as profileDump:
                 json.dump(profiles, profileDump)
 
-            logger.menu('VENETIA','Menu','PROFILE CREATED - {}'.format(colored(profileName,'green',attrs=["bold"])))
+            return redirect('/profiles')
 
-            sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            option = input(' [ENTER] TO RETURN TO Menu ')
-            self.menu()
+        @main_flask_server.route('/delete/profile', methods=['POST'])
+        def edit_profile_route_delete():
+            if request.method == "POST":
+                arg_profile = str(decodeURIComponent(request.args.get('profile')))
+                new_profiles = {
+                    "profiles":[]
+                }
+                with open(f'./data/profiles/profiles.json','r') as profileRead:
+                    profiles = json.loads(profileRead.read())
+                    for p in profiles['profiles']:
+                        if p['profileName'] == arg_profile:
+                            pass
+                        else:
+                            new_profiles['profiles'].append(p)
+                
+                with open(f'./data/profiles/profiles.json','w') as profileDump:
+                    json.dump(new_profiles, profileDump)
+                
+                return redirect('/profiles')
 
-        elif option == 6:
+        @main_flask_server.route('/update/profile', methods=['POST'])
+        def edit_profile_route_post_update():
+
             with open(f'./data/profiles/profiles.json','r') as profileRead:
                 profiles = json.loads(profileRead.read())
 
-            num_profiles = len(profiles['profiles'])
-            index = 0
+            new_profile_data = {
+                "profileName":request.form['profile_name'],
+                "firstName":request.form['first_name'],
+                "lastName":request.form['last_name'],
+                "email":request.form['email_address'],
+                "phonePrefix":request.form['phone_prefix'],
+                "phone": request.form['phone'],
+                "house":request.form['house'],
+                "addressOne":request.form['street_address'],
+                "addressTwo":request.form['street_address_2'],
+                "city":request.form['city'],
+                "region":request.form['state'],
+                "country":request.form['country'].split(':')[0],
+                "countryCode":request.form['country'].split(':')[1],
+                "zip":request.form['postal_code'],
+                "card":{
+                    "cardNumber":request.form['card_number'],
+                    "cardMonth":request.form['card_month'],
+                    "cardYear":request.form['card_year'],
+                    "cardCVV":request.form['card_cvv']
+                }
+            }
+
+            new_profiles = {
+                "profiles":[]
+            }
             for p in profiles['profiles']:
-                index += 1
-                logger.menu('VENETIA','Profiles','[{}] => {}'.format(colored(index,'red', attrs=["bold"]), colored(p['profileName'],'cyan')))
-
-            logger.menu('VENETIA','Profiles','[{}] => {}'.format(colored(index + 1,'red', attrs=["bold"]), colored('RETURN TO MAIN Menu','cyan')))
-
-            sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            try:
-                option_profile = int(input(' Pick a profile => '))
-            except ValueError:
-                logger.error('VENETIA','Menu','Please enter a number')
-                self.menu()
-            
-            if option_profile == num_profiles + 1:
-                self.menu()
-            else:
-                selected_p = profiles['profiles'][option_profile -1]
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('PROFILE NAME','red', attrs=["bold"]), colored(selected_p['profileName'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('FIRST NAME','red', attrs=["bold"]), colored(selected_p['firstName'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('LAST NAME','red', attrs=["bold"]), colored(selected_p['lastName'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('EMAIL','red', attrs=["bold"]), colored(selected_p['email'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('PHONE PREFIX','red', attrs=["bold"]), colored(selected_p['phonePrefix'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('PHONE','red', attrs=["bold"]), colored(selected_p['phone'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('HOUSE NUMBER/NAME','red', attrs=["bold"]), colored(selected_p['house'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('ADDRESS 1','red', attrs=["bold"]), colored(selected_p['addressOne'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('ADDRESS 2','red', attrs=["bold"]), colored(selected_p['addressTwo'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CITY','red', attrs=["bold"]), colored(selected_p['city'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('REGION','red', attrs=["bold"]), colored(selected_p['region'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('COUNTRY','red', attrs=["bold"]), colored(selected_p['country'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('COUNTRY CODE','red', attrs=["bold"]), colored(selected_p['countryCode'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('ZIP/POSTCODE','red', attrs=["bold"]), colored(selected_p['zip'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CARD NUMBER','red', attrs=["bold"]), colored(selected_p['card']['cardNumber'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CARD MONTH','red', attrs=["bold"]), colored(selected_p['card']['cardMonth'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CARD YEAR','red', attrs=["bold"]), colored(selected_p['card']['cardYear'],'cyan')))
-                logger.menu('VENETIA','Menu','[{}] => {}'.format(colored('CARD CVV','red', attrs=["bold"]), colored(selected_p['card']['cardCVV'],'cyan')))
-
-                sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-                option_edit_prof = input(' Edit Profile? Y/N => ')
-
-                if option_edit_prof.lower() == "y":
-                    with open(f'./data/profiles/profiles.json','r') as profileRead:
-                        profiles = json.loads(profileRead.read())
-            
-
-                    print(colored(f"[{get_time()}] Configure Config Below (Leave blank to leave unchanged) ", "red",attrs=['bold']))
-                    for p in profiles['profiles']:
-                        if p['profileName'] == selected_p['profileName']:
-                            profileName =  input(f"[{get_time()}] Profile Name ==> ")
-                            if profileName == "":
-                                try:
-                                    profileName = p['profileName']
-                                except:
-                                    profileName = ""
-                            else:
-                                p['profileName'] = profileName
-
-                            gender = random.choice(['male','female'])
-
-                            firtn =  input(f"[{get_time()}] First Name (Enter 'random' for a random name) ==> ")
-                            if firtn == "":
-                                try:
-                                    firtn = p['firstName']
-                                except:
-                                    firtn = ""
-                            else:
-                                if firtn.lower() == 'random':
-                                    p['firstName'] = names.get_first_name(gender=gender)
-                                else:    
-                                    p['firstName'] = firtn
-
-                            lastn =  input(f"[{get_time()}] Last Name (Enter 'random' for a random name) ==> ")
-                            if lastn == "":
-                                try:
-                                    lastn = p['lastName']
-                                except:
-                                    lastn = ""
-                            else:
-                                if lastn.lower() == 'random':
-                                    p['lastName'] = names.get_last_name()
-                                else:
-                                    p['lastName'] = lastn
-
-                            email =  input(f"[{get_time()}] Email (Enter your catchall with the @ for a random email) ==> ")
-                            if email == "":
-                                try:
-                                    email = p['email']
-                                except:
-                                    email = ""
-                            else:
-                                if email.split('@')[0] == '':
-                                    p['email'] = '{}{}{}{}{}{}'.format(p['firstName'],p['lastName'],random.randint(1,9),random.randint(1,9),random.randint(1,9),email)
-                                else:
-                                    p['email'] = email
-
-                            prefix =  input(f"[{get_time()}] Phone Prefix (example: +44) ==> ")
-                            if prefix == "":
-                                try:
-                                    prefix = p['phonePrefix']
-                                except:
-                                    prefix = ""
-                            else:
-                                p['phonePrefix'] = prefix
-
-                            phone =  input(f"[{get_time()}] Phone (Enter 'random' for a random phone) ==> ")
-                            if phone == "":
-                                try:
-                                    phone = p['phone']
-                                except:
-                                    phone = ""
-                            else:
-                                if phone.lower() == 'random':
-                                    p['phone'] = '{}{}{}{}{}{}{}{}{}{}'.format(random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9),random.randint(1,9))
-                                else:
-                                    p['phone'] = phone
-
-                            house =  input(f"[{get_time()}] House (Number / Name ) ==> ")
-                            if house == "":
-                                try:
-                                    house = p['house']
-                                except:
-                                    house = ""
-                            else:
-                                p['house'] = house
-
-                            add1 =  input(f"[{get_time()}] Address 1 ==> ")
-                            if add1 == "":
-                                try:
-                                    add1 = p['addressOne']
-                                except:
-                                    add1 = ""
-                            else:
-                                p['addressOne'] = add1
-
-                            add2 =  input(f"[{get_time()}] Address 2 (Enter 'random' for a random address 2) ==> ")
-                            if add2 == "":
-                                try:
-                                    add2 = p['addressTwo']
-                                except:
-                                    add2 = ""
-                            else:
-                                if add2.lower() == 'random':
-                                    p['addressTwo'] = 'Unit {}{}{}'.format(random.randint(1,9),random.randint(1,9),random.randint(1,9))
-                                else:
-                                    p['addressTwo'] = add2
-                                    
-                            city =  input(f"[{get_time()}] City ==> ")
-                            if city == "":
-                                try:
-                                    city = p['city']
-                                except:
-                                    city = ""
-                            else:
-                                p['city'] = city
-
-                            region =  input(f"[{get_time()}] Region/Province/State ==> ")
-                            if region == "":
-                                try:
-                                    region = p['region']
-                                except:
-                                    region = ""
-                            else:
-                                p['region'] = region
-
-                            country =  input(f"[{get_time()}] Country (example: United Kingdom) ==> ")
-                            if country == "":
-                                try:
-                                    country = p['country']
-                                except:
-                                    country = ""
-                            else:
-                                p['country'] = country
-                            
-                            countryC =  input(f"[{get_time()}] Country Code (example: GB) ==> ")
-                            if countryC == "":
-                                try:
-                                    countryC = p['countryCode']
-                                except:
-                                    countryC = ""
-                            else:
-                                p['countryCode'] = countryC
-
-                            zip =  input(f"[{get_time()}] Zipcode/Postcode ==> ")
-                            if zip == "":
-                                try:
-                                    zip = p['zip']
-                                except:
-                                    zip = ""
-                            else:
-                                p['zip'] = zip
-
-                            cn =  input(f"[{get_time()}] Card Number ==> ")
-                            if cn == "":
-                                try:
-                                    cn = p['card']['cardNumber']
-                                except:
-                                    cn = ""
-                            else:
-                                p['card']['cardNumber'] = cn
-
-                            expm =  input(f"[{get_time()}] Card Expiry Month (example: 8) ==> ")
-                            if expm == "":
-                                try:
-                                    expm = p['card']['cardMonth']
-                                except:
-                                    expm = ""
-                            else:
-                                p['card']['cardMonth'] = expm
-
-                            expy =  input(f"[{get_time()}] Card Expiry Year (example: 2024) ==> ")
-                            if expy == "":
-                                try:
-                                    expy = p['card']['cardYear']
-                                except:
-                                    expy = ""
-                            else:
-                                p['card']['cardYear'] = expy
-
-                            cvv =  input(f"[{get_time()}] Card CVV/CVC ==> ")
-                            if cvv == "":
-                                try:
-                                    cvv = p['card']['cardCVV']
-                                except:
-                                    cvv = ""
-                            else:
-                                p['card']['cardCVV'] = cvv
-                            
-                            
-
-                    
-                    with open(f'./data/profiles/profiles.json','w') as profileDump2:
-                        json.dump(profiles, profileDump2)
-        
-                    logger.menu('VENETIA','Menu','PROFILE Updated - {}'.format(colored(profileName,'green',attrs=["bold"])))
-        
-                    sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-                    option = input(' [ENTER] TO RETURN TO Menu ')
-                    self.menu()
+                if str(p['profileName']) == str(new_profile_data['profileName']):
+                    new_profiles['profiles'].append(new_profile_data)
                 else:
-                    self.menu()
+                    new_profiles['profiles'].append(p)
 
+            with open(f'./data/profiles/profiles.json','w') as profileDump:
+                json.dump(new_profiles, profileDump)
+
+
+            return redirect('/profiles')
+
+
+        @main_flask_server.route('/import_profiles', methods=['POST'])
+        def import_profiles_route():
+            file = json.loads(request.files['file'].read().decode('Utf-8'))
             
 
-        elif option == 7:
-            print('[{}] Would you like to clear current captcha tokens ?   Y | N'.format(colored(get_time(),'red',attrs=['bold'])))
-            sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            cleartokenQuestion = input(' Pick an option => ')
-            if cleartokenQuestion.lower() == 'y':
-                clearTokens()
+            if request.form['keep_existing_profiles'] == 'true':
+                # add to existing profiles
+                with open(f'./data/profiles/profiles.json','r') as profileRead:
+                    profiles = json.loads(profileRead.read())
+
+                for p in file['profiles']:
+                    profiles['profiles'].append(p)
+
+                with open(f'./data/profiles/profiles.json','w') as profileDump:
+                    json.dump(profiles, profileDump)
+
             else:
-                pass
+                # replace existing files
+                with open(f'./data/profiles/profiles.json','w') as profileDump:
+                    json.dump(file, profileDump)
+
+            return redirect('/profiles')
 
 
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('TITOLO','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('NAKED','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('PRO-DIRECT','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('5','red', attrs=["bold"]), colored('OFFSPRING','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('6','red', attrs=["bold"]), colored('OFFICE','cyan')))
-            logger.menu('VENETIA','CAPTCHAS','[{}] => {}'.format(colored('7','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
-            sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            CaptchasiteSelect = input(' Select a site => ')
-            if CaptchasiteSelect == "1":
-                siteUrl = 'https://en.titoloshop.com/'
-                siteKey = '6Ldpi-gUAAAAANpo2mKVvIR6u8nUGrInKKik8MME'
-                siteName = 'TITOLO'
-            if CaptchasiteSelect == "2":
-                siteUrl = 'https://www.holypopstore.com/'
-                siteKey = '6Lc8GBUUAAAAAKMfe1S46jE08TvVKNSnMYnuj6HN'
-                siteName = 'HOLYPOP'
-            if CaptchasiteSelect == "3":
-                siteUrl = 'https://www.nakedcph.com/'
-                siteKey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
-                siteName = 'NAKED'
-            if CaptchasiteSelect == "4":
-                siteUrl = 'https://www.prodirectbasketball.com/'
-                siteKey = '6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g'
-                siteName = 'PRODIRECT'
-            if CaptchasiteSelect == "5":
-                siteUrl = 'https://www.offspring.co.uk'
-                siteKey = '6Ld-VBsUAAAAABeqZuOqiQmZ-1WAMVeTKjdq2-bJ'
-                siteName = 'OFFSPRING'
-            if CaptchasiteSelect == "6":
-                siteUrl = 'https://www.office.co.uk/'
-                siteKey = '6Ld-VBsUAAAAABeqZuOqiQmZ-1WAMVeTKjdq2-bJ'
-                siteName = 'OFFICE'
-            if CaptchasiteSelect == "7":
-                self.menu()
 
-            sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            amount = option = input(' Enter Amount => ')
-            proxies = 'proxies'
+        # config
+        @main_flask_server.route('/configuration', methods=['GET'])
+        def edit_config_route():
+            with open('./data/config.json') as config:
+                config = json.loads(config.read())
+                return render_template('config.html',config=config)
+
+
+        @main_flask_server.route('/update/config', methods=['POST'])
+        def edit_config_route_post():
+            if request.method == 'POST':
+                with open('./data/config.json') as config:
+                    config = json.loads(config.read())
+
+                    config_updated = {
+                        "key":config["key"],
+                        "checkoutNoise":request.form['checkout_noise'],
+                        "webhook":request.form['webhook'],
+                        "2Captcha":request.form['2cap'],
+                        "capMonster":request.form['cap_mon'],
+                        "captcha":request.form['cap_choice'],
+                        "quickTaskSize":request.form['qt_size'],
+                        "quickTaskProfile":request.form['qt_profile'],
+                        "quickTaskProxies":request.form['qt_proxies'],
+                        "quickTaskDelay":request.form['qt_delay'],
+                        "quickTaskPayment":request.form['qt_payment'],
+                        "quickTaskEmail":request.form['qt_account_email'],
+                        "quickTaskPassword":request.form['qt_account_password']
+                    }
+
+                    with open("./data/config.json","w") as updated:
+                        json.dump(config_updated, updated)
+
+            return redirect('/configuration')
             
-            for i in range(int(amount)):
-                threading.Thread(target=captcha.menuV2,args=(siteKey,siteUrl,proxies,'CAPTCHA',siteName)).start()
-
-            while threading.active_count() != 2:
-                pass
-
-            if threading.active_count() == 2:
-                self.menu()
-
-        if option == 8:
-            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('HOLYPOP','cyan')))
-            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('PRO-DIRECT','cyan')))
-            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('FOOTASYLUM','cyan')))
-            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('SNIPES','cyan')))
-            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('5','red', attrs=["bold"]), colored('NAKED','cyan')))
-            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('6','red', attrs=["bold"]), colored('WCH','cyan')))
-            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('7','red', attrs=["bold"]), colored('AMBUSH','cyan')))
-            logger.menu('VENETIA','Accounts','[{}] => {}'.format(colored('8','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
-            sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            AccountsiteSelect = input(' Select a site => ')
-            if AccountsiteSelect == "8":
-                self.menu()
-
-            # proxies = input(f"[{get_time()}] Enter proxy list name (leave empty for none) ==> ")
-            # if proxies == "":
-                # proxies = None
-            proxies = 'proxies'
-
-            amount = input(f"[{get_time()}] Enter amount ==> ")
-
-            catchall = input(f"[{get_time()}] Enter catchall (with @) ==> ")
-
-            password = input(f"[{get_time()}] Enter Password ==> ")
-            
-            profile = input(f"[{get_time()}] Enter profile name (for address) ==> ")
-
-
-            # completed = []
-            if AccountsiteSelect == "1":
-                sitekey = '6Lc8GBUUAAAAAKMfe1S46jE08TvVKNSnMYnuj6HN'
-                for i in range(int(amount)):
-                    threading.Thread(target=ACCOUNTS.holypop,args=(sitekey,proxies,'HOLYPOP',catchall,password, profile)).start()
-
-            if AccountsiteSelect == "2":
-                sitekey = '6LdXsbwUAAAAAMe1vJVElW1JpeizmksakCUkLL8g'
-                for i in range(int(amount)):
-                    threading.Thread(target=ACCOUNTS.proDirect,args=(sitekey,proxies,'PRO-DIRECT',catchall,password, profile)).start()
-
-            if AccountsiteSelect == "3":
-                sitekey = 'SITE-KEY-NOT-REQUIRED'
-                for i in range(int(amount)):
-                    threading.Thread(target=ACCOUNTS.footasylum,args=(sitekey,proxies,'FOOTASYLUM',catchall,password, profile)).start()
-
-            if AccountsiteSelect == "4":
-                sitekey = 'SITE-KEY-NOT-REQUIRED'
-                for i in range(int(amount)):
-                    threading.Thread(target=ACCOUNTS.snipes,args=(sitekey,proxies,'SNIPES',catchall,password, profile)).start()
-
-            if AccountsiteSelect == "5":
-                sitekey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
-                for i in range(int(amount)):
-                    threading.Thread(target=ACCOUNTS.naked,args=(sitekey,proxies,'NAKED',catchall,password, profile)).start()
-
-            if AccountsiteSelect == "6":
-                sitekey = '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
-                for i in range(int(amount)):
-                    threading.Thread(target=ACCOUNTS.wch,args=(sitekey,proxies,'WCH',catchall,password, profile)).start()
-            
-            if AccountsiteSelect == "7":
-                sitekey = ''
-                for i in range(int(amount)):
-                    threading.Thread(target=ACCOUNTS.ambush,args=(sitekey,proxies,'AMBUSH',catchall,password, profile)).start()
+        @main_flask_server.route('/config/webhook/test', methods=['POST'])
+        def edit_config_route_webhook_test():
+            if request.method == "POST":
+                Webhook.test(webhook=decodeURIComponent(request.args.get('webhook')))
+                return redirect('/configuration')
 
         
-            while threading.active_count() != 2:
-                pass
+        # stats
+        @main_flask_server.route('/statistics', methods=['GET'])
+        def stats_route():
+            with open('./data/checkouts.json') as checkouts:
+                checkouts = json.loads(checkouts.read())
+                return render_template('stats.html',checkouts=json.dumps(checkouts))
 
-            if threading.active_count() == 2:
-                self.menu()
         
-        elif option == 9:
-            # self.menu()
-            
-            logger.menu('VENETIA','Cookies','[{}] => {}'.format(colored('1','red', attrs=["bold"]), colored('COURIR','cyan')))
-            logger.menu('VENETIA','Cookies','[{}] => {}'.format(colored('2','red', attrs=["bold"]), colored('SLAM JAM','cyan')))
-            logger.menu('VENETIA','COOKIES','[{}] => {}'.format(colored('3','red', attrs=["bold"]), colored('STARCOW','cyan')))
-            logger.menu('VENETIA','Cookies','[{}] => {}'.format(colored('4','red', attrs=["bold"]), colored('RETURN TO Menu','cyan')))
-            sys.stdout.write(colored(f'\n[{get_time()}][Venetia-Menu]','cyan',attrs=["bold"]))
-            cookieSiteSelect = input(' Select a site => ')
-            if cookieSiteSelect == "4":
-                self.menu()
+        main_flask_server.run(port=port)
+    
+    try:
+        port = random.randint(1024,65535)
+        t = threading.Thread(target=server,daemon=True, args=(port,)).start()
+        return port
+    except Exception:
+        return None
 
-            sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            proxies = input(' Enter proxy list name (leave empty for none) => ')
-            if proxies == "":
-                proxies = None
-
-            sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            amount = input(' Enter amount => ')
-
-            if cookieSiteSelect == "1":
-                for i in range(int(amount)):
-                    threading.Thread(target=datadome.courir,args=(proxies,'Cookies','save')).start()
-
-            if cookieSiteSelect == "2":
-                sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-                region = input(' Enter Site Region (example: GB) => ')
-
-                for i in range(int(amount)):
-                    threading.Thread(target=datadome.slamjam,args=(proxies,'Cookies','save')).start()
-
-            if cookieSiteSelect == "3":
-                sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-
-                for i in range(int(amount)):
-                    threading.Thread(target=datadome.starcow,args=(proxies,'Cookies','save')).start()
-
-
-            while threading.active_count() != 2:
-                pass
-
-            if threading.active_count() == 2:
-                self.menu()
-
-
-        elif option == 10:
-            checkoutData = loadCheckouts()
-            logger.other_yellow('Total Checkouts: ', checkoutData['total'])
-            logger.other_yellow('Recent Checkouts...', '')
-            count = 0
-            if int(checkoutData['total']) == 0:
-                self.menu()
-
-            elif int(checkoutData['total']) <= 30:
-                count = int(checkoutData['total'])
-            else:
-                count  = 30
-
-            options = []
-            options.append('[XX] Back to Menu')
-            i__ = 1
-            for i in checkoutData['checkouts'][-count:]:
-                if i__ < 10:
-                    i_ = f'0{i__}'
-                else:
-                    i_ = i__
-                data = i
-                i__ = i__ + 1
-                # options.append('[{}]     {}                {}'.format(i_,data['site'].title(), data['product']))
-                site = data['site'].title()
-                prod = data['product']
-                options.append(f'[{i_:<3}]   {site:<10}   {prod:<20}')
-            
-            def selector():
-                logger.other_grey('=' * 50)
-                questions = [
-                    inquirer.List(
-                        "checkouts",
-                        message="Select a checkout",
-                        choices=options,
-                    ),
-                ]
-                answers = inquirer.prompt(questions)
-                num = answers['checkouts'].split('[')[1].split(']')[0]
-                if num == 'XX':
-                    self.menu()
-                link = checkoutData['checkouts'][int(num)]['checkout_url']
-                webbrowser.open_new_tab(link)
-                return num
-
-            n = selector()
-            while n != 'XX':
-                n = selector()
-
-            
-
-            
-
-
-        elif option == 11:
-            logger.menu('VENETIA','Menu','{}'.format(colored('Goodbye...','yellow', attrs=["bold"])))
-            time.sleep(3)
-            os._exit(0)
-        
-        elif option > 11:
-            logger.menu('VENETIA','Menu','{}'.format(colored('Invalid menu choice. Try again','yellow', attrs=["bold"])))
-            time.sleep(3)
-            self.menu()
-            
-                
 
 
 if __name__ == "__main__":
     dataFiles.execute()
+
     with open('./data/config.json') as config:
         config = json.loads(config.read())
         if config["key"] == "":
-            sys.stdout.write('\n[{}][{}]'.format(colored(get_time(),'cyan',attrs=["bold"]), colored('Venetia-Menu','white')))
-            key = input(colored(" Enter Your License Key ==> ","yellow",attrs=["bold"]))
+            key = input("Enter Your License Key ==> ")
             config["key"] = key
             with open("./data/config.json","w") as updated:
                 json.dump(config, updated)
 
             auth = auth.auth(config["key"], uuid.getnode())
             if auth["STATUS"] == 1:
-                logger.menu('VENETIA','Menu','{}'.format(colored(f'Key Authorised','green', attrs=["bold"])))
-                Menu()
+                k = config['key']
+                print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored(f'Key Authorised [{k}]','green', attrs=["bold"])))
+                Menu().base()
+
             if auth["STATUS"] == 0:
-                logger.menu('VENETIA','Menu','{}'.format(colored('Failed to auth key. Closing...','red', attrs=["bold"])))
+                print(colored('Failed to auth key. Closing...','red', attrs=["bold"]))
                 config["key"] = ""
                 with open("./data/config.json","w") as updated:
                     json.dump(config, updated)
+
                 time.sleep(3)
                 os._exit(0)
 
         else:
             auth = auth.auth(config["key"], uuid.getnode())
             if auth["STATUS"] == 1:
-                logger.menu('VENETIA','Menu','{}'.format(colored(f'Key Authorised','green', attrs=["bold"])))
-                Menu()
+                k = config['key']
+                print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored(f'Key Authorised [{k}]','green', attrs=["bold"])))
+                Menu().base()
+                # asyncio.run(Menu().base())
+
             if auth["STATUS"] == 0:
-                logger.menu('VENETIA','Menu','{}'.format(colored('Failed to auth key. Closing...','red', attrs=["bold"])))
+                print('{} {}'.format(colored('[Menu]:','cyan', attrs=["bold"]),colored(f'Failed to auth key. Closing...','red', attrs=["bold"])))
                 config["key"] = ""
                 with open("./data/config.json","w") as updated:
                     json.dump(config, updated)
