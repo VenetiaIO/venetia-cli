@@ -139,7 +139,7 @@ class SIZE:
         if self.profile['countryCode'].lower() == 'gb':
             self.region = '.co.uk'
         else:
-            self.region = '.' + self.profile['countryCode'].lower()
+            self.region = 'official.' + self.profile['countryCode'].lower()
 
 
         self.prodUrl = f'https://www.size{self.region}/product/-/' + self.task['PRODUCT'] + '/stock/?_=' + str(int(time.time()))
@@ -154,7 +154,7 @@ class SIZE:
                 value=response.cookies[c],
                 port=None,
                 port_specified=False,
-                domain="www.offspring.co.uk",
+                domain="www.size" + self.region,
                 domain_specified=False,
                 domain_initial_dot=False,
                 path="/",

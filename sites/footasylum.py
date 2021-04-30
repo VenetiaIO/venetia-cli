@@ -107,8 +107,12 @@ class FOOTASYLUM:
                 rfc2109=False,
             ))
 
-    def rotateProxy(self):
+    def rotateProxy(self, noProxy = True):
         self.proxy = loadProxy2(self.task["PROXIES"],self.taskID,SITE)
+        
+        if noProxy == False:
+            self.proxy = None
+
         self.session = client.Session(
             browser=client.Fingerprint.CHROME_83,
             proxy=self.proxy
@@ -167,26 +171,26 @@ class FOOTASYLUM:
         self.orderNum = None
 
         self.monitor()
-        self.login()
+        # self.login()
         self.addToCart()
         self.startSession()
         self.getInfo()
+        self.email()
         self.basketDetails()
-        self.shipping()
+        # self.shipping()
         self.shippingMethod()
         self.updateCustomerData()
+        self.basketCheck()
         
-
 
         if self.task['PAYMENT'].strip().lower() == "paypal":
             self.paymentToken()
             self.paypal()
         else:
-            self.basketCheck()
             self.card()
             self.cardStage2()
 
-        # self.sendToDiscord()
+        self.sendToDiscord()
 
     def monitor(self):
         while True:
@@ -406,7 +410,7 @@ class FOOTASYLUM:
                 params = {
                     "target":"ajx_basket.asp",
                     "sku":self.sizeSku,
-                    "sessionid":self.sessionId,
+                    # "sessionid":self.sessionId,
                     "_":str(int(datetime.now(tz=timezone.utc).timestamp() * 1000))
                 }
             except:
@@ -415,10 +419,11 @@ class FOOTASYLUM:
                 continue
             
             try:
-                response = self.session.get('https://www.footasylum.com/page/xt_orderform_additem/?target={}&sku={}&sessionid={}&_={}'.format(
+                # &sessionid={}
+                response = self.session.get('https://www.footasylum.com/page/xt_orderform_additem/?target={}&sku={}&_={}'.format(
                     "ajx_basket.asp",
                     self.sizeSku,
-                    self.sessionId,
+                    # self.sessionId,
                     str(int(datetime.now(tz=timezone.utc).timestamp() * 1000))
                 ),headers={
                     'user-agent':self.ua,
@@ -426,7 +431,7 @@ class FOOTASYLUM:
                     'x-requested-with':'XMLHttpRequest',
                     'cookie':getCookies(self.cookieJar),
                     'authority': 'www.footasylum.com',
-                    'referer':'{}?sessionid={}'.format(self.task["PRODUCT"],self.sessionId)
+                    'referer':self.task["PRODUCT"]
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
@@ -454,13 +459,13 @@ class FOOTASYLUM:
 
 
             try:
-                response = self.session.post(f'https://www.footasylum.com/page/nw-api/initiatecheckout/?sessionid={self.sessionId}',headers={
+                response = self.session.post(f'https://www.footasylum.com/page/nw-api/initiatecheckout/',headers={
                     'user-agent':self.ua,
                     'accept':'text/plain, */*; q=0.01',
                     'origin':'https://www.footasylum.com',
                     'x-requested-with':'XMLHttpRequest',
                     'cookie':getCookies(self.cookieJar),
-                    'referer': 'https://www.footasylum.com/page/basket/?sessionid=' + self.sessionId,
+                    'referer': 'https://www.footasylum.com/page/basket/',
                     'content-type':'application/x-www-form-urlencoded'
                     # 'referer':'https://www.footasylum.com/page/basket/'
                 })
@@ -546,6 +551,34 @@ class FOOTASYLUM:
                 self.error(f"Failed to get session info [{str(response.status)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
+    
+    def email(self):
+        while True:
+            self.prepare("Setting email...")
+
+            try:
+                response = self.session.post('https://api.gateway.footasylum.net/wrapper/customer/check?checkout_client=secure',headers={
+                    'user-agent':self.ua,
+                    'accept':'application/json',
+                    'cookie':getCookies(self.cookieJar),
+                    'referer':'https://secure.footasylum.com/',
+                },json={"fascia_id":self.fascia_id,"channel_id":self.channelId,"currency_code":self.currency,"customer":{"email":self.profile['email']}})
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.rotateProxy()
+                continue
+
+            self.setCookies(response)
+            if response.status == 200:
+                self.warning("Email set")
+                return
+            
+            else:
+                self.error(f"Failed to set email [{str(response.status)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
 
     def basketDetails(self):
         while True:
@@ -563,12 +596,26 @@ class FOOTASYLUM:
                 }
             }
 
+            payload = {
+                "fascia_id":self.fascia_id,
+                "channel_id":self.channelId,
+                "currency_code":self.currency,
+                "customer": {
+                    "customer_id": self.customerId,
+                    "sessionID": "",
+                    "hash": "xcx"
+                },
+                "basket_id": self.pasparBasketId,
+                "shipping_country": self.profile['countryCode'].upper()
+            }
+
             try:
-                response = self.session.post('https://r9udv3ar7g.execute-api.eu-west-2.amazonaws.com/prod/customer/details?checkout_client=secure',json=payload,headers={
+                # https://r9udv3ar7g.execute-api.eu-west-2.amazonaws.com/prod/customer/details?checkout_client=secure
+                response = self.session.post('https://api.gateway.footasylum.net/wrapper/basket?checkout_client=secure',json=payload,headers={
                     'user-agent':self.ua,
                     'accept':'application/json',
                     'cookie':getCookies(self.cookieJar),
-                    'referer':'https://secure.footasylum.com/?checkoutSessionId={}'.format(self.checkoutSessionId)
+                    'referer':'https://secure.footasylum.com/'
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
@@ -582,9 +629,13 @@ class FOOTASYLUM:
                 try:
                     responseJson = json.loads(response.text)
                     self.customer = responseJson["customer"]
-                    self.title = responseJson["customer"]["title"]
-                    self.shippingDetails = responseJson["basket"]["shipping_details"]
-                    self.billingDetails = responseJson["basket"]["billing_details"]
+                    self.itemId = responseJson["basket"]["items"][0]["sku"]
+                    self.stripePrice = str(responseJson["basket"]["total"]).replace('.','')
+                    self.webhookData['price'] = '{} {}'.format(responseJson["basket"]["total"],responseJson["basket"]["currency_code"])
+
+                    # self.title = responseJson["customer"]["title"]
+                    # self.shippingDetails = responseJson["basket"]["shipping_details"]
+                    # self.billingDetails = responseJson["basket"]["billing_details"]
                     self.shippingMethodCode = responseJson["basket"]["shipping_method_code"]
                     self.shippingMethodName = responseJson["basket"]["shipping_method_name"]
                     self.shippingTotal = responseJson["basket"]["shipping_total"]
@@ -601,10 +652,59 @@ class FOOTASYLUM:
                 self.error(f"Failed to get customer info [{str(response.status)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
+    
+    def delivery(self):
+        while True:
+            self.prepare("Submitting Delivery...")
+
+            try:
+                payload = {
+                    "email":self.profile['email'],
+                    "order_num":self.checkoutSessionId,
+                    "postcode":self.profile['zip'],
+                    "country":self.profile['countryCode'],
+                    "basket":{
+                        "id":self.pasparBasketId,
+                        "basketItems":[{"id":self.itemId,"qty":1}]
+                    },
+                    "paraspar_customer_id":self.customerId,
+                    "paraspar_session_id":None,
+                    "channelId":self.channelId,
+                    "fascia_id":self.fascia_id
+                }
+            except:
+                self.error("Failed to set delivery [failed to construct payload]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
+
+            try:
+                response = self.session.post('https://api.gateway.footasylum.net/delivery/options?checkout_client=secure',headers={
+                    'user-agent':self.ua,
+                    'accept':'application/json',
+                    'cookie':getCookies(self.cookieJar),
+                    'referer':'https://secure.footasylum.com/',
+                },json={"fascia_id":self.fascia_id,"channel_id":self.channelId,"currency_code":self.currency,"customer":{"email":self.profile['email']}})
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.rotateProxy()
+                continue
+
+            self.setCookies(response)
+            if response.status == 200:
+
+                self.warning("Delivery set")
+                return
+            
+            else:
+                self.error(f"Failed to set delivery [{str(response.status)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
 
     def shipping(self):
         while True:
-            self.prepare("Submitting shipping...")
+            self.prepare("Submitting Basket Address...")
 
             try:
                 payload = {
@@ -613,45 +713,46 @@ class FOOTASYLUM:
                     "currency_code":self.currency,
                     "customer":{
                         "customer_id":self.customerId,
-                        "sessionID":self.parasparSessionId
+                        "sessionID":None
                     },
                     "basket":{
                         "basket_id":self.pasparBasketId
                     },
                     "shipping_details":{
-                        "title":self.title,
-                        "firstname":self.shippingDetails["firstname"],
-                        "surname":self.shippingDetails["surname"],
-                        "address1":self.shippingDetails["address1"],
-                        "address2":self.shippingDetails["address2"],
-                        "town":self.shippingDetails["city"],
-                        "county":self.shippingDetails["county"],
-                        "postcode":self.shippingDetails["postcode"],
-                        "country_id":self.shippingDetails["country_id"],
-                        "country_name":self.shippingDetails["country_name"],
-                        "phone":self.shippingDetails["phone"],
-                        "mobile":self.shippingDetails["phone"]
+                        "title":"Mr",
+                        "firstname":self.profile['firstName'],
+                        "surname":self.profile['lastName'],
+                        "address1":self.profile['house'] + ' ' + self.profile['addressOne'],
+                        "address2":self.profile['addressTwo'],
+                        "town":self.profile["city"],
+                        "county":self.profile["region"],
+                        "postcode":self.profile["zip"],
+                        "country_id":self.profile["countryCode"],
+                        "country_name":self.profile["country"],
+                        "phone":self.profile["phone"],
+                        "mobile":self.profile["phone"]
                     },
                     "billing_details":{
-                        "title":self.title,
-                        "firstname":self.billingDetails["firstname"],
-                        "surname":self.billingDetails["surname"],
-                        "address1":self.billingDetails["address1"],
-                        "address2":self.billingDetails["address2"],
-                        "town":self.billingDetails["city"],
-                        "county":self.billingDetails["county"],
-                        "postcode":self.billingDetails["postcode"],
-                        "country_id":self.billingDetails["country_id"],
-                        "country_name":self.billingDetails["country_name"],
-                        "phone":self.billingDetails["phone"],
-                        "mobile":self.billingDetails["phone"]
+                        "title":"Mr",
+                        "firstname":self.profile['firstName'],
+                        "surname":self.profile['lastName'],
+                        "address1":self.profile['house'] + ' ' + self.profile['addressOne'],
+                        "address2":self.profile['addressTwo'],
+                        "town":self.profile["city"],
+                        "county":self.profile["region"],
+                        "postcode":self.profile["zip"],
+                        "country_id":self.profile["countryCode"],
+                        "country_name":self.profile["country"],
+                        "phone":self.profile["phone"],
+                        "mobile":self.profile["phone"]
                     }
                 }
             except Exception as e:
                 log.info(e)
-                self.error(f"Failed to submit shipping [failed to construct payload]. Retrying...")
+                self.error(f"Failed to submit Basket Address [failed to construct payload]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
+
 
             try:
                 response = self.session.post('https://api.gateway.footasylum.net/wrapper/basket/basketaddaddress?checkout_client=secure',json=payload,headers={
@@ -671,19 +772,24 @@ class FOOTASYLUM:
             if response.status == 200:
                 try:
                     responseJson = json.loads(response.text)
+                    print(responseJson)
                     # self.basketaddressResponse = responseJson
                     self.stripePrice = str(responseJson["basket"]["total"]).replace('.','')
                     self.webhookData['price'] = '{} {}'.format(responseJson["basket"]["total"],responseJson["basket"]["currency_code"])
+                    self.shippingMethodCode = responseJson["basket"]["shipping_method_code"]
+                    self.shippingMethodName = responseJson["basket"]["shipping_method_name"]
+                    self.shippingTotal = responseJson["basket"]["shipping_total"]
+                    self.authState = responseJson["customer"]["session_state"]
                 except Exception as e:
-                    self.error(f"Failed to submit shipping [failed to parse response]. Retrying...")
+                    self.error(f"Failed to submit Basket Address [failed to parse response]. Retrying...")
                     time.sleep(int(self.task['DELAY']))
                     continue
 
-                self.warning("Submitted shipping")
+                self.warning("Submitted Basket Address")
                 return
             
             else:
-                self.error(f"Failed to submit shipping [{str(response.status)}]. Retrying...")
+                self.error(f"Failed to submit Basket Address[{str(response.status)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
 
@@ -759,33 +865,33 @@ class FOOTASYLUM:
                 payload = {
                     "cartId": self.pasparBasketId,
                     "customer": {
-                        "firstname": self.customer['firstname'],
-                        "lastname": self.customer['surname'],
-                        "email": self.customer['email'],
-                        "mobile": self.shippingDetails['phone'],
-                        "title": self.title,
+                        "firstname": self.profile['firstName'],
+                        "lastname": self.profile['lastName'],
+                        "email": self.profile['email'],
+                        "mobile": self.profile['phone'],
+                        "title": "Mr",
                         "newsletter": 1,
-                        "sessionId": self.parasparSessionId,
+                        "sessionId": None,
                         "parasparId": self.customerId
                     },
                     "shippingAddress": {
                         "company": "",
-                        "address1": self.shippingDetails['address1'],
-                        "address2": self.shippingDetails['address2'],
-                        "city": self.shippingDetails['city'],
-                        "country": self.shippingDetails['country_name'],
-                        "postcode": self.shippingDetails['postcode'],
-                        "shortCountry": self.shippingDetails['country_id'],
+                        "address1":self.profile['house'] + ' ' + self.profile['addressOne'],
+                        "address2":self.profile['addressTwo'],
+                        "city": self.profile['city'],
+                        "country": self.profile['country'],
+                        "postcode": self.profile['zip'],
+                        "shortCountry": self.profile['countryCode'],
                         "delivery_instructions": ""
                     },
                     "billingAddress": {
                         "company": "",
-                        "address1": self.billingDetails['address1'],
-                        "address2": self.billingDetails['address2'],
-                        "city": self.billingDetails['city'],
-                        "country": self.billingDetails['country_name'],
-                        "postcode": self.billingDetails['postcode'],
-                        "shortCountry": self.billingDetails['country_id'],
+                        "address1":self.profile['house'] + ' ' + self.profile['addressOne'],
+                        "address2":self.profile['addressTwo'],
+                        "city": self.profile['city'],
+                        "country": self.profile['country'],
+                        "postcode": self.profile['zip'],
+                        "shortCountry": self.profile['countryCode'],
                         "delivery_instructions": ""
                     },
                     "authState": self.authState
@@ -840,7 +946,7 @@ class FOOTASYLUM:
     
     def basketCheck(self):
         while True:
-            self.prepare("Checking basket...")
+            # self.prepare("Checking basket...")
 
             if CONFIG.captcha_configs[_SITE_]['type'].lower() == 'v3':
                 capToken = captcha.v3(CONFIG.captcha_configs[_SITE_]['siteKey'],CONFIG.captcha_configs[_SITE_]['url'],self.task['PROXIES'],SITE,self.taskID)
@@ -898,10 +1004,10 @@ class FOOTASYLUM:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.rotateProxy()
+                self.rotateProxy(True)
                 continue
-
             self.setCookies(response)
+
             if response.status == 200:
                 try:
                     responseJson = json.loads(response.text)
@@ -945,7 +1051,7 @@ class FOOTASYLUM:
                 log.info(e)
                 self.error(f"error: {str(e)}")
                 time.sleep(int(self.task["DELAY"]))
-                self.rotateProxy()
+                self.rotateProxy(True)
                 continue
 
             self.setCookies(response)
@@ -1004,10 +1110,10 @@ class FOOTASYLUM:
                 'currency': self.currency,
                 'amount': self.stripePrice,
                 'owner[name]': '{} {}'.format(self.profile['firstName'], self.profile['lastName']),
-                'owner[email]': self.customer['email'],
-                'owner[address][line1]': self.shippingDetails['address1'],
-                'owner[address][city]': self.shippingDetails['city'],
-                'owner[address][postal_code]': self.shippingDetails['postcode'],
+                'owner[email]': self.profile['email'],
+                'owner[address][line1]': self.profile['house'] + ' ' + self.profile['addressOne'],
+                'owner[address][city]': self.profile['city'],
+                'owner[address][postal_code]': self.profile['zip'],
                 'owner[address][country]': self.profile['countryCode'],
                 'metadata[description]': 'New Checkout payment for FA products',
                 'redirect[return_url]': f'https://secure.footasylum.com/redirect-result?checkoutSessionId={self.checkoutSessionId}&disable_root_load=true',
@@ -1291,8 +1397,7 @@ class FOOTASYLUM:
                             self.setCookies(response5)
                             
                             status = response5.json()['basket']['payment_status']
-                            print(status)
-                            time.sleep(3)
+                            time.sleep(1)
                         
                         if status == 'succeeded':
                             try:
@@ -1325,7 +1430,6 @@ class FOOTASYLUM:
                 continue
     
     
-
     def sendToDiscord(self):
         while True:
             

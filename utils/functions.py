@@ -64,13 +64,17 @@ def injection(session, response):
       return response
 
 def scraper():
-  settings = loadSettings()
-  if settings["captcha"].strip().lower() == "monster":
-    apiKey = settings["capMonster"]
-    provider = 'capmonster'
-  else:
-    apiKey = settings["2Captcha"]
-    provider = '2captcha'
+  try:
+    settings = loadSettings()
+    if settings["captcha"].strip().lower() == "monster":
+      apiKey = settings["capMonster"]
+      provider = 'capmonster'
+    else:
+      apiKey = settings["2Captcha"]
+      provider = '2captcha'
+  except Exception:
+    print('Error loading captcha config')
+    return requests.session()
     
   scraper = cloudscraper.create_scraper(
       requestPostHook=injection,

@@ -110,20 +110,25 @@ class SNIPES:
         else:
             if self.profile['countryCode'].upper() == "DE":
                 self.snipesRegion = 'com'
-            if self.profile['countryCode'].upper() == "AT":
+            elif self.profile['countryCode'].upper() == "AT":
                 self.snipesRegion = 'at'
-            if self.profile['countryCode'].upper() == "NL":
+            elif self.profile['countryCode'].upper() == "NL":
                 self.snipesRegion = 'nl'
-            if self.profile['countryCode'].upper() == "FR":
+            elif self.profile['countryCode'].upper() == "FR":
                 self.snipesRegion = 'fr'
-            if self.profile['countryCode'].upper() == "CH":
+            elif self.profile['countryCode'].upper() == "CH":
                 self.snipesRegion = 'ch'
-            if self.profile['countryCode'].upper() == "IT":
+            elif self.profile['countryCode'].upper() == "IT":
                 self.snipesRegion = 'it'
-            if self.profile['countryCode'].upper() == "ES":
+            elif self.profile['countryCode'].upper() == "ES":
                 self.snipesRegion = 'es'
-            if self.profile['countryCode'].upper() == "BE":
+            elif self.profile['countryCode'].upper() == "BE":
                 self.snipesRegion = 'be'
+            
+            else:
+                self.error('Region not supported. Exiting...')
+                time.sleep(10)
+                sys.exit()
                 
             self.pid = self.task['PRODUCT']
 
@@ -141,10 +146,6 @@ class SNIPES:
 
         self.queryUrl = 'https://www.snipes.{}/p/{}.html?dwvar_{}_color=a&format=ajax'.format(self.snipesRegion,self.pid,self.pid)
 
-        if self.snipesRegion != 'com':
-            self.atcUrl = f'https://www.snipes.{self.snipesRegion}{self.demandWareBase}Cart-AddProduct?format=ajax'
-        else:
-            self.atcUrl = f'https://www.snipes.{self.snipesRegion}/add-product?format=ajax'
 
         self.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.88 Safari/537.36'
 
@@ -195,6 +196,12 @@ class SNIPES:
                     self.webhookData['price'] = str(data["product"]["price"]["sales"]["formatted"])
 
                     self.demandWareBase = data["product"]["quantities"][0]["url"].split('Product-Variation')[0]
+
+                    if self.snipesRegion != 'com':
+                        self.atcUrl = f'https://www.snipes.{self.snipesRegion}{self.demandWareBase}Cart-AddProduct?format=ajax'
+                    else:
+                        self.atcUrl = f'https://www.snipes.{self.snipesRegion}/add-product?format=ajax'
+
 
                     sizeList = data["product"]["variationAttributes"][0]["values"]
 

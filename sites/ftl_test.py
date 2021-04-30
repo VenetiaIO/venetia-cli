@@ -1,6 +1,7 @@
 import requests
 import uuid
 from datetime import timezone, datetime
+import time
 
 session = requests.session()
 lastServed = None
@@ -28,7 +29,7 @@ for i in range(20):
 
     # self.session.get(self.baseUrl)
     # url = '{}/en/product/{}/{}.html'.format(self.baseUrl, self.task['PRODUCT'], self.task['PRODUCT'])
-    url = '{}/api/products/pdp/{}?timestamp={}'.format('https://www.footlocker.co.uk', '314206076904', int(datetime.now(tz=timezone.utc).timestamp() * 1000))
+    url = '{}/api/products/pdp/{}?timestamp={}'.format('https://www.footlocker.co.uk', '314102888204', int(datetime.now(tz=timezone.utc).timestamp() * 1000))
     try:
         retrieveSizes = session.get(url,headers=heads)
     except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -41,4 +42,5 @@ for i in range(20):
 
 
     print('{} <===> {}'.format(retrieveSizes.status_code,retrieveSizes.headers['X-Cache']))
+    time.sleep(1)
 

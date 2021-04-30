@@ -164,7 +164,9 @@ class FOOTLOCKER_NEW:
             time.sleep(10)
             sys.exit()
 
-        # self.baseSite = 'http://gocyberit.com.global.prod.fastly.net'
+        self.baseSite = 'http://gocyberit.com.global.prod.fastly.net'
+        # self.baseSite = self.baseUrl
+
         self.lastServed = None
         self.lastServed_0 = None
 
@@ -211,8 +213,9 @@ class FOOTLOCKER_NEW:
 
 
     def retrieveSizes(self):
+        self.q = False
         while True:
-            self.prepare('Getting product data...')
+            if self.q == False: self.prepare('Getting product data...')
 
             heads = {
                 'host':self.baseUrl.split('https://')[1],
@@ -237,7 +240,7 @@ class FOOTLOCKER_NEW:
 
             # self.session.get(self.baseUrl)
             # url = '{}/en/product/{}/{}.html'.format(self.baseUrl, self.task['PRODUCT'], self.task['PRODUCT'])
-            url = '{}/api/products/pdp/{}?timestamp={}'.format(self.baseUrl, self.task['PRODUCT'], int(datetime.now(tz=timezone.utc).timestamp() * 1000))
+            url = '{}/api/products/pdp/{}?timestamp={}'.format(self.baseSite, self.task['PRODUCT'], int(datetime.now(tz=timezone.utc).timestamp() * 1000))
             try:
                 retrieveSizes = self.session.get(url,headers=heads)
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -249,6 +252,7 @@ class FOOTLOCKER_NEW:
             
 
             if retrieveSizes.status_code == 529:
+                self.q = True
                 self.info('Queue...')
                 
                 time.sleep(int(self.task["DELAY"]))
@@ -260,10 +264,16 @@ class FOOTLOCKER_NEW:
                 continue
 
             elif retrieveSizes.status_code == 403:
-                if retrieveSizes.headers['X-Served-By']:
-                    self.lastServed_0 = retrieveSizes.headers['X-Served-By']
-                else:
-                    self.lastServed_0 = None
+                try:
+                    if retrieveSizes.headers['X-Served-By']:
+                        try:
+                            self.lastServed = retrieveSizes.headers['X-Served-By']
+                        except:
+                            pass
+                    else:
+                        self.lastServed = None
+                except:
+                    pass
 
                 if 'nginx' in retrieveSizes.text:
                     self.error('Blocked. Rotating Proxy')
@@ -280,6 +290,18 @@ class FOOTLOCKER_NEW:
                 self.start = time.time()
                 try:
                     productData = json.loads(retrieveSizes.text)
+                    
+                    if productData['variantAttributes'][0]['displayCountDownTimer'] == True:
+                        date = productData['variantAttributes'][0]['skuLaunchDate'] 
+                        d = datetime.strptime(date, "%b %d %Y %H:%M:%S %Z+0000")
+                        # "May 01 2021 07:00:00 GMT+0000"
+                        date = int(datetime.timestamp(d))
+                        time_until_drop = date - int(time.time())
+                        self.alert('{} Seconds until drop. Sleeping...'.format(time_until_drop))
+                        time.sleep(time_until_drop - 5)
+                        self.secondary('Timer ended. Launching Tasks...')
+
+
                     # with open('ftl.json','w') as f:
                     #     f.write(productData)
                     #     f.close()
@@ -379,7 +401,7 @@ class FOOTLOCKER_NEW:
 
 
             try:
-                response = self.session.get(f'{self.baseUrl}/api/session?timestamp={int(datetime.now(tz=timezone.utc).timestamp() * 1000)}',headers=s_headers)
+                response = self.session.get(f'{self.baseSite}/api/session?timestamp={int(datetime.now(tz=timezone.utc).timestamp() * 1000)}',headers=s_headers)
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
                 self.error(f"error: {str(e)}")
@@ -387,10 +409,16 @@ class FOOTLOCKER_NEW:
                 time.sleep(int(self.task["DELAY"]))
                 continue
 
-            if response.headers['X-Served-By']:
-                self.lastServed = response.headers['X-Served-By']
-            else:
-                self.lastServed = None
+            try:
+                if response.headers['X-Served-By']:
+                    try:
+                        self.lastServed = response.headers['X-Served-By']
+                    except:
+                        pass
+                else:
+                    self.lastServed = None
+            except:
+                pass
             
 
             if response.status_code == 529:
@@ -454,7 +482,7 @@ class FOOTLOCKER_NEW:
                 atc_headers['fastly-ff'] = str(self.lastServed)
 
             try:
-                atcResponse = self.session.post(f'{self.baseUrl}/api/users/carts/current/entries?timestamp={int(datetime.now(tz=timezone.utc).timestamp() * 1000)}',
+                atcResponse = self.session.post(f'{self.baseSite}/api/users/carts/current/entries?timestamp={int(datetime.now(tz=timezone.utc).timestamp() * 1000)}',
                 json=data,headers=atc_headers)
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
@@ -464,10 +492,16 @@ class FOOTLOCKER_NEW:
                 continue
             
 
-            if atcResponse.headers['X-Served-By']:
-                self.lastServed = atcResponse.headers['X-Served-By']
-            else:
-                self.lastServed = None
+            try:
+                if atcResponse.headers['X-Served-By']:
+                    try:
+                        self.lastServed = atcResponse.headers['X-Served-By']
+                    except:
+                        pass
+                else:
+                    self.lastServed = None
+            except:
+                pass
             
             
 
@@ -549,7 +583,7 @@ class FOOTLOCKER_NEW:
 
 
             try:   
-                response = self.session.post(f'{self.baseUrl}/api/users/carts/current/paypal?timestamp={int(datetime.now(tz=timezone.utc).timestamp() * 1000)}',
+                response = self.session.post(f'{self.baseSite}/api/users/carts/current/paypal?timestamp={int(datetime.now(tz=timezone.utc).timestamp() * 1000)}',
                 json=data,headers={
                     'host':self.baseUrl.split('https://')[1],
                     'origin':self.baseUrl,
@@ -611,7 +645,7 @@ class FOOTLOCKER_NEW:
 
             try:
                 response = self.session.put('{}/api/users/carts/current/email/{}?timestamp={}'.format(
-                    self.baseUrl, self.profile['email'], int(datetime.now(tz=timezone.utc).timestamp() * 1000)
+                    self.baseSite, self.profile['email'], int(datetime.now(tz=timezone.utc).timestamp() * 1000)
                 ),headers={
                     'host':self.baseUrl.split('https://')[1],
                     'origin':self.baseUrl,
@@ -702,7 +736,7 @@ class FOOTLOCKER_NEW:
                 continue
 
             try:
-                checkoutOverviewDispatch = self.session.post('{}/api/users/carts/current/addresses/shipping?timestamp={}'.format(self.baseUrl, int(datetime.now(tz=timezone.utc).timestamp() * 1000)),
+                checkoutOverviewDispatch = self.session.post('{}/api/users/carts/current/addresses/shipping?timestamp={}'.format(self.baseSite, int(datetime.now(tz=timezone.utc).timestamp() * 1000)),
                 json=data,headers={
                     'host':self.baseUrl.split('https://')[1],
                     'origin':self.baseUrl,
@@ -757,7 +791,7 @@ class FOOTLOCKER_NEW:
             self.prepare('Getting paypal checkout...')
             try:
                 response = self.session.get('{}/apigate/payment/methods?channel=WEB&timestamp={}'.format(
-                    self.baseUrl, int(datetime.now(tz=timezone.utc).timestamp() * 1000)
+                    self.baseSite, int(datetime.now(tz=timezone.utc).timestamp() * 1000)
                 ),headers={
                     "user-agent":self.userAgent,
                     'host':self.baseUrl.split('https://')[1],
@@ -968,7 +1002,7 @@ class FOOTLOCKER_NEW:
                 continue
             
             try:
-                response = self.session.post('{}/api/users/orders/adyen?timestamp={}'.format(self.baseUrl,int(datetime.now(tz=timezone.utc).timestamp() * 1000)),
+                response = self.session.post('{}/api/users/orders/adyen?timestamp={}'.format(self.baseSite,int(datetime.now(tz=timezone.utc).timestamp() * 1000)),
                 json=payload,headers={
                     "user-agent":self.userAgent,
                     'host':self.baseUrl.split('https://')[1],
@@ -1046,7 +1080,7 @@ class FOOTLOCKER_NEW:
                 
 
                 try:    
-                    response3 = self.session.post('{}/api/users/orders/completePayment?timestamp={}'.format(self.baseUrl,int(datetime.now(tz=timezone.utc).timestamp() * 1000)),
+                    response3 = self.session.post('{}/api/users/orders/completePayment?timestamp={}'.format(self.baseSite,int(datetime.now(tz=timezone.utc).timestamp() * 1000)),
                     json={
                         "cartId":self.cartId,
                         "md":three_d_data['MD'],

@@ -51,6 +51,8 @@ class datadome:
                 'cid': datadomeCookie,
                 't':'fe'
             }
+            log.info("----First DD Request Params----------")
+            log.info(str(geoParams))
         except Exception as e:
             log.info(e)
             return {"cookie":None}
@@ -99,6 +101,8 @@ class datadome:
                 "captchaChallenge": capChallenge(datadomeCookie,10,UA,"en-US",["en-US", "en"]), #false
                 "s": response.text.split("'&s=' + encodeURIComponent('")[1].split("'")[0],
             }
+            log.info("----Final DD Request Params----------")
+            log.info(str(params))
         except Exception as e:
             log.info(e)
             logger.error(SITE,taskID,'Failed to get cookie. Retrying...')
@@ -124,6 +128,9 @@ class datadome:
             logger.error(SITE,taskID,'Error: {}'.format(e))
             return {"cookie":None}
         
+        log.info("----Final DD Request----------")
+        log.info(str(response.text))
+        log.info(str(response.headers))
         if response.status_code == 200:
             try:
                 cookie = response.json()['cookie'].split('datadome=')[1].split(';')[0]

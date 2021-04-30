@@ -75,7 +75,7 @@ sites = {
     # "ASOS":ASOS
 }
 
-def VERSION(): return '0.10.0'
+def VERSION(): return '0.10.1.6'
 
 def new_footlockers(): return ['IT','BE','AT','LU','CZ','DK','PL','GR','PT','HU','ES','IE','NO','SE','DE','FR','NL','GB']
 def old_footlockers(): return ['AU','SG','MY','HK']

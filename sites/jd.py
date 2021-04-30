@@ -46,6 +46,12 @@ def getCookies(jar):
     
     return cookieString
 
+
+newrelics = [
+    'eyJ2IjpbMCwxXSwiZCI6eyJ0eSI6IkJyb3dzZXIiLCJhYyI6IjEwNDEzNTUiLCJhcCI6Ijg4OTU5MjA1IiwiaWQiOiJjYjI5YjRjNTUxMDVlYTZiIiwidHIiOiJmYWU5NzQwNzgwYjg0YTliIiwidGkiOjE2MTcyMzE3OTc3ODZ9fQ==',
+    'eyJ2IjpbMCwxXSwiZCI6eyJ0eSI6IkJyb3dzZXIiLCJhYyI6IjEwNDEzNTUiLCJhcCI6Ijg4OTU5MjA1IiwiaWQiOiI2NmQ3YjllNGZkNDg0Yjc4IiwidHIiOiIzM2QyNTNmNGZiMmFhNDk4IiwidGkiOjE2MTg2MzkyODUyOTB9fQ=='
+]
+
 _SITE_ = 'JD'
 SITE = 'JDSports'
 class JD:
@@ -141,32 +147,51 @@ class JD:
         else:
             self.region = '.' + self.profile['countryCode'].lower()
 
+        self.newrelic = random.choice(newrelics)
+
 
         self.prodUrl = f'https://www.jdsports{self.region}/product/-/' + self.task['PRODUCT'] + '/stock/?_=' + str(int(time.time()))
 
         self.tasks()
 
     def setCookies(self,response):
-        for c in response.cookies:
-            self.cookieJar.set_cookie(http.cookiejar.Cookie(
-                version=0,
-                name=c,
-                value=response.cookies[c],
-                port=None,
-                port_specified=False,
-                domain="www.offspring.co.uk",
-                domain_specified=False,
-                domain_initial_dot=False,
-                path="/",
-                path_specified=True,
-                secure=False,
-                expires=None,
-                discard=True,
-                comment=None,
-                comment_url=None,
-                rest={"HttpOnly": None},
-                rfc2109=False,
-            ))
+        for c in response.headers['Set-Cookie']:
+
+            try:
+                domain = c.split('Domain=')[1].split(';')[0]
+            except:
+                domain = 'www.jdsports' + self.region
+            
+            try:
+                path = c.split('Path=')[1].split(';')[0]
+            except:
+                path = '/'
+            
+            # print(str(c.split('=')[0]) + ' <=====> ' + str(c.split('=')[1].split(';')[0]))
+            try:
+                self.cookieJar.set_cookie(http.cookiejar.Cookie(
+                    version=0,
+                    name=c.split('=')[0],
+                    value=c.split('=')[1].split(';')[0],
+                    port=None,
+                    port_specified=False,
+                    domain=domain,
+                    domain_specified=False,
+                    domain_initial_dot=False,
+                    path=path,
+                    path_specified=True,
+                    secure=False,
+                    expires=None,
+                    discard=True,
+                    comment=None,
+                    comment_url=None,
+                    rest={"HttpOnly": None},
+                    rfc2109=False,
+                ))
+                
+            except Exception as e:
+                print(e)
+
     
 
     
@@ -175,10 +200,11 @@ class JD:
         self.monitor()
         self.addToCart()
         self.guestCheckout()
-        # self.deliveryMethod()
+        self.deliveryPage()
+        self.deliveryMethod()
         self.shipping()
-        # self.updateDelivery_plus_method()
-
+        self.updateDelivery_plus_method()
+        self.update_billing()
 
         if self.task['PAYMENT'].strip().lower() == "paypal":
             self.paypal()
@@ -290,7 +316,8 @@ class JD:
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest',
                     'cookie':getCookies(self.cookieJar),
-                    'newrelic': 'eyJ2IjpbMCwxXSwiZCI6eyJ0eSI6IkJyb3dzZXIiLCJhYyI6IjEwNDEzNTUiLCJhcCI6Ijg4OTU5MjA1IiwiaWQiOiJjYjI5YjRjNTUxMDVlYTZiIiwidHIiOiJmYWU5NzQwNzgwYjg0YTliIiwidGkiOjE2MTcyMzE3OTc3ODZ9fQ=='
+                    'origin': f'https://www.jdsports{self.region}',
+                    'newrelic': self.newrelic
                 },data=json.dumps({
                     "customisations":False,
                     "cartPosition":'null',
@@ -304,7 +331,7 @@ class JD:
                 time.sleep(int(self.task["DELAY"]))
                 self.rotateProxy()
                 continue
-
+            
             self.setCookies(response)
             if response.status == 200:
                 try:
@@ -351,7 +378,9 @@ class JD:
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest',
                     'cookie':getCookies(self.cookieJar),
-                    'newrelic': ''
+                    'referer': f'https://www.jdsports{self.region}/checkout/login/',
+                    'origin': f'https://www.jdsports{self.region}',
+                    'newrelic': self.newrelic
                 },data=json.dumps({
                     "email":self.profile['email']
                 }))
@@ -361,7 +390,7 @@ class JD:
                 time.sleep(int(self.task["DELAY"]))
                 self.rotateProxy()
                 continue
-
+            
             self.setCookies(response)
             if response.status == 200:
                 try:
@@ -391,6 +420,49 @@ class JD:
                 self.error(f"Failed to set email [{str(response.status)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
+    
+    def deliveryPage(self):
+        while True:
+            self.prepare("Getting delivery")
+                
+
+            try:
+                response = self.session.get(f'https://www.jdsports{self.region}/checkout/delivery/',headers={
+                    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    # 'accept-encoding': 'gzip, deflate, br',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
+                    'cookie':getCookies(self.cookieJar),
+                    'referer': f'https://www.jdsports{self.region}/checkout/login/',
+                    'origin': f'https://www.jdsports{self.region}',
+                    # 'newrelic': self.newrelic
+                },data=json.dumps({
+                    "email":self.profile['email']
+                }))
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.rotateProxy()
+                continue
+            
+            self.setCookies(response)
+            if response.status == 200:
+                
+
+                self.warning("Got delivery")
+                return
+
+            elif response.status == 403:
+                self.error(f"Failed to get delivery [{str(response.status)}]. Retrying...")
+                self.rotateProxy()
+                time.sleep(int(self.task['DELAY']))
+                continue
+                
+            else:
+                self.error(f"Failed to get delivery [{str(response.status)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
 
     def deliveryMethod(self):
         while True:
@@ -409,7 +481,9 @@ class JD:
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest',
                     'cookie':getCookies(self.cookieJar),
-                    'newrelic': ''
+                    'referer': f'https://www.jdsports{self.region}/checkout/delivery/',
+                    'origin': f'https://www.jdsports{self.region}',
+                    'newrelic': self.newrelic
                 },data=data)
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
@@ -457,7 +531,9 @@ class JD:
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest',
                     'cookie':getCookies(self.cookieJar),
-                    # 'newrelic': ''
+                    'referer': f'https://www.jdsports{self.region}/checkout/delivery/',
+                    'origin': f'https://www.jdsports{self.region}',
+                    'newrelic': self.newrelic
                 },data=json.dumps({
                     "useDeliveryAsBilling":True,
                     "country":"{}|{}".format(self.profile['country'],self.profile['countryCode'].lower()),
@@ -485,6 +561,7 @@ class JD:
             if response.status in [200,201]:
                 try:
                     responseBody = json.loads(response.text)
+                    # print(responseBody)
                     self.addressId = responseBody['ID']
                 except Exception as e:
                     self.error("Failed to set shipping [failed to parse response]. Retrying...")
@@ -520,11 +597,13 @@ class JD:
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest',
                     'cookie':getCookies(self.cookieJar),
-                    # 'newrelic': ''
+                    'referer': f'https://www.jdsports{self.region}/checkout/delivery/',
+                    'origin': f'https://www.jdsports{self.region}',
+                    'newrelic': self.newrelic
                 },data=json.dumps({
                     # "useDeliveryAsBilling":True,
                     "addressId":self.addressId,
-                    "locale":{},
+                    "deliverySlot":{},
                     "methodId":self.deliveryData["deliveryMethodID"],
                 }))
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
@@ -543,7 +622,7 @@ class JD:
                     log.info(e)
                     time.sleep(int(self.task["DELAY"]))
                     continue
-                
+
                 self.warning("Updated delivery & method")
                 return
 
@@ -557,20 +636,81 @@ class JD:
                 self.error(f"Failed to update delivery & method [{str(response.status)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
+
+    def update_billing(self):
+        while True:
+            self.prepare("Updating Billing...")
+            
+            
+
+            try:
+                response = self.session.post(f'https://www.jdsports{self.region}/checkout/updateBillingAddress/ajax/',headers={
+                    'accept': '*/*',
+                    'accept-language': 'en-US,en;q=0.9',
+                    'content-type': 'application/json',
+                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
+                    'x-requested-with': 'XMLHttpRequest',
+                    'cookie':getCookies(self.cookieJar),
+                    'newrelic': self.newrelic,
+                    'origin': f'https://www.jdsports{self.region}',
+                    'referer': f'https://www.jdsports{self.region}/checkout/billing/'
+                },data=json.dumps({
+                    "editAddressID":self.addressId,
+                }))
+            except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
+                log.info(e)
+                self.error(f"error: {str(e)}")
+                time.sleep(int(self.task["DELAY"]))
+                self.rotateProxy()
+                continue
+
+            self.setCookies(response)
+            if response.status in [200,201]:
+                try:
+                    responseBody = json.loads(response.text)
+                except Exception as e:
+                    self.error("Failed to update billing [failed to parse response]. Retrying...")
+                    log.info(e)
+                    time.sleep(int(self.task["DELAY"]))
+                    continue
+                
+                self.warning("Updated billing")
+                return
+
+            elif response.status == 403:
+                self.error(f"Failed to update billing [{str(response.status)}]. Retrying...")
+                self.rotateProxy()
+                time.sleep(int(self.task['DELAY']))
+                continue
+                
+            else:
+                self.error(f"Failed to update billing[{str(response.status)}]. Retrying...")
+                time.sleep(int(self.task['DELAY']))
+                continue
     
     def paypal(self):
         while True:
             self.prepare("Getting paypal checkout...")
             
-
+            # print(self.cookieJar)
             try:
                 response = self.session.get(f'https://www.jdsports{self.region}/checkout/payment/?paySelect=paypalViaHosted',headers={
                     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                     'accept-language': 'en-US,en;q=0.9',
-                    'content-type': 'application/json',
+                    'accept-encoding': 'gzip, deflate, br',
                     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36',
                     'cookie':getCookies(self.cookieJar),
-                    # 'newrelic': ''
+                    "cache-control": "max-age=0",
+                    "sec-ch-ua": "\"Google Chrome\";v=\"89\", \"Chromium\";v=\"89\", \";Not A Brand\";v=\"99\"",
+                    "sec-ch-ua-mobile": "?0",
+                    "sec-fetch-dest": "document",
+                    "sec-fetch-mode": "navigate",
+                    "sec-fetch-site": "same-origin",
+                    "sec-fetch-user": "?1",
+                    "upgrade-insecure-requests": "1",
+                    # 'newrelic': self.newrelic,
+                    # 'origin': f'https://www.jdsports{self.region}',
+                    'referer': f'https://www.jdsports{self.region}/checkout/billing/'
                 })
             except (Exception, ConnectionError, ConnectionRefusedError, requests.exceptions.RequestException) as e:
                 log.info(e)
@@ -578,11 +718,10 @@ class JD:
                 time.sleep(int(self.task["DELAY"]))
                 self.rotateProxy(False)
                 continue
-
+            
             self.setCookies(response)
-
-            if response.status in [200,302]:
-                if "paypal" in response.url:
+            if response.status in [200,302] and 'productOutOfStock' not in response.url:
+                if "paypal.com/cgi-bin" in response.url:
                     self.end = time.time() - self.start
                     self.webhookData['speed'] = self.end
 
@@ -621,7 +760,9 @@ class JD:
                         self.rotateProxy()
                         continue
                     
-                    if response2.status in [200,302] and 'paypal' in response2.url:
+       
+                    self.setCookies(response2)
+                    if response2.status in [200,302] and 'paypal.com/cgi-bin' in response2.url:
                         self.end = time.time() - self.start
                         self.webhookData['speed'] = self.end
 
@@ -646,6 +787,11 @@ class JD:
             elif response.status == 403:
                 self.error(f"Failed to get paypal checkout [{str(response.status)}]. Retrying...")
                 self.rotateProxy()
+                time.sleep(int(self.task['DELAY']))
+                continue
+
+            elif response.status in [200,302] and 'productOutOfStock' in response.url:
+                self.error(f"Failed to get paypal checkout [OOS]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
                 
@@ -852,12 +998,12 @@ class JD:
                             self.rotateProxy()
                             continue
 
-                        with open('jd2.html','w') as f:
-                            f.write(response5.text)
-                            f.close()
+                        # with open('jd2.html','w') as f:
+                            # f.write(response5.text)
+                            # f.close()
 
-                        print(response5.status)
-                        print(response5.url)
+                        # print(response5.status)
+                        # print(response5.url)
                         return
 
                     else:
@@ -878,7 +1024,7 @@ class JD:
                 continue
                 
             else:
-                print(response.text)
+                # print(response.text)
                 self.error(f"Failed to complete card checkout (1) [{str(response.status)}]. Retrying...")
                 time.sleep(int(self.task['DELAY']))
                 continue
@@ -891,6 +1037,8 @@ class JD:
             self.webhookData['proxy'] = self.proxy
 
             sendNotification(SITE,self.webhookData['product'])
+
+            # print(self.cookieJar)
 
             try:
                 Webhook.success(

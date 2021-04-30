@@ -142,8 +142,8 @@ class FOOTPATROL:
             self.region = '.' + self.profile['countryCode'].lower()
 
 
-        # self.prodUrl = f'https://m.footpatrol{self.region}/product/-/' + self.task['PRODUCT'] + '/stock/?_=' + str(int(time.time()))
-        self.prodUrl = 'https://www.footpatrol.com/product/white-vault-by-vans-x-wacko-maria-ua-og-authentic-lx/396041_footpatrolcom/stock'
+        self.prodUrl = f'https://m.footpatrol{self.region}/product/-/' + self.task['PRODUCT'] + '/stock/?_=' + str(int(time.time()))
+        # self.prodUrl = 'https://www.footpatrol.com/product/white-vault-by-vans-x-wacko-maria-ua-og-authentic-lx/396041_footpatrolcom/stock'
 
         self.tasks()
 
@@ -155,7 +155,7 @@ class FOOTPATROL:
                 value=response.cookies[c],
                 port=None,
                 port_specified=False,
-                domain="www.offspring.co.uk",
+                domain="www.footpatrol" + self.region,
                 domain_specified=False,
                 domain_initial_dot=False,
                 path="/",

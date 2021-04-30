@@ -18,70 +18,33 @@ def execute():
     #check site folders
     try:
         for k in CONFIG.sites.keys():
-            if k.lower() == 'footlocker_new':
-                try:
-                    os.mkdir('footlocker')
-                except:
-                    pass
+            try:
+                os.mkdir('{}'.format(k.lower()))
+            except Exception as e:
+                pass
 
-
+            if k.lower() in ['holypop','naked','footasylum','snipes','wch','prodirect','ambush']:
                 try:
-                    f = open('./{}/tasks.csv'.format('footlocker'))
+                    f = open('./{}/accounts.txt'.format(k.lower()))
                     f.readlines()
                 except IOError as e:
-                    print("Creating tasks.csv for {}".format('footlocker'))
-                    with open('./{}/tasks.csv'.format('footlocker'),'w') as tasks:
-                        tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,PROXIES')
+                    print("Creating accounts.txt for {}".format(k.lower()))
+                    open('./{}/accounts.txt'.format(k.lower()),'w')
 
-                # try:
-                #     f = open('./{}/proxies.txt'.format('footlocker'))
-                #     f.readlines()
-                # except IOError as e:
-                #     print("Creating proxies.txt for {}".format('footlocker'))
-                #     open('./{}/proxies.txt'.format('footlocker'),'w')
+            try:
+                f = open('./{}/tasks.csv'.format(k.lower()))
+                f.readlines()
+            except IOError as e:
+                print("Creating tasks.csv for {}".format(k.lower()))
+                with open('./{}/tasks.csv'.format(k.lower()),'w') as tasks:
+                    tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,PROXIES')
 
-                # try:
-                    # f = open('./footlocker/tasks.csv')
-                    # f.readlines()
-                # except IOError:
-                    # try:
-                        # os.mkdir('footlocker')
-                    # except:
-                        # pass
-# 
-                    # print("Creating files for footlocker")
-                    # open('./footlocker/proxies.txt','w')
-                    # with open('./footlocker/tasks.csv','w') as tasks:
-                        # tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT')
-
-            elif k.lower() not in ['footlocker_old','footlocker_new'] :
-                try:
-                    os.mkdir('{}'.format(k.lower()))
-                except Exception as e:
-                    pass
-
-                if k.lower() in ['holypop','naked','footasylum','snipes','wch','prodirect','ambush']:
-                    try:
-                        f = open('./{}/accounts.txt'.format(k.lower()))
-                        f.readlines()
-                    except IOError as e:
-                        print("Creating accounts.txt for {}".format(k.lower()))
-                        open('./{}/accounts.txt'.format(k.lower()),'w')
-
-                try:
-                    f = open('./{}/tasks.csv'.format(k.lower()))
-                    f.readlines()
-                except IOError as e:
-                    print("Creating tasks.csv for {}".format(k.lower()))
-                    with open('./{}/tasks.csv'.format(k.lower()),'w') as tasks:
-                        tasks.write('PRODUCT,SIZE,DELAY,PROFILE,PAYMENT,PROXIES')
-
-                # try:
-                #     f = open('./{}/proxies.txt'.format(k.lower()))
-                #     f.readlines()
-                # except IOError as e:
-                #     print("Creating proxies.txt for {}".format(k.lower()))
-                #     open('./{}/proxies.txt'.format(k.lower()),'w')
+            # try:
+            #     f = open('./{}/proxies.txt'.format(k.lower()))
+            #     f.readlines()
+            # except IOError as e:
+            #     print("Creating proxies.txt for {}".format(k.lower()))
+            #     open('./{}/proxies.txt'.format(k.lower()),'w')
 
     
 
