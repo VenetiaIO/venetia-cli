@@ -1,177 +1,167 @@
-var _0x2f8b = [
-  "tabs",
-  "value",
-  "get",
-  "656377BgsvPe",
-  "5impaOK",
-  "url",
-  "+++",
-  "redirect",
-  "remove",
-  "getAll",
-  "domain",
-  "startsWith",
-  "venetiacli.io/checkout/",
-  "push",
-  "86290YEmnXR",
-  "https://",
-  "www",
-  "length",
-  "330770gYFYjW",
-  "https://www",
-  "206273nEuZAE",
-  "toString",
-  "name",
-  "query",
-  "log",
-  "join",
-  "split",
-  "752387xJjAsh",
-  "761882BmbSGo",
-  "cookies",
-  "382iNuJmI",
-  "path",
-  "set",
-  "getElementById",
-  "searchParams",
-  "includes",
-  "3791EDExwi",
-  "paypal",
-  "stringify",
-];
-var _0x4a80 = function (_0x399bba, _0x5036c8) {
-  _0x399bba = _0x399bba - 0x10a;
-  var _0x2f8bcf = _0x2f8b[_0x399bba];
-  return _0x2f8bcf;
-};
-(function (_0xd34963, _0x7c056d) {
-  var _0x54053c = _0x4a80;
-  while (!![]) {
-    try {
-      var _0x2e2e3a =
-        -parseInt(_0x54053c(0x10a)) +
-        parseInt(_0x54053c(0x123)) +
-        -parseInt(_0x54053c(0x115)) * parseInt(_0x54053c(0x10b)) +
-        parseInt(_0x54053c(0x11b)) +
-        -parseInt(_0x54053c(0x122)) +
-        parseInt(_0x54053c(0x119)) +
-        parseInt(_0x54053c(0x125)) * parseInt(_0x54053c(0x12b));
-      if (_0x2e2e3a === _0x7c056d) break;
-      else _0xd34963["push"](_0xd34963["shift"]());
-    } catch (_0x28bfd8) {
-      _0xd34963["push"](_0xd34963["shift"]());
+var _0x4498 = [
+    "tabs",
+    "12DILeww",
+    "query",
+    "domain",
+    "name",
+    "origin",
+    "3eXqAlX",
+    "length",
+    "lastError",
+    "remove",
+    "138179HclIzX",
+    "log",
+    "includes",
+    "set",
+    "url",
+    "update",
+    "value",
+    "forEach",
+    "1230369blSrMd",
+    "getAll",
+    "paypal",
+    "14793HgkGdd",
+    "179173BTdQdX",
+    "searchParams",
+    "352TlFZgm",
+    "1224491XPraCb",
+    "1NAkUgi",
+    "431nXZERz",
+    "get",
+    "2609WGdNWC",
+    "replace",
+    "parse",
+    "cookies",
+    "827sXHaUz",
+    "stringify",
+    "redirect",
+  ];
+  (function (_0x3146d, _0x58c813) {
+    var _0x551e7b = _0xd323;
+    while (!![]) {
+      try {
+        var _0x458c21 =
+          -parseInt(_0x551e7b(0x15c)) * parseInt(_0x551e7b(0x14c)) +
+          parseInt(_0x551e7b(0x143)) * parseInt(_0x551e7b(0x157)) +
+          parseInt(_0x551e7b(0x148)) * -parseInt(_0x551e7b(0x158)) +
+          parseInt(_0x551e7b(0x154)) +
+          parseInt(_0x551e7b(0x15a)) * parseInt(_0x551e7b(0x163)) +
+          -parseInt(_0x551e7b(0x15d)) * -parseInt(_0x551e7b(0x15f)) +
+          -parseInt(_0x551e7b(0x15b));
+        if (_0x458c21 === _0x58c813) break;
+        else _0x3146d["push"](_0x3146d["shift"]());
+      } catch (_0x55987d) {
+        _0x3146d["push"](_0x3146d["shift"]());
+      }
     }
-  }
-})(_0x2f8b, 0xdd679);
-function setCookie(_0x42338d, _0x384e6b, _0x44bfb9, _0x3ae207) {
-  var _0x2cf0f1 = _0x4a80;
-  chrome[_0x2cf0f1(0x124)][_0x2cf0f1(0x10f)]({
-    name: _0x42338d,
-    url: _0x3ae207,
-  }),
-    chrome["cookies"][_0x2cf0f1(0x127)](
-      { name: _0x42338d, value: _0x384e6b, domain: _0x44bfb9, url: _0x3ae207 },
-      function (_0x2b6145) {
-        var _0x1cefbe = _0x2cf0f1;
-        console[_0x1cefbe(0x11f)](JSON[_0x1cefbe(0x12d)](_0x2b6145));
+  })(_0x4498, 0xe168f);
+  function main() {
+    var _0x26028f = _0xd323;
+    chrome[_0x26028f(0x166)][_0x26028f(0x144)](
+      { active: !![], lastFocusedWindow: !![] },
+      function (_0xc87b62) {
+        var _0x2d4e25 = _0x26028f,
+          _0x4eebdf = _0xc87b62[0x0][_0x2d4e25(0x150)],
+          _0x53d886 = new URL(_0x4eebdf);
+        if (
+          _0x4eebdf["toLowerCase"]()[_0x2d4e25(0x14e)]("venetiacli.io/checkout/")
+        ) {
+          var _0x24020b = atob(
+              _0x53d886[_0x2d4e25(0x159)][_0x2d4e25(0x15e)](_0x2d4e25(0x147))
+            ),
+            _0x4be5e2 = atob(
+              _0x53d886[_0x2d4e25(0x159)][_0x2d4e25(0x15e)](_0x2d4e25(0x165))
+            ),
+            _0x214620 = decodeURIComponent(
+              _0x53d886[_0x2d4e25(0x159)]["get"](_0x2d4e25(0x162))
+            )[_0x2d4e25(0x160)]("\x20", "+");
+          (_0x214620 = atob(_0x214620)),
+            (_0x214620 = _0x214620[_0x2d4e25(0x160)](/\'/g, "\x22")),
+            (_0x214620 = "[" + _0x214620 + "]"),
+            _0x24020b != undefined &&
+              _0x24020b != "" &&
+              redirect != undefined &&
+              redirect != "" &&
+              _0x214620 != undefined &&
+              _0x214620 != "" &&
+              (redirect(_0x24020b),
+              (_0x214620 = JSON[_0x2d4e25(0x161)](_0x214620)),
+              _0x214620[_0x2d4e25(0x153)]((_0x3e764c) => {
+                deleteCookie(_0x3e764c);
+              }),
+              _0x214620[_0x2d4e25(0x153)]((_0xdf1b82) => {
+                addCookie(_0xdf1b82);
+              }),
+              redirect(_0x4be5e2));
+        }
       }
     );
-}
-function parseCookie(_0x4d1260) {
-  var _0x189ac7 = _0x4a80;
-  setCookie(
-    _0x4d1260[_0x189ac7(0x11d)],
-    _0x4d1260[_0x189ac7(0x12f)],
-    _0x4d1260[_0x189ac7(0x111)],
-    _0x4d1260["url"]
-  );
-}
-function delCookie(_0x37a245) {
-  var _0x4e064e = _0x4a80;
-  if (_0x37a245[_0x4e064e(0x111)] == undefined) return;
-  else {
-    if (_0x37a245[_0x4e064e(0x111)][_0x4e064e(0x12a)](_0x4e064e(0x12c))) return;
   }
-  chrome["cookies"][_0x4e064e(0x110)](
-    { domain: _0x37a245["domain"] },
-    function (_0xa3f7d8) {
-      var _0x4f54fa = _0x4e064e;
-      for (
-        var _0x181550 = 0x0;
-        _0x181550 < _0xa3f7d8[_0x4f54fa(0x118)];
-        _0x181550++
-      ) {
-        if (_0xa3f7d8[_0x181550][_0x4f54fa(0x111)][_0x4f54fa(0x112)]("."))
-          url = _0x4f54fa(0x117) + _0xa3f7d8[_0x181550]["domain"];
-        else
-          _0xa3f7d8[_0x181550][_0x4f54fa(0x111)][_0x4f54fa(0x112)](
-            _0x4f54fa(0x117)
-          )
-            ? (url = _0x4f54fa(0x116) + _0xa3f7d8[_0x181550]["domain"])
-            : (url = _0xa3f7d8[_0x181550][_0x4f54fa(0x111)]);
-        chrome[_0x4f54fa(0x124)][_0x4f54fa(0x10f)]({
-          url: +_0xa3f7d8[_0x181550][_0x4f54fa(0x126)],
-          name: _0xa3f7d8[_0x181550]["name"],
+  function redirect(_0x3f9287) {
+    var _0xe2491b = _0xd323;
+    chrome[_0xe2491b(0x166)]["query"](
+      { currentWindow: !![], active: !![] },
+      function (_0x2477b3) {
+        var _0x13aa29 = _0xe2491b;
+        chrome[_0x13aa29(0x166)][_0x13aa29(0x151)](_0x2477b3["id"], {
+          url: _0x3f9287,
         });
       }
-    }
-  );
-}
-function init() {
-  var _0x2b6a85 = _0x4a80;
-  chrome[_0x2b6a85(0x12e)][_0x2b6a85(0x11e)](
-    { active: !![], currentWindow: !![] },
-    function (_0x4c1d6c) {
-      var _0x34f1d9 = _0x2b6a85,
-        _0x3eec05 = _0x4c1d6c[0x0][_0x34f1d9(0x10c)],
-        _0xb0daa4 = new URL(_0x3eec05);
-      if (_0x3eec05[_0x34f1d9(0x12a)](_0x34f1d9(0x113))) {
-        var _0x3ce8a6 = decodeURIComponent(
-            _0xb0daa4[_0x34f1d9(0x129)][_0x34f1d9(0x130)]("cookies")
-          )
-            [_0x34f1d9(0x121)]("\x20")
-            [_0x34f1d9(0x120)]("+"),
-          _0xfa6c6d = _0xb0daa4[_0x34f1d9(0x129)]
-            [_0x34f1d9(0x130)](_0x34f1d9(0x10e))
-            [_0x34f1d9(0x11c)](),
-          _0x1a0ea6 = atob(_0x3ce8a6);
-        _0x1a0ea6 = _0x1a0ea6[_0x34f1d9(0x121)](_0x34f1d9(0x10d));
-        var _0x3082c0 = [];
-        for (var _0x13e327 of _0x1a0ea6) {
-          (c = _0x13e327[_0x34f1d9(0x121)]("##")),
-            _0x3082c0[_0x34f1d9(0x114)]({
-              name: c[0x0],
-              value: c[0x1],
-              domain: c[0x2],
-              path: c[0x3],
-              url: _0x34f1d9(0x11a) + c[0x2],
+    );
+  }
+  function addCookie(_0x724ee) {
+    var _0x42846f = _0xd323;
+    try {
+      chrome[_0x42846f(0x162)][_0x42846f(0x14b)]({
+        name: _0x724ee[_0x42846f(0x146)],
+        url: _0x724ee[_0x42846f(0x150)],
+      });
+    } catch {}
+    try {
+      chrome[_0x42846f(0x162)][_0x42846f(0x14f)](
+        {
+          name: _0x724ee[_0x42846f(0x146)],
+          domain: _0x724ee["domain"],
+          url: _0x724ee[_0x42846f(0x150)],
+          value: _0x724ee[_0x42846f(0x152)],
+        },
+        function (_0x3f7113) {
+          var _0x1b71b2 = _0x42846f;
+          console[_0x1b71b2(0x14d)](JSON[_0x1b71b2(0x164)](_0x3f7113)),
+            console["log"](chrome["extension"][_0x1b71b2(0x14a)]),
+            console[_0x1b71b2(0x14d)](chrome["runtime"][_0x1b71b2(0x14a)]);
+        }
+      );
+    } catch {}
+  }
+  function deleteCookie(_0x394749) {
+    var _0x1ba0ad = _0xd323;
+    try {
+      if (_0x394749[_0x1ba0ad(0x145)][_0x1ba0ad(0x14e)](_0x1ba0ad(0x156))) return;
+    } catch {}
+    chrome[_0x1ba0ad(0x162)][_0x1ba0ad(0x155)](
+      { domain: _0x394749[_0x1ba0ad(0x145)] },
+      function (_0x3d2eb6) {
+        var _0x5c3d38 = _0x1ba0ad;
+        try {
+          for (
+            var _0x3c8859 = 0x0;
+            _0x3c8859 < _0x3d2eb6[_0x5c3d38(0x149)];
+            _0x3c8859++
+          ) {
+            chrome[_0x5c3d38(0x162)][_0x5c3d38(0x14b)]({
+              url: _0x394749[_0x5c3d38(0x150)],
+              name: _0x3d2eb6[_0x3c8859][_0x5c3d38(0x146)],
             });
-        }
-        _0xfa6c6d = atob(_0xfa6c6d);
-        var _0x4302e9 = _0x3082c0;
-        for (
-          var _0x8ae8b5 = 0x0;
-          _0x8ae8b5 < _0x4302e9["length"];
-          _0x8ae8b5++
-        ) {
-          delCookie(_0x4302e9[_0x8ae8b5]);
-        }
-        for (var _0x1b0ded of _0x4302e9) {
-          parseCookie(_0x1b0ded);
-        }
-        (document[_0x34f1d9(0x128)](_0x34f1d9(0x10e))["innerHTML"] =
-          "Redirecting\x20to\x20" + _0xfa6c6d),
-          chrome["tabs"][_0x34f1d9(0x11e)](
-            { currentWindow: !![], active: !![] },
-            function (_0x51b855) {
-              var _0x54c3f7 = _0x34f1d9;
-              chrome[_0x54c3f7(0x12e)]["update"](_0x51b855["id"], {
-                url: _0xfa6c6d,
-              });
-            }
-          );
+          }
+        } catch {}
       }
-    }
-  );
-}
-window["onload"] = init;
+    );
+  }
+  function _0xd323(_0x5e093c, _0x25e816) {
+    _0x5e093c = _0x5e093c - 0x143;
+    var _0x449828 = _0x4498[_0x5e093c];
+    return _0x449828;
+  }
+  main();
+  

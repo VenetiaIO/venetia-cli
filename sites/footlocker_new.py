@@ -297,9 +297,12 @@ class FOOTLOCKER_NEW:
                         # "May 01 2021 07:00:00 GMT+0000"
                         date = int(datetime.timestamp(d))
                         time_until_drop = date - int(time.time())
-                        self.alert('{} Seconds until drop. Sleeping...'.format(time_until_drop))
-                        time.sleep(time_until_drop - 5)
-                        self.secondary('Timer ended. Launching Tasks...')
+                        if time_until_drop < 0:
+                            pass
+                        else:
+                            self.alert('{} Seconds until drop. Sleeping...'.format(time_until_drop))
+                            time.sleep(time_until_drop - 5)
+                            self.secondary('Timer ended. Launching Tasks...')
 
 
                     # with open('ftl.json','w') as f:

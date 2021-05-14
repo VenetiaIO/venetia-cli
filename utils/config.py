@@ -71,7 +71,7 @@ sites = {
     "JD":JD,
     "SIZE":SIZE,
     "FOOTPATROL":FOOTPATROL,
-    "CONVERSE":CONVERSE,
+    "CONVERSE":CONVERSE
     # "ASOS":ASOS
 }
 

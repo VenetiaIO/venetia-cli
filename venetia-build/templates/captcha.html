@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/all.css')}}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/logo.png')}}" />
+    <title>VenetiaCLI | Captchas</title>
+</head>
+<body class="bg-background">
+<div class="min-h-screen p-10">
+    <div class="pb-10 container bg-coolGray-700 h-full rounded-xl shadow-xl mx-auto">
+    
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 mx-10" id="grid">
+            <div class="col-span-full">
+                <div class="items-center justify-between">
+
+                    <h1 class="text-white font-medium text-2xl p-3 text-center pt-6">Captcha Generator</h1>
+                    <div class="grid grid-cols-2">
+                        <div class="ml-4 mt-2 flex-shrink-0 text-right pr-4">
+                            <button class="text-white hover:text-gray-400 font-medium rounded-xl py-2 px-5 bg-green-600 hover:bg-green-700 trans mb-3 float-left btn"
+                                onclick="openGeneratModal()">
+                                Start Generating
+                            </button>
+                        </div>
+                        <div class="ml-4 mt-2 flex-shrink-0 text-left pr-4">
+                            <button class="text-white hover:text-gray-400 font-medium rounded-xl py-2 px-5 bg-primary hover:bg-primaryDark trans mb-3 float-right btn"
+                                onclick="resetCaptchas()">
+                                Clear Captchas
+                            </button>
+                        </div>
+                    </div>
+    
+                </div>
+    
+            </div>
+
+
+        </div>
+    
+    </div>
+</div>
+
+<div class="fixed z-10 inset-0 overflow-y-auto" id="generate-modal" hidden>
+    <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+  
+      <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+        <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+      </div>
+  
+      <!-- This element is to trick the browser into centering the modal contents. -->
+      <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+  
+      <div class="inline-block align-bottom bg-background rounded-xl px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm sm:w-full sm:p-6" role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+        <div>
+          <button class="text-red-500 font-bold text-xl focus:outline-none" onclick="closeGenerateModal()">
+            X
+          </button>
+          <div class="mt-3 text-center sm:mt-5">
+            <h3 class="text-lg leading-6 font-medium text-white" id="modal-headline">
+              Generate Captchas
+            </h3>
+            <div class="mt-2">
+              <form action="/start_generating" method="POST" enctype="multipart/form-data">
+                <select name="site" id="site" class="focus:outline-none px-3 bg-primary border border-transparent focus:border-white hover:border-white trans rounded-xl text-white font-medium py-2 w-full mt-3">
+                    {%for k in sites %}
+                        <option value="{{ k }}:{{ types[loop.index - 1] }}">{{ k }}</option>
+                    {%endfor%} 
+                </select>
+                <select name="mode" id="mode" class="focus:outline-none px-3 bg-primary border border-transparent focus:border-white hover:border-white trans rounded-xl text-white font-medium py-2 w-full mt-3">
+                  <option value="manual" disabled>Manual (coming soon)</option>
+                  <option value="auto" selected>Automatic</option>
+                </select>
+                <input type="text" name="amount" id="" placeholder="Enter amount to generate" class="focus:outline-none mt-3 inline-flex justify-center w-full rounded-xl px-4 py-2 border border-transparent focus:border-white hover:border-white bg-primary placeholder-white text-base font-medium text-white">
+                <input type="text" name="proxies" id="" placeholder="Enter proxy list name" class="focus:outline-none mt-3 inline-flex justify-center w-full rounded-xl border border-transparent focus:border-white hover:border-white px-4 py-2 bg-primary placeholder-white text-base font-medium text-white sm:text-sm">
+                <button type="submit" class="mt-3 inline-flex justify-center w-full rounded-xl shadow-sm px-4 py-2 bg-green-600 hover:bg-green-700 trans text-base font-medium text-white hover:text-gray-400 sm:text-sm focus:outline-none">Start Generating</button>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="mt-5 sm:mt-6">
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="fixed z-10 inset-0 overflow-y-auto" id="v3-modal" hidden>
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+
+    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+      <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+    </div>
+
+    <!-- This element is to trick the browser into centering the modal contents. -->
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+    <div class="inline-block align-bottom bg-background rounded-xl px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm sm:w-full sm:p-6" role="dialog" aria-modal="true" aria-labelledby="modal-headline">
+      <div>
+        <button class="text-red-500 font-bold text-xl focus:outline-none" onclick="closeV3Modal()">
+          X
+        </button>
+        <div class="mt-3 text-center sm:mt-5">
+          <h3 class="text-lg leading-6 font-medium text-white" id="modal-headline">
+            V3 Solver
+          </h3>
+          <div class="mt-2">
+            <div class='recaptchaContainer'>
+                <div id="recaptcha"></div>
+            </div>
+
+            <script src="https://www.google.com/recaptcha/api.js?onload=recaptchaCallback&render=explicit" async defer></script>
+
+            <script type="text/javascript">
+                var recaptchaCallback = function () {
+                  Object.defineProperty(document, "hidden", {
+                      value: false
+                  });
+                  var holderID = grecaptcha.render("recaptcha", {
+                      sitekey: '6LfENJwUAAAAANpLoBFfQG7BbAR4iQd-FvXSUzO8',
+                      'size': 'invisible',
+                      'badge' : 'bottomright',
+                      theme: 'dark',
+                      callback: function () {
+                          console.log('recaptcha v3 callback');
+                          console.log(grecaptcha.getResponse())
+                      }
+                  });
+                  grecaptcha.execute(holderID)
+                }
+            </script>
+          </div>
+        </div>
+      </div>
+      <div class="mt-5 sm:mt-6">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</body>
+
+<script>
+    var siteSelect = document.getElementById('site')
+    siteSelect.addEventListener("change", function() {
+        console.log(siteSelect.value)
+    });
+
+    function openGeneratModal() {
+        document.getElementById('generate-modal').hidden = false
+    }
+    function closeGenerateModal() {
+        document.getElementById('generate-modal').hidden = true
+    }
+    function closeV3Modal() {
+        document.getElementById('v3-modal').hidden = true
+    }
+
+    function resetCaptchas(){
+        var xmlHttp = new XMLHttpRequest();
+        xmlHttp.open( "get", "/captchas/reset", false ); // false for synchronous request
+        xmlHttp.send( null );
+        return window.location.reload()
+    }
+
+    function decode(str) {
+			return str.replace(/&#(\d+);/g, function(match, dec) {
+				return String.fromCharCode(dec);
+			});
+		}
+
+    function load() {
+        var grid = document.getElementById('grid')
+        var sites = decode("{{ captchas }}")
+        sites = JSON.parse(sites)
+
+
+        for(var key in sites) {
+            element = `
+            <div class="card-grid">
+                <h1 class="text-white text-2xl font-medium select-none">${key}</h1>
+                <label class="text-white text-lg font-medium select-none">Available Captchas:
+                    <span>${sites[key].length}</span></label>
+            </div>
+            `
+            grid.innerHTML += element
+        }
+
+    }
+    load()
+</script>

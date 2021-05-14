@@ -30,7 +30,6 @@ class Updater:
 
         with open('venetiaCLI.exe', 'wb') as f:
             response = requests.get('https://venetiacli.io/venetia-cli-latest/download',stream=True)
-            # downloadProgess(response)
 
             total_length = response.headers.get('content-length')
             dl = 0
