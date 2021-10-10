@@ -16,26 +16,26 @@ import csv
 import asyncio
 import sys
 
-if sys.platform == 'darwin':
-  from helheim.mac import helheim, isChallenge
-  from helheim.mac.exceptions import (
-    HelheimException,
-    HelheimSolveError,
-    HelheimRuntimeError,
-    HelheimSaaSError,
-    HelheimSaaSBalance,
-    HelheimVersion
-  )
-elif sys.platform != 'darwin':
-  from helheim.windows import helheim, isChallenge
-  from helheim.windows.exceptions import (
-    HelheimException,
-    HelheimSolveError,
-    HelheimRuntimeError,
-    HelheimSaaSError,
-    HelheimSaaSBalance,
-    HelheimVersion
-  )
+# if sys.platform == 'darwin':
+#   from helheim.mac import helheim, isChallenge
+#   from helheim.mac.exceptions import (
+#     HelheimException,
+#     HelheimSolveError,
+#     HelheimRuntimeError,
+#     HelheimSaaSError,
+#     HelheimSaaSBalance,
+#     HelheimVersion
+#   )
+# elif sys.platform != 'darwin':
+#   from helheim.windows import helheim, isChallenge
+#   from helheim.windows.exceptions import (
+#     HelheimException,
+#     HelheimSolveError,
+#     HelheimRuntimeError,
+#     HelheimSaaSError,
+#     HelheimSaaSBalance,
+#     HelheimVersion
+#   )
 
 
 try:
@@ -52,46 +52,48 @@ except:
   pass
 
 def injection(session, response):
-  # if session.is_New_IUAM_Challenge(response) \
-  #   or session.is_New_Captcha_Challenge(response) \
-  #   or session.is_BFM_Challenge(response):
-  #       return helheim('2044b982-151b-4fca-974d-ebad6fd10bec', session, response)
-  # else:
-  #   return response
-  if isChallenge(response):
-      return helheim('2044b982-151b-4fca-974d-ebad6fd10bec', session, response)
-  else:
-      return response
+  return None
+#   # if session.is_New_IUAM_Challenge(response) \
+#   #   or session.is_New_Captcha_Challenge(response) \
+#   #   or session.is_BFM_Challenge(response):
+#   #       return helheim('2044b982-151b-4fca-974d-ebad6fd10bec', session, response)
+#   # else:
+#   #   return response
+#   if isChallenge(response):
+#       return helheim('2044b982-151b-4fca-974d-ebad6fd10bec', session, response)
+#   else:
+#       return response
 
 def scraper():
-  try:
-    settings = loadSettings()
-    if settings["captcha"].strip().lower() == "monster":
-      apiKey = settings["capMonster"]
-      provider = 'capmonster'
-    else:
-      apiKey = settings["2Captcha"]
-      provider = '2captcha'
-  except Exception:
-    print('Error loading captcha config')
-    return requests.session()
+  return None
+#   try:
+#     settings = loadSettings()
+#     if settings["captcha"].strip().lower() == "monster":
+#       apiKey = settings["capMonster"]
+#       provider = 'capmonster'
+#     else:
+#       apiKey = settings["2Captcha"]
+#       provider = '2captcha'
+#   except Exception:
+#     print('Error loading captcha config')
+#     return requests.session()
     
-  scraper = cloudscraper.create_scraper(
-      requestPostHook=injection,
-      interpreter='nodejs',
-      # session=session,
-      browser={
-          'browser': 'chrome',
-          'mobile': False,
-          'platform': 'windows'
-          #'platform': 'darwin'
-      },
-      captcha={
-          'provider': provider,
-          'api_key': apiKey
-      }
-  )
-  return scraper
+#   scraper = cloudscraper.create_scraper(
+#       requestPostHook=injection,
+#       interpreter='nodejs',
+#       # session=session,
+#       browser={
+#           'browser': 'chrome',
+#           'mobile': False,
+#           'platform': 'windows'
+#           #'platform': 'darwin'
+#       },
+#       captcha={
+#           'provider': provider,
+#           'api_key': apiKey
+#       }
+#   )
+#   return scraper
 
 def footlocker_snare(url):
   try:
@@ -268,14 +270,14 @@ def loadSettings():
 
 def getUser():
   settings = loadSettings()
-
-  key = settings["key"]
-  headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
-  response = requests.get('https://venetiacli.io/api/v1/users/' + key,headers=headers)
-  if response.status_code == 200:
-      return response.json()
-  else:
-      return None
+  return {"discordName":"test"}
+  # key = settings["key"]
+  # headers = {"apiKey":"27acc458-f01a-48f8-88b8-06583fb39056"}
+  # response = requests.get('https://venetiacli.io/api/v1/users/' + key,headers=headers)
+  # if response.status_code == 200:
+  #     return response.json()
+  # else:
+  #     return None
 
 
 def updateConsoleTitle(carted,checkedOut, SITE):

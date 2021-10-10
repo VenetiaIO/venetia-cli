@@ -185,7 +185,7 @@ class Menu():
         pass
     
     def base(self):
-        checkUpdate()
+        # checkUpdate()
 
         time.sleep(1)
 
