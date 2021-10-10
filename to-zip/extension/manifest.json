@@ -1,0 +1,18 @@
+{
+    "name" : "VenetiaCLI Extension",
+    "version" : "1.0",
+    "description" : "VenetiaCLI Checkout Extension",
+    "permissions": [ 
+      "cookies", "tabs"
+    ],
+    "browser_action": {
+      "default_popup":"popup.html"
+    },
+    "icons": {
+      "48": "icon_48.png",
+      "96": "icon_96.png",
+      "128": "icon_128.png"
+    },
+    "manifest_version": 2
+  }
+  
